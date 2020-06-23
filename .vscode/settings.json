@@ -1,0 +1,19 @@
+{
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "files.exclude": {
+    "dist": true,
+    "node_modules": true
+  },
+  "glsllint.glslangValidatorArgs": "-V -o %temp%/shader.spv",
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
