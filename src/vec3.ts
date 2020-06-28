@@ -175,7 +175,7 @@ export default class Vec3 {
   }
 }
 
-export function write_color(array: Uint8ClampedArray, offset: number, color: Vec3, samples_per_pixel: number): void {
+export function writeColor(array: Uint8ClampedArray, offset: number, color: Vec3, samples_per_pixel: number): void {
   let r = color.r;
   let g = color.g;
   let b = color.b;

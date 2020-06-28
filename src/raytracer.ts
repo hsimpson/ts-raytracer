@@ -1,6 +1,6 @@
 import { HittableList } from './hittablelist';
 import Camera from './camera';
-import Vec3, { write_color } from './vec3';
+import Vec3, { writeColor } from './vec3';
 import { ray_color } from './ray';
 import Sphere from './sphere';
 import { randomNumber } from './util';
@@ -59,7 +59,7 @@ export default class Raytracer {
           pixel_color = Vec3.addVec3(pixel_color, ray_color(r, this._world, this._maxBounces));
         }
 
-        write_color(imageData.data, offset, pixel_color, this._samplesPerPixel);
+        writeColor(imageData.data, offset, pixel_color, this._samplesPerPixel);
         offset += 4;
       }
     }
