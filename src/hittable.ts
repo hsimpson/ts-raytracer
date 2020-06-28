@@ -1,20 +1,20 @@
-import vec3 from './vec3';
-import ray from './ray';
-import material from './material';
+import Vec3 from './vec3';
+import Ray from './ray';
+import Material from './material';
 
-export class hit_record {
-  public p: vec3 = new vec3();
-  public normal: vec3 = new vec3();
+export class HitRecord {
+  public p: Vec3 = new Vec3();
+  public normal: Vec3 = new Vec3();
   public t = 0;
   public front_face = true;
-  public mat: material;
+  public mat: Material;
 
-  public set_face_normal(r: ray, outward_normal: vec3): void {
-    this.front_face = vec3.dot(r.direction, outward_normal) < 0;
+  public set_face_normal(r: Ray, outward_normal: Vec3): void {
+    this.front_face = Vec3.dot(r.direction, outward_normal) < 0;
     this.normal = this.front_face ? outward_normal : outward_normal.negate();
   }
 
-  public copyTo(dest: hit_record): void {
+  public copyTo(dest: HitRecord): void {
     dest.p = this.p;
     dest.normal = this.normal;
     dest.t = this.t;
@@ -23,6 +23,6 @@ export class hit_record {
   }
 }
 
-export abstract class hittable {
-  public abstract hit(r: ray, t_min: number, t_max: number, rec: hit_record): boolean;
+export abstract class Hittable {
+  public abstract hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean;
 }

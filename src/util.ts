@@ -1,13 +1,13 @@
-export function degree_to_radians(degrees: number): number {
+export function degreeToRadians(degrees: number): number {
   return (degrees * Math.PI) / 180;
 }
 
-export function random_number(): number {
+export function randomNumber(): number {
   return Math.random();
 }
 
-export function random_numberRange(min: number, max: number): number {
-  return min + (max - min) * random_number();
+export function randomNumberRange(min: number, max: number): number {
+  return min + (max - min) * randomNumber();
 }
 
 export function clamp(x: number, min: number, max: number): number {

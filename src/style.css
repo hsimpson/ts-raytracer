@@ -4,19 +4,59 @@ body {
   padding: 0;
   vertical-align: baseline;
   background: #cdcdcd;
-  color: #ffffff;
   width: 100vw;
   height: 100vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.canvas {
-  /*
+#root {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.resetButton {
+  margin: 5px;
+}
+
+.gui {
+  width: 80%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.input {
+  display: flex;
+  flex-direction: row;
+  padding: 5px;
+}
+
+.input > input {
+  margin-left: 5px;
+}
+
+.canvas_container {
   width: 80%;
   height: 80%;
-  */
-  border: 2px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #909090;
+  background-color: #b4b4b4;
+}
+
+.canvas {
+  max-width: 100%;
+  max-height: 100%;
+  /* border: 1px solid red; */
+}
+
+.renderButton {
+  font-size: 24px;
+  width: 80%;
+  margin: 5px;
 }
