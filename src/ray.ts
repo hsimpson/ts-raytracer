@@ -41,7 +41,7 @@ export default class Ray {
   }
 }
 
-export function ray_color(r: Ray, world: Hittable, depth: number): Vec3 {
+export function rayColor(r: Ray, world: Hittable, depth: number): Vec3 {
   const rec = new HitRecord();
   // If we've exceeded the ray bounce limit, no more light is gathered.
   if (depth <= 0) {
@@ -53,7 +53,7 @@ export function ray_color(r: Ray, world: Hittable, depth: number): Vec3 {
     const attenuation = new Vec3();
 
     if (rec.mat.scatter(r, rec, attenuation, scattered)) {
-      return Vec3.multVec3(attenuation, ray_color(scattered, world, depth - 1));
+      return Vec3.multVec3(attenuation, rayColor(scattered, world, depth - 1));
     }
     return new Vec3(0, 0, 0);
   }

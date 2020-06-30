@@ -1,11 +1,12 @@
-import { HittableList } from './hittablelist';
 import Camera from './camera';
-import Vec3, { writeColor } from './vec3';
-import { ray_color } from './ray';
-import Sphere from './sphere';
-import { randomNumber } from './util';
+import DielectricMaterial from './dielectric';
+import { HittableList } from './hittablelist';
 import LambertianMaterial from './lambertian';
 import MetalMaterial from './metal';
+import { rayColor } from './ray';
+import Sphere from './sphere';
+import { randomNumber } from './util';
+import Vec3, { writeColor } from './vec3';
 
 export default class Raytracer {
   private _isRunning = false;
@@ -33,11 +34,17 @@ export default class Raytracer {
 
     this._context2D = this._onScreenCanvas.getContext('2d');
     this._world = new HittableList();
-    this._world.add(new Sphere(new Vec3(0, 0, -1), 0.5, new LambertianMaterial(new Vec3(0.7, 0.3, 0.3))));
+
+    //this._world.add(new Sphere(new Vec3(0, 0, -1), 0.5, new DielectricMaterial(1.5)));
+    this._world.add(new Sphere(new Vec3(0, 0, -1), 0.5, new LambertianMaterial(new Vec3(0.1, 0.2, 0.5))));
     this._world.add(new Sphere(new Vec3(0, -100.5, -1), 100, new LambertianMaterial(new Vec3(0.8, 0.8, 0))));
 
-    this._world.add(new Sphere(new Vec3(1, 0, -1), 0.5, new MetalMaterial(new Vec3(0.8, 0.6, 0.2), 1.0)));
-    this._world.add(new Sphere(new Vec3(-1, 0, -1), 0.5, new MetalMaterial(new Vec3(0.8, 0.8, 0.8), 0.1)));
+    this._world.add(new Sphere(new Vec3(1, 0, -1), 0.5, new MetalMaterial(new Vec3(0.8, 0.6, 0.2), 0.3)));
+    //this._world.add(new Sphere(new Vec3(-1, 0, -1), 0.5, new MetalMaterial(new Vec3(0.8, 0.8, 0.8), 0.1)));
+    this._world.add(new Sphere(new Vec3(-1, 0, -1), 0.5, new DielectricMaterial(1.5)));
+
+    // negative radius sphere in other sphere to mimic a bubble effect
+    //this._world.add(new Sphere(new Vec3(-1, 0, -1), -0.45, new DielectricMaterial(1.5)));
   }
 
   public start(): void {
@@ -55,8 +62,8 @@ export default class Raytracer {
           const u = (i + randomNumber()) / (this._imageWidth - 1);
           const v = (j + randomNumber()) / (this._imageHeight - 1);
 
-          const r = cam.get_ray(u, v);
-          pixel_color = Vec3.addVec3(pixel_color, ray_color(r, this._world, this._maxBounces));
+          const r = cam.getRay(u, v);
+          pixel_color = Vec3.addVec3(pixel_color, rayColor(r, this._world, this._maxBounces));
         }
 
         writeColor(imageData.data, offset, pixel_color, this._samplesPerPixel);

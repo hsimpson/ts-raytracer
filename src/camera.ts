@@ -26,7 +26,7 @@ export default class Camera {
     );
   }
 
-  public get_ray(u: number, v: number): Ray {
+  public getRay(u: number, v: number): Ray {
     const vecU = Vec3.multScalarVec3(this.horizontal, u);
     const vecV = Vec3.multScalarVec3(this.vertical, v);
 

@@ -9,6 +9,12 @@ export default class Vec3 {
     this._arr[2] = z ?? 0;
   }
 
+  public set(x: number, y: number, z: number): void {
+    this._arr[0] = x;
+    this._arr[1] = y;
+    this._arr[2] = z;
+  }
+
   public copyTo(dest: Vec3): void {
     dest._arr = this._arr;
   }
@@ -172,6 +178,14 @@ export default class Vec3 {
 
   public static reflect(v: Vec3, n: Vec3): Vec3 {
     return Vec3.subVec3(v, Vec3.multScalarVec3(n, 2 * Vec3.dot(v, n)));
+  }
+
+  public static refract(uv: Vec3, n: Vec3, etai_over_etat: number): Vec3 {
+    const cos_theta = Vec3.dot(uv.negate(), n);
+    const uvTheta = Vec3.addVec3(uv, Vec3.multScalarVec3(n, cos_theta));
+    const r_out_parallel = Vec3.multScalarVec3(uvTheta, etai_over_etat);
+    const r_out_perp = Vec3.multScalarVec3(n, -Math.sqrt(1 - r_out_parallel.lengthSquared()));
+    return Vec3.addVec3(r_out_parallel, r_out_perp);
   }
 }
 
