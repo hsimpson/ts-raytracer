@@ -187,6 +187,17 @@ export default class Vec3 {
     const r_out_perp = Vec3.multScalarVec3(n, -Math.sqrt(1 - r_out_parallel.lengthSquared()));
     return Vec3.addVec3(r_out_parallel, r_out_perp);
   }
+
+  public static randomInUnitdisk(): Vec3 {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const p = new Vec3(randomNumberRange(-1, 1), randomNumberRange(-1, 1), 0);
+      if (p.lengthSquared() >= 1) {
+        continue;
+      }
+      return p;
+    }
+  }
 }
 
 export function writeColor(array: Uint8ClampedArray, offset: number, color: Vec3, samples_per_pixel: number): void {
