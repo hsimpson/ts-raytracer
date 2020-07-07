@@ -18,7 +18,7 @@ const IntegerInput = (props: InputProps): React.ReactElement => {
   return (
     <div className="input">
       <span>{props.label}</span>
-      <input type="text" size={props.size} value={props.value} onChange={onInputChange}></input>
+      <input type="number" size={props.size} value={props.value} onChange={onInputChange}></input>
     </div>
   );
 };

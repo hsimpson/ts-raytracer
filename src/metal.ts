@@ -1,10 +1,13 @@
-import Material from './material';
-import Vec3 from './vec3';
-import Ray from './ray';
+import { autoserializeAs } from 'cerializr';
+import BaseMaterial from './basematerial';
 import { HitRecord } from './hittable';
+import Ray from './ray';
+import Vec3 from './vec3';
 
-export default class MetalMaterial extends Material {
+export default class MetalMaterial extends BaseMaterial {
+  @autoserializeAs(Vec3)
   private albedo: Vec3;
+  @autoserializeAs(Number)
   private roughness: number;
 
   public constructor(color: Vec3, roughness: number) {

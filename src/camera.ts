@@ -1,16 +1,35 @@
 import Vec3 from './vec3';
 import Ray from './ray';
 import { degreeToRadians } from './util';
+import { autoserializeAs } from 'cerializr';
+
+export interface CameraOptions {
+  lookFrom: Vec3;
+  lookAt: Vec3;
+  vUp: Vec3;
+  fovY: number;
+  aspectRatio: number;
+  aperture: number;
+  focusDist: number;
+}
 
 export default class Camera {
-  private origin: Vec3;
+  @autoserializeAs(Vec3)
+  private lookFrom: Vec3;
+  @autoserializeAs(Vec3)
   private lower_left_corner: Vec3;
+  @autoserializeAs(Vec3)
   private horizontal: Vec3;
+  @autoserializeAs(Vec3)
   private vertical: Vec3;
+  @autoserializeAs(Vec3)
   private u: Vec3;
+  @autoserializeAs(Vec3)
   private v: Vec3;
+  @autoserializeAs(Vec3)
   private w: Vec3;
-  private lenseRadius;
+  @autoserializeAs(Number)
+  private lenseRadius: number;
 
   public constructor(
     lookFrom: Vec3,
@@ -30,7 +49,7 @@ export default class Camera {
     this.u = Vec3.unit_vector(Vec3.cross(vUp, this.w));
     this.v = Vec3.cross(this.w, this.u);
 
-    this.origin = lookFrom;
+    this.lookFrom = lookFrom;
     this.horizontal = Vec3.multScalarVec3(this.u, focusDist * viewport_width);
     this.vertical = Vec3.multScalarVec3(this.v, focusDist * viewport_height);
 
@@ -40,7 +59,7 @@ export default class Camera {
     const focusW = Vec3.multScalarVec3(this.w, focusDist);
 
     this.lower_left_corner = Vec3.subVec3(
-      Vec3.subVec3(Vec3.subVec3(this.origin, half_horizontal), half_vertical),
+      Vec3.subVec3(Vec3.subVec3(this.lookFrom, half_horizontal), half_vertical),
       focusW
     );
 
@@ -58,8 +77,8 @@ export default class Camera {
     const tVer = Vec3.multScalarVec3(this.vertical, t);
 
     return new Ray(
-      Vec3.addVec3(this.origin, offset),
-      Vec3.subVec3(Vec3.subVec3(Vec3.addVec3(Vec3.addVec3(this.lower_left_corner, sHor), tVer), this.origin), offset)
+      Vec3.addVec3(this.lookFrom, offset),
+      Vec3.subVec3(Vec3.subVec3(Vec3.addVec3(Vec3.addVec3(this.lower_left_corner, sHor), tVer), this.lookFrom), offset)
     );
   }
 }

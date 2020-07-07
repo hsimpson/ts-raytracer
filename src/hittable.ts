@@ -1,13 +1,13 @@
 import Vec3 from './vec3';
 import Ray from './ray';
-import Material from './material';
+import BaseMaterial from './basematerial';
 
 export class HitRecord {
   public p: Vec3 = new Vec3();
   public normal: Vec3 = new Vec3();
   public t = 0;
   public front_face = true;
-  public mat: Material;
+  public mat: BaseMaterial;
 
   public set_face_normal(r: Ray, outward_normal: Vec3): void {
     this.front_face = Vec3.dot(r.direction, outward_normal) < 0;
@@ -23,6 +23,6 @@ export class HitRecord {
   }
 }
 
-export abstract class Hittable {
-  public abstract hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean;
+export interface Hittable {
+  hit: (r: Ray, t_min: number, t_max: number, rec: HitRecord) => boolean;
 }

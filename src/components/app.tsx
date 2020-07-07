@@ -11,8 +11,8 @@ const App = (): React.ReactElement => {
     <React.Fragment>
       <Gui></Gui>
       <Canvas></Canvas>
-      <button className="renderButton" disabled={startRendering} onClick={() => setStartRendering(!startRendering)}>
-        Start rendering!
+      <button className="renderButton" onClick={() => setStartRendering(!startRendering)}>
+        {startRendering ? 'Stop rendering!' : 'Start rendering!'}
       </button>
     </React.Fragment>
   );

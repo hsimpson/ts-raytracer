@@ -1,18 +1,87 @@
-import Vec3 from './vec3';
+import {
+  autoserializeAs,
+  inheritSerialization,
+  InstantiationMethod,
+  JsonObject,
+  Serialize,
+  Deserialize,
+} from 'cerializr';
+import BaseMaterial from './basematerial';
+import BaseObject from './baseobject';
+import { HitRecord } from './hittable';
+import LambertianMaterial from './lambertian';
+import MetalMaterial from './metal';
+import DielectricMaterial from './dielectric';
 import Ray from './ray';
-import { Hittable, HitRecord } from './hittable';
-import Material from './material';
+import Vec3 from './vec3';
 
-export default class Sphere extends Hittable {
+@inheritSerialization(BaseObject)
+export default class Sphere extends BaseObject {
+  @autoserializeAs(Vec3)
   private center: Vec3;
+  @autoserializeAs(Number)
   private radius: number;
-  private mat: Material;
+  @autoserializeAs(BaseMaterial)
+  private mat: BaseMaterial;
 
-  public constructor(center: Vec3, radius: number, mat: Material) {
+  public constructor(center: Vec3, radius: number, mat: BaseMaterial) {
     super();
     this.center = center;
     this.radius = radius;
     this.mat = mat;
+  }
+
+  public static onSerialized(json: JsonObject, instance: Sphere): JsonObject {
+    switch (instance.mat.constructor.name) {
+      case 'LambertianMaterial':
+        json.mat = Serialize(instance.mat, LambertianMaterial);
+        json.mat.type = 'LambertianMaterial';
+        break;
+      case 'MetalMaterial':
+        json.mat = Serialize(instance.mat, MetalMaterial);
+        json.mat.type = 'MetalMaterial';
+        break;
+      case 'DielectricMaterial':
+        json.mat = Serialize(instance.mat, DielectricMaterial);
+        json.mat.type = 'DielectricMaterial';
+        break;
+    }
+    return json;
+  }
+
+  public static onDeserialized(
+    data: JsonObject,
+    instance: Sphere,
+    instantiationMethod: InstantiationMethod = InstantiationMethod.New
+  ): Sphere | void {
+    if (!instance) {
+      switch (instantiationMethod) {
+        /*
+        case InstantiationMethod.New:
+          instance = new Sphere(data.center, data.radius, data.mat);
+          break;
+        */
+        case InstantiationMethod.ObjectCreate:
+          instance = Object.create(Sphere.prototype);
+          break;
+        default:
+          instance = {} as Sphere;
+          break;
+      }
+    }
+    const mat = data.mat as any;
+    switch (mat.type) {
+      case 'LambertianMaterial':
+        instance.mat = Deserialize(mat, LambertianMaterial, null, InstantiationMethod.ObjectCreate);
+        break;
+      case 'MetalMaterial':
+        instance.mat = Deserialize(mat, MetalMaterial, null, InstantiationMethod.ObjectCreate);
+        break;
+      case 'DielectricMaterial':
+        instance.mat = Deserialize(mat, DielectricMaterial, null, InstantiationMethod.ObjectCreate);
+        break;
+    }
+    return instance;
   }
 
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {

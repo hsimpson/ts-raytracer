@@ -1,6 +1,5 @@
 import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
-import CopyWebpackPlugin from 'copy-webpack-plugin';
 
 const commonConfig: webpack.Configuration = {
   entry: './src/index.tsx',
@@ -13,7 +12,12 @@ const commonConfig: webpack.Configuration = {
     rules: [
       {
         test: /\.ts(x?)$/,
-        use: ['ts-loader'],
+        use: 'ts-loader',
+        exclude: [/node_modules/],
+      },
+      {
+        test: /\.worker\.js$/,
+        use: { loader: 'worker-loader' },
       },
       {
         test: /\.css$/i,

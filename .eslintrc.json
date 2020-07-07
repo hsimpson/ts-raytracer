@@ -23,7 +23,8 @@
       {
         "vars": "all",
         "args": "after-used",
-        "ignoreRestSiblings": false
+        "ignoreRestSiblings": false,
+        "argsIgnorePattern": "^_"
       }
     ],
     "@typescript-eslint/no-require-imports": "warn",

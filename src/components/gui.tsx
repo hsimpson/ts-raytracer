@@ -33,6 +33,11 @@ const Gui = (): React.ReactElement => {
         size={5}
         value={raytracerState.maxBounces}
         onValueChange={(maxBounces) => setRaytracerState({ ...raytracerState, maxBounces })}></IntegerInput>
+      <IntegerInput
+        label="Num of workers:"
+        size={5}
+        value={raytracerState.numOfWorkers}
+        onValueChange={(numOfWorkers) => setRaytracerState({ ...raytracerState, numOfWorkers })}></IntegerInput>
       <button className="resetButton" onClick={onReset}>
         Reset to default
       </button>

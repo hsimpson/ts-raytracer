@@ -1,10 +1,12 @@
+import { autoserializeAs } from 'cerializr';
+import BaseMaterial from './basematerial';
 import { HitRecord } from './hittable';
-import Material from './material';
 import Ray from './ray';
-import Vec3 from './vec3';
 import { randomNumber } from './util';
+import Vec3 from './vec3';
 
-export default class DielectricMaterial extends Material {
+export default class DielectricMaterial extends BaseMaterial {
+  @autoserializeAs(Number)
   private _refIdx: number;
 
   public constructor(refIdx: number) {
