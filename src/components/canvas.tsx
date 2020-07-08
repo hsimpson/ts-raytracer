@@ -2,7 +2,7 @@ import React from 'react';
 import { RaytracerProperties } from './atoms';
 import { useRecoilState } from 'recoil';
 import { StartRendering } from './atoms';
-import Raytracer from '../raytracer';
+import Raytracer from '../raytracer-cpu/raytracer';
 
 const Canvas = (): React.ReactElement => {
   const canvasRef = React.useRef<HTMLCanvasElement>(undefined);
