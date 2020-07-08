@@ -7,6 +7,7 @@ import {
   WorkerMessage,
 } from './workerinterfaces';
 
+export type DoneCallback = (duration: number) => void;
 export default class Raytracer {
   private _isRunning = false;
   private _imageWidth: number;
@@ -18,6 +19,7 @@ export default class Raytracer {
   private _controllerWorker: ControllerWorker;
   private _startTime = 0;
   private _numOfWorkers = 1;
+  private _doneCallback: DoneCallback;
 
   public constructor(
     canvas: HTMLCanvasElement,
@@ -74,7 +76,9 @@ export default class Raytracer {
     this._context2D.textBaseline = 'top';
     this._context2D.fillText(renderTime, 5, 5);
 
-    // TODO: send back to GUI
+    if (this._doneCallback) {
+      this._doneCallback(duration);
+    }
   }
 
   private onControllerMessage(event): void {
@@ -89,7 +93,8 @@ export default class Raytracer {
     }
   }
 
-  public start(): void {
+  public start(doneCallback?: DoneCallback): void {
+    this._doneCallback = doneCallback;
     this._isRunning = true;
     this._startTime = performance.now();
 

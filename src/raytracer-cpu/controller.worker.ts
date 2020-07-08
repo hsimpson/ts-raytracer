@@ -48,7 +48,7 @@ const start = (msg: ControllerStartMessage): void => {
   for (let workerId = 0; workerId < msg.data.computeWorkers; workerId++) {
     const computeWorker = new ComputeWorker();
     computeWorker.onmessage = onMessageFromComputeWorker;
-    const computeInitMessage: ComputeStartMessage = {
+    const computeStartMessage: ComputeStartMessage = {
       cmd: ComputeCommands.START,
       data: {
         workerId,
@@ -62,7 +62,7 @@ const start = (msg: ControllerStartMessage): void => {
         maxBounces: _maxBounces,
       },
     };
-    computeWorker.postMessage(computeInitMessage);
+    computeWorker.postMessage(computeStartMessage);
     _computeWorkers.set(workerId, computeWorker);
     availableLines -= lineLoad;
     startLine += lineLoad;

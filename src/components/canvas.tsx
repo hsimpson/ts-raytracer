@@ -7,8 +7,12 @@ import Raytracer from '../raytracer-cpu/raytracer';
 const Canvas = (): React.ReactElement => {
   const canvasRef = React.useRef<HTMLCanvasElement>(undefined);
   const [raytracerState] = useRecoilState(RaytracerProperties);
-  const [startRendering] = useRecoilState(StartRendering);
+  const [startRendering, setStartRendering] = useRecoilState(StartRendering);
   const rayTracerRef = React.useRef<Raytracer>(undefined);
+
+  const onRayTracerDone = (duration: number): void => {
+    setStartRendering(false);
+  };
 
   React.useEffect(() => {
     if (!rayTracerRef.current) {
@@ -42,14 +46,11 @@ const Canvas = (): React.ReactElement => {
     }
 
     if (startRendering && !rayTracerRef.current.isRunning) {
-      rayTracerRef.current.start();
-    }
-
-    /*
-    else if (!startRendering && rayTracerRef.current.isRunning) {
+      rayTracerRef.current.start(onRayTracerDone);
+    } else if (!startRendering && rayTracerRef.current.isRunning) {
       rayTracerRef.current.stop();
     }
-    */
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startRendering]);
 

@@ -69,6 +69,7 @@ export default class Sphere extends BaseObject {
           break;
       }
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mat = data.mat as any;
     switch (mat.type) {
       case 'LambertianMaterial':
