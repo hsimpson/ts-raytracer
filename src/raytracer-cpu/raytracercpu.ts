@@ -1,4 +1,5 @@
 import ControllerWorker from 'worker-loader!./controller.worker';
+import { DoneCallback, RaytracerBase } from '../raytracerbase';
 import {
   ControllerCommands,
   ControllerEndMessage,
@@ -7,19 +8,8 @@ import {
   WorkerMessage,
 } from './workerinterfaces';
 
-export type DoneCallback = (duration: number) => void;
-export default class Raytracer {
-  private _isRunning = false;
-  private _imageWidth: number;
-  private _imageHeight: number;
-  private _samplesPerPixel: number;
-  private _maxBounces: number;
-  private _onScreenCanvas: HTMLCanvasElement;
-  private _context2D: CanvasRenderingContext2D;
+export default class RaytracerCPU extends RaytracerBase {
   private _controllerWorker: ControllerWorker;
-  private _startTime = 0;
-  private _numOfWorkers = 1;
-  private _doneCallback: DoneCallback;
 
   public constructor(
     canvas: HTMLCanvasElement,
@@ -27,30 +17,10 @@ export default class Raytracer {
     imageHeight: number,
     samplesPerPixel: number,
     maxBounces: number,
-    numOfWorkers: number
+    private _numOfWorkers: number
   ) {
-    this._onScreenCanvas = canvas;
-    this._imageWidth = imageWidth;
-    this._imageHeight = imageHeight;
-    this._samplesPerPixel = samplesPerPixel;
-    this._maxBounces = maxBounces;
-    this._numOfWorkers = numOfWorkers;
-
-    this._context2D = this._onScreenCanvas.getContext('2d');
-  }
-
-  private msToTimeString(duration: number): string {
-    duration = Math.floor(duration);
-    const ms = duration % 1000;
-    duration = (duration - ms) / 1000;
-    const secs = duration % 60;
-    duration = (duration - secs) / 60;
-    const mins = duration % 60;
-    const hrs = (duration - mins) / 60;
-
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs
-      .toString()
-      .padStart(2, '0')}.${ms}`;
+    super(canvas, imageWidth, imageHeight, samplesPerPixel, maxBounces);
+    this._controllerWorker = new ControllerWorker();
   }
 
   private onControllerFinshed(msg: ControllerEndMessage): void {
@@ -70,7 +40,7 @@ export default class Raytracer {
     const duration = performance.now() - this._startTime;
     const renderTime = `spp: ${this._samplesPerPixel}, max-bounces: ${
       this._maxBounces
-    }, rendertime: ${this.msToTimeString(duration)}`;
+    }, rendertime: ${RaytracerBase.msToTimeString(duration)}`;
     console.log(renderTime);
     this._context2D.font = '16px Arial';
     this._context2D.textBaseline = 'top';
@@ -98,8 +68,6 @@ export default class Raytracer {
     this._isRunning = true;
     this._startTime = performance.now();
 
-    this._controllerWorker = new ControllerWorker();
-
     this._controllerWorker.onmessage = (event) => this.onControllerMessage(event);
 
     const controllerStartMessage: ControllerStartMessage = {
@@ -115,6 +83,7 @@ export default class Raytracer {
 
     this._controllerWorker.postMessage(controllerStartMessage);
   }
+
   public stop(): void {
     const controllerStopMessage: ControllerStopMessage = {
       cmd: ControllerCommands.STOP,
@@ -122,26 +91,6 @@ export default class Raytracer {
     };
 
     this._controllerWorker.postMessage(controllerStopMessage);
-  }
-
-  public get isRunning(): boolean {
-    return this._isRunning;
-  }
-
-  public set imageWidth(imageWidth: number) {
-    this._imageWidth = imageWidth;
-  }
-
-  public set imageHeight(imageHeight: number) {
-    this._imageHeight = imageHeight;
-  }
-
-  public set samplesPerPixel(samplesPerPixel: number) {
-    this._samplesPerPixel = samplesPerPixel;
-  }
-
-  public set maxBounces(maxBounces: number) {
-    this._maxBounces = maxBounces;
   }
 
   public set numOfWorkers(numOfWorkers: number) {

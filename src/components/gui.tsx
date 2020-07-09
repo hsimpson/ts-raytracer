@@ -1,11 +1,20 @@
 import React from 'react';
 import NumberInput from './input';
+import CheckBox from './checkbox';
 import { RaytracerProperties } from './atoms';
 import { useRecoilState, useResetRecoilState } from 'recoil';
+import RaytracerGPU from '../raytracer-gpu/raytracergpu';
 
 const Gui = (): React.ReactElement => {
   const [raytracerState, setRaytracerState] = useRecoilState(RaytracerProperties);
   const resetRaytracerState = useResetRecoilState(RaytracerProperties);
+
+  React.useEffect(() => {
+    if (RaytracerGPU.supportsWebGPU()) {
+      setRaytracerState({ ...raytracerState, webGPUavailable: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onReset = (): void => {
     resetRaytracerState();
@@ -40,6 +49,11 @@ const Gui = (): React.ReactElement => {
         max={navigator.hardwareConcurrency}
         value={raytracerState.numOfWorkers}
         onValueChange={(numOfWorkers) => setRaytracerState({ ...raytracerState, numOfWorkers })}></NumberInput>
+      <CheckBox
+        label="WebGPU-compute"
+        checked={raytracerState.webGPUenabled}
+        disabled={!raytracerState.webGPUavailable}
+        onValueChange={(webGPUenabled) => setRaytracerState({ ...raytracerState, webGPUenabled })}></CheckBox>
       <button className="resetButton" onClick={onReset}>
         Reset to default
       </button>

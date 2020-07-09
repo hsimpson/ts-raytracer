@@ -29,10 +29,16 @@ body {
   flex-wrap: wrap;
 }
 
-.input {
+.input,
+.checkbox {
   display: flex;
   flex-direction: row;
   padding: 5px;
+  align-items: center;
+}
+
+.checkbox.disabled {
+  color: #909090;
 }
 
 .input > input {

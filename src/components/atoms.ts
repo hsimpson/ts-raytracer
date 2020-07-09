@@ -8,6 +8,8 @@ export const RaytracerProperties = atom({
     samplesPerPixel: 5,
     maxBounces: 20,
     numOfWorkers: 1,
+    webGPUavailable: false,
+    webGPUenabled: false,
   },
 });
 

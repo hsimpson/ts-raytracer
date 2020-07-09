@@ -2,53 +2,69 @@ import React from 'react';
 import { RaytracerProperties } from './atoms';
 import { useRecoilState } from 'recoil';
 import { StartRendering } from './atoms';
-import Raytracer from '../raytracer-cpu/raytracer';
+import RaytracerCPU from '../raytracer-cpu/raytracercpu';
+import RaytracerGPU from '../raytracer-gpu/raytracergpu';
 
 const Canvas = (): React.ReactElement => {
   const canvasRef = React.useRef<HTMLCanvasElement>(undefined);
   const [raytracerState] = useRecoilState(RaytracerProperties);
   const [startRendering, setStartRendering] = useRecoilState(StartRendering);
-  const rayTracerRef = React.useRef<Raytracer>(undefined);
 
-  const onRayTracerDone = (duration: number): void => {
+  const rayTracerCPURef = React.useRef<RaytracerCPU>(undefined);
+  const rayTracerGPURef = React.useRef<RaytracerGPU>(undefined);
+
+  const onRayTracerDone = (_duration: number): void => {
     setStartRendering(false);
   };
 
   React.useEffect(() => {
-    if (!rayTracerRef.current) {
-      rayTracerRef.current = new Raytracer(
+    rayTracerCPURef.current = new RaytracerCPU(
+      canvasRef.current,
+      raytracerState.imageWidth,
+      raytracerState.imageHeight,
+      raytracerState.samplesPerPixel,
+      raytracerState.maxBounces,
+      raytracerState.numOfWorkers
+    );
+
+    if (RaytracerGPU.supportsWebGPU()) {
+      rayTracerGPURef.current = new RaytracerGPU(
         canvasRef.current,
         raytracerState.imageWidth,
         raytracerState.imageHeight,
         raytracerState.samplesPerPixel,
-        raytracerState.maxBounces,
-        raytracerState.numOfWorkers
+        raytracerState.maxBounces
       );
-    } else {
-      rayTracerRef.current.imageWidth = raytracerState.imageWidth;
-      rayTracerRef.current.imageHeight = raytracerState.imageHeight;
-      rayTracerRef.current.samplesPerPixel = raytracerState.samplesPerPixel;
-      rayTracerRef.current.maxBounces = raytracerState.maxBounces;
-      rayTracerRef.current.numOfWorkers = raytracerState.numOfWorkers;
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useEffect(() => {
+    rayTracerCPURef.current.imageWidth = raytracerState.imageWidth;
+    rayTracerCPURef.current.imageHeight = raytracerState.imageHeight;
+    rayTracerCPURef.current.samplesPerPixel = raytracerState.samplesPerPixel;
+    rayTracerCPURef.current.maxBounces = raytracerState.maxBounces;
+    rayTracerCPURef.current.numOfWorkers = raytracerState.numOfWorkers;
+
+    if (rayTracerGPURef.current) {
+      rayTracerGPURef.current.imageWidth = raytracerState.imageWidth;
+      rayTracerGPURef.current.imageHeight = raytracerState.imageHeight;
+      rayTracerGPURef.current.samplesPerPixel = raytracerState.samplesPerPixel;
+      rayTracerGPURef.current.maxBounces = raytracerState.maxBounces;
     }
   }, [raytracerState]);
 
   React.useEffect(() => {
-    if (!rayTracerRef.current) {
-      rayTracerRef.current = new Raytracer(
-        canvasRef.current,
-        raytracerState.imageWidth,
-        raytracerState.imageHeight,
-        raytracerState.samplesPerPixel,
-        raytracerState.maxBounces,
-        raytracerState.numOfWorkers
-      );
+    let raytracer: RaytracerCPU | RaytracerGPU = rayTracerCPURef.current;
+    if (raytracerState.webGPUenabled) {
+      raytracer = rayTracerGPURef.current;
     }
 
-    if (startRendering && !rayTracerRef.current.isRunning) {
-      rayTracerRef.current.start(onRayTracerDone);
-    } else if (!startRendering && rayTracerRef.current.isRunning) {
-      rayTracerRef.current.stop();
+    if (startRendering && !raytracer.isRunning) {
+      raytracer.start(onRayTracerDone);
+    } else if (!startRendering && raytracer.isRunning) {
+      raytracer.stop();
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
