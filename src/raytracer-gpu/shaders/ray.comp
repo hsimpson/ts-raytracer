@@ -1,0 +1,28 @@
+#ifndef RAY_INC
+#define RAY_INC
+
+struct Ray {
+  vec3 origin;
+  vec3 direction;
+};
+
+struct HitRecord {
+  vec3  p;
+  vec3  normal;
+  float t;
+  bool  frontFace;
+  int   materialType;
+  vec3  albedo;
+  float roughness;
+};
+
+void setFaceNormal(inout HitRecord rec, const Ray r, const vec3 outwardNormal) {
+  rec.frontFace = dot(r.direction, outwardNormal) < 0.0;
+  rec.normal    = rec.frontFace ? outwardNormal : -outwardNormal;
+}
+
+vec3 rayAt(const Ray ray, const float t) {
+  return ray.origin + t * ray.direction;
+}
+
+#endif  //RAY_INC

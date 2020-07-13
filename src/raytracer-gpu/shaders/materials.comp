@@ -1,0 +1,27 @@
+#ifndef MATERIALS_INC
+#define MATERIALS_INC
+
+#extension GL_GOOGLE_include_directive : enable
+#include "utils.comp"
+#include "ray.comp"
+
+#define MATERIAL_LAMBERT 0
+#define MATERIAL_METAL 1
+#define MATERIAL_DIELECTRIC 1
+
+bool materialBSDF(const Ray r_in, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
+  if (rec.materialType == MATERIAL_LAMBERT) {
+    vec3 scatterDirection = rec.normal + randomUnitVector();
+    scattered             = Ray(rec.p, scatterDirection);
+    attenuation           = rec.albedo;
+    return true;
+  } else if (rec.materialType == MATERIAL_METAL) {
+    vec3 reflected = reflect(normalize(r_in.direction), rec.normal);
+    scattered      = Ray(rec.p, reflected + rec.roughness * randomInUnitSphere());
+    attenuation    = rec.albedo;
+    return (dot(scattered.direction, rec.normal) > 0.0);
+  }
+  return false;
+}
+
+#endif  //MATERIALS_INC

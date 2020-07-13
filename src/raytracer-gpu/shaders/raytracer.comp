@@ -1,10 +1,14 @@
 #version 460
 #extension GL_GOOGLE_include_directive : enable
 
-#include "utils.glsl"
+#include "utils.comp"
+#include "materials.comp"
+#include "ray.comp"
 
-const float infinity = 1. / 0.;
-#define FLT_MAX 3.402823466e+38
+//#define FLT_MAX 3.402823466e+38
+#define FLT_MAX 99999.99
+//const float INFINITY     = 1. / 0.;
+const uint SPHERE_COUNT = 4;
 
 layout(set = 0, binding = 0) uniform ComputeParams {
   float fWidth;
@@ -19,44 +23,18 @@ layout(std140, set = 0, binding = 1) buffer PixelBuffer {
 }
 pixelBuffer;
 
-struct Ray {
-  vec3 orig;
-  vec3 dir;
-};
-
-struct HitRecord {
-  vec3  p;
-  vec3  normal;
-  float t;
-  bool  frontFace;
-};
-
 struct Sphere {
   vec3  center;
   float radius;
+  int   materialType;
+  vec3  albedo;
+  float roughness;
 };
 
-void setFaceNormal(inout HitRecord rec, const Ray r, const vec3 outwardNormal) {
-  rec.frontFace = dot(r.dir, outwardNormal) < 0;
-  rec.normal    = rec.frontFace ? outwardNormal : -outwardNormal;
-}
-
-vec3 unitVector(const vec3 v) {
-  return v / length(v);
-}
-
-float lengthSquared(const vec3 v) {
-  return v.x * v.x + v.y * v.y + v.z * v.z;
-}
-
-vec3 rayAt(const Ray ray, const float t) {
-  return ray.orig + t * ray.dir;
-}
-
 bool hitSphere(const Sphere s, const Ray r, float t_min, float t_max, inout HitRecord rec) {
-  vec3  oc           = r.orig - s.center;
-  float a            = lengthSquared(r.dir);
-  float half_b       = dot(oc, r.dir);
+  vec3  oc           = r.origin - s.center;
+  float a            = lengthSquared(r.direction);
+  float half_b       = dot(oc, r.direction);
   float c            = lengthSquared(oc) - s.radius * s.radius;
   float discriminant = half_b * half_b - a * c;
 
@@ -68,6 +46,9 @@ bool hitSphere(const Sphere s, const Ray r, float t_min, float t_max, inout HitR
       rec.p               = rayAt(r, rec.t);
       vec3 outward_normal = (rec.p - s.center) / s.radius;
       setFaceNormal(rec, r, outward_normal);
+      rec.materialType = s.materialType;
+      rec.albedo       = s.albedo;
+      rec.roughness    = s.roughness;
       return true;
     }
     temp = (-half_b + root) / a;
@@ -76,18 +57,21 @@ bool hitSphere(const Sphere s, const Ray r, float t_min, float t_max, inout HitR
       rec.p               = rayAt(r, rec.t);
       vec3 outward_normal = (rec.p - s.center) / s.radius;
       setFaceNormal(rec, r, outward_normal);
+      rec.materialType = s.materialType;
+      rec.albedo       = s.albedo;
+      rec.roughness    = s.roughness;
       return true;
     }
   }
   return false;
 }
 
-bool hittablesHit(const Sphere spheres[2], const Ray r, float t_min, float t_max, inout HitRecord rec) {
+bool hittablesHit(const Sphere spheres[SPHERE_COUNT], const Ray r, float t_min, float t_max, inout HitRecord rec) {
   HitRecord temp_rec;
   bool      hit_anything   = false;
   float     closest_so_far = t_max;
 
-  for (int i = 0; i < 2; i++) {
+  for (int i = 0; i < SPHERE_COUNT; i++) {
     if (hitSphere(spheres[i], r, t_min, closest_so_far, temp_rec)) {
       hit_anything   = true;
       closest_so_far = temp_rec.t;
@@ -98,23 +82,47 @@ bool hittablesHit(const Sphere spheres[2], const Ray r, float t_min, float t_max
   return hit_anything;
 }
 
-vec3 rayColor(const Ray r, const Sphere spheres[2]) {
+vec3 rayColor(Ray ray, const Sphere spheres[SPHERE_COUNT], uint depth) {
   HitRecord rec;
-  if (hittablesHit(spheres, r, 0, FLT_MAX, rec)) {
-    return 0.5 * (rec.normal + vec3(1.0, 1.0, 1.0));
+  vec3      color = vec3(1.0, 1.0, 1.0);
+
+  for (int i = 0; i < depth; i++) {
+    if (hittablesHit(spheres, ray, 0.001, FLT_MAX, rec)) {
+      Ray  newRay;
+      vec3 attenuation;
+
+      bool wasScattered = materialBSDF(ray, rec, attenuation, newRay);
+
+      ray.origin    = newRay.origin;
+      ray.direction = newRay.direction;
+
+      if (wasScattered) {
+        color *= attenuation;
+      } else {
+        color *= vec3(0.0, 0.0, 0.0);
+        break;
+      }
+
+    } else {
+      vec3  unit_direction = normalize(ray.direction);
+      float t              = 0.5 * (unit_direction.y + 1.0);
+      vec3  skyColor       = (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
+      color *= skyColor;
+      break;
+    }
   }
 
-  vec3  unit_direction = unitVector(r.dir);
-  float t              = 0.5 * (unit_direction.y + 1.0);
-  return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
+  return color;
 }
 
 void main() {
   uint index = gl_GlobalInvocationID.x;
-  initSeed(index * 1099087573U);
 
   float j = params.fHeight - (floor(float(index) / params.fWidth));
   float i = mod(float(index), params.fWidth);
+
+  initSeed(index * 1099087573U);
+  //initSeed(vec2(i, j));
 
   float aspect_ratio      = params.fWidth / params.fHeight;
   float viewport_height   = 2.0;
@@ -125,25 +133,37 @@ void main() {
   vec3  vertical          = vec3(0, viewport_height, 0);
   vec3  lower_left_corner = origin - horizontal / 2 - vertical / 2 - vec3(0, 0, focal_length);
 
-  Sphere spheres[2] = {
-      {{0.0, 0.0, -1.0}, 0.5},
-      {{0.0, -100.5, -1.0}, 100}};
+  Sphere spheres[SPHERE_COUNT] = {
+
+      {{0.0, 0.0, -1.0}, 0.5, MATERIAL_LAMBERT, {0.7, 0.3, 0.3}, 0.0},
+
+      {{0.0, -100.5, -1.0}, 100, MATERIAL_LAMBERT, {0.8, 0.8, 0.8}, 0.0},
+
+      {{-1.0, 0.0, -1.0}, 0.5, MATERIAL_METAL, {0.8, 0.8, 0.8}, 0.1},
+      {{1.0, 0.0, -1.0}, 0.5, MATERIAL_METAL, {0.8, 0.6, 0.2}, 0.8},
+
+  };
 
   vec3 pixel_color = vec3(0.0, 0.0, 0.0);
 
-  const uint ssp = uint(params.fSamplesPerPixel);
+  const uint ssp     = uint(params.fSamplesPerPixel);
+  const uint bounces = uint(params.fMaxBounces);
 
   for (int s = 0; s < ssp; s++) {
-    float u = (i + rand()) / (params.fWidth - 1.0);
-    float v = (j + rand()) / (params.fHeight - 1.0);
+    float u = (i + random()) / (params.fWidth - 1.0);
+    float v = (j + random()) / (params.fHeight - 1.0);
     Ray   r = Ray(origin, lower_left_corner + u * horizontal + v * vertical - origin);
-    pixel_color += rayColor(r, spheres);
+    pixel_color += rayColor(r, spheres, bounces);
   }
 
-  //vec3 pixel_color = vec3(rand(), rand(), rand());
   float scale = 1.0 / params.fSamplesPerPixel;
   pixel_color *= scale;
+  //pixel_color = vec3(random());
 
+  // gamma correction
+  pixel_color = sqrt(pixel_color);
+
+  //pixel_color               = randomVec3();
   pixelBuffer.pixels[index] = vec4(pixel_color, 1.0);
 }
 
