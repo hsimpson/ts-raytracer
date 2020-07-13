@@ -16,7 +16,7 @@ export abstract class RaytracerBase {
     this._context2D = this._canvas.getContext('2d');
   }
 
-  public abstract start(doneCallback?: DoneCallback): void;
+  public abstract async start(doneCallback?: DoneCallback): Promise<void>;
   public abstract stop(): void;
 
   protected static msToTimeString(duration: number): string {
@@ -30,7 +30,7 @@ export abstract class RaytracerBase {
 
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs
       .toString()
-      .padStart(2, '0')}.${ms}`;
+      .padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
   }
 
   public get isRunning(): boolean {

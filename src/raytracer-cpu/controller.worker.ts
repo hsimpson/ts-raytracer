@@ -34,7 +34,8 @@ const start = (msg: ControllerStartMessage): void => {
   const lookFrom = new Vec3(13, 2, 3);
   const lookAt = new Vec3(0, 0, 0);
   const vUp = new Vec3(0, -1, 0);
-  //const distToFocus = Vec3.subVec3(lookFrom, lookAt).length();
+  //const vUp = new Vec3(0, 1, 0);
+
   const focusDist = 10;
   const aperture = 0.1;
   const fovY = 20;

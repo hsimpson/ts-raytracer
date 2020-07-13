@@ -63,7 +63,7 @@ export default class RaytracerCPU extends RaytracerBase {
     }
   }
 
-  public start(doneCallback?: DoneCallback): void {
+  public async start(doneCallback?: DoneCallback): Promise<void> {
     this._doneCallback = doneCallback;
     this._isRunning = true;
     this._startTime = performance.now();

@@ -11,7 +11,7 @@ const Gui = (): React.ReactElement => {
 
   React.useEffect(() => {
     if (RaytracerGPU.supportsWebGPU()) {
-      setRaytracerState({ ...raytracerState, webGPUavailable: true });
+      setRaytracerState({ ...raytracerState, webGPUavailable: true, webGPUenabled: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

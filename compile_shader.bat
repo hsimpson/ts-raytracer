@@ -1,0 +1,1 @@
+ glslc.exe .\src\raytracer-gpu\shaders\raytracer.comp -o .\src\raytracer-gpu\shaders\raytracer.comp.spv

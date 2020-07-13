@@ -1,5 +1,6 @@
 import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 
 const commonConfig: webpack.Configuration = {
   entry: './src/index.tsx',
@@ -29,6 +30,9 @@ const commonConfig: webpack.Configuration = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/index.html',
+    }),
+    new CopyWebpackPlugin({
+      patterns: [{ from: './src/raytracer-gpu/shaders/*.spv', to: '.', flatten: true }],
     }),
   ],
 };
