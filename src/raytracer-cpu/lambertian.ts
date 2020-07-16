@@ -2,7 +2,7 @@ import { autoserializeAs } from 'cerializr';
 import BaseMaterial from './basematerial';
 import { HitRecord } from './hittable';
 import Ray from './ray';
-import Vec3 from './vec3';
+import Vec3 from '../vec3';
 
 export default class LambertianMaterial extends BaseMaterial {
   @autoserializeAs(Vec3)

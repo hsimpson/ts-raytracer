@@ -11,9 +11,10 @@ struct HitRecord {
   vec3  normal;
   float t;
   bool  frontFace;
-  int   materialType;
+  float materialType;
   vec3  albedo;
   float roughness;
+  float refractIdx;
 };
 
 void setFaceNormal(inout HitRecord rec, const Ray r, const vec3 outwardNormal) {

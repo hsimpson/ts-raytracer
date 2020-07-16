@@ -1,0 +1,47 @@
+#ifndef CAMERA_INC
+#define CAMERA_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#include "utils.comp"
+#include "ray.comp"
+
+struct Camera {
+  vec3  origin;
+  vec3  lowerLeftCorner;
+  vec3  horizontal;
+  vec3  vertical;
+  vec3  u;
+  vec3  v;
+  vec3  w;
+  float lensRadius;
+};
+
+Camera
+createCamera(vec3 lookFrom, vec3 lookAt, vec3 vUp, float vfoY, float aspectRatio, float aperture, float focusDistance) {
+  Camera camera;
+
+  float theta          = radians(vfoY);
+  float h              = tan(theta / 2.0);
+  float viewportHeight = 2.0 * h;
+  float viewportWidth  = aspectRatio * viewportHeight;
+
+  camera.w               = normalize(lookFrom - lookAt);
+  camera.u               = normalize(cross(vUp, camera.w));
+  camera.v               = cross(camera.w, camera.u);
+  camera.origin          = lookFrom;
+  camera.horizontal      = focusDistance * viewportWidth * camera.u;
+  camera.vertical        = focusDistance * viewportHeight * camera.v;
+  camera.lowerLeftCorner = camera.origin - camera.horizontal / 2.0 - camera.vertical / 2.0 - focusDistance * camera.w;
+  camera.lensRadius      = aperture / 2.0;
+
+  return camera;
+}
+
+Ray cameraGetRay(const Camera camera, float s, float t) {
+  vec3 rd     = camera.lensRadius * randomInUnitDisc();
+  vec3 offset = camera.u * rd.x + camera.v * rd.y;
+  return Ray(camera.origin + offset, camera.lowerLeftCorner + s * camera.horizontal + t * camera.vertical - camera.origin - offset);
+}
+
+#endif  // CAMERA_INC

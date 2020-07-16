@@ -82,4 +82,14 @@ vec3 randomInHemisphere(const vec3 normal) {
   }
 }
 
+vec3 randomInUnitDisc() {
+  while (true) {
+    vec3 p = vec3(random(-1.0, 1.0), random(-1.0, 1.0), 0.0);
+    if (lengthSquared(p) >= 1.0)
+      continue;
+    return p;
+  }
+  return vec3(1.0, 1.0, 1.0);
+}
+
 #endif  //UTILS_INC

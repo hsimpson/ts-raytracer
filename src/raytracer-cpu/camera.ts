@@ -1,6 +1,6 @@
-import Vec3 from './vec3';
+import Vec3 from '../vec3';
 import Ray from './ray';
-import { degreeToRadians } from './util';
+import { degreeToRadians } from '../util';
 import { autoserializeAs } from 'cerializr';
 
 export interface CameraOptions {

@@ -4,6 +4,8 @@
 import { DoneCallback, RaytracerBase } from '../raytracerbase';
 import WebGPUContext from './webgpucontext';
 import WebGPUComputePipline from './webgpucomputepipeline';
+import Vec3 from '../vec3';
+import { randomNumberRange } from '../util';
 
 export default class RaytracerGPU extends RaytracerBase {
   private _initialized = false;
@@ -32,24 +34,36 @@ export default class RaytracerGPU extends RaytracerBase {
     this._isRunning = true;
     this._startTime = performance.now();
 
+    const randomSceneArray = this.createRandomScene();
+
     const pipeline = new WebGPUComputePipline({
       computeShaderUrl: 'raytracer.comp.spv',
       unformParams: {
-        iWidth: this._imageWidth,
-        iHeight: this._imageHeight,
-        iSamplesPerPixel: this._samplesPerPixel,
-        iMaxBounces: this._maxBounces,
+        fWidth: this._imageWidth,
+        fHeight: this._imageHeight,
+        fSamplesPerPixel: this._samplesPerPixel,
+        fMaxBounces: this._maxBounces,
+        fSphereCount: randomSceneArray.length / 12,
       },
+      randomScene: randomSceneArray,
     });
 
     await pipeline.initialize(this._webGPUContext);
 
-    const floatArray = await this.compute(pipeline);
-
     const imageData = this._context2D.createImageData(this._imageWidth, this._imageHeight);
+    const rawArray = new Float32Array(this._imageWidth * this._imageHeight * 4);
 
-    for (let i = 0; i <= floatArray.length; i++) {
-      imageData.data[i] = floatArray[i] * 255;
+    for (let i = 0; i < this._samplesPerPixel; i++) {
+      console.log(`Sample pass ${i + 1} of ${this._samplesPerPixel}`);
+      const rayTracedArray = await this.compute(pipeline);
+
+      for (let j = 0; j <= rayTracedArray.length; j++) {
+        rawArray[j] += rayTracedArray[j];
+      }
+    }
+
+    for (let i = 0; i <= rawArray.length; i++) {
+      imageData.data[i] = (rawArray[i] / this._samplesPerPixel) * 255;
     }
 
     this._context2D.putImageData(imageData, 0, 0);
@@ -88,13 +102,67 @@ export default class RaytracerGPU extends RaytracerBase {
     this._initialized = true;
   }
 
+  private createSphere(
+    center: Vec3,
+    radius: number,
+    material: number,
+    albedo: Vec3,
+    roughness: number,
+    refractIdx: number
+  ): number[] {
+    const array: number[] = [];
+    array.push(...center.array, radius, material, ...albedo.array, roughness, refractIdx);
+
+    // padding;
+    array.push(0, 0);
+
+    return array;
+  }
+
+  private createRandomScene(): Float32Array {
+    const array: number[] = [];
+
+    array.push(...this.createSphere(new Vec3(0.0, -1000, 0.0), 1000, 0.5, new Vec3(0.5, 0.5, 0.5), 0.0, 1.0));
+    array.push(...this.createSphere(new Vec3(0.0, 1.0, 0.0), 1.0, 1.0, new Vec3(1.0, 1.0, 1.0), 1.0, 1.5));
+    array.push(...this.createSphere(new Vec3(-4.0, 1.0, 0.0), 1.0, 0.5, new Vec3(0.4, 0.2, 0.1), 0.0, 1.0));
+    array.push(...this.createSphere(new Vec3(4.0, 1.0, 0.0), 1.0, 0.9, new Vec3(0.7, 0.7, 0.5), 0.0, 1.0));
+
+    for (let a = -11; a < 11; a++) {
+      for (let b = -11; b < 11; b++) {
+        const chooseMat = Math.random();
+
+        const center = new Vec3(a + 0.9 * Math.random(), 0.2, b + 0.9 * Math.random());
+
+        if (Vec3.subVec3(center, new Vec3(4, 0.2, 0)).length() > 0.9) {
+          let albedo: Vec3;
+          let roughness = 0.0;
+          let refIdx = 1.0;
+
+          if (chooseMat < 0.8) {
+            albedo = Vec3.multVec3(Vec3.random(), Vec3.random());
+          } else if (chooseMat < 0.95) {
+            roughness = randomNumberRange(0, 0.5);
+            albedo = Vec3.randomRange(0.5, 1);
+          } else {
+            albedo = new Vec3(1.0, 1.0, 1.0);
+            refIdx = 1.5;
+          }
+
+          array.push(...this.createSphere(center, 0.2, chooseMat, albedo, roughness, refIdx));
+        }
+      }
+    }
+
+    return new Float32Array(array);
+  }
+
   private async compute(pipeline: WebGPUComputePipline): Promise<Float32Array> {
     // encode commands
     const commandEncoder = this._webGPUContext.device.createCommandEncoder();
     const passEncoder = commandEncoder.beginComputePass();
     passEncoder.setPipeline(pipeline.gpuPipeline);
     passEncoder.setBindGroup(0, pipeline.bindGroup);
-    // passEncoder.dispatch(this._imageWidth, this._imageHeight, 1);
+    //passEncoder.dispatch(this._imageWidth, this._imageHeight, 1);
     passEncoder.dispatch(this._imageWidth * this._imageHeight, 1, 1);
     passEncoder.endPass();
 
@@ -114,6 +182,9 @@ export default class RaytracerGPU extends RaytracerBase {
     this._webGPUContext.queue.submit([commandEncoder.finish()]);
 
     const arrayBuffer = await gpuReadBuffer.mapReadAsync();
+
+    pipeline.updateUniformBuffer();
+
     return new Float32Array(arrayBuffer);
   }
 }

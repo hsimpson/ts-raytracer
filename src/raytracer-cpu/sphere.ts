@@ -13,7 +13,7 @@ import LambertianMaterial from './lambertian';
 import MetalMaterial from './metal';
 import DielectricMaterial from './dielectric';
 import Ray from './ray';
-import Vec3 from './vec3';
+import Vec3 from '../vec3';
 
 @inheritSerialization(BaseObject)
 export default class Sphere extends BaseObject {

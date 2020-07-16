@@ -2,8 +2,8 @@ import { Deserialize, InstantiationMethod } from 'cerializr';
 import Camera from './camera';
 import { HittableList } from './hittablelist';
 import { rayColor } from './ray';
-import { randomNumber } from './util';
-import Vec3 from './vec3';
+import { randomNumber } from '../util';
+import Vec3 from '../vec3';
 import { ComputeCommands, ComputeEndMessage, ComputeStartMessage, WorkerMessage } from './workerinterfaces';
 
 const _controllerCtx: Worker = self as never;

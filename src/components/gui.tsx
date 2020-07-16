@@ -35,11 +35,13 @@ const Gui = (): React.ReactElement => {
       <NumberInput
         label="Samples per pixel:"
         size={5}
+        min={1}
         value={raytracerState.samplesPerPixel}
         onValueChange={(samplesPerPixel) => setRaytracerState({ ...raytracerState, samplesPerPixel })}></NumberInput>
       <NumberInput
         label="Max bounces:"
         size={5}
+        min={1}
         value={raytracerState.maxBounces}
         onValueChange={(maxBounces) => setRaytracerState({ ...raytracerState, maxBounces })}></NumberInput>
       <NumberInput

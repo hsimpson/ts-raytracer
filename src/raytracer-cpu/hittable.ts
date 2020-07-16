@@ -1,4 +1,4 @@
-import Vec3 from './vec3';
+import Vec3 from '../vec3';
 import Ray from './ray';
 import BaseMaterial from './basematerial';
 

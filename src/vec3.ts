@@ -15,6 +15,10 @@ export default class Vec3 {
     this.z = z ?? 0;
   }
 
+  public get array(): number[] {
+    return [this.x, this.y, this.z];
+  }
+
   public set(x: number, y: number, z: number): void {
     this.x = x;
     this.y = y;

@@ -4,17 +4,18 @@ import { HittableList } from './hittablelist';
 import LambertianMaterial from './lambertian';
 import MetalMaterial from './metal';
 import Sphere from './sphere';
-import { randomNumber, randomNumberRange } from './util';
-import Vec3 from './vec3';
+import { randomNumber, randomNumberRange } from '../util';
+import Vec3 from '../vec3';
 
 export default function randomScene(): HittableList {
   const world = new HittableList();
 
   const groundMaterial = new LambertianMaterial(new Vec3(0.5, 0.5, 0.5));
   world.add(new Sphere(new Vec3(0, -1000, 0), 1000, groundMaterial));
-
+  let i = 1;
   for (let a = -11; a < 11; a++) {
     for (let b = -11; b < 11; b++) {
+      console.log(`${i++}`);
       const chooseMat = randomNumber();
       const center = new Vec3(a + 0.9 * randomNumber(), 0.2, b + 0.9 * randomNumber());
 

@@ -3,15 +3,18 @@ import WebGPUContext from './webgpucontext';
 import { createBuffer } from './webgpuhelpers';
 
 interface ComputeUniformParams {
-  iWidth: number;
-  iHeight: number;
-  iSamplesPerPixel: number;
-  iMaxBounces: number;
+  fWidth: number;
+  fHeight: number;
+  fSamplesPerPixel: number;
+  fMaxBounces: number;
+  fSphereCount: number;
+  fRandomSeed?: number;
 }
 
 interface WebGPUComputePiplineOptions {
   computeShaderUrl: string;
   unformParams: ComputeUniformParams;
+  randomScene: Float32Array;
 }
 
 export default class WebGPUComputePipline extends WebGPUPipelineBase {
@@ -24,10 +27,12 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
   private _pixelBuffer: GPUBuffer;
 
   private _context: WebGPUContext;
+  private _randomSceneBuffer: GPUBuffer;
 
   public constructor(options: WebGPUComputePiplineOptions) {
     super();
     this._options = options;
+    this._options.unformParams.fRandomSeed = Math.random();
   }
 
   public async initialize(context: WebGPUContext): Promise<void> {
@@ -38,7 +43,7 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
 
     this._context = context;
 
-    const pixelArray = new Float32Array(this._options.unformParams.iWidth * this._options.unformParams.iHeight * 4);
+    const pixelArray = new Float32Array(this._options.unformParams.fWidth * this._options.unformParams.fHeight * 4);
     this._pixelBuffer = createBuffer(
       this._context.device,
       pixelArray,
@@ -53,6 +58,8 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
       GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
     );
 
+    this._randomSceneBuffer = createBuffer(this._context.device, this._options.randomScene, GPUBufferUsage.STORAGE);
+
     this._bindGroupLayout = this._context.device.createBindGroupLayout({
       entries: [
         {
@@ -65,10 +72,23 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
           visibility: GPUShaderStage.COMPUTE,
           type: 'storage-buffer',
         },
+        {
+          binding: 2,
+          visibility: GPUShaderStage.COMPUTE,
+          type: 'storage-buffer',
+        },
       ],
     });
 
     await this.createBindGroup();
+  }
+
+  public updateUniformBuffer(): void {
+    if (this._initialized) {
+      this._options.unformParams.fRandomSeed = Math.random();
+      const uniformArray = this.getParamsArray();
+      this._context.queue.writeBuffer(this._computeParamsUniformBuffer, 0, uniformArray.buffer);
+    }
   }
 
   private async createBindGroup(): Promise<void> {
@@ -86,9 +106,17 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
         {
           binding: 1,
           resource: {
+            buffer: this._randomSceneBuffer,
+            offset: 0,
+            size: this._options.randomScene.byteLength,
+          },
+        },
+        {
+          binding: 2,
+          resource: {
             buffer: this._pixelBuffer,
             offset: 0,
-            size: this._options.unformParams.iWidth * this._options.unformParams.iHeight * 4 * 4,
+            size: this._options.unformParams.fWidth * this._options.unformParams.fHeight * 4 * 4,
           },
         },
       ],

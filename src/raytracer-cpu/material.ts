@@ -1,5 +1,5 @@
 import Ray from './ray';
-import Vec3 from './vec3';
+import Vec3 from '../vec3';
 import { HitRecord } from './hittable';
 
 export interface Material {

@@ -8,7 +8,7 @@ import {
   ComputeEndMessage,
   ComputeCommands,
 } from './workerinterfaces';
-import Vec3 from './vec3';
+import Vec3 from '../vec3';
 import Camera from './camera';
 import { Serialize } from 'cerializr';
 import { HittableList } from './hittablelist';
