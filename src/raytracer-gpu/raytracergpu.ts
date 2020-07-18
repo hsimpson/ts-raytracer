@@ -63,6 +63,37 @@ export default class RaytracerGPU extends RaytracerBase {
     const imageData = this._context2D.createImageData(this._imageWidth, this._imageHeight);
     const rawArray = new Float32Array(this._imageWidth * this._imageHeight * 4);
 
+    const raytracing = async (): Promise<void> => {
+      return new Promise((resolve) => {
+        let sample = 1;
+        const frame = (): void => {
+          //const lastframe = true;
+          console.log(`Sample pass ${sample} of ${this._samplesPerPixel}`);
+          console.time('compute');
+          this.compute(pipeline, true).then((rayTracedArray) => {
+            console.timeEnd('compute');
+
+            for (let j = 0; j <= rayTracedArray.length; j++) {
+              rawArray[j] += rayTracedArray[j];
+              imageData.data[j] = (rawArray[j] / sample) * 255;
+            }
+            this._context2D.putImageData(imageData, 0, 0);
+
+            sample++;
+            if (sample < this._samplesPerPixel) {
+              window.requestAnimationFrame(frame);
+            } else {
+              resolve();
+            }
+          });
+        };
+        window.requestAnimationFrame(frame);
+      });
+    };
+
+    await raytracing();
+
+    /*
     for (let sample = 0; sample < this._samplesPerPixel; sample++) {
       // const lastframe = sample === this._samplesPerPixel - 1;
       const lastframe = true;
@@ -79,6 +110,7 @@ export default class RaytracerGPU extends RaytracerBase {
       this._context2D.putImageData(imageData, 0, 0);
       // }
     }
+    */
 
     // raytracer finished
     const duration = performance.now() - this._startTime;
