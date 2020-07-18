@@ -1,6 +1,7 @@
 import WebGPUPipelineBase from './webgpupipelinebase';
 import WebGPUContext from './webgpucontext';
 import { createBuffer } from './webgpuhelpers';
+import Camera from '../camera';
 
 interface ComputeUniformParams {
   fWidth: number;
@@ -15,6 +16,7 @@ interface WebGPUComputePiplineOptions {
   computeShaderUrl: string;
   unformParams: ComputeUniformParams;
   randomScene: Float32Array;
+  camera: Camera;
 }
 
 export default class WebGPUComputePipline extends WebGPUPipelineBase {
@@ -24,6 +26,10 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
 
   private _computeParamsUniformBuffer: GPUBuffer;
   private _computeParamsUniformBufferSize = 0;
+
+  private _computeCameraUniformBuffer: GPUBuffer;
+  private _computeCameraUniformBufferSize = 0;
+
   private _pixelBuffer: GPUBuffer;
 
   private _context: WebGPUContext;
@@ -58,6 +64,14 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
       GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
     );
 
+    const cameraArray = this._options.camera.getUniformArray();
+    this._computeCameraUniformBufferSize = cameraArray.byteLength;
+    this._computeCameraUniformBuffer = createBuffer(
+      context.device,
+      cameraArray,
+      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+    );
+
     this._randomSceneBuffer = createBuffer(this._context.device, this._options.randomScene, GPUBufferUsage.STORAGE);
 
     this._bindGroupLayout = this._context.device.createBindGroupLayout({
@@ -70,10 +84,15 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
         {
           binding: 1,
           visibility: GPUShaderStage.COMPUTE,
-          type: 'storage-buffer',
+          type: 'uniform-buffer',
         },
         {
           binding: 2,
+          visibility: GPUShaderStage.COMPUTE,
+          type: 'storage-buffer',
+        },
+        {
+          binding: 3,
           visibility: GPUShaderStage.COMPUTE,
           type: 'storage-buffer',
         },
@@ -106,13 +125,21 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
         {
           binding: 1,
           resource: {
+            buffer: this._computeCameraUniformBuffer,
+            offset: 0,
+            size: this._computeCameraUniformBufferSize,
+          },
+        },
+        {
+          binding: 2,
+          resource: {
             buffer: this._randomSceneBuffer,
             offset: 0,
             size: this._options.randomScene.byteLength,
           },
         },
         {
-          binding: 2,
+          binding: 3,
           resource: {
             buffer: this._pixelBuffer,
             offset: 0,
@@ -152,6 +179,12 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
         array.push(val);
       }
     }
+    return new Float32Array(array);
+  }
+
+  private createCamera(): Float32Array {
+    const array = [];
+
     return new Float32Array(array);
   }
 

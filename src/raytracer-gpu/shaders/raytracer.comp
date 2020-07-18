@@ -4,7 +4,7 @@
 #include "utils.comp"
 #include "materials.comp"
 #include "ray.comp"
-#include "camera.comp"
+//#include "camera.comp"
 
 //#define FLT_MAX 3.402823466e+38
 #define FLT_MAX 99999.99
@@ -20,16 +20,29 @@ layout(set = 0, binding = 0) uniform ComputeParams {
 }
 params;
 
-layout(std140, set = 0, binding = 1) buffer RandomScene {
+layout(set = 0, binding = 1) uniform Camera {
+  vec4  origin;
+  vec4  lowerLeftCorner;
+  vec4  horizontal;
+  vec4  vertical;
+  vec4  u;
+  vec4  v;
+  vec4  w;
+  float lensRadius;
+}
+camera;
+
+layout(std140, set = 0, binding = 2) buffer RandomScene {
   vec4 sceneArray[];
 }
 randomScene;
 
-layout(std140, set = 0, binding = 2) buffer PixelBuffer {
+layout(std140, set = 0, binding = 3) buffer PixelBuffer {
   vec4 pixels[];
 }
 pixelBuffer;
 
+/*
 struct Sphere {
   vec3  center;
   float radius;
@@ -38,12 +51,31 @@ struct Sphere {
   float roughness;
   float refractIdx;
 };
+*/
 
-bool hitSphere(const Sphere s, const Ray r, float t_min, float t_max, inout HitRecord rec) {
-  vec3  oc           = r.origin - s.center;
+Ray cameraGetRay(float s, float t) {
+  vec3 rd     = camera.lensRadius * randomInUnitDisc();
+  vec3 offset = camera.u.xyz * rd.x + camera.v.xyz * rd.y;
+  return Ray(camera.origin.xyz + offset, camera.lowerLeftCorner.xyz + s * camera.horizontal.xyz + t * camera.vertical.xyz - camera.origin.xyz - offset);
+}
+
+bool hitSphere(const uint sphereIdx, const Ray r, float t_min, float t_max, inout HitRecord rec) {
+  uint idx = sphereIdx * 3;
+  vec4 v1  = randomScene.sceneArray[idx++];
+  vec4 v2  = randomScene.sceneArray[idx++];
+  vec4 v3  = randomScene.sceneArray[idx++];
+
+  vec3  center       = v1.xyz;
+  float radius       = v1.w;
+  float materialType = v2.x;
+  vec3  albedo       = v2.yzw;
+  float roughness    = v3.x;
+  float refractIdx   = v3.y;
+
+  vec3  oc           = r.origin - center;
   float a            = lengthSquared(r.direction);
   float half_b       = dot(oc, r.direction);
-  float c            = lengthSquared(oc) - s.radius * s.radius;
+  float c            = lengthSquared(oc) - radius * radius;
   float discriminant = half_b * half_b - a * c;
 
   if (discriminant > 0) {
@@ -52,24 +84,24 @@ bool hitSphere(const Sphere s, const Ray r, float t_min, float t_max, inout HitR
     if (temp < t_max && temp > t_min) {
       rec.t               = temp;
       rec.p               = rayAt(r, rec.t);
-      vec3 outward_normal = (rec.p - s.center) / s.radius;
+      vec3 outward_normal = (rec.p - center) / radius;
       setFaceNormal(rec, r, outward_normal);
-      rec.materialType = s.materialType;
-      rec.albedo       = s.albedo;
-      rec.roughness    = s.roughness;
-      rec.refractIdx   = s.refractIdx;
+      rec.materialType = materialType;
+      rec.albedo       = albedo;
+      rec.roughness    = roughness;
+      rec.refractIdx   = refractIdx;
       return true;
     }
     temp = (-half_b + root) / a;
     if (temp < t_max && temp > t_min) {
       rec.t               = temp;
       rec.p               = rayAt(r, rec.t);
-      vec3 outward_normal = (rec.p - s.center) / s.radius;
+      vec3 outward_normal = (rec.p - center) / radius;
       setFaceNormal(rec, r, outward_normal);
-      rec.materialType = s.materialType;
-      rec.albedo       = s.albedo;
-      rec.roughness    = s.roughness;
-      rec.refractIdx   = s.refractIdx;
+      rec.materialType = materialType;
+      rec.albedo       = albedo;
+      rec.roughness    = roughness;
+      rec.refractIdx   = refractIdx;
       return true;
     }
   }
@@ -82,24 +114,8 @@ bool hittablesHit(const Ray r, float t_min, float t_max, inout HitRecord rec) {
   float     closest_so_far = t_max;
   const int count          = int(params.fSphereCount);
 
-  int idx = 0;
   for (int i = 0; i < count; i++) {
-    vec4 v1 = randomScene.sceneArray[idx++];
-    vec4 v2 = randomScene.sceneArray[idx++];
-    vec4 v3 = randomScene.sceneArray[idx++];
-
-    Sphere sphere;
-    sphere.center       = v1.xyz;
-    sphere.radius       = v1.w;
-    sphere.materialType = v2.x;
-    sphere.albedo       = v2.yzw;
-    sphere.roughness    = v3.x;
-    sphere.refractIdx   = v3.y;
-
-    // Sphere sphere2 = Sphere(vec3(0.0, -1000, 0.0), 1000, MATERIAL_LAMBERT, vec3(0.5, 0.5, 0.5), 0.0, 1.0);
-    Sphere sphere2 = Sphere(sphere.center, sphere.radius, sphere.materialType, sphere.albedo, sphere.roughness, sphere.refractIdx);
-
-    if (hitSphere(sphere2, r, t_min, closest_so_far, temp_rec)) {
+    if (hitSphere(i, r, t_min, closest_so_far, temp_rec)) {
       hit_anything   = true;
       closest_so_far = temp_rec.t;
       rec            = temp_rec;
@@ -149,28 +165,7 @@ void main() {
   float i = mod(float(index), params.fWidth);
 
   //initSeed(index * 1099087573U);
-  initSeed(index * uint(floor(params.fRandomSeed * 100000000U)));
-
-  float aspectRatio = params.fWidth / params.fHeight;
-
-  vec3  lookFrom = {13.0, 2.0, 3.0};
-  vec3  lookAt   = {0.0, 0.0, 0.0};
-  vec3  vUp      = {0.0, 1.0, 0.0};
-  float vfoY     = 20;
-  float aperture = 0.0;
-  //float focusDistance = length(lookFrom - lookAt);
-  float focusDistance = 10.0;
-
-  Camera camera = createCamera(lookFrom, lookAt, vUp, vfoY, aspectRatio, aperture, focusDistance);
-
-  /*
-  {{0.0, -100.5, -1.0}, 100, MATERIAL_LAMBERT, {0.8, 0.8, 0.0}, 0.0, 1.0},
-  {{0.0, 0.0, -1.0}, 0.5, MATERIAL_LAMBERT, {0.1, 0.2, 0.5}, 0.0, 1.0},
-  {{1.0, 0.0, -1.0}, 0.5, MATERIAL_METAL, {0.8, 0.6, 0.2}, 0.05, 1.0},
-  {{-1.0, 0.0, -1.0}, 0.5, MATERIAL_DIELECTRIC, {1.0, 1.0, 1.0}, 1.0, 1.5},
-  */
-
-  //{{1.0, 0.0, -2.5}, 0.5, MATERIAL_METAL, {0.8, 0.6, 0.2}, 0.8, 1.0},
+  initSeed(index * uint(floor(params.fRandomSeed * 1000000000U)));
 
   vec3 pixel_color = vec3(0.0, 0.0, 0.0);
 
@@ -180,7 +175,7 @@ void main() {
   // for (int s = 0; s < ssp; s++) {
   float u = (i + random()) / (params.fWidth - 1.0);
   float v = (j + random()) / (params.fHeight - 1.0);
-  Ray   r = cameraGetRay(camera, u, v);
+  Ray   r = cameraGetRay(u, v);
   pixel_color += rayColor(r, bounces);
   // }
 

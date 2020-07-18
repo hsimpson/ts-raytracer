@@ -9,7 +9,7 @@ import {
   ComputeCommands,
 } from './workerinterfaces';
 import Vec3 from '../vec3';
-import Camera from './camera';
+import Camera from '../camera';
 import { Serialize } from 'cerializr';
 import { HittableList } from './hittablelist';
 import randomScene from './randomscene';

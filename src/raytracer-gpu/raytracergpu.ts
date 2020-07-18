@@ -6,6 +6,7 @@ import WebGPUContext from './webgpucontext';
 import WebGPUComputePipline from './webgpucomputepipeline';
 import Vec3 from '../vec3';
 import { randomNumberRange } from '../util';
+import Camera from '../camera';
 
 export default class RaytracerGPU extends RaytracerBase {
   private _initialized = false;
@@ -29,12 +30,20 @@ export default class RaytracerGPU extends RaytracerBase {
   }
 
   public async start(doneCallback?: DoneCallback): Promise<void> {
+    this._startTime = performance.now();
     await this.initialize();
     this._doneCallback = doneCallback;
     this._isRunning = true;
-    this._startTime = performance.now();
 
     const randomSceneArray = this.createRandomScene();
+    const aspectRatio = this._imageWidth / this._imageHeight;
+    const lookFrom = new Vec3(13, 2, 3);
+    const lookAt = new Vec3(0, 0, 0);
+    const vUp = new Vec3(0, 1, 0);
+    const focusDist = 10;
+    const aperture = 0.1;
+    const fovY = 20;
+    const camera = new Camera(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist);
 
     const pipeline = new WebGPUComputePipline({
       computeShaderUrl: 'raytracer.comp.spv',
@@ -46,6 +55,7 @@ export default class RaytracerGPU extends RaytracerBase {
         fSphereCount: randomSceneArray.length / 12,
       },
       randomScene: randomSceneArray,
+      camera,
     });
 
     await pipeline.initialize(this._webGPUContext);
@@ -53,20 +63,22 @@ export default class RaytracerGPU extends RaytracerBase {
     const imageData = this._context2D.createImageData(this._imageWidth, this._imageHeight);
     const rawArray = new Float32Array(this._imageWidth * this._imageHeight * 4);
 
-    for (let i = 0; i < this._samplesPerPixel; i++) {
-      console.log(`Sample pass ${i + 1} of ${this._samplesPerPixel}`);
-      const rayTracedArray = await this.compute(pipeline);
+    for (let sample = 0; sample < this._samplesPerPixel; sample++) {
+      // const lastframe = sample === this._samplesPerPixel - 1;
+      const lastframe = true;
+      console.log(`Sample pass ${sample + 1} of ${this._samplesPerPixel}`);
+      console.time('compute');
+      const rayTracedArray = await this.compute(pipeline, lastframe);
+      console.timeEnd('compute');
 
+      // if (lastframe) {
       for (let j = 0; j <= rayTracedArray.length; j++) {
         rawArray[j] += rayTracedArray[j];
+        imageData.data[j] = (rawArray[j] / (sample + 1)) * 255;
       }
+      this._context2D.putImageData(imageData, 0, 0);
+      // }
     }
-
-    for (let i = 0; i <= rawArray.length; i++) {
-      imageData.data[i] = (rawArray[i] / this._samplesPerPixel) * 255;
-    }
-
-    this._context2D.putImageData(imageData, 0, 0);
 
     // raytracer finished
     const duration = performance.now() - this._startTime;
@@ -156,7 +168,7 @@ export default class RaytracerGPU extends RaytracerBase {
     return new Float32Array(array);
   }
 
-  private async compute(pipeline: WebGPUComputePipline): Promise<Float32Array> {
+  private async compute(pipeline: WebGPUComputePipline, copyBuffer = false): Promise<Float32Array> {
     // encode commands
     const commandEncoder = this._webGPUContext.device.createCommandEncoder();
     const passEncoder = commandEncoder.beginComputePass();
@@ -166,25 +178,28 @@ export default class RaytracerGPU extends RaytracerBase {
     passEncoder.dispatch(this._imageWidth * this._imageHeight, 1, 1);
     passEncoder.endPass();
 
-    const gpuReadBuffer = this._webGPUContext.device.createBuffer({
-      size: this._imageWidth * this._imageHeight * 4 * 4,
-      usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-    });
-
-    commandEncoder.copyBufferToBuffer(
-      pipeline.pixelBuffer,
-      0,
-      gpuReadBuffer,
-      0,
-      this._imageWidth * this._imageHeight * 4 * 4
-    );
-
-    this._webGPUContext.queue.submit([commandEncoder.finish()]);
-
-    const arrayBuffer = await gpuReadBuffer.mapReadAsync();
-
     pipeline.updateUniformBuffer();
 
-    return new Float32Array(arrayBuffer);
+    if (copyBuffer) {
+      const gpuReadBuffer = this._webGPUContext.device.createBuffer({
+        size: this._imageWidth * this._imageHeight * 4 * 4,
+        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+      });
+
+      commandEncoder.copyBufferToBuffer(
+        pipeline.pixelBuffer,
+        0,
+        gpuReadBuffer,
+        0,
+        this._imageWidth * this._imageHeight * 4 * 4
+      );
+
+      this._webGPUContext.queue.submit([commandEncoder.finish()]);
+
+      const arrayBuffer = await gpuReadBuffer.mapReadAsync();
+
+      return new Float32Array(arrayBuffer);
+    }
+    return new Float32Array();
   }
 }
