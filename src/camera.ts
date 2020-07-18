@@ -1,6 +1,6 @@
-import Vec3 from '../vec3';
-import Ray from './ray';
-import { degreeToRadians } from '../util';
+import Vec3 from './vec3';
+import Ray from './raytracer-cpu/ray';
+import { degreeToRadians } from './util';
 import { autoserializeAs } from 'cerializr';
 
 export interface CameraOptions {
@@ -17,7 +17,7 @@ export default class Camera {
   @autoserializeAs(Vec3)
   private lookFrom: Vec3;
   @autoserializeAs(Vec3)
-  private lower_left_corner: Vec3;
+  private lowerLeftCorner: Vec3;
   @autoserializeAs(Vec3)
   private horizontal: Vec3;
   @autoserializeAs(Vec3)
@@ -58,7 +58,7 @@ export default class Camera {
 
     const focusW = Vec3.multScalarVec3(this.w, focusDist);
 
-    this.lower_left_corner = Vec3.subVec3(
+    this.lowerLeftCorner = Vec3.subVec3(
       Vec3.subVec3(Vec3.subVec3(this.lookFrom, half_horizontal), half_vertical),
       focusW
     );
@@ -78,7 +78,21 @@ export default class Camera {
 
     return new Ray(
       Vec3.addVec3(this.lookFrom, offset),
-      Vec3.subVec3(Vec3.subVec3(Vec3.addVec3(Vec3.addVec3(this.lower_left_corner, sHor), tVer), this.lookFrom), offset)
+      Vec3.subVec3(Vec3.subVec3(Vec3.addVec3(Vec3.addVec3(this.lowerLeftCorner, sHor), tVer), this.lookFrom), offset)
     );
+  }
+
+  public getUniformArray(): Float32Array {
+    const array = [];
+    array.push(...this.lookFrom.array, 0.0); // vec4 because of memory alignment
+    array.push(...this.lowerLeftCorner.array, 0.0);
+    array.push(...this.horizontal.array, 0.0);
+    array.push(...this.vertical.array, 0.0);
+    array.push(...this.u.array, 0.0);
+    array.push(...this.v.array, 0.0);
+    array.push(...this.w.array, 0.0);
+    array.push(this.lenseRadius);
+
+    return new Float32Array(array);
   }
 }

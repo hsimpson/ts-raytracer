@@ -1,5 +1,5 @@
 import { Deserialize, InstantiationMethod } from 'cerializr';
-import Camera from './camera';
+import Camera from '../camera';
 import { HittableList } from './hittablelist';
 import { rayColor } from './ray';
 import { randomNumber } from '../util';
