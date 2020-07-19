@@ -10,6 +10,7 @@ import {
 
 export default class RaytracerCPU extends RaytracerBase {
   private _controllerWorker: ControllerWorker;
+  private _context2D: CanvasRenderingContext2D;
 
   public constructor(
     canvas: HTMLCanvasElement,
@@ -65,6 +66,7 @@ export default class RaytracerCPU extends RaytracerBase {
 
   public async start(doneCallback?: DoneCallback): Promise<void> {
     this._doneCallback = doneCallback;
+    this._context2D = this._canvas.getContext('2d');
     this._isRunning = true;
     this._startTime = performance.now();
 

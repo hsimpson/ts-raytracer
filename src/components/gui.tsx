@@ -44,13 +44,17 @@ const Gui = (): React.ReactElement => {
         min={1}
         value={raytracerState.maxBounces}
         onValueChange={(maxBounces) => setRaytracerState({ ...raytracerState, maxBounces })}></NumberInput>
-      <NumberInput
-        label="Num of workers:"
-        size={5}
-        min={1}
-        max={navigator.hardwareConcurrency}
-        value={raytracerState.numOfWorkers}
-        onValueChange={(numOfWorkers) => setRaytracerState({ ...raytracerState, numOfWorkers })}></NumberInput>
+      {raytracerState.webGPUenabled === false ? (
+        <NumberInput
+          label="Num of CPU workers:"
+          size={5}
+          min={1}
+          max={navigator.hardwareConcurrency}
+          value={raytracerState.numOfWorkers}
+          onValueChange={(numOfWorkers) => setRaytracerState({ ...raytracerState, numOfWorkers })}></NumberInput>
+      ) : (
+        ''
+      )}
       <CheckBox
         label="WebGPU-compute"
         checked={raytracerState.webGPUenabled}

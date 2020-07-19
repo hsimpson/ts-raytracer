@@ -42,17 +42,6 @@ layout(std140, set = 0, binding = 3) buffer PixelBuffer {
 }
 pixelBuffer;
 
-/*
-struct Sphere {
-  vec3  center;
-  float radius;
-  float materialType;
-  vec3  albedo;
-  float roughness;
-  float refractIdx;
-};
-*/
-
 Ray cameraGetRay(float s, float t) {
   vec3 rd     = camera.lensRadius * randomInUnitDisc();
   vec3 offset = camera.u.xyz * rd.x + camera.v.xyz * rd.y;
@@ -187,7 +176,8 @@ void main() {
   pixel_color = sqrt(pixel_color);
 
   //pixel_color               = randomVec3();
-  pixelBuffer.pixels[index] = vec4(pixel_color, 1.0);
+  //pixelBuffer.pixels[index] = vec4(pixel_color, 1.0);
+  pixelBuffer.pixels[index] += vec4(pixel_color, 1.0);
 }
 
 /*

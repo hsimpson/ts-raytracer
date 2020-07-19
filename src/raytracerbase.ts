@@ -2,7 +2,6 @@ export type DoneCallback = (duration: number) => void;
 
 export abstract class RaytracerBase {
   protected _isRunning = false;
-  protected _context2D: CanvasRenderingContext2D;
   protected _startTime = 0;
   protected _doneCallback: DoneCallback;
 
@@ -12,9 +11,7 @@ export abstract class RaytracerBase {
     protected _imageHeight: number,
     protected _samplesPerPixel: number,
     protected _maxBounces: number
-  ) {
-    this._context2D = this._canvas.getContext('2d');
-  }
+  ) {}
 
   public abstract async start(doneCallback?: DoneCallback): Promise<void>;
   public abstract stop(): void;

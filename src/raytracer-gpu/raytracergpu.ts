@@ -7,10 +7,16 @@ import WebGPUComputePipline from './webgpucomputepipeline';
 import Vec3 from '../vec3';
 import { randomNumberRange } from '../util';
 import Camera from '../camera';
+import WebGPURenderPipeline from './webgpurenderpipeline';
 
 export default class RaytracerGPU extends RaytracerBase {
   private _initialized = false;
   private _webGPUContext: WebGPUContext;
+  private _context2D: CanvasRenderingContext2D;
+
+  private _colorTextureView: GPUTextureView;
+  private _colorAttachment: GPURenderPassColorAttachmentDescriptor;
+  private _swapchain: GPUSwapChain;
 
   public constructor(
     canvas: HTMLCanvasElement,
@@ -35,19 +41,42 @@ export default class RaytracerGPU extends RaytracerBase {
     this._doneCallback = doneCallback;
     this._isRunning = true;
 
+    const textureSize: GPUExtent3D = {
+      width: this._imageWidth,
+      height: this._imageHeight,
+      depth: 1,
+    };
+
+    const colorTextureDesc: GPUTextureDescriptor = {
+      size: textureSize,
+      sampleCount: 1,
+      format: 'bgra8unorm',
+      usage: GPUTextureUsage.OUTPUT_ATTACHMENT,
+    };
+
+    const colorTexture = this._webGPUContext.device.createTexture(colorTextureDesc);
+    this._colorTextureView = colorTexture.createView();
+
+    this._colorAttachment = {
+      attachment: null,
+      loadValue: { r: 0, g: 0, b: 0, a: 1 },
+      storeOp: 'store',
+    };
+
     const randomSceneArray = this.createRandomScene();
     const aspectRatio = this._imageWidth / this._imageHeight;
     const lookFrom = new Vec3(13, 2, 3);
     const lookAt = new Vec3(0, 0, 0);
     const vUp = new Vec3(0, 1, 0);
     const focusDist = 10;
-    const aperture = 0.1;
+    //const aperture = 0.1;
+    const aperture = 0.0;
     const fovY = 20;
     const camera = new Camera(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist);
 
-    const pipeline = new WebGPUComputePipline({
+    const computePipeline = new WebGPUComputePipline({
       computeShaderUrl: 'raytracer.comp.spv',
-      unformParams: {
+      uniformParams: {
         fWidth: this._imageWidth,
         fHeight: this._imageHeight,
         fSamplesPerPixel: this._samplesPerPixel,
@@ -58,34 +87,59 @@ export default class RaytracerGPU extends RaytracerBase {
       camera,
     });
 
-    await pipeline.initialize(this._webGPUContext);
+    await computePipeline.initialize(this._webGPUContext);
 
-    const imageData = this._context2D.createImageData(this._imageWidth, this._imageHeight);
-    const rawArray = new Float32Array(this._imageWidth * this._imageHeight * 4);
+    const renderPipeline = new WebGPURenderPipeline({
+      vertexShaderUrl: 'renderer.vert.spv',
+      fragmentShaderUrl: 'renderer.frag.spv',
+      sharedPixelBuffer: computePipeline.pixelBuffer,
+      uniformParams: {
+        fWidth: this._imageWidth,
+        fHeight: this._imageHeight,
+        fSample: 1,
+      },
+    });
+
+    await renderPipeline.initialize(this._webGPUContext);
+
+    // const imageData = this._context2D.createImageData(this._imageWidth, this._imageHeight);
 
     const raytracing = async (): Promise<void> => {
       return new Promise((resolve) => {
         let sample = 1;
+        let prevTime = performance.now();
         const frame = (): void => {
-          //const lastframe = true;
+          const currentTime = performance.now();
+          console.log(`duration: ${(currentTime - prevTime).toFixed(3)} ms`);
+          prevTime = currentTime;
           console.log(`Sample pass ${sample} of ${this._samplesPerPixel}`);
-          console.time('compute');
-          this.compute(pipeline, true).then((rayTracedArray) => {
+
+          /* async without render pipeline
+          // const lastframe = sample === this._samplesPerPixel;
+          this.compute(computePipeline, lastframe).then((rayTracedArray) => {
             console.timeEnd('compute');
 
-            for (let j = 0; j <= rayTracedArray.length; j++) {
-              rawArray[j] += rayTracedArray[j];
-              imageData.data[j] = (rawArray[j] / sample) * 255;
-            }
-            this._context2D.putImageData(imageData, 0, 0);
-
             sample++;
-            if (sample < this._samplesPerPixel) {
+            if (sample <= this._samplesPerPixel) {
               window.requestAnimationFrame(frame);
             } else {
+              for (let j = 0; j <= rayTracedArray.length; j++) {
+                imageData.data[j] = (rayTracedArray[j] / this._samplesPerPixel) * 255;
+              }
+              this._context2D.putImageData(imageData, 0, 0);
               resolve();
             }
           });
+          */
+
+          // synchron with render pipeline
+          this.compute2(computePipeline, renderPipeline, sample);
+          sample++;
+          if (sample <= this._samplesPerPixel) {
+            window.requestAnimationFrame(frame);
+          } else {
+            resolve();
+          }
         };
         window.requestAnimationFrame(frame);
       });
@@ -93,34 +147,16 @@ export default class RaytracerGPU extends RaytracerBase {
 
     await raytracing();
 
-    /*
-    for (let sample = 0; sample < this._samplesPerPixel; sample++) {
-      // const lastframe = sample === this._samplesPerPixel - 1;
-      const lastframe = true;
-      console.log(`Sample pass ${sample + 1} of ${this._samplesPerPixel}`);
-      console.time('compute');
-      const rayTracedArray = await this.compute(pipeline, lastframe);
-      console.timeEnd('compute');
-
-      // if (lastframe) {
-      for (let j = 0; j <= rayTracedArray.length; j++) {
-        rawArray[j] += rayTracedArray[j];
-        imageData.data[j] = (rawArray[j] / (sample + 1)) * 255;
-      }
-      this._context2D.putImageData(imageData, 0, 0);
-      // }
-    }
-    */
-
     // raytracer finished
     const duration = performance.now() - this._startTime;
     const renderTime = `spp: ${this._samplesPerPixel}, max-bounces: ${
       this._maxBounces
     }, rendertime: ${RaytracerBase.msToTimeString(duration)}`;
     console.log(renderTime);
-    this._context2D.font = '16px Arial';
-    this._context2D.textBaseline = 'top';
-    this._context2D.fillText(renderTime, 5, 5);
+
+    // this._context2D.font = '16px Arial';
+    // this._context2D.textBaseline = 'top';
+    // this._context2D.fillText(renderTime, 5, 5);
 
     if (this._doneCallback) {
       this._doneCallback(duration);
@@ -143,6 +179,18 @@ export default class RaytracerGPU extends RaytracerBase {
     const queue = device.defaultQueue;
 
     this._webGPUContext = new WebGPUContext(device, queue);
+
+    // this._context2D = this._canvas.getContext('2d');
+    // swapchain
+
+    const context: GPUCanvasContext = (this._canvas.getContext('gpupresent') as unknown) as GPUCanvasContext;
+    const swapChainDesc: GPUSwapChainDescriptor = {
+      device,
+      format: 'bgra8unorm',
+      usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC,
+    };
+    this._swapchain = context.configureSwapChain(swapChainDesc);
+
     this._initialized = true;
   }
 
@@ -200,17 +248,20 @@ export default class RaytracerGPU extends RaytracerBase {
     return new Float32Array(array);
   }
 
-  private async compute(pipeline: WebGPUComputePipline, copyBuffer = false): Promise<Float32Array> {
-    // encode commands
+  private async compute(computePipeline: WebGPUComputePipline, copyBuffer = false): Promise<Float32Array> {
     const commandEncoder = this._webGPUContext.device.createCommandEncoder();
-    const passEncoder = commandEncoder.beginComputePass();
-    passEncoder.setPipeline(pipeline.gpuPipeline);
-    passEncoder.setBindGroup(0, pipeline.bindGroup);
-    //passEncoder.dispatch(this._imageWidth, this._imageHeight, 1);
-    passEncoder.dispatch(this._imageWidth * this._imageHeight, 1, 1);
-    passEncoder.endPass();
 
-    pipeline.updateUniformBuffer();
+    // compute pass
+    {
+      const passEncoder = commandEncoder.beginComputePass();
+      passEncoder.setPipeline(computePipeline.gpuPipeline);
+      passEncoder.setBindGroup(0, computePipeline.bindGroup);
+      //passEncoder.dispatch(this._imageWidth, this._imageHeight, 1);
+      passEncoder.dispatch(this._imageWidth * this._imageHeight, 1, 1);
+      passEncoder.endPass();
+
+      computePipeline.updateUniformBuffer();
+    }
 
     if (copyBuffer) {
       const gpuReadBuffer = this._webGPUContext.device.createBuffer({
@@ -219,19 +270,55 @@ export default class RaytracerGPU extends RaytracerBase {
       });
 
       commandEncoder.copyBufferToBuffer(
-        pipeline.pixelBuffer,
+        computePipeline.pixelBuffer,
         0,
         gpuReadBuffer,
         0,
         this._imageWidth * this._imageHeight * 4 * 4
       );
-
       this._webGPUContext.queue.submit([commandEncoder.finish()]);
 
       const arrayBuffer = await gpuReadBuffer.mapReadAsync();
 
       return new Float32Array(arrayBuffer);
+    } else {
+      this._webGPUContext.queue.submit([commandEncoder.finish()]);
     }
-    return new Float32Array();
+    return new Float32Array(this._imageWidth * this._imageHeight * 4 * 4);
+  }
+
+  private compute2(computePipeline: WebGPUComputePipline, renderPipeLine: WebGPURenderPipeline, sample: number): void {
+    const commandEncoder = this._webGPUContext.device.createCommandEncoder();
+
+    // compute pass
+    {
+      const passEncoder = commandEncoder.beginComputePass();
+      passEncoder.setPipeline(computePipeline.gpuPipeline);
+      passEncoder.setBindGroup(0, computePipeline.bindGroup);
+      //passEncoder.dispatch(this._imageWidth, this._imageHeight, 1);
+      passEncoder.dispatch(this._imageWidth * this._imageHeight, 1, 1);
+      passEncoder.endPass();
+
+      computePipeline.updateUniformBuffer();
+    }
+
+    // render pass
+    {
+      renderPipeLine.updateUniformBuffer(sample);
+      this._colorAttachment.attachment = this._swapchain.getCurrentTexture().createView();
+      const renderPassDesc: GPURenderPassDescriptor = {
+        colorAttachments: [this._colorAttachment],
+        //depthStencilAttachment: this._depthAttachment,
+      };
+
+      const passEncoder = commandEncoder.beginRenderPass(renderPassDesc);
+      passEncoder.setPipeline(renderPipeLine.gpuPipeline);
+      passEncoder.setBindGroup(0, renderPipeLine.bindGroup);
+      passEncoder.setVertexBuffer(0, renderPipeLine.vertexPostionBuffer);
+      passEncoder.draw(6, 1, 0, 0);
+      passEncoder.endPass();
+    }
+
+    this._webGPUContext.queue.submit([commandEncoder.finish()]);
   }
 }

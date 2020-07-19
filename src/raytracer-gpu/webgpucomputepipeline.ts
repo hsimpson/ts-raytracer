@@ -14,15 +14,13 @@ interface ComputeUniformParams {
 
 interface WebGPUComputePiplineOptions {
   computeShaderUrl: string;
-  unformParams: ComputeUniformParams;
+  uniformParams: ComputeUniformParams;
   randomScene: Float32Array;
   camera: Camera;
 }
 
 export default class WebGPUComputePipline extends WebGPUPipelineBase {
   private _options: WebGPUComputePiplineOptions;
-  private _bindGroupLayout: GPUBindGroupLayout;
-  private _bindGroup: GPUBindGroup;
 
   private _computeParamsUniformBuffer: GPUBuffer;
   private _computeParamsUniformBufferSize = 0;
@@ -32,13 +30,12 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
 
   private _pixelBuffer: GPUBuffer;
 
-  private _context: WebGPUContext;
   private _randomSceneBuffer: GPUBuffer;
 
   public constructor(options: WebGPUComputePiplineOptions) {
     super();
     this._options = options;
-    this._options.unformParams.fRandomSeed = Math.random();
+    this._options.uniformParams.fRandomSeed = Math.random();
   }
 
   public async initialize(context: WebGPUContext): Promise<void> {
@@ -49,14 +46,14 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
 
     this._context = context;
 
-    const pixelArray = new Float32Array(this._options.unformParams.fWidth * this._options.unformParams.fHeight * 4);
+    const pixelArray = new Float32Array(this._options.uniformParams.fWidth * this._options.uniformParams.fHeight * 4);
     this._pixelBuffer = createBuffer(
       this._context.device,
       pixelArray,
       GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
     );
 
-    const uniformArray = this.getParamsArray();
+    const uniformArray = this.getParamsArray(this._options.uniformParams);
     this._computeParamsUniformBufferSize = uniformArray.byteLength;
     this._computeParamsUniformBuffer = createBuffer(
       context.device,
@@ -104,13 +101,13 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
 
   public updateUniformBuffer(): void {
     if (this._initialized) {
-      this._options.unformParams.fRandomSeed = Math.random();
-      const uniformArray = this.getParamsArray();
+      this._options.uniformParams.fRandomSeed = Math.random();
+      const uniformArray = this.getParamsArray(this._options.uniformParams);
       this._context.queue.writeBuffer(this._computeParamsUniformBuffer, 0, uniformArray.buffer);
     }
   }
 
-  private async createBindGroup(): Promise<void> {
+  protected async createBindGroup(): Promise<void> {
     this._bindGroup = this._context.device.createBindGroup({
       layout: this._bindGroupLayout,
       entries: [
@@ -143,7 +140,11 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
           resource: {
             buffer: this._pixelBuffer,
             offset: 0,
-            size: this._options.unformParams.fWidth * this._options.unformParams.fHeight * 4 * 4,
+            size:
+              this._options.uniformParams.fWidth *
+              this._options.uniformParams.fHeight *
+              4 *
+              Float32Array.BYTES_PER_ELEMENT,
           },
         },
       ],
@@ -168,28 +169,10 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
     this._pipeline = this._context.device.createComputePipeline(pipelineDesc);
   }
 
-  private getParamsArray(): Float32Array {
-    const keys = Object.keys(this._options.unformParams);
-    const array = [];
-    for (let i = 0; i < keys.length; i++) {
-      const val = this._options.unformParams[keys[i]];
-      if (Array.isArray(val)) {
-        array.push(...val);
-      } else {
-        array.push(val);
-      }
-    }
-    return new Float32Array(array);
-  }
-
   private createCamera(): Float32Array {
     const array = [];
 
     return new Float32Array(array);
-  }
-
-  public get bindGroup(): GPUBindGroup {
-    return this._bindGroup;
   }
 
   public get gpuPipeline(): GPUComputePipeline {

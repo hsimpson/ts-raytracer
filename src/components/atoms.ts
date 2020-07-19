@@ -5,7 +5,7 @@ export const RaytracerProperties = atom({
   default: {
     imageWidth: 640,
     imageHeight: 360,
-    samplesPerPixel: 5,
+    samplesPerPixel: 20,
     maxBounces: 50,
     numOfWorkers: 1,
     webGPUavailable: false,
