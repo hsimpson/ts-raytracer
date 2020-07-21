@@ -10,6 +10,8 @@
 #define FLT_MAX 99999.99
 //const float INFINITY     = 1. / 0.;
 
+layout(local_size_x = 8, local_size_y = 8) in;
+
 layout(set = 0, binding = 0) uniform ComputeParams {
   float fWidth;
   float fHeight;
@@ -148,13 +150,15 @@ vec3 rayColor(Ray ray, uint depth) {
 }
 
 void main() {
-  uint index = gl_GlobalInvocationID.x;
+  uvec3 index = gl_GlobalInvocationID;
 
-  float j = params.fHeight - (floor(float(index) / params.fWidth));
-  float i = mod(float(index), params.fWidth);
+  // float j = params.fHeight - (floor(float(index.x) / params.fWidth));
+  // float i = mod(float(index.y), params.fWidth);
+  float i = index.x;
+  float j = params.fHeight - index.y;
 
   //initSeed(index * 1099087573U);
-  initSeed(index * uint(floor(params.fRandomSeed * 1000000000U)));
+  initSeed(index.x * index.y * uint(floor(params.fRandomSeed * 1000000000U)));
 
   vec3 pixel_color = vec3(0.0, 0.0, 0.0);
 
@@ -177,7 +181,9 @@ void main() {
 
   //pixel_color               = randomVec3();
   //pixelBuffer.pixels[index] = vec4(pixel_color, 1.0);
-  pixelBuffer.pixels[index] += vec4(pixel_color, 1.0);
+
+  const uint pixelIndex = index.y * uint(params.fWidth) + index.x;
+  pixelBuffer.pixels[pixelIndex] += vec4(pixel_color, 1.0);
 }
 
 /*
