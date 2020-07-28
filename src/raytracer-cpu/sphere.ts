@@ -1,88 +1,21 @@
-import {
-  autoserializeAs,
-  inheritSerialization,
-  InstantiationMethod,
-  JsonObject,
-  Serialize,
-  Deserialize,
-} from 'cerializr';
-import BaseMaterial from './basematerial';
-import BaseObject from './baseobject';
-import { HitRecord } from './hittable';
-import LambertianMaterial from './lambertian';
-import MetalMaterial from './metal';
-import DielectricMaterial from './dielectric';
+import Material from './material';
+import { HitRecord, Hittable } from './hittable';
 import Ray from './ray';
 import Vec3 from '../vec3';
+import AABB from './aabb';
+import { serializable } from '../serializing';
 
-@inheritSerialization(BaseObject)
-export default class Sphere extends BaseObject {
-  @autoserializeAs(Vec3)
+@serializable
+export default class Sphere extends Hittable {
   private center: Vec3;
-  @autoserializeAs(Number)
   private radius: number;
-  @autoserializeAs(BaseMaterial)
-  private mat: BaseMaterial;
+  private mat: Material;
 
-  public constructor(center: Vec3, radius: number, mat: BaseMaterial) {
+  public constructor(center: Vec3, radius: number, mat: Material) {
     super();
     this.center = center;
     this.radius = radius;
     this.mat = mat;
-  }
-
-  public static onSerialized(json: JsonObject, instance: Sphere): JsonObject {
-    switch (instance.mat.constructor.name) {
-      case 'LambertianMaterial':
-        json.mat = Serialize(instance.mat, LambertianMaterial);
-        json.mat.type = 'LambertianMaterial';
-        break;
-      case 'MetalMaterial':
-        json.mat = Serialize(instance.mat, MetalMaterial);
-        json.mat.type = 'MetalMaterial';
-        break;
-      case 'DielectricMaterial':
-        json.mat = Serialize(instance.mat, DielectricMaterial);
-        json.mat.type = 'DielectricMaterial';
-        break;
-    }
-    return json;
-  }
-
-  public static onDeserialized(
-    data: JsonObject,
-    instance: Sphere,
-    instantiationMethod: InstantiationMethod = InstantiationMethod.New
-  ): Sphere | void {
-    if (!instance) {
-      switch (instantiationMethod) {
-        /*
-        case InstantiationMethod.New:
-          instance = new Sphere(data.center, data.radius, data.mat);
-          break;
-        */
-        case InstantiationMethod.ObjectCreate:
-          instance = Object.create(Sphere.prototype);
-          break;
-        default:
-          instance = {} as Sphere;
-          break;
-      }
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mat = data.mat as any;
-    switch (mat.type) {
-      case 'LambertianMaterial':
-        instance.mat = Deserialize(mat, LambertianMaterial, null, InstantiationMethod.ObjectCreate);
-        break;
-      case 'MetalMaterial':
-        instance.mat = Deserialize(mat, MetalMaterial, null, InstantiationMethod.ObjectCreate);
-        break;
-      case 'DielectricMaterial':
-        instance.mat = Deserialize(mat, DielectricMaterial, null, InstantiationMethod.ObjectCreate);
-        break;
-    }
-    return instance;
   }
 
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
@@ -114,5 +47,14 @@ export default class Sphere extends BaseObject {
       }
     }
     return false;
+  }
+
+  public boundingBox(outputBox: AABB): boolean {
+    const newOutputBox = new AABB(
+      Vec3.subVec3(this.center, new Vec3(this.radius, this.radius, this.radius)),
+      Vec3.addVec3(this.center, new Vec3(this.radius, this.radius, this.radius))
+    );
+    newOutputBox.copyTo(outputBox);
+    return true;
   }
 }

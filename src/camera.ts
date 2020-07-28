@@ -1,7 +1,7 @@
 import Vec3 from './vec3';
 import Ray from './raytracer-cpu/ray';
 import { degreeToRadians } from './util';
-import { autoserializeAs } from 'cerializr';
+import { serializable } from './serializing';
 
 export interface CameraOptions {
   lookFrom: Vec3;
@@ -13,25 +13,22 @@ export interface CameraOptions {
   focusDist: number;
 }
 
+@serializable
 export default class Camera {
-  @autoserializeAs(Vec3)
   private lookFrom: Vec3;
-  @autoserializeAs(Vec3)
   private lowerLeftCorner: Vec3;
-  @autoserializeAs(Vec3)
   private horizontal: Vec3;
-  @autoserializeAs(Vec3)
   private vertical: Vec3;
-  @autoserializeAs(Vec3)
   private u: Vec3;
-  @autoserializeAs(Vec3)
   private v: Vec3;
-  @autoserializeAs(Vec3)
   private w: Vec3;
-  @autoserializeAs(Number)
   private lenseRadius: number;
 
-  public constructor(
+  public constructor() {
+    //
+  }
+
+  public init(
     lookFrom: Vec3,
     lookAt: Vec3,
     vUp: Vec3,
@@ -39,7 +36,7 @@ export default class Camera {
     aspectRatio: number,
     aperture: number,
     focusDist: number
-  ) {
+  ): void {
     const theta = degreeToRadians(fovY);
     const h = Math.tan(theta / 2);
     const viewport_height = 2 * h;

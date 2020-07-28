@@ -1,4 +1,4 @@
-import BaseMaterial from './basematerial';
+import Material from './material';
 import DielectricMaterial from './dielectric';
 import { HittableList } from './hittablelist';
 import LambertianMaterial from './lambertian';
@@ -6,21 +6,22 @@ import MetalMaterial from './metal';
 import Sphere from './sphere';
 import { randomNumber, randomNumberRange } from '../util';
 import Vec3 from '../vec3';
+import BVHNode from './bvhnode';
 
 export default function randomScene(): HittableList {
   const world = new HittableList();
 
   const groundMaterial = new LambertianMaterial(new Vec3(0.5, 0.5, 0.5));
   world.add(new Sphere(new Vec3(0, -1000, 0), 1000, groundMaterial));
-  let i = 1;
+  // let i = 1;
   for (let a = -11; a < 11; a++) {
     for (let b = -11; b < 11; b++) {
-      console.log(`${i++}`);
+      //console.log(`${i++}`);
       const chooseMat = randomNumber();
       const center = new Vec3(a + 0.9 * randomNumber(), 0.2, b + 0.9 * randomNumber());
 
       if (Vec3.subVec3(center, new Vec3(4, 0.2, 0)).length() > 0.9) {
-        let sphereMaterial: BaseMaterial;
+        let sphereMaterial: Material;
 
         if (chooseMat < 0.8) {
           // diffuse
@@ -50,4 +51,5 @@ export default function randomScene(): HittableList {
   world.add(new Sphere(new Vec3(4, 1, 0), 1, material3));
 
   return world;
+  //return new HittableList(BVHNode.createFromHitableList(world));
 }

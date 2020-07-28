@@ -1,13 +1,28 @@
-import { Deserialize, InstantiationMethod } from 'cerializr';
 import Camera from '../camera';
 import { HittableList } from './hittablelist';
 import { rayColor } from './ray';
 import { randomNumber } from '../util';
 import Vec3 from '../vec3';
 import { ComputeCommands, ComputeEndMessage, ComputeStartMessage, WorkerMessage } from './workerinterfaces';
+import { deserialize } from '../serializing/deserialize';
+import Sphere from './sphere';
+import LambertianMaterial from './lambertian';
+import MetalMaterial from './metal';
+import DielectricMaterial from './dielectric';
+import BVHNode from './bvhnode';
+import AABB from './aabb';
 
 const _controllerCtx: Worker = self as never;
 let _id: number;
+
+const map = {
+  lambertianMaterial: LambertianMaterial,
+  metalMaterial: MetalMaterial,
+  dielectricMaterial: DielectricMaterial,
+  sphere: Sphere,
+  bvhNode: BVHNode,
+  aabb: AABB,
+};
 
 const writeColor = (array: Uint8ClampedArray, offset: number, color: Vec3, ssp: number): void => {
   let r = color.r;
@@ -28,9 +43,8 @@ const writeColor = (array: Uint8ClampedArray, offset: number, color: Vec3, ssp: 
 
 const start = (msg: ComputeStartMessage): void => {
   _id = msg.data.workerId;
-  const camera = Deserialize(msg.data.camera, Camera, null, InstantiationMethod.ObjectCreate);
-  // debugger;
-  const world = Deserialize(msg.data.world, HittableList, null, InstantiationMethod.ObjectCreate);
+  const camera = deserialize(Camera, msg.data.camera);
+  const world = deserialize(HittableList, msg.data.world);
   const imageWidth = msg.data.imageWidth;
   const imageHeight = msg.data.imageHeight;
   const scanlineCount = msg.data.scanlineCount;

@@ -1,11 +1,10 @@
-import { autoserializeAs } from 'cerializr';
-import BaseMaterial from './basematerial';
+import Material from './material';
 import { HitRecord } from './hittable';
 import Ray from './ray';
 import Vec3 from '../vec3';
-
-export default class LambertianMaterial extends BaseMaterial {
-  @autoserializeAs(Vec3)
+import { serializable } from '../serializing';
+@serializable
+export default class LambertianMaterial extends Material {
   private albedo: Vec3;
 
   public constructor(color: Vec3) {

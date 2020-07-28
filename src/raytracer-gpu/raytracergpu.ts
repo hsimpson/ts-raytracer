@@ -72,7 +72,8 @@ export default class RaytracerGPU extends RaytracerBase {
     //const aperture = 0.1;
     const aperture = 0.0;
     const fovY = 20;
-    const camera = new Camera(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist);
+    const camera = new Camera();
+    camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist);
 
     const computePipeline = new WebGPUComputePipline({
       computeShaderUrl: 'raytracer.comp.spv',

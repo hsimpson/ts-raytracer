@@ -1,4 +1,6 @@
-import { JsonObject } from 'cerializr';
+import Camera from '../camera';
+import { HittableList } from './hittablelist';
+import { JsonObject } from '../serializing';
 
 export enum ControllerCommands {
   START,

@@ -10,9 +10,9 @@ import {
 } from './workerinterfaces';
 import Vec3 from '../vec3';
 import Camera from '../camera';
-import { Serialize } from 'cerializr';
 import { HittableList } from './hittablelist';
 import randomScene from './randomscene';
+import { serialize } from '../serializing';
 
 const _controllerCtx: Worker = self as never;
 let _array: Uint8ClampedArray;
@@ -39,7 +39,8 @@ const start = (msg: ControllerStartMessage): void => {
   const focusDist = 10;
   const aperture = 0.1;
   const fovY = 20;
-  const camera = new Camera(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist);
+  const camera = new Camera();
+  camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist);
   const world = randomScene();
 
   let startLine = 0;
@@ -53,8 +54,8 @@ const start = (msg: ControllerStartMessage): void => {
       cmd: ComputeCommands.START,
       data: {
         workerId,
-        camera: Serialize(camera, Camera),
-        world: Serialize(world, HittableList),
+        camera: serialize(Camera, camera),
+        world: serialize(HittableList, world),
         imageWidth: msg.data.imageWidth,
         imageHeight: msg.data.imageHeight,
         scanlineCount: availableLines - lineLoad < 0 ? availableLines : lineLoad,
@@ -63,6 +64,7 @@ const start = (msg: ControllerStartMessage): void => {
         maxBounces: _maxBounces,
       },
     };
+
     computeWorker.postMessage(computeStartMessage);
     _computeWorkers.set(workerId, computeWorker);
     availableLines -= lineLoad;

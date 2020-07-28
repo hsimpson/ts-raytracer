@@ -1,78 +1,29 @@
-import { autoserializeAsArray, Deserialize, InstantiationMethod, JsonObject, Serialize } from 'cerializr';
-import BaseObject from './baseobject';
 import { HitRecord, Hittable } from './hittable';
 import Ray from './ray';
-import Sphere from './sphere';
+import AABB from './aabb';
+import { serializable } from '../serializing';
 
-export class HittableList implements Hittable {
-  @autoserializeAsArray(BaseObject)
-  private objects: BaseObject[] = [];
+@serializable
+export class HittableList extends Hittable {
+  private _objects: Hittable[] = [];
 
   public constructor(object?: Hittable) {
+    super();
     if (object) {
       this.add(object);
     }
   }
 
-  public static onSerialized(json: JsonObject, instance: HittableList): JsonObject {
-    const objects = [];
-    for (const o of instance.objects) {
-      switch (o.constructor.name) {
-        case 'Sphere': {
-          const serializedObject = Serialize(o, Sphere);
-          serializedObject.type = 'Sphere';
-          objects.push(serializedObject);
-          break;
-        }
-
-        default:
-          break;
-      }
-    }
-    json['objects'] = objects;
-    return json;
-  }
-
-  public static onDeserialized(
-    data: JsonObject,
-    instance: HittableList,
-    instantiationMethod: InstantiationMethod = InstantiationMethod.New
-  ): HittableList | void {
-    if (!instance) {
-      switch (instantiationMethod) {
-        case InstantiationMethod.New:
-          instance = new HittableList();
-          break;
-        case InstantiationMethod.ObjectCreate:
-          instance = Object.create(HittableList.prototype);
-          break;
-        default:
-          instance = {} as HittableList;
-          break;
-      }
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const objects: any[] = data.objects as any[];
-    instance.objects.length = 0;
-    for (const o of objects) {
-      switch (o.type) {
-        case 'Sphere':
-          instance.objects.push(Deserialize(o, Sphere, null, InstantiationMethod.ObjectCreate));
-          break;
-
-        default:
-          break;
-      }
-    }
-    return instance;
+  public get objects(): Hittable[] {
+    return this._objects;
   }
 
   public clear(): void {
-    this.objects.length = 0;
+    this._objects.length = 0;
   }
 
   public add(object: Hittable): void {
-    this.objects.push(object);
+    this._objects.push(object);
   }
 
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
@@ -80,7 +31,7 @@ export class HittableList implements Hittable {
     let hit_anything = false;
     let closest_so_far = t_max;
 
-    for (const object of this.objects) {
+    for (const object of this._objects) {
       if (object.hit(r, t_min, closest_so_far, temp_rec)) {
         hit_anything = true;
         closest_so_far = temp_rec.t;
@@ -90,5 +41,26 @@ export class HittableList implements Hittable {
     }
 
     return hit_anything;
+  }
+
+  public boundingBox(outputBox: AABB): boolean {
+    if (this._objects.length === 0) {
+      return false;
+    }
+    const tempBox: AABB = new AABB();
+    let firstBox = true;
+    for (const object of this._objects) {
+      if (!object.boundingBox(tempBox)) {
+        return false;
+      }
+
+      if (firstBox) {
+        tempBox.copyTo(outputBox);
+      } else {
+        AABB.surroundingBox(outputBox, tempBox).copyTo(outputBox);
+      }
+      firstBox = false;
+    }
+    return true;
   }
 }

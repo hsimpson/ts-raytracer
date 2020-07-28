@@ -1,12 +1,10 @@
 import { randomNumber, randomNumberRange } from './util';
-import { autoserializeAs } from 'cerializr';
+import { serializable } from './serializing';
 
+@serializable
 export default class Vec3 {
-  @autoserializeAs(Number)
   public x = 0;
-  @autoserializeAs(Number)
   public y = 0;
-  @autoserializeAs(Number)
   public z = 0;
 
   public constructor(x?: number, y?: number, z?: number) {

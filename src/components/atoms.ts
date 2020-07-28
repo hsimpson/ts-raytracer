@@ -3,9 +3,9 @@ import { atom } from 'recoil';
 export const RaytracerProperties = atom({
   key: 'raytracerProperties',
   default: {
-    imageWidth: 640,
-    imageHeight: 360,
-    samplesPerPixel: 20,
+    imageWidth: 400,
+    imageHeight: 300,
+    samplesPerPixel: 1,
     maxBounces: 50,
     numOfWorkers: 1,
     webGPUavailable: false,

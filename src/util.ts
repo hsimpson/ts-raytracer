@@ -19,3 +19,16 @@ export function clamp(x: number, min: number, max: number): number {
   }
   return x;
 }
+
+export function randomInt(min: number, max: number): number {
+  // Returns a random integer in [min,max].
+  return Math.floor(randomNumberRange(min, max + 1));
+}
+
+export function sortArrayRange<T>(array: T[], start: number, end: number, compareFn: (a: T, b: T) => number): void {
+  array = [].concat(
+    ...array.slice(0, start),
+    ...array.slice(start, start + end).sort(compareFn),
+    ...array.slice(start + end, array.length)
+  );
+}

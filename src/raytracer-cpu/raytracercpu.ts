@@ -36,6 +36,22 @@ export default class RaytracerCPU extends RaytracerBase {
       imageData.data[i++] = 255;
     }
 
+    /*
+    for (let i = 0; i < this._imageHeight; i++) {
+      for (let j = 0; j < this._imageWidth; j++) {
+        let canvasIdx = (this._imageHeight - 1 - i) * (this._imageWidth + j);
+        canvasIdx *= 4;
+        let arrayIdx = i * this._imageWidth + j;
+        arrayIdx *= 3;
+
+        imageData.data[canvasIdx++] = msg.data.imageArray[arrayIdx++];
+        imageData.data[canvasIdx++] = msg.data.imageArray[arrayIdx++];
+        imageData.data[canvasIdx++] = msg.data.imageArray[arrayIdx++];
+        imageData.data[canvasIdx++] = 255;
+      }
+    }
+    */
+
     this._context2D.putImageData(imageData, 0, 0);
 
     const duration = performance.now() - this._startTime;
