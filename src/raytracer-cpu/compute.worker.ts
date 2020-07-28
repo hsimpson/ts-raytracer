@@ -58,9 +58,10 @@ const start = (msg: ComputeStartMessage): void => {
   const dataArray = new Uint8ClampedArray(imageWidth * scanlineCount * 3);
 
   let offset = 0;
-  const endLine = startLine + scanlineCount;
-  for (let j = startLine; j < endLine; j++) {
-    console.log(`worker[${_id}] scanlines remaining ${endLine - j}`);
+  const endLine = startLine + 1 - scanlineCount;
+  let linesToCalc = scanlineCount;
+  for (let j = startLine; j >= endLine; j--) {
+    console.log(`worker[${_id}] scanlines remaining ${linesToCalc--}`);
     for (let i = 0; i < imageWidth; i++) {
       let pixelColor = new Vec3(0, 0, 0);
 

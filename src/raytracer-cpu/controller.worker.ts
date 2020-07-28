@@ -33,17 +33,17 @@ const start = (msg: ControllerStartMessage): void => {
   const aspectRatio = msg.data.imageWidth / msg.data.imageHeight;
   const lookFrom = new Vec3(13, 2, 3);
   const lookAt = new Vec3(0, 0, 0);
-  const vUp = new Vec3(0, -1, 0);
-  //const vUp = new Vec3(0, 1, 0);
+  const vUp = new Vec3(0, 1, 0);
 
   const focusDist = 10;
   const aperture = 0.1;
+  //const aperture = 0.0;
   const fovY = 20;
   const camera = new Camera();
   camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist);
   const world = randomScene();
 
-  let startLine = 0;
+  let startLine = msg.data.imageHeight - 1;
   let availableLines = msg.data.imageHeight;
   const lineLoad = Math.ceil(availableLines / msg.data.computeWorkers);
 
@@ -68,7 +68,7 @@ const start = (msg: ControllerStartMessage): void => {
     computeWorker.postMessage(computeStartMessage);
     _computeWorkers.set(workerId, computeWorker);
     availableLines -= lineLoad;
-    startLine += lineLoad;
+    startLine -= lineLoad;
   }
 };
 
@@ -95,17 +95,21 @@ const workerIsDone = (msg: ComputeEndMessage): void => {
   const workerArray = msg.data.pixelArray;
   const scanlineCount = msg.data.scanlineCount;
   const startLine = msg.data.startLine;
+  //
 
-  let imageOffset = startLine * _imageWidth * 3;
+  //let imageOffset = (startLine + 1 - scanlineCount) * _imageWidth * 3;
+  let imageOffset = (_imageHeight - (startLine + 1)) * _imageWidth * 3;
   let dataOffset = 0;
-  const endLine = startLine + scanlineCount;
-  for (let j = startLine; j < endLine; j++) {
+  //const endLine = startLine + scanlineCount;
+  // if (id === 0) {
+  for (let j = 0; j < scanlineCount; j++) {
     for (let i = 0; i < _imageWidth; i++) {
       _array[imageOffset++] = workerArray[dataOffset++];
       _array[imageOffset++] = workerArray[dataOffset++];
       _array[imageOffset++] = workerArray[dataOffset++];
     }
   }
+  // }
 
   _computeWorkers.get(id).terminate();
   _computeWorkers.delete(id);
