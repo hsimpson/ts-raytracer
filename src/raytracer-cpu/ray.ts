@@ -4,8 +4,9 @@ import { HitRecord, Hittable } from './hittable';
 export default class Ray {
   private _orig: Vec3;
   private _dir: Vec3;
+  private _time: number;
 
-  public constructor(origin?: Vec3, direction?: Vec3) {
+  public constructor(origin?: Vec3, direction?: Vec3, time = 0.0) {
     if (origin) {
       this._orig = origin;
     }
@@ -13,11 +14,14 @@ export default class Ray {
     if (direction) {
       this._dir = direction;
     }
+
+    this._time = time;
   }
 
   public copyTo(dest: Ray): void {
     dest._orig = this._orig;
     dest._dir = this._dir;
+    dest._time = this._time;
   }
 
   public get origin(): Vec3 {
@@ -34,6 +38,10 @@ export default class Ray {
 
   public set direction(direction: Vec3) {
     this._dir = direction;
+  }
+
+  public get time(): number {
+    return this._time;
   }
 
   public at(t: number): Vec3 {

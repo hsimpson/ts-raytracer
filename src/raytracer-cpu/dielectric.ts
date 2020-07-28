@@ -30,19 +30,19 @@ export default class DielectricMaterial extends Material {
     const sin_theta = Math.sqrt(1 - cos_theta * cos_theta);
     if (etai_over_etat * sin_theta > 1) {
       const reflected = Vec3.reflect(unit_direction, rec.normal);
-      new Ray(rec.p, reflected).copyTo(scattered);
+      new Ray(rec.p, reflected, r_in.time).copyTo(scattered);
       return true;
     }
 
     const reflect_prob = this.schlick(cos_theta, etai_over_etat);
     if (randomNumber() < reflect_prob) {
       const reflected = Vec3.reflect(unit_direction, rec.normal);
-      new Ray(rec.p, reflected).copyTo(scattered);
+      new Ray(rec.p, reflected, r_in.time).copyTo(scattered);
       return true;
     }
 
     const refracted = Vec3.refract(unit_direction, rec.normal, etai_over_etat);
-    new Ray(rec.p, refracted).copyTo(scattered);
+    new Ray(rec.p, refracted, r_in.time).copyTo(scattered);
     return true;
   }
 }

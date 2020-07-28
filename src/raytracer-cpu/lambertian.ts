@@ -14,7 +14,7 @@ export default class LambertianMaterial extends Material {
 
   public scatter(r_in: Ray, rec: HitRecord, attenuation: Vec3, scattered: Ray): boolean {
     const scatter_direction = Vec3.addVec3(rec.normal, Vec3.randomUnitVector());
-    new Ray(rec.p, scatter_direction).copyTo(scattered);
+    new Ray(rec.p, scatter_direction, r_in.time).copyTo(scattered);
     this.albedo.copyTo(attenuation);
     return true;
   }

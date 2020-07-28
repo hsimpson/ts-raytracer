@@ -1,16 +1,17 @@
 import Camera from '../camera';
-import { HittableList } from './hittablelist';
-import { rayColor } from './ray';
+import { deserialize } from '../serializing/deserialize';
 import { randomNumber } from '../util';
 import Vec3 from '../vec3';
-import { ComputeCommands, ComputeEndMessage, ComputeStartMessage, WorkerMessage } from './workerinterfaces';
-import { deserialize } from '../serializing/deserialize';
-import Sphere from './sphere';
+import AABB from './aabb';
+import BVHNode from './bvhnode';
+import DielectricMaterial from './dielectric';
+import { HittableList } from './hittablelist';
 import LambertianMaterial from './lambertian';
 import MetalMaterial from './metal';
-import DielectricMaterial from './dielectric';
-import BVHNode from './bvhnode';
-import AABB from './aabb';
+import MovingSphere from './movingsphere';
+import { rayColor } from './ray';
+import Sphere from './sphere';
+import { ComputeCommands, ComputeEndMessage, ComputeStartMessage, WorkerMessage } from './workerinterfaces';
 
 const _controllerCtx: Worker = self as never;
 let _id: number;
@@ -20,6 +21,7 @@ const map = {
   metalMaterial: MetalMaterial,
   dielectricMaterial: DielectricMaterial,
   sphere: Sphere,
+  movingSphere: MovingSphere,
   bvhNode: BVHNode,
   aabb: AABB,
 };

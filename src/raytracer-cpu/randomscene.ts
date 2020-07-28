@@ -4,6 +4,7 @@ import { HittableList } from './hittablelist';
 import LambertianMaterial from './lambertian';
 import MetalMaterial from './metal';
 import Sphere from './sphere';
+import MovingSphere from './movingsphere';
 import { randomNumber, randomNumberRange } from '../util';
 import Vec3 from '../vec3';
 import BVHNode from './bvhnode';
@@ -24,20 +25,22 @@ export default function randomScene(): HittableList {
         let sphereMaterial: Material;
 
         if (chooseMat < 0.8) {
-          // diffuse
+          // diffuse aka lambertian
           const albedo = Vec3.multVec3(Vec3.random(), Vec3.random());
+          const center2 = Vec3.addVec3(center, new Vec3(0, randomNumberRange(0, 0.5), 0));
           sphereMaterial = new LambertianMaterial(albedo);
+          world.add(new MovingSphere(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
         } else if (chooseMat < 0.95) {
           // metal
           const albedo = Vec3.randomRange(0.5, 1);
           const roughness = randomNumberRange(0, 0.5);
           sphereMaterial = new MetalMaterial(albedo, roughness);
+          world.add(new Sphere(center, 0.2, sphereMaterial));
         } else {
           // glass
           sphereMaterial = new DielectricMaterial(1.5);
+          world.add(new Sphere(center, 0.2, sphereMaterial));
         }
-
-        world.add(new Sphere(center, 0.2, sphereMaterial));
       }
     }
   }

@@ -1,6 +1,6 @@
 import Vec3 from './vec3';
 import Ray from './raytracer-cpu/ray';
-import { degreeToRadians } from './util';
+import { degreeToRadians, randomNumberRange } from './util';
 import { serializable } from './serializing';
 
 export interface CameraOptions {
@@ -23,6 +23,8 @@ export default class Camera {
   private v: Vec3;
   private w: Vec3;
   private lenseRadius: number;
+  private time0: number;
+  private time1: number;
 
   public constructor() {
     //
@@ -35,7 +37,9 @@ export default class Camera {
     fovY: number,
     aspectRatio: number,
     aperture: number,
-    focusDist: number
+    focusDist: number,
+    t0 = 0,
+    t1 = 0
   ): void {
     const theta = degreeToRadians(fovY);
     const h = Math.tan(theta / 2);
@@ -61,6 +65,8 @@ export default class Camera {
     );
 
     this.lenseRadius = aperture / 2;
+    this.time0 = t0;
+    this.time1 = t1;
   }
 
   public getRay(s: number, t: number): Ray {
@@ -75,7 +81,8 @@ export default class Camera {
 
     return new Ray(
       Vec3.addVec3(this.lookFrom, offset),
-      Vec3.subVec3(Vec3.subVec3(Vec3.addVec3(Vec3.addVec3(this.lowerLeftCorner, sHor), tVer), this.lookFrom), offset)
+      Vec3.subVec3(Vec3.subVec3(Vec3.addVec3(Vec3.addVec3(this.lowerLeftCorner, sHor), tVer), this.lookFrom), offset),
+      randomNumberRange(this.time0, this.time1)
     );
   }
 

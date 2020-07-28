@@ -40,7 +40,8 @@ const start = (msg: ControllerStartMessage): void => {
   //const aperture = 0.0;
   const fovY = 20;
   const camera = new Camera();
-  camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist);
+  //camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist, 0.0, 1.0);
+  camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist, 0.0, 0.0);
   const world = randomScene();
 
   let startLine = msg.data.imageHeight - 1;
