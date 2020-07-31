@@ -8,11 +8,16 @@ import MovingSphere from './movingsphere';
 import { randomNumber, randomNumberRange } from '../util';
 import Vec3 from '../vec3';
 import BVHNode from './bvhnode';
+import { CheckerTexture } from './texture';
 
 export default function randomScene(): HittableList {
   const world = new HittableList();
 
-  const groundMaterial = new LambertianMaterial(new Vec3(0.5, 0.5, 0.5));
+  //const groundMaterial = new LambertianMaterial(new Vec3(0.5, 0.5, 0.5));
+  const checkerTexture = new CheckerTexture(new Vec3(0.2, 0.3, 0.1), new Vec3(0.9, 0.9, 0.9));
+  const groundMaterial = new LambertianMaterial();
+  groundMaterial.texture = checkerTexture;
+
   world.add(new Sphere(new Vec3(0, -1000, 0), 1000, groundMaterial));
   // let i = 1;
   for (let a = -11; a < 11; a++) {
@@ -27,9 +32,10 @@ export default function randomScene(): HittableList {
         if (chooseMat < 0.8) {
           // diffuse aka lambertian
           const albedo = Vec3.multVec3(Vec3.random(), Vec3.random());
-          const center2 = Vec3.addVec3(center, new Vec3(0, randomNumberRange(0, 0.5), 0));
           sphereMaterial = new LambertianMaterial(albedo);
-          world.add(new MovingSphere(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
+          //const center2 = Vec3.addVec3(center, new Vec3(0, randomNumberRange(0, 0.5), 0));
+          //world.add(new MovingSphere(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
+          world.add(new Sphere(center, 0.2, sphereMaterial));
         } else if (chooseMat < 0.95) {
           // metal
           const albedo = Vec3.randomRange(0.5, 1);

@@ -11,6 +11,7 @@ import MetalMaterial from './metal';
 import MovingSphere from './movingsphere';
 import { rayColor } from './ray';
 import Sphere from './sphere';
+import { SolidColor, CheckerTexture } from './texture';
 import { ComputeCommands, ComputeEndMessage, ComputeStartMessage, WorkerMessage } from './workerinterfaces';
 
 const _controllerCtx: Worker = self as never;
@@ -24,6 +25,8 @@ const map = {
   movingSphere: MovingSphere,
   bvhNode: BVHNode,
   aabb: AABB,
+  checkerTexture: CheckerTexture,
+  solidTexture: SolidColor,
 };
 
 const writeColor = (array: Uint8ClampedArray, offset: number, color: Vec3, ssp: number): void => {

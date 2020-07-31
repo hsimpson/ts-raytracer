@@ -5,6 +5,14 @@ import Vec3 from '../vec3';
 import AABB from './aabb';
 import { serializable } from '../serializing';
 
+function getSphereUV(p: Vec3): { u: number; v: number } {
+  const phi = Math.atan2(p.z, p.x);
+  const theta = Math.asin(p.y);
+  const u = 1 - (phi + Math.PI) / (2 * Math.PI);
+  const v = (theta + Math.PI / 2) / Math.PI;
+  return { u, v };
+}
+
 @serializable
 export default class Sphere extends Hittable {
   private center: Vec3;
@@ -33,6 +41,9 @@ export default class Sphere extends Hittable {
         rec.p = r.at(rec.t);
         const outward_normal = Vec3.divScalarVec(Vec3.subVec3(rec.p, this.center), this.radius);
         rec.set_face_normal(r, outward_normal);
+        const uv = getSphereUV(Vec3.divScalarVec(Vec3.subVec3(rec.p, this.center), this.radius));
+        rec.u = uv.u;
+        rec.v = uv.v;
         rec.mat = this.mat;
         return true;
       }
@@ -42,6 +53,9 @@ export default class Sphere extends Hittable {
         rec.p = r.at(rec.t);
         const outward_normal = Vec3.divScalarVec(Vec3.subVec3(rec.p, this.center), this.radius);
         rec.set_face_normal(r, outward_normal);
+        const uv = getSphereUV(Vec3.divScalarVec(Vec3.subVec3(rec.p, this.center), this.radius));
+        rec.u = uv.u;
+        rec.v = uv.v;
         rec.mat = this.mat;
         return true;
       }

@@ -7,6 +7,8 @@ export class HitRecord {
   public p: Vec3 = new Vec3();
   public normal: Vec3 = new Vec3();
   public t = 0;
+  public u = 0;
+  public v = 0;
   public front_face = true;
   public mat: Material;
 
@@ -19,6 +21,8 @@ export class HitRecord {
     dest.p = this.p;
     dest.normal = this.normal;
     dest.t = this.t;
+    dest.u = this.u;
+    dest.v = this.v;
     dest.front_face = this.front_face;
     dest.mat = this.mat;
   }
