@@ -1,0 +1,26 @@
+Bugs:
+  Serializer:
+    ☐ Do not work in production/uglified code due to classnames
+
+  GPU:
+    ☐ Missing pixels when width or height is not devidable by fixed worksize devisor (8)
+    ☐ Uncaught in Promise->on heavy GPU frame load
+    ☐ Adapt new WebGPU Buffer Spec see: https://hackmd.io/szV68rOVQ56GYzPJMBko8A
+  
+  GUI:
+    ☐ Reset to default disable WebGPU -> probably check again
+    
+
+Features:
+  GPU:
+    ☐ Add BVH
+    ☐ Add motion blur
+    ☐ Add textures (solid and checkerboard)
+    ☐ Optional frame seperation like Blender Cycles with e.g. hilbert spiral
+    ☐ Cancel GPU rendering
+
+  CPU:
+    ☐ Add progressive rendering like on GPU show each sample image
+
+  Common:
+    ☐ Add favicon

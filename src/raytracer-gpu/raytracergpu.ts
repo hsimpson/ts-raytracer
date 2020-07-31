@@ -107,24 +107,24 @@ export default class RaytracerGPU extends RaytracerBase {
 
     const raytracing = async (): Promise<void> => {
       return new Promise((resolve) => {
-        let sample = 0;
+        let sample = 1;
         let prevTime = performance.now();
         const frame = (): void => {
           const currentTime = performance.now();
           console.log(`duration: ${(currentTime - prevTime).toFixed(3)} ms`);
           prevTime = currentTime;
-          console.log(`Sample pass ${sample + 1} of ${this._samplesPerPixel}`);
+          console.log(`Sample pass ${sample} of ${this._samplesPerPixel}`);
 
           // async without render pipeline
           // const lastframe = sample === this._samplesPerPixel;
           this.compute(computePipeline, true).then((rayTracedArray) => {
-            sample++;
-            if (sample <= this._samplesPerPixel) {
+            for (let j = 0; j <= rayTracedArray.length; j++) {
+              imageData.data[j] = (rayTracedArray[j] / sample) * 255;
+            }
+            this._context2D.putImageData(imageData, 0, 0);
+            if (sample < this._samplesPerPixel) {
+              sample++;
               window.requestAnimationFrame(frame);
-              for (let j = 0; j <= rayTracedArray.length; j++) {
-                imageData.data[j] = (rayTracedArray[j] / sample) * 255;
-              }
-              this._context2D.putImageData(imageData, 0, 0);
             } else {
               resolve();
             }
@@ -216,7 +216,7 @@ export default class RaytracerGPU extends RaytracerBase {
     array.push(...this.createSphere(new Vec3(0.0, -1000, 0.0), 1000, 0.5, new Vec3(0.5, 0.5, 0.5), 0.0, 1.0));
     array.push(...this.createSphere(new Vec3(0.0, 1.0, 0.0), 1.0, 1.0, new Vec3(1.0, 1.0, 1.0), 1.0, 1.5));
     array.push(...this.createSphere(new Vec3(-4.0, 1.0, 0.0), 1.0, 0.5, new Vec3(0.4, 0.2, 0.1), 0.0, 1.0));
-    array.push(...this.createSphere(new Vec3(4.0, 1.0, 0.0), 1.0, 0.9, new Vec3(0.7, 0.7, 0.5), 0.0, 1.0));
+    array.push(...this.createSphere(new Vec3(4.0, 1.0, 0.0), 1.0, 0.9, new Vec3(0.7, 0.6, 0.5), 0.0, 1.0));
 
     for (let a = -11; a < 11; a++) {
       for (let b = -11; b < 11; b++) {
@@ -255,7 +255,6 @@ export default class RaytracerGPU extends RaytracerBase {
       const passEncoder = commandEncoder.beginComputePass();
       passEncoder.setPipeline(computePipeline.gpuPipeline);
       passEncoder.setBindGroup(0, computePipeline.bindGroup);
-      // passEncoder.dispatch(this._imageWidth * this._imageHeight, 1, 1);
       passEncoder.dispatch(this._imageWidth / 8, this._imageHeight / 8, 1);
       passEncoder.endPass();
 

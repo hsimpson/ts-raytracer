@@ -25,11 +25,13 @@ const Gui = (): React.ReactElement => {
       <NumberInput
         label="Image width:"
         size={5}
+        min={1}
         value={raytracerState.imageWidth}
         onValueChange={(imageWidth) => setRaytracerState({ ...raytracerState, imageWidth })}></NumberInput>
       <NumberInput
         label="Image height:"
         size={5}
+        min={1}
         value={raytracerState.imageHeight}
         onValueChange={(imageHeight) => setRaytracerState({ ...raytracerState, imageHeight })}></NumberInput>
       <NumberInput
