@@ -11,7 +11,7 @@ import {
 import Vec3 from '../vec3';
 import Camera from '../camera';
 import { HittableList } from './hittablelist';
-import randomScene from './randomscene';
+import { randomScene, twoSpheres } from './scenes';
 import { serialize } from '../serializing';
 
 const _controllerCtx: Worker = self as never;
@@ -31,18 +31,45 @@ const start = (msg: ControllerStartMessage): void => {
   _array = new Uint8ClampedArray(_imageWidth * _imageHeight * 3);
 
   const aspectRatio = msg.data.imageWidth / msg.data.imageHeight;
-  const lookFrom = new Vec3(13, 2, 3);
-  const lookAt = new Vec3(0, 0, 0);
-  const vUp = new Vec3(0, 1, 0);
+  let lookFrom: Vec3;
+  let lookAt: Vec3;
 
   const focusDist = 10;
-  const aperture = 0.1;
+  let aperture = 0.0;
   //const aperture = 0.0;
-  const fovY = 20;
+  //const fovY = 20;
+  let fovY = 40;
+
+  let world: HittableList;
+
+  let scene: number;
+  // eslint-disable-next-line prefer-const
+  scene = 1;
+
+  switch (scene) {
+    case 1:
+      world = randomScene();
+      lookFrom = new Vec3(13, 2, 3);
+      lookAt = new Vec3(0, 0, 0);
+      fovY = 20.0;
+      aperture = 0.1;
+      break;
+
+    case 2:
+      world = twoSpheres();
+      lookFrom = new Vec3(13, 2, 3);
+      lookAt = new Vec3(0, 0, 0);
+      fovY = 20.0;
+      break;
+
+    default:
+      break;
+  }
+
   const camera = new Camera();
+  const vUp = new Vec3(0, 1, 0);
   //camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist, 0.0, 1.0);
   camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist, 0.0, 0.0);
-  const world = randomScene();
 
   let startLine = msg.data.imageHeight - 1;
   let availableLines = msg.data.imageHeight;

@@ -10,7 +10,20 @@ import Vec3 from '../vec3';
 import BVHNode from './bvhnode';
 import { CheckerTexture } from './texture';
 
-export default function randomScene(): HittableList {
+export function twoSpheres(): HittableList {
+  const objects = new HittableList();
+
+  const checkerTexture = new CheckerTexture(new Vec3(0.2, 0.3, 0.1), new Vec3(0.9, 0.9, 0.9));
+  const sphereMaterial = new LambertianMaterial();
+  sphereMaterial.texture = checkerTexture;
+
+  objects.add(new Sphere(new Vec3(0, -10, 0), 10, sphereMaterial));
+  objects.add(new Sphere(new Vec3(0, 10, 0), 10, sphereMaterial));
+
+  return objects;
+}
+
+export function randomScene(): HittableList {
   const world = new HittableList();
 
   //const groundMaterial = new LambertianMaterial(new Vec3(0.5, 0.5, 0.5));
