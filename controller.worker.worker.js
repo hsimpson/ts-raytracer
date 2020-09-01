@@ -102,10 +102,11 @@ eval("\nvar __importDefault = (this && this.__importDefault) || function (mod) {
 /*!**************************************************************************************!*\
   !*** ./node_modules/worker-loader/dist/cjs.js!./src/raytracer-cpu/compute.worker.ts ***!
   \**************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-eval("module.exports = function() {\n  return new Worker(__webpack_require__.p + \"84eec4462dba4211b0ea.worker.js\");\n};\n\n//# sourceURL=webpack:///./src/raytracer-cpu/compute.worker.ts?./node_modules/worker-loader/dist/cjs.js");
+"use strict";
+eval("__webpack_require__.r(__webpack_exports__);\n/* harmony default export */ __webpack_exports__[\"default\"] = (function() {\n  return new Worker(__webpack_require__.p + \"compute.worker.worker.worker.js\");\n});\n\n\n//# sourceURL=webpack:///./src/raytracer-cpu/compute.worker.ts?./node_modules/worker-loader/dist/cjs.js");
 
 /***/ }),
 
@@ -297,7 +298,7 @@ eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nexport
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-eval("\nvar __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {\n    if (k2 === undefined) k2 = k;\n    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });\n}) : (function(o, m, k, k2) {\n    if (k2 === undefined) k2 = k;\n    o[k2] = m[k];\n}));\nvar __exportStar = (this && this.__exportStar) || function(m, exports) {\n    for (var p in m) if (p !== \"default\" && !exports.hasOwnProperty(p)) __createBinding(exports, m, p);\n};\nObject.defineProperty(exports, \"__esModule\", { value: true });\n__exportStar(__webpack_require__(/*! ./interfaces */ \"./src/serializing/interfaces.ts\"), exports);\n__exportStar(__webpack_require__(/*! ./serialize */ \"./src/serializing/serialize.ts\"), exports);\n__exportStar(__webpack_require__(/*! ./deserialize */ \"./src/serializing/deserialize.ts\"), exports);\n__exportStar(__webpack_require__(/*! ./decorators */ \"./src/serializing/decorators.ts\"), exports);\n\n\n//# sourceURL=webpack:///./src/serializing/index.ts?");
+eval("\nvar __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {\n    if (k2 === undefined) k2 = k;\n    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });\n}) : (function(o, m, k, k2) {\n    if (k2 === undefined) k2 = k;\n    o[k2] = m[k];\n}));\nvar __exportStar = (this && this.__exportStar) || function(m, exports) {\n    for (var p in m) if (p !== \"default\" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);\n};\nObject.defineProperty(exports, \"__esModule\", { value: true });\n__exportStar(__webpack_require__(/*! ./interfaces */ \"./src/serializing/interfaces.ts\"), exports);\n__exportStar(__webpack_require__(/*! ./serialize */ \"./src/serializing/serialize.ts\"), exports);\n__exportStar(__webpack_require__(/*! ./deserialize */ \"./src/serializing/deserialize.ts\"), exports);\n__exportStar(__webpack_require__(/*! ./decorators */ \"./src/serializing/decorators.ts\"), exports);\n\n\n//# sourceURL=webpack:///./src/serializing/index.ts?");
 
 /***/ }),
 
