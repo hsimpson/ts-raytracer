@@ -5,7 +5,7 @@ Bugs:
   GPU:
     ☐ Missing pixels when width or height is not devidable by fixed worksize devisor (8)
     ☐ Uncaught in Promise->on heavy GPU frame load
-    ☐ Adapt new WebGPU Buffer Spec see: https://hackmd.io/szV68rOVQ56GYzPJMBko8A
+    ✔ Adapt new WebGPU Buffer Spec see: https://hackmd.io/szV68rOVQ56GYzPJMBko8A @done(20-09-01 21:33)
   
   GUI:
     ☐ Reset to default disable WebGPU -> probably check again
@@ -13,7 +13,7 @@ Bugs:
 
 Features:
   GPU:
-    ☐ Add BVH
+    ☐ Add acceleration data stucture like BVH (https://research.nvidia.com/sites/default/files/pubs/2012-06_Maximizing-Parallelism-in/karras2012hpg_paper.pdf)
     ☐ Add motion blur
     ☐ Add textures (solid and checkerboard)
     ☐ Optional frame seperation like Blender Cycles with e.g. hilbert spiral

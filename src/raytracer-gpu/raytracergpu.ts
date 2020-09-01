@@ -276,7 +276,8 @@ export default class RaytracerGPU extends RaytracerBase {
       );
       this._webGPUContext.queue.submit([commandEncoder.finish()]);
 
-      const arrayBuffer = await gpuReadBuffer.mapReadAsync();
+      await gpuReadBuffer.mapAsync(GPUMapMode.READ);
+      const arrayBuffer = gpuReadBuffer.getMappedRange();
 
       return new Float32Array(arrayBuffer);
     } else {
