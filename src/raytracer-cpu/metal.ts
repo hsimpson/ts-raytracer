@@ -16,7 +16,7 @@ export default class MetalMaterial extends Material {
   }
 
   public scatter(r_in: Ray, rec: HitRecord, attenuation: Vec3, scattered: Ray): boolean {
-    const reflect = Vec3.reflect(Vec3.unit_vector(r_in.direction), rec.normal);
+    const reflect = Vec3.reflect(Vec3.unitVector(r_in.direction), rec.normal);
 
     new Ray(
       rec.p,

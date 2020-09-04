@@ -122,7 +122,7 @@ export default class Vec3 {
       u.x * v.y - u.y * v.x);
   }
 
-  public static unit_vector(v: Vec3): Vec3 {
+  public static unitVector(v: Vec3): Vec3 {
     return Vec3.divScalarVec(v, v.length());
   }
 

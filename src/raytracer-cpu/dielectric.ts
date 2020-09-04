@@ -24,7 +24,7 @@ export default class DielectricMaterial extends Material {
     attenuation.set(1.0, 1.0, 1.0);
     const etai_over_etat = rec.front_face ? 1 / this._refIdx : this._refIdx;
 
-    const unit_direction = Vec3.unit_vector(r_in.direction);
+    const unit_direction = Vec3.unitVector(r_in.direction);
 
     const cos_theta = Math.min(Vec3.dot(unit_direction.negate(), rec.normal), 1);
     const sin_theta = Math.sqrt(1 - cos_theta * cos_theta);

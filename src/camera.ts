@@ -46,8 +46,8 @@ export default class Camera {
     const viewport_height = 2 * h;
     const viewport_width = aspectRatio * viewport_height;
 
-    this.w = Vec3.unit_vector(Vec3.subVec3(lookFrom, lookAt));
-    this.u = Vec3.unit_vector(Vec3.cross(vUp, this.w));
+    this.w = Vec3.unitVector(Vec3.subVec3(lookFrom, lookAt));
+    this.u = Vec3.unitVector(Vec3.cross(vUp, this.w));
     this.v = Vec3.cross(this.w, this.u);
 
     this.lookFrom = lookFrom;

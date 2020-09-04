@@ -66,7 +66,7 @@ export function rayColor(r: Ray, world: Hittable, depth: number): Vec3 {
     return new Vec3(0, 0, 0);
   }
 
-  const unit_direction = Vec3.unit_vector(r.direction);
+  const unit_direction = Vec3.unitVector(r.direction);
   const t = 0.5 * (unit_direction.y + 1);
   const color1 = Vec3.multScalarVec3(new Vec3(1, 1, 1), 1 - t);
   const color2 = Vec3.multScalarVec3(new Vec3(0.5, 0.7, 1.0), t);
