@@ -42,11 +42,7 @@ const start = (msg: ControllerStartMessage): void => {
 
   let world: HittableList;
 
-  let scene: number;
-  // eslint-disable-next-line prefer-const
-  scene = 1;
-
-  switch (scene) {
+  switch (msg.data.scene) {
     case 1:
       world = randomScene();
       lookFrom = new Vec3(13, 2, 3);

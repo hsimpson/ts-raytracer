@@ -1,5 +1,3 @@
-import Camera from '../camera';
-import { HittableList } from './hittablelist';
 import { JsonObject } from '../serializing';
 
 export enum ControllerCommands {
@@ -29,6 +27,7 @@ export interface ControllerStartMessage extends WorkerMessage {
     samplesPerPixel: number;
     maxBounces: number;
     computeWorkers: number;
+    scene: number;
   };
 }
 

@@ -18,9 +18,10 @@ export default class RaytracerCPU extends RaytracerBase {
     imageHeight: number,
     samplesPerPixel: number,
     maxBounces: number,
+    scene: number,
     private _numOfWorkers: number
   ) {
-    super(canvas, imageWidth, imageHeight, samplesPerPixel, maxBounces);
+    super(canvas, imageWidth, imageHeight, samplesPerPixel, maxBounces, scene);
     this._controllerWorker = new ControllerWorker();
   }
 
@@ -80,6 +81,7 @@ export default class RaytracerCPU extends RaytracerBase {
         samplesPerPixel: this._samplesPerPixel,
         maxBounces: this._maxBounces,
         computeWorkers: this._numOfWorkers,
+        scene: this._scene,
       },
     };
 

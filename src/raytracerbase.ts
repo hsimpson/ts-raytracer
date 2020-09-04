@@ -10,7 +10,8 @@ export abstract class RaytracerBase {
     protected _imageWidth: number,
     protected _imageHeight: number,
     protected _samplesPerPixel: number,
-    protected _maxBounces: number
+    protected _maxBounces: number,
+    protected _scene: number
   ) {}
 
   public abstract async start(doneCallback?: DoneCallback): Promise<void>;
@@ -48,5 +49,9 @@ export abstract class RaytracerBase {
 
   public set maxBounces(maxBounces: number) {
     this._maxBounces = maxBounces;
+  }
+
+  public set scene(scene: number) {
+    this._scene = scene;
   }
 }

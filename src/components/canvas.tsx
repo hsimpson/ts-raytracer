@@ -24,6 +24,7 @@ const Canvas = (): React.ReactElement => {
       raytracerState.imageHeight,
       raytracerState.samplesPerPixel,
       raytracerState.maxBounces,
+      raytracerState.scene,
       raytracerState.numOfWorkers
     );
 
@@ -33,7 +34,8 @@ const Canvas = (): React.ReactElement => {
         raytracerState.imageWidth,
         raytracerState.imageHeight,
         raytracerState.samplesPerPixel,
-        raytracerState.maxBounces
+        raytracerState.maxBounces,
+        raytracerState.scene
       );
     }
 
@@ -45,6 +47,7 @@ const Canvas = (): React.ReactElement => {
     rayTracerCPURef.current.imageHeight = raytracerState.imageHeight;
     rayTracerCPURef.current.samplesPerPixel = raytracerState.samplesPerPixel;
     rayTracerCPURef.current.maxBounces = raytracerState.maxBounces;
+    rayTracerCPURef.current.scene = raytracerState.scene;
     rayTracerCPURef.current.numOfWorkers = raytracerState.numOfWorkers;
 
     if (rayTracerGPURef.current) {
@@ -52,6 +55,7 @@ const Canvas = (): React.ReactElement => {
       rayTracerGPURef.current.imageHeight = raytracerState.imageHeight;
       rayTracerGPURef.current.samplesPerPixel = raytracerState.samplesPerPixel;
       rayTracerGPURef.current.maxBounces = raytracerState.maxBounces;
+      rayTracerGPURef.current.scene = raytracerState.scene;
     }
   }, [raytracerState]);
 

@@ -23,9 +23,10 @@ export default class RaytracerGPU extends RaytracerBase {
     imageWidth: number,
     imageHeight: number,
     samplesPerPixel: number,
-    maxBounces: number
+    maxBounces: number,
+    scene: number
   ) {
-    super(canvas, imageWidth, imageHeight, samplesPerPixel, maxBounces);
+    super(canvas, imageWidth, imageHeight, samplesPerPixel, maxBounces, scene);
   }
 
   public static supportsWebGPU(): boolean {

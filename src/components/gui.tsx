@@ -1,9 +1,10 @@
 import React from 'react';
-import NumberInput from './input';
-import CheckBox from './checkbox';
-import { RaytracerProperties } from './atoms';
 import { useRecoilState, useResetRecoilState } from 'recoil';
 import RaytracerGPU from '../raytracer-gpu/raytracergpu';
+import { RaytracerProperties } from './atoms';
+import CheckBox from './checkbox';
+import NumberInput from './input';
+import { DropDownItem, DropDown } from './dropdown';
 
 const Gui = (): React.ReactElement => {
   const [raytracerState, setRaytracerState] = useRecoilState(RaytracerProperties);
@@ -19,6 +20,12 @@ const Gui = (): React.ReactElement => {
   const onReset = (): void => {
     resetRaytracerState();
   };
+
+  const sceneConfig: DropDownItem[] = [
+    { text: 'Random Spheres', value: 1 },
+    { text: '2 Checkboard spheres', value: 2 },
+    { text: '2 Perlin noise spheres', value: 3 },
+  ];
 
   return (
     <div className="gui">
@@ -62,6 +69,11 @@ const Gui = (): React.ReactElement => {
         checked={raytracerState.webGPUenabled}
         disabled={!raytracerState.webGPUavailable}
         onValueChange={(webGPUenabled) => setRaytracerState({ ...raytracerState, webGPUenabled })}></CheckBox>
+      <DropDown
+        label="Scene:"
+        disabled={raytracerState.webGPUenabled}
+        items={sceneConfig}
+        onValueChange={(scene) => setRaytracerState({ ...raytracerState, scene })}></DropDown>
       <button className="resetButton" onClick={onReset}>
         Reset to default
       </button>

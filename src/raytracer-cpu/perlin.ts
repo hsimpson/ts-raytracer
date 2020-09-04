@@ -1,6 +1,6 @@
-import { randomNumber, randomInt } from '../util';
-import Vec3 from '../vec3';
 import { serializable } from '../serializing';
+import { randomInt } from '../util';
+import Vec3 from '../vec3';
 
 @serializable
 export default class Perlin {

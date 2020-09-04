@@ -30,7 +30,8 @@ body {
 }
 
 .input,
-.checkbox {
+.checkbox,
+.dropdown {
   display: flex;
   flex-direction: row;
   padding: 5px;
@@ -41,7 +42,8 @@ body {
   color: #909090;
 }
 
-.input > input {
+.input > input,
+.dropdown > select {
   margin-left: 5px;
 }
 
