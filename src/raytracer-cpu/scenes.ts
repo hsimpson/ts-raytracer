@@ -8,7 +8,7 @@ import MovingSphere from './movingsphere';
 import { randomNumber, randomNumberRange } from '../util';
 import Vec3 from '../vec3';
 import BVHNode from './bvhnode';
-import { CheckerTexture } from './texture';
+import { CheckerTexture, NoiseTexture } from './texture';
 
 export function twoSpheres(): HittableList {
   const objects = new HittableList();
@@ -19,6 +19,19 @@ export function twoSpheres(): HittableList {
 
   objects.add(new Sphere(new Vec3(0, -10, 0), 10, sphereMaterial));
   objects.add(new Sphere(new Vec3(0, 10, 0), 10, sphereMaterial));
+
+  return objects;
+}
+
+export function twoPerlinSpheres(): HittableList {
+  const objects = new HittableList();
+
+  const perlinTexture = new NoiseTexture(4);
+  const sphereMaterial = new LambertianMaterial();
+  sphereMaterial.texture = perlinTexture;
+
+  objects.add(new Sphere(new Vec3(0, -1000, 0), 1000, sphereMaterial));
+  objects.add(new Sphere(new Vec3(0, 2, 0), 2, sphereMaterial));
 
   return objects;
 }

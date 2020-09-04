@@ -1,5 +1,6 @@
 import Vec3 from '../vec3';
 import { serializable } from '../serializing';
+import Perlin from './perlin';
 
 export abstract class Texture {
   public abstract value(u: number, v: number, p: Vec3): Vec3;
@@ -37,5 +38,30 @@ export class CheckerTexture extends Texture {
     } else {
       return this._even.value(u, v, p);
     }
+  }
+}
+
+@serializable
+export class NoiseTexture extends Texture {
+  private _noise = new Perlin();
+  private _scale: number;
+
+  public constructor(scale: number) {
+    super();
+    this._scale = scale;
+  }
+
+  public value(u: number, v: number, p: Vec3): Vec3 {
+    // return Vec3.multScalarVec3(
+    //   Vec3.multScalarVec3(new Vec3(1, 1, 1), 0.5),
+    //   1.0 + this._noise.noise(Vec3.multScalarVec3(p, this._scale))
+    // );
+
+    //return Vec3.multScalarVec3(new Vec3(1, 1, 1), this._noise.turb(Vec3.multScalarVec3(p, this._scale)));
+
+    return Vec3.multScalarVec3(
+      Vec3.multScalarVec3(new Vec3(1, 1, 1), 0.5),
+      1.0 + Math.sin(this._scale * p.z + 10 * this._noise.turb(p))
+    );
   }
 }
