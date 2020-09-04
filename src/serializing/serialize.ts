@@ -9,7 +9,10 @@ function _serialize<T>(type: SerializableType<T>, instance: T): JsonObject | nul
     const v = instance[k];
     if (Array.isArray(v)) {
       target[k] = v.map((val) => {
-        return _serialize(val.constructor, val);
+        if (typeof val === 'object') {
+          return _serialize(val.constructor, val);
+        }
+        return val;
       });
     } else if (typeof v === 'object') {
       target[k] = _serialize(v.constructor, v);
