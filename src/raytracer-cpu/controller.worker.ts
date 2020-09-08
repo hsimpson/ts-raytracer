@@ -11,7 +11,7 @@ import {
 import Vec3 from '../vec3';
 import Camera from '../camera';
 import { HittableList } from './hittablelist';
-import { randomScene, twoSpheres, twoPerlinSpheres, earthSphere } from './scenes';
+import { randomScene, twoSpheres, twoPerlinSpheres, earthSphere, simpleLight, cornellBox } from './scenes';
 import { serialize } from '../serializing';
 
 const _controllerCtx: Worker = self as never;
@@ -39,12 +39,14 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
   //const aperture = 0.0;
   //const fovY = 20;
   let fovY = 40;
+  let background = new Vec3(0, 0, 0);
 
   let world: HittableList;
 
   switch (msg.data.scene) {
     case 1:
       world = randomScene();
+      background = new Vec3(0.7, 0.8, 1.0);
       lookFrom = new Vec3(13, 2, 3);
       lookAt = new Vec3(0, 0, 0);
       fovY = 20.0;
@@ -53,6 +55,7 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
 
     case 2:
       world = twoSpheres();
+      background = new Vec3(0.7, 0.8, 1.0);
       lookFrom = new Vec3(13, 2, 3);
       lookAt = new Vec3(0, 0, 0);
       fovY = 20.0;
@@ -60,6 +63,7 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
 
     case 3:
       world = twoPerlinSpheres();
+      background = new Vec3(0.7, 0.8, 1.0);
       lookFrom = new Vec3(13, 2, 3);
       lookAt = new Vec3(0, 0, 0);
       fovY = 20.0;
@@ -67,12 +71,30 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
 
     case 4:
       world = await earthSphere();
+      background = new Vec3(0.7, 0.8, 1.0);
       lookFrom = new Vec3(13, 2, 3);
       lookAt = new Vec3(0, 0, 0);
       fovY = 20.0;
       break;
 
+    case 5:
+      world = simpleLight();
+      background = new Vec3(0, 0, 0);
+      lookFrom = new Vec3(26, 3, 6);
+      lookAt = new Vec3(0, 2, 0);
+      fovY = 20.0;
+      break;
+
+    case 6:
+      world = cornellBox();
+      background = new Vec3(0, 0, 0);
+      lookFrom = new Vec3(278, 278, -800);
+      lookAt = new Vec3(278, 278, 0);
+      fovY = 40.0;
+      break;
+
     default:
+      background = new Vec3(0, 0, 0);
       break;
   }
 
@@ -94,6 +116,7 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
         workerId,
         camera: serialize(Camera, camera),
         world: serialize(HittableList, world),
+        background: serialize(Vec3, background),
         imageWidth: msg.data.imageWidth,
         imageHeight: msg.data.imageHeight,
         scanlineCount: availableLines - lineLoad < 0 ? availableLines : lineLoad,

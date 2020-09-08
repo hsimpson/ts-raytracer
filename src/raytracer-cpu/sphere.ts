@@ -40,7 +40,7 @@ export default class Sphere extends Hittable {
         rec.t = temp;
         rec.p = r.at(rec.t);
         const outward_normal = Vec3.divScalarVec(Vec3.subVec3(rec.p, this.center), this.radius);
-        rec.set_face_normal(r, outward_normal);
+        rec.setFaceNormal(r, outward_normal);
         const uv = getSphereUV(Vec3.divScalarVec(Vec3.subVec3(rec.p, this.center), this.radius));
         rec.u = uv.u;
         rec.v = uv.v;
@@ -52,7 +52,7 @@ export default class Sphere extends Hittable {
         rec.t = temp;
         rec.p = r.at(rec.t);
         const outward_normal = Vec3.divScalarVec(Vec3.subVec3(rec.p, this.center), this.radius);
-        rec.set_face_normal(r, outward_normal);
+        rec.setFaceNormal(r, outward_normal);
         const uv = getSphereUV(Vec3.divScalarVec(Vec3.subVec3(rec.p, this.center), this.radius));
         rec.u = uv.u;
         rec.v = uv.v;

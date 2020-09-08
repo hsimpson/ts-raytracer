@@ -38,7 +38,7 @@ export default class MovingSphere extends Hittable {
         rec.t = temp;
         rec.p = r.at(rec.t);
         const outward_normal = Vec3.divScalarVec(Vec3.subVec3(rec.p, this.center(r.time)), this.radius);
-        rec.set_face_normal(r, outward_normal);
+        rec.setFaceNormal(r, outward_normal);
         rec.mat = this.mat;
         return true;
       }
@@ -47,7 +47,7 @@ export default class MovingSphere extends Hittable {
         rec.t = temp;
         rec.p = r.at(rec.t);
         const outward_normal = Vec3.divScalarVec(Vec3.subVec3(rec.p, this.center(r.time)), this.radius);
-        rec.set_face_normal(r, outward_normal);
+        rec.setFaceNormal(r, outward_normal);
         rec.mat = this.mat;
         return true;
       }

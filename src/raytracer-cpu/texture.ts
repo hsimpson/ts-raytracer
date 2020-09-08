@@ -95,7 +95,7 @@ export class ImageTexture extends Texture {
     this._bytesPerScanLine = ImageTexture.BytesPerPixel * this._width;
   }
 
-  public value(u: number, v: number, p: Vec3): Vec3 {
+  public value(u: number, v: number, _p: Vec3): Vec3 {
     // If we have no texture data, then return solid cyan as a debugging aid.
     if (!this._data || this._data.length === 0) {
       return new Vec3(0, 1, 1);

@@ -12,7 +12,7 @@ export class HitRecord {
   public front_face = true;
   public mat: Material;
 
-  public set_face_normal(r: Ray, outward_normal: Vec3): void {
+  public setFaceNormal(r: Ray, outward_normal: Vec3): void {
     this.front_face = Vec3.dot(r.direction, outward_normal) < 0;
     this.normal = this.front_face ? outward_normal : outward_normal.negate();
   }

@@ -42,6 +42,7 @@ export interface ComputeStartMessage extends WorkerMessage {
     workerId: number;
     camera: JsonObject;
     world: JsonObject;
+    background: JsonObject;
     imageWidth: number;
     imageHeight: number;
     scanlineCount: number;

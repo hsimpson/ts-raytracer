@@ -3,20 +3,24 @@ import { deserialize } from '../serializing/deserialize';
 import { randomNumber } from '../util';
 import Vec3 from '../vec3';
 import AABB from './aabb';
+import { XYRect, XZRect, YZRect } from './aarect';
 import BVHNode from './bvhnode';
 import DielectricMaterial from './dielectric';
+import DiffuseLight from './diffuselight';
 import { HittableList } from './hittablelist';
 import LambertianMaterial from './lambertian';
 import MetalMaterial from './metal';
 import MovingSphere from './movingsphere';
+import Perlin from './perlin';
 import { rayColor } from './ray';
 import Sphere from './sphere';
-import { SolidColor, CheckerTexture } from './texture';
+import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor } from './texture';
 import { ComputeCommands, ComputeEndMessage, ComputeStartMessage, WorkerMessage } from './workerinterfaces';
 
 const _controllerCtx: Worker = self as never;
 let _id: number;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const map = {
   lambertianMaterial: LambertianMaterial,
   metalMaterial: MetalMaterial,
@@ -27,6 +31,13 @@ const map = {
   aabb: AABB,
   checkerTexture: CheckerTexture,
   solidTexture: SolidColor,
+  perlin: Perlin,
+  noise: NoiseTexture,
+  image: ImageTexture,
+  diffuseLight: DiffuseLight,
+  xyRect: XYRect,
+  xzRect: XZRect,
+  yzRect: YZRect,
 };
 
 const writeColor = (array: Uint8ClampedArray, offset: number, color: Vec3, ssp: number): void => {
@@ -50,6 +61,7 @@ const start = (msg: ComputeStartMessage): void => {
   _id = msg.data.workerId;
   const camera = deserialize(Camera, msg.data.camera);
   const world = deserialize(HittableList, msg.data.world);
+  const background = deserialize(Vec3, msg.data.background);
   const imageWidth = msg.data.imageWidth;
   const imageHeight = msg.data.imageHeight;
   const scanlineCount = msg.data.scanlineCount;
@@ -76,7 +88,7 @@ const start = (msg: ComputeStartMessage): void => {
         const v = (j + randomNumber()) / (imageHeight - 1);
 
         const r = camera.getRay(u, v);
-        pixelColor = Vec3.addVec3(pixelColor, rayColor(r, world, maxBounces));
+        pixelColor = Vec3.addVec3(pixelColor, rayColor(r, background, world, maxBounces));
       }
 
       writeColor(dataArray, offset, pixelColor, ssp);

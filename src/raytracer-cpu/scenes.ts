@@ -1,14 +1,14 @@
-import Material from './material';
-import DielectricMaterial from './dielectric';
-import { HittableList } from './hittablelist';
-import LambertianMaterial from './lambertian';
-import MetalMaterial from './metal';
-import Sphere from './sphere';
-import MovingSphere from './movingsphere';
 import { randomNumber, randomNumberRange } from '../util';
 import Vec3 from '../vec3';
-import BVHNode from './bvhnode';
-import { CheckerTexture, NoiseTexture, ImageTexture } from './texture';
+import { XYRect, XZRect, YZRect } from './aarect';
+import DielectricMaterial from './dielectric';
+import DiffuseLight from './diffuselight';
+import { HittableList } from './hittablelist';
+import LambertianMaterial from './lambertian';
+import Material from './material';
+import MetalMaterial from './metal';
+import Sphere from './sphere';
+import { CheckerTexture, ImageTexture, NoiseTexture } from './texture';
 
 export function twoSpheres(): HittableList {
   const objects = new HittableList();
@@ -101,4 +101,37 @@ export function randomScene(): HittableList {
 
   return world;
   //return new HittableList(BVHNode.createFromHitableList(world));
+}
+
+export function simpleLight(): HittableList {
+  const objects = new HittableList();
+  const perlinTexture = new NoiseTexture(4);
+  const sphereMaterial = new LambertianMaterial();
+  sphereMaterial.texture = perlinTexture;
+
+  objects.add(new Sphere(new Vec3(0, -1000, 0), 1000, sphereMaterial));
+  objects.add(new Sphere(new Vec3(0, 2, 0), 2, sphereMaterial));
+
+  const diffuseLight = new DiffuseLight(new Vec3(4, 4, 4));
+  objects.add(new XYRect(3, 5, 1, 3, -2, diffuseLight));
+  objects.add(new Sphere(new Vec3(0, 7, 0), 2, diffuseLight));
+
+  return objects;
+}
+
+export function cornellBox(): HittableList {
+  const objects = new HittableList();
+  const red = new LambertianMaterial(new Vec3(0.65, 0.05, 0.05));
+  const white = new LambertianMaterial(new Vec3(0.73, 0.73, 0.73));
+  const green = new LambertianMaterial(new Vec3(0.12, 0.45, 0.15));
+  const light = new DiffuseLight(new Vec3(15, 15, 15));
+
+  objects.add(new YZRect(0, 555, 0, 555, 555, green));
+  objects.add(new YZRect(0, 555, 0, 555, 0, red));
+  objects.add(new XZRect(213, 343, 227, 332, 554, light));
+  objects.add(new XZRect(0, 555, 0, 555, 0, white));
+  objects.add(new XZRect(0, 555, 0, 555, 555, white));
+  objects.add(new XYRect(0, 555, 0, 555, 555, white));
+
+  return objects;
 }
