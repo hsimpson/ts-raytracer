@@ -32,7 +32,14 @@ const commonConfig: webpack.Configuration = {
       template: './src/index.html',
     }),
     new CopyWebpackPlugin({
-      patterns: [{ from: './src/raytracer-gpu/shaders/*.spv', to: '.', flatten: true }],
+      patterns: [
+        { from: './src/raytracer-gpu/shaders/*.spv', to: '.', flatten: true },
+        {
+          from: './src/assets/textures/*.*',
+          to: 'assets/textures',
+          flatten: true,
+        },
+      ],
     }),
   ],
 };

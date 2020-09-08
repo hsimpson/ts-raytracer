@@ -11,7 +11,7 @@ import {
 import Vec3 from '../vec3';
 import Camera from '../camera';
 import { HittableList } from './hittablelist';
-import { randomScene, twoSpheres, twoPerlinSpheres } from './scenes';
+import { randomScene, twoSpheres, twoPerlinSpheres, earthSphere } from './scenes';
 import { serialize } from '../serializing';
 
 const _controllerCtx: Worker = self as never;
@@ -22,7 +22,7 @@ let _samplesPerPixel: number;
 let _maxBounces: number;
 const _computeWorkers: Map<number, ComputeWorker> = new Map<number, ComputeWorker>();
 
-const start = (msg: ControllerStartMessage): void => {
+const start = async (msg: ControllerStartMessage): Promise<void> => {
   _imageWidth = msg.data.imageWidth;
   _imageHeight = msg.data.imageHeight;
   _samplesPerPixel = msg.data.samplesPerPixel;
@@ -60,6 +60,13 @@ const start = (msg: ControllerStartMessage): void => {
 
     case 3:
       world = twoPerlinSpheres();
+      lookFrom = new Vec3(13, 2, 3);
+      lookAt = new Vec3(0, 0, 0);
+      fovY = 20.0;
+      break;
+
+    case 4:
+      world = await earthSphere();
       lookFrom = new Vec3(13, 2, 3);
       lookAt = new Vec3(0, 0, 0);
       fovY = 20.0;

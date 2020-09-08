@@ -8,7 +8,7 @@ import MovingSphere from './movingsphere';
 import { randomNumber, randomNumberRange } from '../util';
 import Vec3 from '../vec3';
 import BVHNode from './bvhnode';
-import { CheckerTexture, NoiseTexture } from './texture';
+import { CheckerTexture, NoiseTexture, ImageTexture } from './texture';
 
 export function twoSpheres(): HittableList {
   const objects = new HittableList();
@@ -32,6 +32,20 @@ export function twoPerlinSpheres(): HittableList {
 
   objects.add(new Sphere(new Vec3(0, -1000, 0), 1000, sphereMaterial));
   objects.add(new Sphere(new Vec3(0, 2, 0), 2, sphereMaterial));
+
+  return objects;
+}
+
+export async function earthSphere(): Promise<HittableList> {
+  const objects = new HittableList();
+
+  const earthTexture = new ImageTexture();
+  await earthTexture.load('assets/textures/earthmap.jpg');
+
+  const sphereMaterial = new LambertianMaterial();
+  sphereMaterial.texture = earthTexture;
+
+  objects.add(new Sphere(new Vec3(0, 0, 0), 2, sphereMaterial));
 
   return objects;
 }

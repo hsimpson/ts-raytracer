@@ -14,6 +14,18 @@ function _serialize<T>(type: SerializableType<T>, instance: T): JsonObject | nul
         }
         return val;
       });
+    } else if (
+      v instanceof Int8Array ||
+      v instanceof Uint8Array ||
+      v instanceof Uint8ClampedArray ||
+      v instanceof Int16Array ||
+      v instanceof Uint16Array ||
+      v instanceof Int32Array ||
+      v instanceof Uint32Array ||
+      v instanceof Float32Array ||
+      v instanceof Float64Array
+    ) {
+      target[k] = Array.from(v);
     } else if (typeof v === 'object') {
       target[k] = _serialize(v.constructor, v);
     } else {

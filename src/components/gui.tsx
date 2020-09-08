@@ -25,6 +25,7 @@ const Gui = (): React.ReactElement => {
     { text: 'Random Spheres', value: 1 },
     { text: '2 Checkboard spheres', value: 2 },
     { text: '2 Perlin noise spheres', value: 3 },
+    { text: 'Earth sphere', value: 4 },
   ];
 
   return (
