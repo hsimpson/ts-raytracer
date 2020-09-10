@@ -6,6 +6,11 @@ Bugs:
     ☐ Missing pixels when width or height is not devidable by fixed worksize devisor (8)
     ☐ Uncaught in Promise->on heavy GPU frame load
     ✔ Adapt new WebGPU Buffer Spec see: https://hackmd.io/szV68rOVQ56GYzPJMBko8A @done(20-09-01 21:33)
+      ☐ Firefox do not support the current spec
+  
+  CPU:
+    ✔ ImageTexture not working on Firefox due to OffscreenCanvas is not able to use 2d context @done(20-09-11 00:52)
+    
   
   GUI:
     ☐ Reset to default disable WebGPU -> probably check again

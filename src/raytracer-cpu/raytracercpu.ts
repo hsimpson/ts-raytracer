@@ -7,6 +7,9 @@ import {
   ControllerStopMessage,
   WorkerMessage,
 } from './workerinterfaces';
+import { randomScene, twoSpheres, twoPerlinSpheres, earthSphere, simpleLight, cornellBox } from './scenes';
+import { HittableList } from './hittablelist';
+import { serialize } from '../serializing';
 
 export default class RaytracerCPU extends RaytracerBase {
   private _controllerWorker: ControllerWorker;
@@ -73,6 +76,29 @@ export default class RaytracerCPU extends RaytracerBase {
 
     this._controllerWorker.onmessage = (event) => this.onControllerMessage(event);
 
+    let world: HittableList;
+
+    switch (this._scene) {
+      case 1:
+        world = randomScene();
+        break;
+      case 2:
+        world = twoSpheres();
+        break;
+      case 3:
+        world = twoPerlinSpheres();
+        break;
+      case 4:
+        world = await earthSphere();
+        break;
+      case 5:
+        world = simpleLight();
+        break;
+      case 6:
+        world = cornellBox();
+        break;
+    }
+
     const controllerStartMessage: ControllerStartMessage = {
       cmd: ControllerCommands.START,
       data: {
@@ -81,7 +107,8 @@ export default class RaytracerCPU extends RaytracerBase {
         samplesPerPixel: this._samplesPerPixel,
         maxBounces: this._maxBounces,
         computeWorkers: this._numOfWorkers,
-        scene: this._scene,
+        sceneIdx: this._scene,
+        world: serialize(HittableList, world),
       },
     };
 

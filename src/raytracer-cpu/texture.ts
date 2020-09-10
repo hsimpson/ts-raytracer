@@ -84,7 +84,11 @@ export class ImageTexture extends Texture {
     const blob = await response.blob();
     const imgBitmap = await createImageBitmap(blob);
 
-    const canvas = new OffscreenCanvas(imgBitmap.width, imgBitmap.height);
+    // Firefox do not support 2D context on OffscreenCanvas :-(
+    //const canvas = new OffscreenCanvas(imgBitmap.width, imgBitmap.height);
+    const canvas = document.createElement('canvas');
+    canvas.width = imgBitmap.width;
+    canvas.height = imgBitmap.height;
     const ctx = canvas.getContext('2d');
     ctx.drawImage(imgBitmap, 0, 0);
 

@@ -2,43 +2,14 @@ import Camera from '../camera';
 import { deserialize } from '../serializing/deserialize';
 import { randomNumber } from '../util';
 import Vec3 from '../vec3';
-import AABB from './aabb';
-import { XYRect, XZRect, YZRect } from './aarect';
-import BVHNode from './bvhnode';
-import DielectricMaterial from './dielectric';
-import DiffuseLight from './diffuselight';
+import { DeserializerMap } from './deserializermap';
 import { HittableList } from './hittablelist';
-import LambertianMaterial from './lambertian';
-import MetalMaterial from './metal';
-import MovingSphere from './movingsphere';
-import Perlin from './perlin';
 import { rayColor } from './ray';
-import Sphere from './sphere';
-import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor } from './texture';
 import { ComputeCommands, ComputeEndMessage, ComputeStartMessage, WorkerMessage } from './workerinterfaces';
 
+const map = DeserializerMap;
 const _controllerCtx: Worker = self as never;
 let _id: number;
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const map = {
-  lambertianMaterial: LambertianMaterial,
-  metalMaterial: MetalMaterial,
-  dielectricMaterial: DielectricMaterial,
-  sphere: Sphere,
-  movingSphere: MovingSphere,
-  bvhNode: BVHNode,
-  aabb: AABB,
-  checkerTexture: CheckerTexture,
-  solidTexture: SolidColor,
-  perlin: Perlin,
-  noise: NoiseTexture,
-  image: ImageTexture,
-  diffuseLight: DiffuseLight,
-  xyRect: XYRect,
-  xzRect: XZRect,
-  yzRect: YZRect,
-};
 
 const writeColor = (array: Uint8ClampedArray, offset: number, color: Vec3, ssp: number): void => {
   let r = color.r;

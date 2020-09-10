@@ -1,18 +1,20 @@
 import ComputeWorker from 'worker-loader!./compute.worker';
-import {
-  ControllerCommands,
-  WorkerMessage,
-  ControllerStartMessage,
-  ControllerEndMessage,
-  ComputeStartMessage,
-  ComputeEndMessage,
-  ComputeCommands,
-} from './workerinterfaces';
-import Vec3 from '../vec3';
 import Camera from '../camera';
+import { deserialize, serialize } from '../serializing';
+import Vec3 from '../vec3';
+import { DeserializerMap } from './deserializermap';
 import { HittableList } from './hittablelist';
-import { randomScene, twoSpheres, twoPerlinSpheres, earthSphere, simpleLight, cornellBox } from './scenes';
-import { serialize } from '../serializing';
+import {
+  ComputeCommands,
+  ComputeEndMessage,
+  ComputeStartMessage,
+  ControllerCommands,
+  ControllerEndMessage,
+  ControllerStartMessage,
+  WorkerMessage,
+} from './workerinterfaces';
+
+const map = DeserializerMap;
 
 const _controllerCtx: Worker = self as never;
 let _array: Uint8ClampedArray;
@@ -41,11 +43,10 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
   let fovY = 40;
   let background = new Vec3(0, 0, 0);
 
-  let world: HittableList;
+  const world = deserialize(HittableList, msg.data.world);
 
-  switch (msg.data.scene) {
+  switch (msg.data.sceneIdx) {
     case 1:
-      world = randomScene();
       background = new Vec3(0.7, 0.8, 1.0);
       lookFrom = new Vec3(13, 2, 3);
       lookAt = new Vec3(0, 0, 0);
@@ -54,7 +55,6 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
       break;
 
     case 2:
-      world = twoSpheres();
       background = new Vec3(0.7, 0.8, 1.0);
       lookFrom = new Vec3(13, 2, 3);
       lookAt = new Vec3(0, 0, 0);
@@ -62,7 +62,6 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
       break;
 
     case 3:
-      world = twoPerlinSpheres();
       background = new Vec3(0.7, 0.8, 1.0);
       lookFrom = new Vec3(13, 2, 3);
       lookAt = new Vec3(0, 0, 0);
@@ -70,7 +69,6 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
       break;
 
     case 4:
-      world = await earthSphere();
       background = new Vec3(0.7, 0.8, 1.0);
       lookFrom = new Vec3(13, 2, 3);
       lookAt = new Vec3(0, 0, 0);
@@ -78,7 +76,6 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
       break;
 
     case 5:
-      world = simpleLight();
       background = new Vec3(0, 0, 0);
       lookFrom = new Vec3(26, 3, 6);
       lookAt = new Vec3(0, 2, 0);
@@ -86,7 +83,6 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
       break;
 
     case 6:
-      world = cornellBox();
       background = new Vec3(0, 0, 0);
       lookFrom = new Vec3(278, 278, -800);
       lookAt = new Vec3(278, 278, 0);

@@ -1,4 +1,5 @@
 import { JsonObject } from '../serializing';
+import { HittableList } from './hittablelist';
 
 export enum ControllerCommands {
   START,
@@ -27,7 +28,8 @@ export interface ControllerStartMessage extends WorkerMessage {
     samplesPerPixel: number;
     maxBounces: number;
     computeWorkers: number;
-    scene: number;
+    sceneIdx: number;
+    world: JsonObject;
   };
 }
 
