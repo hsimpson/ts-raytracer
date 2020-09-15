@@ -45,7 +45,7 @@ export class XYRect extends Hittable {
     return true;
   }
 
-  public boundingBox(outputBox: AABB): boolean {
+  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
     // The bounding box must have non-zero width in each dimension, so pad the Z
     // dimension a small amount.
 
@@ -99,7 +99,7 @@ export class XZRect extends Hittable {
     return true;
   }
 
-  public boundingBox(outputBox: AABB): boolean {
+  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
     // The bounding box must have non-zero width in each dimension, so pad the Z
     // dimension a small amount.
 
@@ -153,7 +153,7 @@ export class YZRect extends Hittable {
     return true;
   }
 
-  public boundingBox(outputBox: AABB): boolean {
+  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
     // The bounding box must have non-zero width in each dimension, so pad the Z
     // dimension a small amount.
 

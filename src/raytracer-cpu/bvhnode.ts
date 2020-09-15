@@ -20,19 +20,25 @@ export default class BVHNode extends Hittable {
     //_id++;
   }
 
-  public static createFromHitableList(list: HittableList): BVHNode {
+  public static createFromHitableList(list: HittableList, time0: number, time1: number): BVHNode {
     const node = new BVHNode();
-    node.init(list.objects, 0, list.objects.length);
+    node.init(list.objects, 0, list.objects.length, time0, time1);
     return node;
   }
 
-  public static createFromObjects(objects: Hittable[], start: number, end: number): BVHNode {
+  public static createFromObjects(
+    objects: Hittable[],
+    start: number,
+    end: number,
+    time0: number,
+    time1: number
+  ): BVHNode {
     const node = new BVHNode();
-    node.init(objects, start, end);
+    node.init(objects, start, end, time0, time1);
     return node;
   }
 
-  private init(objects: Hittable[], start: number, end: number): void {
+  private init(objects: Hittable[], start: number, end: number, time0: number, time1: number): void {
     const axis = randomInt(0, 2);
     const comparator = axis === 0 ? boxXCompare : axis === 1 ? boxYCompare : boxZCompare;
 
@@ -51,14 +57,14 @@ export default class BVHNode extends Hittable {
     } else {
       sortArrayRange(objects, start, end, comparator);
       const mid = start + Math.floor(objectSpan / 2);
-      this.left = BVHNode.createFromObjects(objects, start, mid);
-      this.right = BVHNode.createFromObjects(objects, mid, end);
+      this.left = BVHNode.createFromObjects(objects, start, mid, time0, time1);
+      this.right = BVHNode.createFromObjects(objects, mid, end, time0, time1);
     }
 
     const boxLeft = new AABB();
     const boxRight = new AABB();
 
-    if (!this.left.boundingBox(boxLeft) || !this.right.boundingBox(boxRight)) {
+    if (!this.left.boundingBox(time0, time1, boxLeft) || !this.right.boundingBox(time0, time1, boxRight)) {
       console.error('No bounding box in bvh_node constructor.');
     }
     this.box = AABB.surroundingBox(boxLeft, boxRight);
@@ -90,7 +96,7 @@ export default class BVHNode extends Hittable {
     return false;
   }
 
-  public boundingBox(outputBox: AABB): boolean {
+  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
     this.box.copyTo(outputBox);
     return true;
   }
@@ -100,7 +106,7 @@ function boxCompare(a: Hittable, b: Hittable, axis: number): number {
   const boxA = new AABB();
   const boxB = new AABB();
 
-  if (!a.boundingBox(boxA) || !b.boundingBox(boxB)) {
+  if (!a.boundingBox(0, 0, boxA) || !b.boundingBox(0, 0, boxB)) {
     console.error('No bounding box in bvh_node constructor.');
   }
 

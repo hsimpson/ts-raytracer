@@ -62,8 +62,8 @@ export default class MovingSphere extends Hittable {
     return Vec3.addVec3(this.center0, Vec3.multScalarVec3(centerDiff, timeDiff));
   }
 
-  public boundingBox(outputBox: AABB): boolean {
-    // TODO!
+  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
+    // FIXME!
     /*
     const newOutputBox = new AABB(
       Vec3.subVec3(this.center, new Vec3(this.radius, this.radius, this.radius)),

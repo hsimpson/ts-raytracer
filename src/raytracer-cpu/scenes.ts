@@ -1,6 +1,7 @@
 import { randomNumber, randomNumberRange } from '../util';
 import Vec3 from '../vec3';
 import { XYRect, XZRect, YZRect } from './aarect';
+import Box from './box';
 import DielectricMaterial from './dielectric';
 import DiffuseLight from './diffuselight';
 import { HittableList } from './hittablelist';
@@ -9,6 +10,9 @@ import Material from './material';
 import MetalMaterial from './metal';
 import Sphere from './sphere';
 import { CheckerTexture, ImageTexture, NoiseTexture } from './texture';
+import { RotateY } from './rotation';
+import { Hittable } from './hittable';
+import Translate from './translate';
 
 export function twoSpheres(): HittableList {
   const objects = new HittableList();
@@ -120,18 +124,31 @@ export function simpleLight(): HittableList {
 }
 
 export function cornellBox(): HittableList {
+  // http://www.graphics.cornell.edu/online/box/data.html
   const objects = new HittableList();
   const red = new LambertianMaterial(new Vec3(0.65, 0.05, 0.05));
   const white = new LambertianMaterial(new Vec3(0.73, 0.73, 0.73));
   const green = new LambertianMaterial(new Vec3(0.12, 0.45, 0.15));
   const light = new DiffuseLight(new Vec3(15, 15, 15));
 
-  objects.add(new YZRect(0, 555, 0, 555, 555, green));
-  objects.add(new YZRect(0, 555, 0, 555, 0, red));
-  objects.add(new XZRect(213, 343, 227, 332, 554, light));
-  objects.add(new XZRect(0, 555, 0, 555, 0, white));
-  objects.add(new XZRect(0, 555, 0, 555, 555, white));
-  objects.add(new XYRect(0, 555, 0, 555, 555, white));
+  objects.add(new YZRect(0, 555, 0, 555, 555, red)); // left wall
+  objects.add(new YZRect(0, 555, 0, 555, 0, green)); // right wall
+  objects.add(new XZRect(213, 343, 227, 332, 554, light)); // light
+  objects.add(new XZRect(0, 555, 0, 555, 0, white)); // floor
+  objects.add(new XZRect(0, 555, 0, 555, 555, white)); // ceiling
+  objects.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
+
+  let box1: Hittable;
+  box1 = new Box(new Vec3(0, 0, 0), new Vec3(165, 330, 165), white);
+  box1 = new RotateY(box1, 15);
+  box1 = new Translate(box1, new Vec3(265, 0, 295));
+  objects.add(box1);
+
+  let box2: Hittable;
+  box2 = new Box(new Vec3(0, 0, 0), new Vec3(165, 165, 165), white);
+  box2 = new RotateY(box2, -18);
+  box2 = new Translate(box2, new Vec3(130, 0, 65));
+  objects.add(box2);
 
   return objects;
 }

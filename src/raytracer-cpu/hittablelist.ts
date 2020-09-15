@@ -43,14 +43,14 @@ export class HittableList extends Hittable {
     return hit_anything;
   }
 
-  public boundingBox(outputBox: AABB): boolean {
+  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
     if (this._objects.length === 0) {
       return false;
     }
     const tempBox: AABB = new AABB();
     let firstBox = true;
     for (const object of this._objects) {
-      if (!object.boundingBox(tempBox)) {
+      if (!object.boundingBox(t0, t1, tempBox)) {
         return false;
       }
 

@@ -29,6 +29,10 @@ export default class Vec3 {
     dest.z = this.z;
   }
 
+  public clone(): Vec3 {
+    return new Vec3(this.x, this.y, this.z);
+  }
+
   public get r(): number {
     return this.x;
   }

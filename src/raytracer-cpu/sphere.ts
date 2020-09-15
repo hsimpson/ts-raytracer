@@ -63,7 +63,7 @@ export default class Sphere extends Hittable {
     return false;
   }
 
-  public boundingBox(outputBox: AABB): boolean {
+  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
     const newOutputBox = new AABB(
       Vec3.subVec3(this.center, new Vec3(this.radius, this.radius, this.radius)),
       Vec3.addVec3(this.center, new Vec3(this.radius, this.radius, this.radius))
