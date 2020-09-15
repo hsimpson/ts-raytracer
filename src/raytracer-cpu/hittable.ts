@@ -9,12 +9,12 @@ export class HitRecord {
   public t = 0;
   public u = 0;
   public v = 0;
-  public front_face = true;
+  public frontFace = true;
   public mat: Material;
 
   public setFaceNormal(r: Ray, outward_normal: Vec3): void {
-    this.front_face = Vec3.dot(r.direction, outward_normal) < 0;
-    this.normal = this.front_face ? outward_normal : outward_normal.negate();
+    this.frontFace = Vec3.dot(r.direction, outward_normal) < 0;
+    this.normal = this.frontFace ? outward_normal : outward_normal.negate();
   }
 
   public copyTo(dest: HitRecord): void {
@@ -23,7 +23,7 @@ export class HitRecord {
     dest.t = this.t;
     dest.u = this.u;
     dest.v = this.v;
-    dest.front_face = this.front_face;
+    dest.frontFace = this.frontFace;
     dest.mat = this.mat;
   }
 }

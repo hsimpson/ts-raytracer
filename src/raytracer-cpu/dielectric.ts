@@ -22,7 +22,7 @@ export default class DielectricMaterial extends Material {
 
   public scatter(r_in: Ray, rec: HitRecord, attenuation: Vec3, scattered: Ray): boolean {
     attenuation.set(1.0, 1.0, 1.0);
-    const etai_over_etat = rec.front_face ? 1 / this._refIdx : this._refIdx;
+    const etai_over_etat = rec.frontFace ? 1 / this._refIdx : this._refIdx;
 
     const unit_direction = Vec3.unitVector(r_in.direction);
 

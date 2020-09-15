@@ -89,6 +89,13 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
       fovY = 40.0;
       break;
 
+    case 7:
+      background = new Vec3(0, 0, 0);
+      lookFrom = new Vec3(278, 278, -800);
+      lookAt = new Vec3(278, 278, 0);
+      fovY = 40.0;
+      break;
+
     default:
       background = new Vec3(0, 0, 0);
       break;

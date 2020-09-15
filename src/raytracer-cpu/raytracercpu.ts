@@ -1,5 +1,16 @@
 import ControllerWorker from 'worker-loader!./controller.worker';
 import { DoneCallback, RaytracerBase } from '../raytracerbase';
+import { serialize } from '../serializing';
+import { HittableList } from './hittablelist';
+import {
+  cornellBox,
+  cornellBoxSmoke,
+  earthSphere,
+  randomScene,
+  simpleLight,
+  twoPerlinSpheres,
+  twoSpheres,
+} from './scenes';
 import {
   ControllerCommands,
   ControllerEndMessage,
@@ -7,9 +18,6 @@ import {
   ControllerStopMessage,
   WorkerMessage,
 } from './workerinterfaces';
-import { randomScene, twoSpheres, twoPerlinSpheres, earthSphere, simpleLight, cornellBox } from './scenes';
-import { HittableList } from './hittablelist';
-import { serialize } from '../serializing';
 
 export default class RaytracerCPU extends RaytracerBase {
   private _controllerWorker: ControllerWorker;
@@ -96,6 +104,9 @@ export default class RaytracerCPU extends RaytracerBase {
         break;
       case 6:
         world = cornellBox();
+        break;
+      case 7:
+        world = cornellBoxSmoke();
         break;
     }
 

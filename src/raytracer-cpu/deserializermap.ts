@@ -2,8 +2,10 @@ import AABB from './aabb';
 import { XYRect, XZRect, YZRect } from './aarect';
 import Box from './box';
 import BVHNode from './bvhnode';
+import { ConstantMedium } from './constantmedium';
 import DielectricMaterial from './dielectric';
 import DiffuseLight from './diffuselight';
+import { IsoTropic } from './isotropic';
 import LambertianMaterial from './lambertian';
 import MetalMaterial from './metal';
 import MovingSphere from './movingsphere';
@@ -34,4 +36,6 @@ export const DeserializerMap = {
   box: Box,
   translate: Translate,
   rotateY: RotateY,
+  constantMedium: ConstantMedium,
+  isoTropic: IsoTropic,
 };
