@@ -21,7 +21,6 @@ import {
 
 export default class RaytracerCPU extends RaytracerBase {
   private _controllerWorker: ControllerWorker;
-  private _context2D: CanvasRenderingContext2D;
 
   public constructor(
     canvas: HTMLCanvasElement,
@@ -51,13 +50,7 @@ export default class RaytracerCPU extends RaytracerBase {
     this._context2D.putImageData(imageData, 0, 0);
 
     const duration = performance.now() - this._startTime;
-    const renderTime = `spp: ${this._samplesPerPixel}, max-bounces: ${
-      this._maxBounces
-    }, rendertime: ${RaytracerBase.msToTimeString(duration)}`;
-    console.log(renderTime);
-    this._context2D.font = '16px Arial';
-    this._context2D.textBaseline = 'top';
-    this._context2D.fillText(renderTime, 5, 5);
+    this.writeStatsToImage(duration);
 
     if (this._doneCallback) {
       this._doneCallback(duration);

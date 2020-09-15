@@ -4,6 +4,7 @@ export abstract class RaytracerBase {
   protected _isRunning = false;
   protected _startTime = 0;
   protected _doneCallback: DoneCallback;
+  protected _context2D: CanvasRenderingContext2D;
 
   public constructor(
     protected _canvas: HTMLCanvasElement,
@@ -17,8 +18,8 @@ export abstract class RaytracerBase {
   public abstract async start(doneCallback?: DoneCallback): Promise<void>;
   public abstract stop(): void;
 
-  protected static msToTimeString(duration: number): string {
-    duration = Math.floor(duration);
+  private static msToTimeString(duration: number): string {
+    duration |= 0; // integer cast (like std::trunc ;-) )
     const ms = duration % 1000;
     duration = (duration - ms) / 1000;
     const secs = duration % 60;
@@ -29,6 +30,22 @@ export abstract class RaytracerBase {
     return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs
       .toString()
       .padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+  }
+
+  protected writeStatsToImage(duration: number): void {
+    const renderTime = `spp: ${this._samplesPerPixel}, max-bounces: ${
+      this._maxBounces
+    }, rendertime: ${RaytracerBase.msToTimeString(duration)}`;
+    console.log(renderTime);
+
+    this._context2D.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    this._context2D.fillRect(0, 0, this._canvas.width, 22);
+
+    this._context2D.fillStyle = 'rgb(0, 0, 0)';
+    this._context2D.strokeStyle = 'rgb(0, 0, 0)';
+    this._context2D.font = '16px Arial';
+    this._context2D.textBaseline = 'top';
+    this._context2D.fillText(renderTime, 5, 5);
   }
 
   public get isRunning(): boolean {

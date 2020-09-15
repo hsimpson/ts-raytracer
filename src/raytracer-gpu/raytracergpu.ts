@@ -12,7 +12,6 @@ import WebGPURenderPipeline from './webgpurenderpipeline';
 export default class RaytracerGPU extends RaytracerBase {
   private _initialized = false;
   private _webGPUContext: WebGPUContext;
-  private _context2D: CanvasRenderingContext2D;
 
   private _colorTextureView: GPUTextureView;
   private _colorAttachment: GPURenderPassColorAttachmentDescriptor;
@@ -148,14 +147,7 @@ export default class RaytracerGPU extends RaytracerBase {
 
     // raytracer finished
     const duration = performance.now() - this._startTime;
-    const renderTime = `spp: ${this._samplesPerPixel}, max-bounces: ${
-      this._maxBounces
-    }, rendertime: ${RaytracerBase.msToTimeString(duration)}`;
-    console.log(renderTime);
-
-    this._context2D.font = '16px Arial';
-    this._context2D.textBaseline = 'top';
-    this._context2D.fillText(renderTime, 5, 5);
+    this.writeStatsToImage(duration);
 
     if (this._doneCallback) {
       this._doneCallback(duration);
