@@ -1,4 +1,5 @@
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
+import * as Vector from '../vec3';
 import { HitRecord, Hittable } from './hittable';
 
 export default class Ray {
@@ -45,7 +46,7 @@ export default class Ray {
   }
 
   public at(t: number): Vec3 {
-    return Vec3.addVec3(this._orig, Vec3.multScalarVec3(this._dir, t));
+    return Vector.addVec3(this._orig, Vector.multScalarVec3(this._dir, t));
   }
 }
 
@@ -53,7 +54,7 @@ export function rayColor(r: Ray, background: Vec3, world: Hittable, depth: numbe
   const rec = new HitRecord();
   // If we've exceeded the ray bounce limit, no more light is gathered.
   if (depth <= 0) {
-    return new Vec3(0, 0, 0);
+    return [0, 0, 0];
   }
 
   // If the ray hits nothing, return the background color.
@@ -62,14 +63,14 @@ export function rayColor(r: Ray, background: Vec3, world: Hittable, depth: numbe
   }
 
   const scattered = new Ray();
-  const attenuation = new Vec3();
+  const attenuation: Vec3 = [0, 0, 0];
   const emitted = rec.mat.emitted(rec.u, rec.v, rec.p);
 
   if (!rec.mat.scatter(r, rec, attenuation, scattered)) {
     return emitted;
   }
 
-  return Vec3.addVec3(emitted, Vec3.multVec3(attenuation, rayColor(scattered, background, world, depth - 1)));
+  return Vector.addVec3(emitted, Vector.multVec3(attenuation, rayColor(scattered, background, world, depth - 1)));
 
   /*
   const unit_direction = Vec3.unitVector(r.direction);

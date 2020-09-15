@@ -1,7 +1,8 @@
 import Camera from '../camera';
 import { deserialize } from '../serializing/deserialize';
 import { randomNumber } from '../util';
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
+import * as Vector from '../vec3';
 import { DeserializerMap } from './deserializermap';
 import { HittableList } from './hittablelist';
 import { rayColor } from './ray';
@@ -12,9 +13,7 @@ const _controllerCtx: Worker = self as never;
 let _id: number;
 
 const writeColor = (array: Uint8ClampedArray, offset: number, color: Vec3, ssp: number): void => {
-  let r = color.r;
-  let g = color.g;
-  let b = color.b;
+  let [r, g, b] = color;
 
   // Divide the color total by the number of samples and gamma-correct for gamma=2.0.
   const scale = 1.0 / ssp;
@@ -32,7 +31,7 @@ const start = (msg: ComputeStartMessage): void => {
   _id = msg.data.workerId;
   const camera = deserialize(Camera, msg.data.camera);
   const world = deserialize(HittableList, msg.data.world);
-  const background = deserialize(Vec3, msg.data.background);
+  const background = msg.data.background;
   const imageWidth = msg.data.imageWidth;
   const imageHeight = msg.data.imageHeight;
   const scanlineCount = msg.data.scanlineCount;
@@ -51,7 +50,7 @@ const start = (msg: ComputeStartMessage): void => {
   for (let j = startLine; j >= endLine; j--) {
     console.log(`worker[${_id}] scanlines remaining ${linesToCalc--}`);
     for (let i = 0; i < imageWidth; i++) {
-      let pixelColor = new Vec3(0, 0, 0);
+      let pixelColor: Vec3 = [0, 0, 0];
 
       for (let s = 0; s < ssp; s++) {
         //pixelColor = randomColor;
@@ -59,7 +58,7 @@ const start = (msg: ComputeStartMessage): void => {
         const v = (j + randomNumber()) / (imageHeight - 1);
 
         const r = camera.getRay(u, v);
-        pixelColor = Vec3.addVec3(pixelColor, rayColor(r, background, world, maxBounces));
+        pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, world, maxBounces));
       }
 
       writeColor(dataArray, offset, pixelColor, ssp);

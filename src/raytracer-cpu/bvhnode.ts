@@ -110,7 +110,7 @@ function boxCompare(a: Hittable, b: Hittable, axis: number): number {
     console.error('No bounding box in bvh_node constructor.');
   }
 
-  return boxA.min.array[axis] < boxB.min.array[axis] ? -1 : 1;
+  return boxA.min[axis] < boxB.min[axis] ? -1 : 1;
 }
 
 function boxXCompare(a: Hittable, b: Hittable): number {

@@ -1,4 +1,5 @@
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
+import * as Vector from '../vec3';
 import { serializable } from '../serializing';
 import Perlin from './perlin';
 import { clamp } from '../util';
@@ -33,7 +34,7 @@ export class CheckerTexture extends Texture {
   }
 
   public value(u: number, v: number, p: Vec3): Vec3 {
-    const sines = Math.sin(10 * p.x) * Math.sin(10 * p.y) * Math.sin(10 * p.z);
+    const sines = Math.sin(10 * p[0]) * Math.sin(10 * p[1]) * Math.sin(10 * p[2]);
     if (sines < 0) {
       return this._odd.value(u, v, p);
     } else {
@@ -60,9 +61,9 @@ export class NoiseTexture extends Texture {
 
     //return Vec3.multScalarVec3(new Vec3(1, 1, 1), this._noise.turb(Vec3.multScalarVec3(p, this._scale)));
 
-    return Vec3.multScalarVec3(
-      Vec3.multScalarVec3(new Vec3(1, 1, 1), 0.5),
-      1.0 + Math.sin(this._scale * p.z + 10 * this._noise.turb(p))
+    return Vector.multScalarVec3(
+      Vector.multScalarVec3([1, 1, 1], 0.5),
+      1.0 + Math.sin(this._scale * p[2] + 10 * this._noise.turb(p))
     );
   }
 }
@@ -102,7 +103,7 @@ export class ImageTexture extends Texture {
   public value(u: number, v: number, _p: Vec3): Vec3 {
     // If we have no texture data, then return solid cyan as a debugging aid.
     if (!this._data || this._data.length === 0) {
-      return new Vec3(0, 1, 1);
+      return [0, 1, 1];
     }
 
     // Clamp input texture coordinates to [0,1] x [1,0]
@@ -120,10 +121,10 @@ export class ImageTexture extends Texture {
 
     let pixelOffset = j * this._bytesPerScanLine + i * ImageTexture.BytesPerPixel;
 
-    return new Vec3(
+    return [
       this._data[pixelOffset++] * colorScale,
       this._data[pixelOffset++] * colorScale,
-      this._data[pixelOffset++] * colorScale
-    );
+      this._data[pixelOffset++] * colorScale,
+    ];
   }
 }

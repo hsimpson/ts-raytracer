@@ -1,199 +1,172 @@
 import { randomNumber, randomNumberRange } from './util';
-import { serializable } from './serializing';
+export type Vec3 = [r: number, g: number, b: number] | [x: number, y: number, z: number];
 
-@serializable
-export default class Vec3 {
-  public x = 0;
-  public y = 0;
-  public z = 0;
+export function isVec3(v: any): v is Vec3 {
+  return Array.isArray(v) && typeof v[0] === 'number' && typeof v[1] === 'number' && typeof v[2] === 'number';
+}
 
-  public constructor(x?: number, y?: number, z?: number) {
-    this.x = x ?? 0;
-    this.y = y ?? 0;
-    this.z = z ?? 0;
-  }
+export function set(v: Vec3, ...u: Vec3): void {
+  v[0] = u[0];
+  v[1] = u[1];
+  v[2] = u[2];
+}
 
-  public get array(): number[] {
-    return [this.x, this.y, this.z];
-  }
+export function copyTo(v: Vec3, dest: Vec3): void {
+  dest[0] = v[0];
+  dest[1] = v[1];
+  dest[2] = v[2];
+}
 
-  public set(x: number, y: number, z: number): void {
-    this.x = x;
-    this.y = y;
-    this.z = z;
-  }
+export function clone(v: Vec3): Vec3 {
+  return [...v];
+}
 
-  public copyTo(dest: Vec3): void {
-    dest.x = this.x;
-    dest.y = this.y;
-    dest.z = this.z;
-  }
+export function r(v: Vec3): number;
+export function r(v: Vec3, r: number): void;
+export function r(v: Vec3, r?: number): number {
+  return r === undefined ? v[0] : (v[0] = r);
+}
 
-  public clone(): Vec3 {
-    return new Vec3(this.x, this.y, this.z);
-  }
+export function g(v: Vec3): number;
+export function g(v: Vec3, g: number): void;
+export function g(v: Vec3, g?: number): number {
+  return g === undefined ? v[1] : (v[1] = g);
+}
 
-  public get r(): number {
-    return this.x;
-  }
+export function b(v: Vec3): number;
+export function b(v: Vec3, b: number): void;
+export function b(v: Vec3, b?: number): number {
+  return r === undefined ? v[2] : (v[2] = b);
+}
 
-  public set r(r: number) {
-    this.x = r;
-  }
+export function length(v: Vec3): number {
+  return Math.sqrt(lengthSquared(v));
+}
 
-  public get g(): number {
-    return this.y;
-  }
+export function lengthSquared(v: Vec3): number {
+  return v[0] ** 2 + v[1] ** 2 + v[2] ** 2;
+}
 
-  public set g(g: number) {
-    this.y = g;
-  }
+export function negate(v: Vec3): Vec3 {
+  return [-v[0], -v[1], -v[2]];
+}
 
-  public get b(): number {
-    return this.z;
-  }
+export function add(v: Vec3, o: Vec3): Vec3 {
+  return [v[0] + o[0], v[1] + o[1], v[2] + o[2]];
+}
 
-  public set b(b: number) {
-    this.z = b;
-  }
+export function multiplyScalar(v: Vec3, t: number): Vec3 {
+  return [v[0] * t, v[1] * t, v[2] * t];
+}
 
-  public length(): number {
-    return Math.sqrt(this.lengthSquared());
-  }
+export function divideScalar(v: Vec3, t: number): Vec3 {
+  return [v[0] / t, v[1] / t, v[2] / t];
+}
 
-  public lengthSquared(): number {
-    return this.x * this.x + this.y * this.y + this.z * this.z;
-  }
+export function toString(v: Vec3): string {
+  return `${v[0]}, ${v[1]}, ${v[2]}`;
+}
 
-  public negate(): Vec3 {
-    return new Vec3(-this.x, -this.y, -this.z);
-  }
+export function addVec3(u: Vec3, v: Vec3): Vec3 {
+  return [u[0] + v[0], u[1] + v[1], u[2] + v[2]];
+}
 
-  public add(v: Vec3): Vec3 {
-    this.x += v.x;
-    this.y += v.y;
-    this.z += v.z;
-    return this;
-  }
+export function subVec3(u: Vec3, v: Vec3): Vec3 {
+  return [u[0] - v[0], u[1] - v[1], u[2] - v[2]];
+}
 
-  public multiplyScalar(t: number): Vec3 {
-    this.x *= t;
-    this.y *= t;
-    this.z *= t;
-    return this;
-  }
+export function multVec3(u: Vec3, v: Vec3): Vec3 {
+  return [u[0] * v[0], u[1] * v[1], u[2] * v[2]];
+}
 
-  public divideScalar(t: number): Vec3 {
-    this.x /= t;
-    this.y /= t;
-    this.z /= t;
-    return this;
-  }
+export function multScalarVec3(v: Vec3, t: number): Vec3 {
+  return [t * v[0], t * v[1], t * v[2]];
+}
 
-  public toString(): string {
-    return `${this.x}, ${this.y}, ${this.z}`;
-  }
+export function divScalarVec(v: Vec3, t: number): Vec3 {
+  return [v[0] / t, v[1] / t, v[2] / t];
+}
 
-  public static addVec3(u: Vec3, v: Vec3): Vec3 {
-    return new Vec3(u.x + v.x, u.y + v.y, u.z + v.z);
-  }
+export function dot(u: Vec3, v: Vec3): number {
+  return u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
+}
 
-  public static subVec3(u: Vec3, v: Vec3): Vec3 {
-    return new Vec3(u.x - v.x, u.y - v.y, u.z - v.z);
-  }
+export function cross(u: Vec3, v: Vec3): Vec3 {
+  // prettier-ignore
+  return [
+      u[1] * v[2] - u[2] * v[1],
+      u[2] * v[0] - u[0] * v[2],
+      u[0] * v[1] - u[1] * v[0]
+    ];
+}
 
-  public static multVec3(u: Vec3, v: Vec3): Vec3 {
-    return new Vec3(u.x * v.x, u.y * v.y, u.z * v.z);
-  }
+export function unitVector(v: Vec3): Vec3 {
+  return divScalarVec(v, length(v));
+}
 
-  public static multScalarVec3(v: Vec3, t: number): Vec3 {
-    return new Vec3(t * v.x, t * v.y, t * v.z);
-  }
+export function random(): Vec3 {
+  return [randomNumber(), randomNumber(), randomNumber()];
+}
 
-  public static divScalarVec(v: Vec3, t: number): Vec3 {
-    return new Vec3(v.x / t, v.y / t, v.z / t);
-  }
+export function randomRange(min: number, max: number): Vec3 {
+  return [randomNumberRange(min, max), randomNumberRange(min, max), randomNumberRange(min, max)];
+}
 
-  public static dot(u: Vec3, v: Vec3): number {
-    return u.x * v.x + u.y * v.y + u.z * v.z;
-  }
-
-  public static cross(u: Vec3, v: Vec3): Vec3 {
-    // prettier-ignore
-    return new Vec3(
-      u.y * v.z - u.z * v.y,
-      u.z * v.x - u.x * v.z,
-      u.x * v.y - u.y * v.x);
-  }
-
-  public static unitVector(v: Vec3): Vec3 {
-    return Vec3.divScalarVec(v, v.length());
-  }
-
-  public static random(): Vec3 {
-    return new Vec3(randomNumber(), randomNumber(), randomNumber());
-  }
-
-  public static randomRange(min: number, max: number): Vec3 {
-    return new Vec3(randomNumberRange(min, max), randomNumberRange(min, max), randomNumberRange(min, max));
-  }
-
-  public static randomInUnitSphere(): Vec3 {
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const p = Vec3.randomRange(-1, 1);
-      if (p.lengthSquared() >= 1) {
-        continue;
-      }
-      return p;
+export function randomInUnitSphere(): Vec3 {
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const p = randomRange(-1, 1);
+    if (lengthSquared(p) >= 1) {
+      continue;
     }
+    return p;
   }
+}
 
-  public static randomUnitVector(): Vec3 {
-    const a = randomNumberRange(0, 2 * Math.PI);
-    const z = randomNumberRange(-1, 1);
-    const r = Math.sqrt(1 - z * z);
-    return new Vec3(r * Math.cos(a), r * Math.sin(a), z);
+export function randomUnitVector(): Vec3 {
+  const a = randomNumberRange(0, 2 * Math.PI);
+  const z = randomNumberRange(-1, 1);
+  const r = Math.sqrt(1 - z * z);
+  return [r * Math.cos(a), r * Math.sin(a), z];
+}
+
+export function randomInHemisphere(normal: Vec3): Vec3 {
+  const in_unit_sphere = randomInUnitSphere();
+  if (dot(in_unit_sphere, normal) > 0.0) {
+    // In the same hemisphere as the normal
+    return in_unit_sphere;
+  } else {
+    return negate(in_unit_sphere);
   }
+}
 
-  public static randomInHemisphere(normal: Vec3): Vec3 {
-    const in_unit_sphere = Vec3.randomInUnitSphere();
-    if (Vec3.dot(in_unit_sphere, normal) > 0.0) {
-      // In the same hemisphere as the normal
-      return in_unit_sphere;
-    } else {
-      return in_unit_sphere.negate();
+export function reflect(v: Vec3, n: Vec3): Vec3 {
+  return subVec3(v, multScalarVec3(n, 2 * dot(v, n)));
+}
+
+export function refract(uv: Vec3, n: Vec3, etai_over_etat: number): Vec3 {
+  const cos_theta = dot(negate(uv), n);
+  const uvTheta = addVec3(uv, multScalarVec3(n, cos_theta));
+  const r_out_parallel = multScalarVec3(uvTheta, etai_over_etat);
+  const r_out_perp = multScalarVec3(n, -Math.sqrt(1 - lengthSquared(r_out_parallel)));
+  return addVec3(r_out_parallel, r_out_perp);
+}
+
+export function randomInUnitdisk(): Vec3 {
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const p: Vec3 = [randomNumberRange(-1, 1), randomNumberRange(-1, 1), 0];
+    if (lengthSquared(p) >= 1) {
+      continue;
     }
-  }
-
-  public static reflect(v: Vec3, n: Vec3): Vec3 {
-    return Vec3.subVec3(v, Vec3.multScalarVec3(n, 2 * Vec3.dot(v, n)));
-  }
-
-  public static refract(uv: Vec3, n: Vec3, etai_over_etat: number): Vec3 {
-    const cos_theta = Vec3.dot(uv.negate(), n);
-    const uvTheta = Vec3.addVec3(uv, Vec3.multScalarVec3(n, cos_theta));
-    const r_out_parallel = Vec3.multScalarVec3(uvTheta, etai_over_etat);
-    const r_out_perp = Vec3.multScalarVec3(n, -Math.sqrt(1 - r_out_parallel.lengthSquared()));
-    return Vec3.addVec3(r_out_parallel, r_out_perp);
-  }
-
-  public static randomInUnitdisk(): Vec3 {
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const p = new Vec3(randomNumberRange(-1, 1), randomNumberRange(-1, 1), 0);
-      if (p.lengthSquared() >= 1) {
-        continue;
-      }
-      return p;
-    }
+    return p;
   }
 }
 
 export function writeColor(array: Uint8ClampedArray, offset: number, color: Vec3, samples_per_pixel: number): void {
-  let r = color.r;
-  let g = color.g;
-  let b = color.b;
+  let r = color[0];
+  let g = color[1];
+  let b = color[2];
 
   // Divide the color total by the number of samples and gamma-correct for gamma=2.0.
   const scale = 1.0 / samples_per_pixel;

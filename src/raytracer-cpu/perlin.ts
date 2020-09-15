@@ -1,6 +1,7 @@
 import { serializable } from '../serializing';
 import { randomInt } from '../util';
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
+import * as Vector from '../vec3';
 
 @serializable
 export default class Perlin {
@@ -13,7 +14,7 @@ export default class Perlin {
   public constructor() {
     this._ranVecs = new Array<Vec3>(Perlin._pointCount);
     for (let i = 0; i < Perlin._pointCount; i++) {
-      this._ranVecs[i] = Vec3.unitVector(Vec3.randomRange(-1, 1));
+      this._ranVecs[i] = Vector.unitVector(Vector.randomRange(-1, 1));
     }
 
     this._permX = Perlin.perlinGeneratePerm();
@@ -22,9 +23,9 @@ export default class Perlin {
   }
 
   public noise(p: Vec3): number {
-    let u = p.x - Math.floor(p.x);
-    let v = p.y - Math.floor(p.y);
-    let w = p.z - Math.floor(p.z);
+    let u = p[0] - Math.floor(p[0]);
+    let v = p[1] - Math.floor(p[1]);
+    let w = p[2] - Math.floor(p[2]);
 
     // const i = Math.trunc(4 * p.x) & 255;
     // const j = Math.trunc(4 * p.y) & 255;
@@ -34,9 +35,9 @@ export default class Perlin {
     v = v * v * (3 - 2 * v);
     w = w * w * (3 - 2 * w);
 
-    const i = Math.floor(p.x);
-    const j = Math.floor(p.y);
-    const k = Math.floor(p.z);
+    const i = Math.floor(p[0]);
+    const j = Math.floor(p[1]);
+    const k = Math.floor(p[2]);
 
     const c: Vec3[][][] = [
       [[], []],
@@ -62,7 +63,7 @@ export default class Perlin {
     for (let i = 0; i < depth; i++) {
       accum += weight * this.noise(temp_p);
       weight *= 0.5;
-      temp_p = Vec3.multScalarVec3(temp_p, 2);
+      temp_p = Vector.multScalarVec3(temp_p, 2);
     }
 
     return Math.abs(accum);
@@ -99,12 +100,12 @@ function trilinearInterp(c: Vec3[][][], u: number, v: number, w: number): number
   for (let i = 0; i < 2; i++) {
     for (let j = 0; j < 2; j++) {
       for (let k = 0; k < 2; k++) {
-        const weight = new Vec3(u - i, v - j, w - k);
+        const weight: Vec3 = [u - i, v - j, w - k];
         // prettier-ignore
         accum += (i * uu + (1 - i) * (1 - uu))
                * (j * vv + (1 - j) * (1 - vv))
                * (k * ww + (1 - k) * (1 - ww))
-               * Vec3.dot(c[i][j][k], weight);
+               * Vector.dot(c[i][j][k], weight);
       }
     }
   }

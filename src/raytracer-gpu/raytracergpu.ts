@@ -4,7 +4,8 @@
 import { DoneCallback, RaytracerBase } from '../raytracerbase';
 import WebGPUContext from './webgpucontext';
 import WebGPUComputePipline from './webgpucomputepipeline';
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
+import * as Vector from '../vec3';
 import { randomNumberRange } from '../util';
 import Camera from '../camera';
 import WebGPURenderPipeline from './webgpurenderpipeline';
@@ -66,9 +67,9 @@ export default class RaytracerGPU extends RaytracerBase {
 
     const randomSceneArray = this.createRandomScene();
     const aspectRatio = this._imageWidth / this._imageHeight;
-    const lookFrom = new Vec3(13, 2, 3);
-    const lookAt = new Vec3(0, 0, 0);
-    const vUp = new Vec3(0, 1, 0);
+    const lookFrom: Vec3 = [13, 2, 3];
+    const lookAt: Vec3 = [0, 0, 0];
+    const vUp: Vec3 = [0, 1, 0];
     const focusDist = 10;
     //const aperture = 0.1;
     const aperture = 0.0;
@@ -203,7 +204,7 @@ export default class RaytracerGPU extends RaytracerBase {
     refractIdx: number
   ): number[] {
     const array: number[] = [];
-    array.push(...center.array, radius, material, ...albedo.array, roughness, refractIdx);
+    array.push(...center, radius, material, ...albedo, roughness, refractIdx);
 
     // padding;
     array.push(0, 0);
@@ -214,29 +215,29 @@ export default class RaytracerGPU extends RaytracerBase {
   private createRandomScene(): Float32Array {
     const array: number[] = [];
 
-    array.push(...this.createSphere(new Vec3(0.0, -1000, 0.0), 1000, 0.5, new Vec3(0.5, 0.5, 0.5), 0.0, 1.0));
-    array.push(...this.createSphere(new Vec3(0.0, 1.0, 0.0), 1.0, 1.0, new Vec3(1.0, 1.0, 1.0), 1.0, 1.5));
-    array.push(...this.createSphere(new Vec3(-4.0, 1.0, 0.0), 1.0, 0.5, new Vec3(0.4, 0.2, 0.1), 0.0, 1.0));
-    array.push(...this.createSphere(new Vec3(4.0, 1.0, 0.0), 1.0, 0.9, new Vec3(0.7, 0.6, 0.5), 0.0, 1.0));
+    array.push(...this.createSphere([0.0, -1000, 0.0], 1000, 0.5, [0.5, 0.5, 0.5], 0.0, 1.0));
+    array.push(...this.createSphere([0.0, 1.0, 0.0], 1.0, 1.0, [1.0, 1.0, 1.0], 1.0, 1.5));
+    array.push(...this.createSphere([-4.0, 1.0, 0.0], 1.0, 0.5, [0.4, 0.2, 0.1], 0.0, 1.0));
+    array.push(...this.createSphere([4.0, 1.0, 0.0], 1.0, 0.9, [0.7, 0.6, 0.5], 0.0, 1.0));
 
     for (let a = -11; a < 11; a++) {
       for (let b = -11; b < 11; b++) {
         const chooseMat = Math.random();
 
-        const center = new Vec3(a + 0.9 * Math.random(), 0.2, b + 0.9 * Math.random());
+        const center: Vec3 = [a + 0.9 * Math.random(), 0.2, b + 0.9 * Math.random()];
 
-        if (Vec3.subVec3(center, new Vec3(4, 0.2, 0)).length() > 0.9) {
+        if (Vector.length(Vector.subVec3(center, [4, 0.2, 0])) > 0.9) {
           let albedo: Vec3;
           let roughness = 0.0;
           let refIdx = 1.0;
 
           if (chooseMat < 0.8) {
-            albedo = Vec3.multVec3(Vec3.random(), Vec3.random());
+            albedo = Vector.multVec3(Vector.random(), Vector.random());
           } else if (chooseMat < 0.95) {
             roughness = randomNumberRange(0, 0.5);
-            albedo = Vec3.randomRange(0.5, 1);
+            albedo = Vector.randomRange(0.5, 1);
           } else {
-            albedo = new Vec3(1.0, 1.0, 1.0);
+            albedo = [1.0, 1.0, 1.0];
             refIdx = 1.5;
           }
 

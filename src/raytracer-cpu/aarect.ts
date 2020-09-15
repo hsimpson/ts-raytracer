@@ -2,7 +2,7 @@ import AABB from './aabb';
 import { HitRecord, Hittable } from './hittable';
 import Material from './material';
 import Ray from './ray';
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
 import { serializable } from '../serializing';
 
 @serializable
@@ -25,12 +25,12 @@ export class XYRect extends Hittable {
   }
 
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const t = (this._k - r.origin.z) / r.direction.z;
+    const t = (this._k - r.origin[2]) / r.direction[2];
     if (t < t_min || t > t_max) {
       return false;
     }
-    const x = r.origin.x + t * r.direction.x;
-    const y = r.origin.y + t * r.direction.y;
+    const x = r.origin[0] + t * r.direction[0];
+    const y = r.origin[1] + t * r.direction[1];
     if (x < this._x0 || x > this._x1 || y < this._y0 || y > this._y1) {
       return false;
     }
@@ -38,7 +38,7 @@ export class XYRect extends Hittable {
     rec.v = (y - this._y0) / (this._y1 - this._y0);
     rec.t = t;
 
-    const outwardNormal = new Vec3(0, 0, 1);
+    const outwardNormal: Vec3 = [0, 0, 1];
     rec.setFaceNormal(r, outwardNormal);
     rec.mat = this._material;
     rec.p = r.at(t);
@@ -49,10 +49,7 @@ export class XYRect extends Hittable {
     // The bounding box must have non-zero width in each dimension, so pad the Z
     // dimension a small amount.
 
-    const newOutputBox = new AABB(
-      new Vec3(this._x0, this._y0, this._k - 0.0001),
-      new Vec3(this._x1, this._y1, this._k + 0.0001)
-    );
+    const newOutputBox = new AABB([this._x0, this._y0, this._k - 0.0001], [this._x1, this._y1, this._k + 0.0001]);
     newOutputBox.copyTo(outputBox);
 
     return true;
@@ -79,12 +76,12 @@ export class XZRect extends Hittable {
   }
 
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const t = (this._k - r.origin.y) / r.direction.y;
+    const t = (this._k - r.origin[1]) / r.direction[1];
     if (t < t_min || t > t_max) {
       return false;
     }
-    const x = r.origin.x + t * r.direction.x;
-    const z = r.origin.z + t * r.direction.z;
+    const x = r.origin[0] + t * r.direction[0];
+    const z = r.origin[2] + t * r.direction[2];
     if (x < this._x0 || x > this._x1 || z < this._z0 || z > this._z1) {
       return false;
     }
@@ -92,7 +89,7 @@ export class XZRect extends Hittable {
     rec.v = (z - this._z0) / (this._z1 - this._z0);
     rec.t = t;
 
-    const outwardNormal = new Vec3(0, 1, 0);
+    const outwardNormal: Vec3 = [0, 1, 0];
     rec.setFaceNormal(r, outwardNormal);
     rec.mat = this._material;
     rec.p = r.at(t);
@@ -103,10 +100,7 @@ export class XZRect extends Hittable {
     // The bounding box must have non-zero width in each dimension, so pad the Z
     // dimension a small amount.
 
-    const newOutputBox = new AABB(
-      new Vec3(this._x0, this._k - 0.0001, this._z0),
-      new Vec3(this._x1, this._k + 0.0001, this._z1)
-    );
+    const newOutputBox = new AABB([this._x0, this._k - 0.0001, this._z0], [this._x1, this._k + 0.0001, this._z1]);
     newOutputBox.copyTo(outputBox);
 
     return true;
@@ -133,12 +127,12 @@ export class YZRect extends Hittable {
   }
 
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const t = (this._k - r.origin.x) / r.direction.x;
+    const t = (this._k - r.origin[0]) / r.direction[0];
     if (t < t_min || t > t_max) {
       return false;
     }
-    const y = r.origin.y + t * r.direction.y;
-    const z = r.origin.z + t * r.direction.z;
+    const y = r.origin[1] + t * r.direction[1];
+    const z = r.origin[2] + t * r.direction[2];
     if (y < this._y0 || y > this._y1 || z < this._z0 || z > this._z1) {
       return false;
     }
@@ -146,7 +140,7 @@ export class YZRect extends Hittable {
     rec.v = (z - this._z0) / (this._z1 - this._z0);
     rec.t = t;
 
-    const outwardNormal = new Vec3(1, 0, 0);
+    const outwardNormal: Vec3 = [1, 0, 0];
     rec.setFaceNormal(r, outwardNormal);
     rec.mat = this._material;
     rec.p = r.at(t);
@@ -157,10 +151,7 @@ export class YZRect extends Hittable {
     // The bounding box must have non-zero width in each dimension, so pad the Z
     // dimension a small amount.
 
-    const newOutputBox = new AABB(
-      new Vec3(this._k - 0.0001, this._y0, this._z0),
-      new Vec3(this._k + 0.0001, this._y1, this._z1)
-    );
+    const newOutputBox = new AABB([this._k - 0.0001, this._y0, this._z0], [this._k + 0.0001, this._y1, this._z1]);
     newOutputBox.copyTo(outputBox);
 
     return true;

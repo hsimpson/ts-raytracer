@@ -1,7 +1,8 @@
 import Material from './material';
 import { HitRecord } from './hittable';
 import Ray from './ray';
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
+import * as Vector from '../vec3';
 import { serializable } from '../serializing';
 import { Texture, SolidColor } from './texture';
 
@@ -21,10 +22,10 @@ export default class LambertianMaterial extends Material {
   }
 
   public scatter(r_in: Ray, rec: HitRecord, attenuation: Vec3, scattered: Ray): boolean {
-    const scatter_direction = Vec3.addVec3(rec.normal, Vec3.randomUnitVector());
+    const scatter_direction = Vector.addVec3(rec.normal, Vector.randomUnitVector());
     new Ray(rec.p, scatter_direction, r_in.time).copyTo(scattered);
     const col = this.albedo.value(rec.u, rec.v, rec.p);
-    col.copyTo(attenuation);
+    Vector.copyTo(col, attenuation);
     return true;
   }
 }
