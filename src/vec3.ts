@@ -6,15 +6,11 @@ export function isVec3(v: any): v is Vec3 {
 }
 
 export function set(v: Vec3, ...u: Vec3): void {
-  v[0] = u[0];
-  v[1] = u[1];
-  v[2] = u[2];
+  [v[0], v[1], v[2]] = u;
 }
 
 export function copyTo(v: Vec3, dest: Vec3): void {
-  dest[0] = v[0];
-  dest[1] = v[1];
-  dest[2] = v[2];
+  [dest[0], dest[1], dest[2]] = v;
 }
 
 export function clone(v: Vec3): Vec3 {
