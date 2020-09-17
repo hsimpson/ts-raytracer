@@ -6,6 +6,7 @@ import {
   cornellBox,
   cornellBoxSmoke,
   earthSphere,
+  finalScene,
   randomScene,
   simpleLight,
   twoPerlinSpheres,
@@ -100,6 +101,9 @@ export default class RaytracerCPU extends RaytracerBase {
         break;
       case 7:
         world = cornellBoxSmoke();
+        break;
+      case 8:
+        world = await finalScene();
         break;
     }
 

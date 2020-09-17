@@ -63,14 +63,19 @@ export default class MovingSphere extends Hittable {
   }
 
   public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
-    // FIXME!
-    /*
-    const newOutputBox = new AABB(
-      Vec3.subVec3(this.center, new Vec3(this.radius, this.radius, this.radius)),
-      Vec3.addVec3(this.center, new Vec3(this.radius, this.radius, this.radius))
+    const box0 = new AABB(
+      Vec3.subVec3(this.center(t0), new Vec3(this.radius, this.radius, this.radius)),
+      Vec3.addVec3(this.center(t0), new Vec3(this.radius, this.radius, this.radius))
     );
+
+    const box1 = new AABB(
+      Vec3.subVec3(this.center(t1), new Vec3(this.radius, this.radius, this.radius)),
+      Vec3.addVec3(this.center(t1), new Vec3(this.radius, this.radius, this.radius))
+    );
+
+    const newOutputBox = AABB.surroundingBox(box0, box1);
     newOutputBox.copyTo(outputBox);
-    */
+
     return true;
   }
 }

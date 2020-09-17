@@ -26,6 +26,13 @@ Features:
 
   CPU:
     ☐ Add progressive rendering like on GPU show each sample image
+    ☐ Look if Woker logik could be made with comlink: https://github.com/GoogleChromeLabs/comlink
 
   Common:
     ☐ Add favicon
+
+
+Refactoring:
+  TS:
+    ☐ Remove default exports and use named exports
+    ☐ Create Color & Point alias for Vec3

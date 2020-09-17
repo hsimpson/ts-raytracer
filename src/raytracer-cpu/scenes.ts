@@ -14,6 +14,8 @@ import { RotateY } from './rotation';
 import { Hittable } from './hittable';
 import Translate from './translate';
 import { ConstantMedium } from './constantmedium';
+import MovingSphere from './movingsphere';
+import BVHNode from './bvhnode';
 
 export function twoSpheres(): HittableList {
   const objects = new HittableList();
@@ -58,10 +60,10 @@ export async function earthSphere(): Promise<HittableList> {
 export function randomScene(): HittableList {
   const world = new HittableList();
 
-  //const groundMaterial = new LambertianMaterial(new Vec3(0.5, 0.5, 0.5));
-  const checkerTexture = new CheckerTexture(new Vec3(0.2, 0.3, 0.1), new Vec3(0.9, 0.9, 0.9));
-  const groundMaterial = new LambertianMaterial();
-  groundMaterial.texture = checkerTexture;
+  const groundMaterial = new LambertianMaterial(new Vec3(0.5, 0.5, 0.5));
+  // const checkerTexture = new CheckerTexture(new Vec3(0.2, 0.3, 0.1), new Vec3(0.9, 0.9, 0.9));
+  // const groundMaterial = new LambertianMaterial();
+  // groundMaterial.texture = checkerTexture;
 
   world.add(new Sphere(new Vec3(0, -1000, 0), 1000, groundMaterial));
   // let i = 1;
@@ -78,9 +80,9 @@ export function randomScene(): HittableList {
           // diffuse aka lambertian
           const albedo = Vec3.multVec3(Vec3.random(), Vec3.random());
           sphereMaterial = new LambertianMaterial(albedo);
-          //const center2 = Vec3.addVec3(center, new Vec3(0, randomNumberRange(0, 0.5), 0));
-          //world.add(new MovingSphere(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
-          world.add(new Sphere(center, 0.2, sphereMaterial));
+          const center2 = Vec3.addVec3(center, new Vec3(0, randomNumberRange(0, 0.5), 0));
+          world.add(new MovingSphere(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
+          //world.add(new Sphere(center, 0.2, sphereMaterial));
         } else if (chooseMat < 0.95) {
           // metal
           const albedo = Vec3.randomRange(0.5, 1);
@@ -104,8 +106,8 @@ export function randomScene(): HittableList {
   world.add(new Sphere(new Vec3(-4, 1, 0), 1, material2));
   world.add(new Sphere(new Vec3(4, 1, 0), 1, material3));
 
-  return world;
-  //return new HittableList(BVHNode.createFromHitableList(world));
+  //return world;
+  return new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0));
 }
 
 export function simpleLight(): HittableList {
@@ -180,6 +182,72 @@ export function cornellBoxSmoke(): HittableList {
   box2 = new RotateY(box2, -18);
   box2 = new Translate(box2, new Vec3(130, 0, 65));
   objects.add(new ConstantMedium(box2, 0.01, new Vec3(1, 1, 1)));
+
+  return objects;
+}
+
+export async function finalScene(): Promise<HittableList> {
+  const objects = new HittableList();
+  const boxes1 = new HittableList();
+
+  const ground = new LambertianMaterial(new Vec3(0.48, 0.83, 0.53));
+
+  const boxesPerSide = 20;
+  const w = 100.0;
+  const y0 = 0.0;
+
+  for (let i = 0; i < boxesPerSide; i++) {
+    for (let j = 0; j < boxesPerSide; j++) {
+      const x0 = -1000.0 + i * w;
+      const z0 = -1000.0 + j * w;
+      const x1 = x0 + w;
+      const y1 = randomNumberRange(1, 101);
+      const z1 = z0 + w;
+
+      boxes1.add(new Box(new Vec3(x0, y0, z0), new Vec3(x1, y1, z1), ground));
+    }
+  }
+
+  //objects.add(boxes1);
+  objects.add(BVHNode.createFromHitableList(boxes1, 0, 1));
+
+  const light = new DiffuseLight(new Vec3(7, 7, 7));
+  objects.add(new XZRect(123, 423, 147, 412, 554, light));
+
+  const center1 = new Vec3(400, 400, 200);
+  const center2 = Vec3.addVec3(center1, new Vec3(30, 0, 0));
+  const movingSphereMaterial = new LambertianMaterial(new Vec3(0.7, 0.3, 0.1));
+  objects.add(new MovingSphere(center1, center2, 0, 1, 50, movingSphereMaterial));
+
+  objects.add(new Sphere(new Vec3(260, 150, 45), 50, new DielectricMaterial(1.5)));
+  objects.add(new Sphere(new Vec3(0, 150, 145), 50, new MetalMaterial(new Vec3(0.8, 0.8, 0.9), 10.0)));
+
+  const boundary1 = new Sphere(new Vec3(360, 150, 145), 70, new DielectricMaterial(1.5));
+  objects.add(boundary1);
+  objects.add(new ConstantMedium(boundary1, 0.2, new Vec3(0.2, 0.4, 0.9)));
+  const boundary2 = new Sphere(new Vec3(0, 0, 0), 5000, new DielectricMaterial(1.5));
+  objects.add(new ConstantMedium(boundary2, 0.0001, new Vec3(1, 1, 1)));
+
+  const earthTexture = new ImageTexture();
+  await earthTexture.load('assets/textures/earthmap.jpg');
+
+  const earthMaterial = new LambertianMaterial();
+  earthMaterial.texture = earthTexture;
+  objects.add(new Sphere(new Vec3(400, 200, 400), 100, earthMaterial));
+
+  const perlinTexture = new NoiseTexture(0.1);
+  const perlinMaterial = new LambertianMaterial();
+  perlinMaterial.texture = perlinTexture;
+  objects.add(new Sphere(new Vec3(220, 280, 300), 80, perlinMaterial));
+
+  const boxes2 = new HittableList();
+  const white = new LambertianMaterial(new Vec3(0.73, 0.73, 0.73));
+  for (let j = 0; j < 1000; j++) {
+    boxes2.add(new Sphere(Vec3.randomRange(0, 165), 10, white));
+  }
+
+  //objects.add(new Translate(new RotateY(boxes2, 15), new Vec3(-100, 270, 395)));
+  objects.add(new Translate(new RotateY(BVHNode.createFromHitableList(boxes2, 0, 1), 15), new Vec3(-100, 270, 395)));
 
   return objects;
 }

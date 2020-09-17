@@ -14,6 +14,7 @@ import {
   WorkerMessage,
 } from './workerinterfaces';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const map = DeserializerMap;
 
 const _controllerCtx: Worker = self as never;
@@ -42,6 +43,8 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
   //const fovY = 20;
   let fovY = 40;
   let background = new Vec3(0, 0, 0);
+  const cameraT0 = 0.0;
+  let cameraT1 = 0.0;
 
   const world = deserialize(HittableList, msg.data.world);
 
@@ -52,6 +55,7 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
       lookAt = new Vec3(0, 0, 0);
       fovY = 20.0;
       aperture = 0.1;
+      cameraT1 = 1.0;
       break;
 
     case 2:
@@ -96,6 +100,14 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
       fovY = 40.0;
       break;
 
+    case 8:
+      background = new Vec3(0, 0, 0);
+      lookFrom = new Vec3(478, 278, -600);
+      lookAt = new Vec3(278, 278, 0);
+      fovY = 40.0;
+      cameraT1 = 1.0;
+      break;
+
     default:
       background = new Vec3(0, 0, 0);
       break;
@@ -103,8 +115,7 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
 
   const camera = new Camera();
   const vUp = new Vec3(0, 1, 0);
-  //camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist, 0.0, 1.0);
-  camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist, 0.0, 0.0);
+  camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist, cameraT0, cameraT1);
 
   let startLine = msg.data.imageHeight - 1;
   let availableLines = msg.data.imageHeight;

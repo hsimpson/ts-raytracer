@@ -29,6 +29,7 @@ const Gui = (): React.ReactElement => {
     { text: 'Area light', value: 5 },
     { text: 'Cornell Box', value: 6 },
     { text: 'Cornell Box Smoke', value: 7 },
+    { text: 'Final Scene', value: 8 },
   ];
 
   return (
