@@ -1,4 +1,5 @@
-import Vec3 from './vec3';
+import type { Vec3 } from './vec3';
+import * as Vector from './vec3';
 import Ray from './raytracer-cpu/ray';
 import { degreeToRadians, randomNumberRange } from './util';
 import { serializable } from './serializing';
@@ -46,21 +47,21 @@ export default class Camera {
     const viewport_height = 2 * h;
     const viewport_width = aspectRatio * viewport_height;
 
-    this.w = Vec3.unitVector(Vec3.subVec3(lookFrom, lookAt));
-    this.u = Vec3.unitVector(Vec3.cross(vUp, this.w));
-    this.v = Vec3.cross(this.w, this.u);
+    this.w = Vector.unitVector(Vector.subVec3(lookFrom, lookAt));
+    this.u = Vector.unitVector(Vector.cross(vUp, this.w));
+    this.v = Vector.cross(this.w, this.u);
 
     this.lookFrom = lookFrom;
-    this.horizontal = Vec3.multScalarVec3(this.u, focusDist * viewport_width);
-    this.vertical = Vec3.multScalarVec3(this.v, focusDist * viewport_height);
+    this.horizontal = Vector.multScalarVec3(this.u, focusDist * viewport_width);
+    this.vertical = Vector.multScalarVec3(this.v, focusDist * viewport_height);
 
-    const half_horizontal = Vec3.divScalarVec(this.horizontal, 2);
-    const half_vertical = Vec3.divScalarVec(this.vertical, 2);
+    const half_horizontal = Vector.divScalarVec(this.horizontal, 2);
+    const half_vertical = Vector.divScalarVec(this.vertical, 2);
 
-    const focusW = Vec3.multScalarVec3(this.w, focusDist);
+    const focusW = Vector.multScalarVec3(this.w, focusDist);
 
-    this.lowerLeftCorner = Vec3.subVec3(
-      Vec3.subVec3(Vec3.subVec3(this.lookFrom, half_horizontal), half_vertical),
+    this.lowerLeftCorner = Vector.subVec3(
+      Vector.subVec3(Vector.subVec3(this.lookFrom, half_horizontal), half_vertical),
       focusW
     );
 
@@ -70,31 +71,34 @@ export default class Camera {
   }
 
   public getRay(s: number, t: number): Ray {
-    const rd = Vec3.multScalarVec3(Vec3.randomInUnitdisk(), this.lenseRadius);
+    const rd = Vector.multScalarVec3(Vector.randomInUnitdisk(), this.lenseRadius);
 
-    const vecU = Vec3.multScalarVec3(this.u, rd.x);
-    const vecV = Vec3.multScalarVec3(this.v, rd.y);
-    const offset = Vec3.addVec3(vecU, vecV);
+    const vecU = Vector.multScalarVec3(this.u, rd[0]);
+    const vecV = Vector.multScalarVec3(this.v, rd[1]);
+    const offset = Vector.addVec3(vecU, vecV);
 
-    const sHor = Vec3.multScalarVec3(this.horizontal, s);
-    const tVer = Vec3.multScalarVec3(this.vertical, t);
+    const sHor = Vector.multScalarVec3(this.horizontal, s);
+    const tVer = Vector.multScalarVec3(this.vertical, t);
 
     return new Ray(
-      Vec3.addVec3(this.lookFrom, offset),
-      Vec3.subVec3(Vec3.subVec3(Vec3.addVec3(Vec3.addVec3(this.lowerLeftCorner, sHor), tVer), this.lookFrom), offset),
+      Vector.addVec3(this.lookFrom, offset),
+      Vector.subVec3(
+        Vector.subVec3(Vector.addVec3(Vector.addVec3(this.lowerLeftCorner, sHor), tVer), this.lookFrom),
+        offset
+      ),
       randomNumberRange(this.time0, this.time1)
     );
   }
 
   public getUniformArray(): Float32Array {
     const array = [];
-    array.push(...this.lookFrom.array, 0.0); // vec4 because of memory alignment
-    array.push(...this.lowerLeftCorner.array, 0.0);
-    array.push(...this.horizontal.array, 0.0);
-    array.push(...this.vertical.array, 0.0);
-    array.push(...this.u.array, 0.0);
-    array.push(...this.v.array, 0.0);
-    array.push(...this.w.array, 0.0);
+    array.push(...this.lookFrom, 0.0); // vec4 because of memory alignment
+    array.push(...this.lowerLeftCorner, 0.0);
+    array.push(...this.horizontal, 0.0);
+    array.push(...this.vertical, 0.0);
+    array.push(...this.u, 0.0);
+    array.push(...this.v, 0.0);
+    array.push(...this.w, 0.0);
     array.push(this.lenseRadius);
 
     return new Float32Array(array);

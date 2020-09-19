@@ -1,7 +1,7 @@
 import ComputeWorker from 'worker-loader!./compute.worker';
 import Camera from '../camera';
 import { deserialize, serialize } from '../serializing';
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
 import { DeserializerMap } from './deserializermap';
 import { HittableList } from './hittablelist';
 import {
@@ -42,7 +42,7 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
   //const aperture = 0.0;
   //const fovY = 20;
   let fovY = 40;
-  let background = new Vec3(0, 0, 0);
+  let background: Vec3 = [0, 0, 0];
   const cameraT0 = 0.0;
   let cameraT1 = 0.0;
 
@@ -50,71 +50,71 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
 
   switch (msg.data.sceneIdx) {
     case 1:
-      background = new Vec3(0.7, 0.8, 1.0);
-      lookFrom = new Vec3(13, 2, 3);
-      lookAt = new Vec3(0, 0, 0);
+      background = [0.7, 0.8, 1.0];
+      lookFrom = [13, 2, 3];
+      lookAt = [0, 0, 0];
       fovY = 20.0;
       aperture = 0.1;
       cameraT1 = 1.0;
       break;
 
     case 2:
-      background = new Vec3(0.7, 0.8, 1.0);
-      lookFrom = new Vec3(13, 2, 3);
-      lookAt = new Vec3(0, 0, 0);
+      background = [0.7, 0.8, 1.0];
+      lookFrom = [13, 2, 3];
+      lookAt = [0, 0, 0];
       fovY = 20.0;
       break;
 
     case 3:
-      background = new Vec3(0.7, 0.8, 1.0);
-      lookFrom = new Vec3(13, 2, 3);
-      lookAt = new Vec3(0, 0, 0);
+      background = [0.7, 0.8, 1.0];
+      lookFrom = [13, 2, 3];
+      lookAt = [0, 0, 0];
       fovY = 20.0;
       break;
 
     case 4:
-      background = new Vec3(0.7, 0.8, 1.0);
-      lookFrom = new Vec3(13, 2, 3);
-      lookAt = new Vec3(0, 0, 0);
+      background = [0.7, 0.8, 1.0];
+      lookFrom = [13, 2, 3];
+      lookAt = [0, 0, 0];
       fovY = 20.0;
       break;
 
     case 5:
-      background = new Vec3(0, 0, 0);
-      lookFrom = new Vec3(26, 3, 6);
-      lookAt = new Vec3(0, 2, 0);
+      background = [0, 0, 0];
+      lookFrom = [26, 3, 6];
+      lookAt = [0, 2, 0];
       fovY = 20.0;
       break;
 
     case 6:
-      background = new Vec3(0, 0, 0);
-      lookFrom = new Vec3(278, 278, -800);
-      lookAt = new Vec3(278, 278, 0);
+      background = [0, 0, 0];
+      lookFrom = [278, 278, -800];
+      lookAt = [278, 278, 0];
       fovY = 40.0;
       break;
 
     case 7:
-      background = new Vec3(0, 0, 0);
-      lookFrom = new Vec3(278, 278, -800);
-      lookAt = new Vec3(278, 278, 0);
+      background = [0, 0, 0];
+      lookFrom = [278, 278, -800];
+      lookAt = [278, 278, 0];
       fovY = 40.0;
       break;
 
     case 8:
-      background = new Vec3(0, 0, 0);
-      lookFrom = new Vec3(478, 278, -600);
-      lookAt = new Vec3(278, 278, 0);
+      background = [0, 0, 0];
+      lookFrom = [478, 278, -600];
+      lookAt = [278, 278, 0];
       fovY = 40.0;
       cameraT1 = 1.0;
       break;
 
     default:
-      background = new Vec3(0, 0, 0);
+      background = [0, 0, 0];
       break;
   }
 
   const camera = new Camera();
-  const vUp = new Vec3(0, 1, 0);
+  const vUp: Vec3 = [0, 1, 0];
   camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist, cameraT0, cameraT1);
 
   let startLine = msg.data.imageHeight - 1;
@@ -130,7 +130,7 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
         workerId,
         camera: serialize(Camera, camera),
         world: serialize(HittableList, world),
-        background: serialize(Vec3, background),
+        background: background,
         imageWidth: msg.data.imageWidth,
         imageHeight: msg.data.imageHeight,
         scanlineCount: availableLines - lineLoad < 0 ? availableLines : lineLoad,

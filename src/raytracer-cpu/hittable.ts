@@ -1,11 +1,12 @@
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
+import * as Vector from '../vec3';
 import Ray from './ray';
 import Material from './material';
 import AABB from './aabb';
 
 export class HitRecord {
-  public p: Vec3 = new Vec3();
-  public normal: Vec3 = new Vec3();
+  public p: Vec3 = [0, 0, 0];
+  public normal: Vec3 = [0, 0, 0];
   public t = 0;
   public u = 0;
   public v = 0;
@@ -13,8 +14,8 @@ export class HitRecord {
   public mat: Material;
 
   public setFaceNormal(r: Ray, outward_normal: Vec3): void {
-    this.frontFace = Vec3.dot(r.direction, outward_normal) < 0;
-    this.normal = this.frontFace ? outward_normal : outward_normal.negate();
+    this.frontFace = Vector.dot(r.direction, outward_normal) < 0;
+    this.normal = this.frontFace ? outward_normal : Vector.negate(outward_normal);
   }
 
   public copyTo(dest: HitRecord): void {
