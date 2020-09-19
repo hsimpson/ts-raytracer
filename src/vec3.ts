@@ -1,6 +1,7 @@
 import { randomNumber, randomNumberRange } from './util';
 export type Vec3 = [r: number, g: number, b: number] | [x: number, y: number, z: number];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
 export function isVec3(v: any): v is Vec3 {
   return Array.isArray(v) && typeof v[0] === 'number' && typeof v[1] === 'number' && typeof v[2] === 'number';
 }
@@ -90,10 +91,10 @@ export function dot(u: Vec3, v: Vec3): number {
 export function cross(u: Vec3, v: Vec3): Vec3 {
   // prettier-ignore
   return [
-      u[1] * v[2] - u[2] * v[1],
-      u[2] * v[0] - u[0] * v[2],
-      u[0] * v[1] - u[1] * v[0]
-    ];
+    u[1] * v[2] - u[2] * v[1],
+    u[2] * v[0] - u[0] * v[2],
+    u[0] * v[1] - u[1] * v[0]
+  ];
 }
 
 export function unitVector(v: Vec3): Vec3 {
