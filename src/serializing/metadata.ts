@@ -2,14 +2,14 @@
 
 import { SerializableType } from './interfaces';
 
-const _metaMap = new Map<string, SerializableType<any>>();
+const _metaMap = new Map<string, SerializableType>();
 
-export function addClassName(type: SerializableType<any>): void {
+export function addClassName(type: SerializableType): void {
   //console.log(`add constructor of ${type.name} to map`);
   _metaMap.set(type.name, type);
 }
 
-export function getClassConstructor(name: string): SerializableType<any> | null {
+export function getClassConstructor(name: string): SerializableType | null {
   if (_metaMap.has(name)) {
     return _metaMap.get(name);
   }

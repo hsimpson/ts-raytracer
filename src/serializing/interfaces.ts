@@ -2,15 +2,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type JsonType = null | string | number | boolean | JsonObject | JsonArray;
 
-export interface SerializableType<T> {
-  new (...args: any[]): T;
+export interface SerializableType {
+  new (...args: any[]): any;
 }
 
-export interface JsonObject extends Indexable<JsonType | JsonObject> {}
+export interface JsonObject extends Indexable {}
 export interface JsonArray extends Array<JsonType> {}
 
-export interface Indexable<T = any | null> {
-  [idx: string]: T;
+export interface Indexable {
+  [idx: string]: JsonType;
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
