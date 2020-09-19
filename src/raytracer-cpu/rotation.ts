@@ -1,6 +1,7 @@
 import { serializable } from '../serializing';
 import { degreeToRadians } from '../util';
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
+import * as Vector from '../vec3';
 import AABB from './aabb';
 import { HitRecord, Hittable } from './hittable';
 import Ray from './ray';
@@ -21,29 +22,29 @@ export class RotateY extends Hittable {
     this._cosTheta = Math.cos(radians);
     this._hasBox = this._p.boundingBox(0, 1, this._bbBox);
 
-    const min = new Vec3(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
-    const max = new Vec3(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
+    const min: Vec3 = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
+    const max: Vec3 = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];
 
     for (let i = 0; i < 2; i++) {
       for (let j = 0; j < 2; j++) {
         for (let k = 0; k < 2; k++) {
-          const x = i * this._bbBox.max.x + (1 - i) * this._bbBox.min.x;
-          const y = j * this._bbBox.max.y + (1 - j) * this._bbBox.min.y;
-          const z = k * this._bbBox.max.z + (1 - k) * this._bbBox.min.z;
+          const x = i * this._bbBox.max[0] + (1 - i) * this._bbBox.min[0];
+          const y = j * this._bbBox.max[0] + (1 - j) * this._bbBox.min[0];
+          const z = k * this._bbBox.max[2] + (1 - k) * this._bbBox.min[2];
 
           const newx = this._cosTheta * x + this._sinTheta * z;
           const newz = -this._sinTheta * x + this._cosTheta * z;
 
-          const tester = new Vec3(newx, y, newz);
+          const tester = [newx, y, newz];
 
-          min.x = Math.min(min.x, tester.x);
-          max.x = Math.max(max.x, tester.x);
+          min[0] = Math.min(min[0], tester[0]);
+          max[0] = Math.max(max[0], tester[0]);
 
-          min.y = Math.min(min.y, tester.y);
-          max.y = Math.max(max.y, tester.y);
+          min[1] = Math.min(min[1], tester[1]);
+          max[1] = Math.max(max[1], tester[1]);
 
-          min.z = Math.min(min.z, tester.z);
-          max.z = Math.max(max.z, tester.z);
+          min[2] = Math.min(min[2], tester[2]);
+          max[2] = Math.max(max[2], tester[2]);
         }
       }
     }
@@ -52,14 +53,14 @@ export class RotateY extends Hittable {
   }
 
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const origin = r.origin.clone();
-    const direction = r.direction.clone();
+    const origin = Vector.clone(r.origin);
+    const direction = Vector.clone(r.direction);
 
-    origin.x = this._cosTheta * r.origin.x - this._sinTheta * r.origin.z;
-    origin.z = this._sinTheta * r.origin.x + this._cosTheta * r.origin.z;
+    origin[0] = this._cosTheta * r.origin[0] - this._sinTheta * r.origin[2];
+    origin[2] = this._sinTheta * r.origin[0] + this._cosTheta * r.origin[2];
 
-    direction.x = this._cosTheta * r.direction.x - this._sinTheta * r.direction.z;
-    direction.z = this._sinTheta * r.direction.x + this._cosTheta * r.direction.z;
+    direction[0] = this._cosTheta * r.direction[0] - this._sinTheta * r.direction[2];
+    direction[2] = this._sinTheta * r.direction[0] + this._cosTheta * r.direction[2];
 
     const rotatedRay = new Ray(origin, direction, r.time);
 
@@ -70,11 +71,11 @@ export class RotateY extends Hittable {
     const p = rec.p;
     const normal = rec.normal;
 
-    p.x = this._cosTheta * rec.p.x + this._sinTheta * rec.p.z;
-    p.z = -this._sinTheta * rec.p.x + this._cosTheta * rec.p.z;
+    p[0] = this._cosTheta * rec.p[0] + this._sinTheta * rec.p[2];
+    p[2] = -this._sinTheta * rec.p[0] + this._cosTheta * rec.p[2];
 
-    normal.x = this._cosTheta * rec.normal.x + this._sinTheta * rec.normal.z;
-    normal.z = -this._sinTheta * rec.normal.x + this._cosTheta * rec.normal.z;
+    normal[0] = this._cosTheta * rec.normal[0] + this._sinTheta * rec.normal[2];
+    normal[2] = -this._sinTheta * rec.normal[0] + this._cosTheta * rec.normal[2];
 
     rec.p = p;
     rec.setFaceNormal(rotatedRay, normal);

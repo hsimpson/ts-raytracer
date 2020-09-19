@@ -1,4 +1,5 @@
 import { JsonObject } from '../serializing';
+import type { Vec3 } from '../vec3';
 import { HittableList } from './hittablelist';
 
 export enum ControllerCommands {
@@ -44,7 +45,7 @@ export interface ComputeStartMessage extends WorkerMessage {
     workerId: number;
     camera: JsonObject;
     world: JsonObject;
-    background: JsonObject;
+    background: Vec3;
     imageWidth: number;
     imageHeight: number;
     scanlineCount: number;

@@ -1,4 +1,4 @@
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
 import Ray from './ray';
 import { serializable } from '../serializing';
 
@@ -8,8 +8,8 @@ export default class AABB {
   private _max: Vec3;
 
   public constructor(min?: Vec3, max?: Vec3) {
-    this._min = min ?? new Vec3();
-    this._max = max ?? new Vec3();
+    this._min = min ?? [0, 0, 0];
+    this._max = max ?? [0, 0, 0];
   }
 
   public copyTo(dest: AABB): void {
@@ -46,9 +46,9 @@ export default class AABB {
 
   public hit(r: Ray, tmin: number, tmax: number): boolean {
     for (let a = 0; a < 3; a++) {
-      const invD = 1.0 / r.direction.array[a];
-      let t0 = (this._min.array[a] - r.origin.array[a]) * invD;
-      let t1 = (this._max.array[a] - r.origin.array[a]) * invD;
+      const invD = 1.0 / r.direction[a];
+      let t0 = (this._min[a] - r.origin[a]) * invD;
+      let t1 = (this._max[a] - r.origin[a]) * invD;
 
       if (invD < 0.0) {
         const tmp = t0;
@@ -66,17 +66,17 @@ export default class AABB {
   }
 
   public static surroundingBox(box0: AABB, box1: AABB): AABB {
-    const small = new Vec3(
-      Math.min(box0.min.x, box1.min.x),
-      Math.min(box0.min.y, box1.min.y),
-      Math.min(box0.min.z, box1.min.z)
-    );
+    const small: Vec3 = [
+      Math.min(box0.min[0], box1.min[0]),
+      Math.min(box0.min[1], box1.min[1]),
+      Math.min(box0.min[2], box1.min[2]),
+    ];
 
-    const big = new Vec3(
-      Math.max(box0.max.x, box1.max.x),
-      Math.max(box0.max.y, box1.max.y),
-      Math.max(box0.max.z, box1.max.z)
-    );
+    const big: Vec3 = [
+      Math.max(box0.max[0], box1.max[0]),
+      Math.max(box0.max[1], box1.max[1]),
+      Math.max(box0.max[2], box1.max[2]),
+    ];
 
     return new AABB(small, big);
   }

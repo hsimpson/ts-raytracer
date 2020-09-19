@@ -1,6 +1,7 @@
 import { serializable } from '../serializing';
 import { randomNumber } from '../util';
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
+import * as Vector from '../vec3';
 import AABB from './aabb';
 import { HitRecord, Hittable } from './hittable';
 import { IsoTropic } from './isotropic';
@@ -56,7 +57,7 @@ export class ConstantMedium extends Hittable {
       rec1.t = 0;
     }
 
-    const rayLength = r.direction.length();
+    const rayLength = Vector.length(r.direction);
     const distanceInsideBoundary = (rec2.t - rec1.t) * rayLength;
     const hitDistance = this._negInvDensity * Math.log(randomNumber());
 
@@ -74,7 +75,7 @@ export class ConstantMedium extends Hittable {
       `);
     }
 
-    rec.normal = new Vec3(1, 0, 0); // arbitrary
+    rec.normal = [1, 0, 0]; // arbitrary
     rec.frontFace = true; // also arbitrary
     rec.mat = this._phaseFunction;
 

@@ -1,5 +1,6 @@
 import { serializable } from '../serializing';
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
+import * as Vector from '../vec3';
 import AABB from './aabb';
 import { HitRecord, Hittable } from './hittable';
 import Ray from './ray';
@@ -16,12 +17,12 @@ export default class Translate extends Hittable {
   }
 
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const movedRay = new Ray(Vec3.subVec3(r.origin, this._offset), r.direction, r.time);
+    const movedRay = new Ray(Vector.subVec3(r.origin, this._offset), r.direction, r.time);
     if (!this._p.hit(movedRay, t_min, t_max, rec)) {
       return false;
     }
 
-    rec.p = Vec3.addVec3(rec.p, this._offset);
+    rec.p = Vector.addVec3(rec.p, this._offset);
     rec.setFaceNormal(movedRay, rec.normal);
 
     return true;
@@ -32,7 +33,10 @@ export default class Translate extends Hittable {
       return false;
     }
 
-    const newOutputBox = new AABB(Vec3.addVec3(outputBox.min, this._offset), Vec3.addVec3(outputBox.max, this._offset));
+    const newOutputBox = new AABB(
+      Vector.addVec3(outputBox.min, this._offset),
+      Vector.addVec3(outputBox.max, this._offset)
+    );
     newOutputBox.copyTo(outputBox);
     return true;
   }

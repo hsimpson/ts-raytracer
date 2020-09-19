@@ -1,5 +1,6 @@
 import { serializable } from '../serializing';
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
+import * as Vector from '../vec3';
 import { HitRecord } from './hittable';
 import Material from './material';
 import Ray from './ray';
@@ -11,7 +12,7 @@ export class IsoTropic extends Material {
 
   public constructor(albedo: Vec3 | Texture) {
     super();
-    if (albedo instanceof Vec3) {
+    if (Vector.isVec3(albedo)) {
       this._albedo = new SolidColor(albedo);
     } else {
       this._albedo = albedo;
@@ -19,8 +20,8 @@ export class IsoTropic extends Material {
   }
 
   public scatter(r_in: Ray, rec: HitRecord, attenuation: Vec3, scattered: Ray): boolean {
-    new Ray(rec.p, Vec3.randomInUnitSphere(), r_in.time).copyTo(scattered);
-    this._albedo.value(rec.u, rec.v, rec.p).copyTo(attenuation);
+    new Ray(rec.p, Vector.randomInUnitSphere(), r_in.time).copyTo(scattered);
+    Vector.copyTo(this._albedo.value(rec.u, rec.v, rec.p), attenuation);
     return true;
   }
 }

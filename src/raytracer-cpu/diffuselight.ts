@@ -1,5 +1,5 @@
 import { serializable } from '../serializing';
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
 import { HitRecord } from './hittable';
 import Material from './material';
 import Ray from './ray';

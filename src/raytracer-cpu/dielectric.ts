@@ -2,7 +2,8 @@ import Material from './material';
 import { HitRecord } from './hittable';
 import Ray from './ray';
 import { randomNumber } from '../util';
-import Vec3 from '../vec3';
+import type { Vec3 } from '../vec3';
+import * as Vector from '../vec3';
 import { serializable } from '../serializing';
 
 @serializable
@@ -21,27 +22,27 @@ export default class DielectricMaterial extends Material {
   }
 
   public scatter(r_in: Ray, rec: HitRecord, attenuation: Vec3, scattered: Ray): boolean {
-    attenuation.set(1.0, 1.0, 1.0);
+    Vector.set(attenuation, 1.0, 1.0, 1.0);
     const etai_over_etat = rec.frontFace ? 1 / this._refIdx : this._refIdx;
 
-    const unit_direction = Vec3.unitVector(r_in.direction);
+    const unit_direction = Vector.unitVector(r_in.direction);
 
-    const cos_theta = Math.min(Vec3.dot(unit_direction.negate(), rec.normal), 1);
+    const cos_theta = Math.min(Vector.dot(Vector.negate(unit_direction), rec.normal), 1);
     const sin_theta = Math.sqrt(1 - cos_theta * cos_theta);
     if (etai_over_etat * sin_theta > 1) {
-      const reflected = Vec3.reflect(unit_direction, rec.normal);
+      const reflected = Vector.reflect(unit_direction, rec.normal);
       new Ray(rec.p, reflected, r_in.time).copyTo(scattered);
       return true;
     }
 
     const reflect_prob = this.schlick(cos_theta, etai_over_etat);
     if (randomNumber() < reflect_prob) {
-      const reflected = Vec3.reflect(unit_direction, rec.normal);
+      const reflected = Vector.reflect(unit_direction, rec.normal);
       new Ray(rec.p, reflected, r_in.time).copyTo(scattered);
       return true;
     }
 
-    const refracted = Vec3.refract(unit_direction, rec.normal, etai_over_etat);
+    const refracted = Vector.refract(unit_direction, rec.normal, etai_over_etat);
     new Ray(rec.p, refracted, r_in.time).copyTo(scattered);
     return true;
   }
