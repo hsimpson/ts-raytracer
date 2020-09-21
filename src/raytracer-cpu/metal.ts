@@ -7,13 +7,13 @@ import { serializable } from '../serializing';
 
 @serializable
 export default class MetalMaterial extends Material {
-  private albedo: Vec3;
-  private roughness: number;
+  private _albedo: Vec3;
+  private _roughness: number;
 
   public constructor(color: Vec3, roughness: number) {
     super();
-    this.albedo = color;
-    this.roughness = roughness;
+    this._albedo = color;
+    this._roughness = roughness;
   }
 
   public scatter(r_in: Ray, rec: HitRecord, attenuation: Vec3, scattered: Ray): boolean {
@@ -21,10 +21,10 @@ export default class MetalMaterial extends Material {
 
     new Ray(
       rec.p,
-      Vector.addVec3(reflect, Vector.multScalarVec3(Vector.randomInUnitSphere(), this.roughness)),
+      Vector.addVec3(reflect, Vector.multScalarVec3(Vector.randomInUnitSphere(), this._roughness)),
       r_in.time
     ).copyTo(scattered);
-    Vector.copyTo(this.albedo, attenuation);
+    Vector.copyTo(this._albedo, attenuation);
     return Vector.dot(scattered.direction, rec.normal) > 0;
   }
 }

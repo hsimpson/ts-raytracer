@@ -16,22 +16,22 @@ function getSphereUV(p: Vec3): { u: number; v: number } {
 
 @serializable
 export default class Sphere extends Hittable {
-  private center: Vec3;
-  private radius: number;
-  private mat: Material;
+  private _center: Vec3;
+  private _radius: number;
+  private _material: Material;
 
   public constructor(center: Vec3, radius: number, mat: Material) {
     super();
-    this.center = center;
-    this.radius = radius;
-    this.mat = mat;
+    this._center = center;
+    this._radius = radius;
+    this._material = mat;
   }
 
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const oc = Vector.subVec3(r.origin, this.center);
+    const oc = Vector.subVec3(r.origin, this._center);
     const a = Vector.lengthSquared(r.direction);
     const half_b = Vector.dot(oc, r.direction);
-    const c = Vector.lengthSquared(oc) - this.radius * this.radius;
+    const c = Vector.lengthSquared(oc) - this._radius * this._radius;
     const discriminat = half_b * half_b - a * c;
 
     if (discriminat > 0) {
@@ -40,24 +40,24 @@ export default class Sphere extends Hittable {
       if (temp < t_max && temp > t_min) {
         rec.t = temp;
         rec.p = r.at(rec.t);
-        const outward_normal = Vector.divScalarVec(Vector.subVec3(rec.p, this.center), this.radius);
+        const outward_normal = Vector.divScalarVec(Vector.subVec3(rec.p, this._center), this._radius);
         rec.setFaceNormal(r, outward_normal);
-        const uv = getSphereUV(Vector.divScalarVec(Vector.subVec3(rec.p, this.center), this.radius));
+        const uv = getSphereUV(Vector.divScalarVec(Vector.subVec3(rec.p, this._center), this._radius));
         rec.u = uv.u;
         rec.v = uv.v;
-        rec.mat = this.mat;
+        rec.mat = this._material;
         return true;
       }
       temp = (-half_b + root) / a;
       if (temp < t_max && temp > t_min) {
         rec.t = temp;
         rec.p = r.at(rec.t);
-        const outward_normal = Vector.divScalarVec(Vector.subVec3(rec.p, this.center), this.radius);
+        const outward_normal = Vector.divScalarVec(Vector.subVec3(rec.p, this._center), this._radius);
         rec.setFaceNormal(r, outward_normal);
-        const uv = getSphereUV(Vector.divScalarVec(Vector.subVec3(rec.p, this.center), this.radius));
+        const uv = getSphereUV(Vector.divScalarVec(Vector.subVec3(rec.p, this._center), this._radius));
         rec.u = uv.u;
         rec.v = uv.v;
-        rec.mat = this.mat;
+        rec.mat = this._material;
         return true;
       }
     }
@@ -66,8 +66,8 @@ export default class Sphere extends Hittable {
 
   public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
     const newOutputBox = new AABB(
-      Vector.subVec3(this.center, [this.radius, this.radius, this.radius]),
-      Vector.addVec3(this.center, [this.radius, this.radius, this.radius])
+      Vector.subVec3(this._center, [this._radius, this._radius, this._radius]),
+      Vector.addVec3(this._center, [this._radius, this._radius, this._radius])
     );
     newOutputBox.copyTo(outputBox);
     return true;
