@@ -47,15 +47,23 @@ const start = (msg: ComputeStartMessage): void => {
   let offset = 0;
   const endLine = startLine + 1 - scanlineCount;
   let linesToCalc = scanlineCount;
+
+  // const sampleOffsets = [];
+  // for (let sample = 0; sample < ssp; sample++) {
+  //   sampleOffsets.push(randomNumber());
+  // }
+
   for (let j = startLine; j >= endLine; j--) {
     console.log(`worker[${_id}] scanlines remaining ${linesToCalc--}`);
     for (let i = 0; i < imageWidth; i++) {
       let pixelColor: Vec3 = [0, 0, 0];
 
       for (let s = 0; s < ssp; s++) {
-        //pixelColor = randomColor;
+        // const rnd = sampleOffsets[s];
         const u = (i + randomNumber()) / (imageWidth - 1);
         const v = (j + randomNumber()) / (imageHeight - 1);
+        // const u = (i + rnd) / (imageWidth - 1);
+        // const v = (j + rnd) / (imageHeight - 1);
 
         const r = camera.getRay(u, v);
         pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, world, maxBounces));
