@@ -1,6 +1,6 @@
+import { WebGPUBuffer } from './webgpubuffer';
+import { WebGPUContext } from './webgpucontext';
 import WebGPUPipelineBase from './webgpupipelinebase';
-import WebGPUContext from './webgpucontext';
-import { createBuffer } from './webgpuhelpers';
 
 interface RenderUniformParams {
   fWidth: number;
@@ -11,7 +11,7 @@ interface RenderUniformParams {
 interface WebGPURenderPipelineOptions {
   vertexShaderUrl: string;
   fragmentShaderUrl: string;
-  sharedPixelBuffer: GPUBuffer;
+  sharedPixelBuffer: WebGPUBuffer;
   uniformParams: RenderUniformParams;
 }
 
@@ -35,35 +35,28 @@ const _vertexPositions = new Float32Array([
 
 export default class WebGPURenderPipeline extends WebGPUPipelineBase {
   private _options: WebGPURenderPipelineOptions;
-  private _vertexPositionBuffer: GPUBuffer;
-  private _vertexColorBuffer: GPUBuffer;
+  private _vertexPositionBuffer = new WebGPUBuffer();
+  private _vertexColorBuffer = new WebGPUBuffer();
 
-  private _renderParamsUniformBuffer: GPUBuffer;
-  private _renderParamsUniformBufferSize = 0;
+  private _renderParamsUniformBuffer = new WebGPUBuffer();
 
   public constructor(options: WebGPURenderPipelineOptions) {
     super();
     this._options = options;
   }
 
-  public async initialize(context: WebGPUContext): Promise<void> {
+  public async initialize(): Promise<void> {
     if (this._initialized) {
       return;
     }
     this._initialized = true;
-    this._context = context;
 
-    this._vertexPositionBuffer = createBuffer(this._context.device, _vertexPositions, GPUBufferUsage.VERTEX);
+    this._vertexPositionBuffer.create(_vertexPositions, GPUBufferUsage.VERTEX);
 
     const uniformArray = this.getParamsArray(this._options.uniformParams);
-    this._renderParamsUniformBufferSize = uniformArray.byteLength;
-    this._renderParamsUniformBuffer = createBuffer(
-      context.device,
-      uniformArray,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-    );
+    this._renderParamsUniformBuffer.create(uniformArray, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
 
-    this._bindGroupLayout = this._context.device.createBindGroupLayout({
+    this._bindGroupLayout = WebGPUContext.device.createBindGroupLayout({
       entries: [
         {
           binding: 0,
@@ -82,27 +75,23 @@ export default class WebGPURenderPipeline extends WebGPUPipelineBase {
   }
 
   protected async createBindGroup(): Promise<void> {
-    this._bindGroup = this._context.device.createBindGroup({
+    this._bindGroup = WebGPUContext.device.createBindGroup({
       layout: this._bindGroupLayout,
       entries: [
         {
           binding: 0,
           resource: {
-            buffer: this._renderParamsUniformBuffer,
+            buffer: this._renderParamsUniformBuffer.gpuBuffer,
             offset: 0,
-            size: this._renderParamsUniformBufferSize,
+            size: this._renderParamsUniformBuffer.size,
           },
         },
         {
           binding: 1,
           resource: {
-            buffer: this._options.sharedPixelBuffer,
+            buffer: this._options.sharedPixelBuffer.gpuBuffer,
             offset: 0,
-            size:
-              this._options.uniformParams.fWidth *
-              this._options.uniformParams.fHeight *
-              4 *
-              Float32Array.BYTES_PER_ELEMENT,
+            size: this._options.sharedPixelBuffer.size,
           },
         },
       ],
@@ -110,17 +99,17 @@ export default class WebGPURenderPipeline extends WebGPUPipelineBase {
 
     this._bindGroup.label = `${this.name}-BindGroup`;
 
-    const layout = this._context.device.createPipelineLayout({
+    const layout = WebGPUContext.device.createPipelineLayout({
       bindGroupLayouts: [this._bindGroupLayout],
     });
 
     const vertexStage: GPUProgrammableStageDescriptor = {
-      module: await this.loadShader(this._context, this._options.vertexShaderUrl),
+      module: await this.loadShader(this._options.vertexShaderUrl),
       entryPoint: 'main',
     };
 
     const fragmentStage: GPUProgrammableStageDescriptor = {
-      module: await this.loadShader(this._context, this._options.fragmentShaderUrl),
+      module: await this.loadShader(this._options.fragmentShaderUrl),
       entryPoint: 'main',
     };
 
@@ -173,14 +162,14 @@ export default class WebGPURenderPipeline extends WebGPUPipelineBase {
       sampleCount: 1,
     };
 
-    this._pipeline = this._context.device.createRenderPipeline(pipelineDesc);
+    this._pipeline = WebGPUContext.device.createRenderPipeline(pipelineDesc);
   }
 
   public updateUniformBuffer(sample: number): void {
     if (this._initialized) {
       this._options.uniformParams.fSample = sample;
       const uniformArray = this.getParamsArray(this._options.uniformParams);
-      this._context.queue.writeBuffer(this._renderParamsUniformBuffer, 0, uniformArray.buffer);
+      WebGPUContext.queue.writeBuffer(this._renderParamsUniformBuffer.gpuBuffer, 0, uniformArray.buffer);
     }
   }
 
@@ -189,6 +178,6 @@ export default class WebGPURenderPipeline extends WebGPUPipelineBase {
   }
 
   public get vertexPostionBuffer(): GPUBuffer {
-    return this._vertexPositionBuffer;
+    return this._vertexPositionBuffer.gpuBuffer;
   }
 }

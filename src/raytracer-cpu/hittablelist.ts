@@ -1,17 +1,30 @@
-import { HitRecord, Hittable } from './hittable';
-import Ray from './ray';
-import AABB from './aabb';
 import { serializable } from '../serializing';
+import AABB from './aabb';
+import { HitRecord, Hittable, IWebGPUObject, WebGPUHittableType } from './hittable';
+import Ray from './ray';
 
 @serializable
-export class HittableList extends Hittable {
+export class HittableList extends Hittable implements IWebGPUObject {
   private _objects: Hittable[] = [];
+  private static _gpuBuffer = [];
+  private static _staticgpuObjectIndex = 0;
+  private _gpuObjectIndex: number;
 
   public constructor(object?: Hittable) {
     super();
+    this._gpuObjectIndex = HittableList._staticgpuObjectIndex++;
     if (object) {
       this.add(object);
     }
+  }
+
+  public insertIntoBufferArray(): void {
+    //
+  }
+
+  public static resetGPUBuffer(): void {
+    HittableList._gpuBuffer = [];
+    HittableList._staticgpuObjectIndex = 0;
   }
 
   public get objects(): Hittable[] {
@@ -24,6 +37,9 @@ export class HittableList extends Hittable {
 
   public add(object: Hittable): void {
     this._objects.push(object);
+    const obj = (object as unknown) as IWebGPUObject;
+    // HittableList._gpuBuffer.push(obj.gpuObjectTypeId, obj.gpuObjectIndex);
+    HittableList._gpuBuffer.push(obj.gpuObjectTypeId, obj.gpuObjectIndex, -1, -1);
   }
 
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
@@ -62,5 +78,18 @@ export class HittableList extends Hittable {
       firstBox = false;
     }
     return true;
+  }
+
+  public get gpuObjectTypeId(): WebGPUHittableType {
+    return WebGPUHittableType.HittableList;
+  }
+
+  public get gpuObjectIndex(): number {
+    return this._gpuObjectIndex;
+  }
+
+  public static get gpuBufferArray(): Float32Array {
+    console.log('HittableList:', HittableList._gpuBuffer);
+    return new Float32Array(HittableList._gpuBuffer);
   }
 }

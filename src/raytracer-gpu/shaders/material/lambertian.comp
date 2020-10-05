@@ -1,0 +1,31 @@
+#ifndef LAMBERTIANMATERIAL_INC
+#define LAMBERTIANMATERIAL_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#include "../utils.comp"
+#include "../ray.comp"
+#include "../texture/texture.comp"
+
+struct LambertianMaterial {
+  float textureType;
+  float textureIndex;
+};
+
+layout(std430, set = 0, binding = 5) buffer LambertianMaterials {
+  LambertianMaterial lambertianMaterials[];
+};
+
+bool lambertianScatter(const LambertianMaterial lambertianMaterial, const Ray ray, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
+  int textureType  = int(round(lambertianMaterial.textureType));
+  int textureIndex = int(round(lambertianMaterial.textureIndex));
+
+  vec3 scatterDirection = rec.normal + randomUnitVector();
+  scattered             = Ray(rec.p, scatterDirection, ray.time);
+  attenuation           = textureValue(textureType, textureIndex, rec.uv, rec.p);
+  // attenuation = textureValue(1, 0, rec.uv, rec.p);
+
+  return true;
+}
+
+#endif  //LAMBERTIANMATERIAL_INC

@@ -1,5 +1,5 @@
 import Material from './material';
-import { HitRecord, Hittable } from './hittable';
+import { HitRecord, Hittable, WebGPUHittableType, IWebGPUObject } from './hittable';
 import Ray from './ray';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
@@ -15,16 +15,33 @@ function getSphereUV(p: Vec3): { u: number; v: number } {
 }
 
 @serializable
-export default class Sphere extends Hittable {
+export class Sphere extends Hittable implements IWebGPUObject {
   private _center: Vec3;
   private _radius: number;
   private _material: Material;
+  private static _gpuBuffer = [];
+  private static _staticgpuObjectIndex = 0;
+  private _gpuObjectIndex: number;
 
   public constructor(center: Vec3, radius: number, mat: Material) {
     super();
+    this._gpuObjectIndex = Sphere._staticgpuObjectIndex++;
     this._center = center;
     this._radius = radius;
     this._material = mat;
+    this.insertIntoBufferArray();
+  }
+
+  public insertIntoBufferArray(): void {
+    Sphere._gpuBuffer.push(...this._center, this._radius);
+    const mat = (this._material as unknown) as IWebGPUObject;
+    Sphere._gpuBuffer.push(mat.gpuObjectTypeId, mat.gpuObjectIndex, -1, -1);
+    // Sphere._gpuBuffer.push(mat.gpuObjectTypeId, mat.gpuObjectIndex);
+  }
+
+  public static resetGPUBuffer(): void {
+    Sphere._gpuBuffer = [];
+    Sphere._staticgpuObjectIndex = 0;
   }
 
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
@@ -71,5 +88,18 @@ export default class Sphere extends Hittable {
     );
     newOutputBox.copyTo(outputBox);
     return true;
+  }
+
+  public get gpuObjectTypeId(): WebGPUHittableType {
+    return WebGPUHittableType.Sphere;
+  }
+
+  public get gpuObjectIndex(): number {
+    return this._gpuObjectIndex;
+  }
+
+  public static get gpuBufferArray(): Float32Array {
+    console.log('Spheres:', Sphere._gpuBuffer);
+    return new Float32Array(Sphere._gpuBuffer);
   }
 }

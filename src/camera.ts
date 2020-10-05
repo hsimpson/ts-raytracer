@@ -100,6 +100,8 @@ export default class Camera {
     array.push(...this.v, 0.0);
     array.push(...this.w, 0.0);
     array.push(this.lenseRadius);
+    array.push(this.time0);
+    array.push(this.time1);
 
     return new Float32Array(array);
   }

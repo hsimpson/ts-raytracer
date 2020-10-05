@@ -1,0 +1,45 @@
+#ifndef MATERIAL_INC
+#define MATERIAL_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#define MATERIALTYPE_LAMBERTIAN 0
+#define MATERIALTYPE_METAL 1
+#define MATERIALTYPE_DIELECTRIC 2
+#define MATERIALTYPE_ISOTROPIC 3
+#define MATERIALTYPE_DIFFUSELIGHT 4
+
+#include "../utils.comp"
+#include "../ray.comp"
+#include "./lambertian.comp"
+
+bool materialScatter(const Ray ray, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
+  int materialType  = int(round(rec.materialType));
+  int materialIndex = int(round(rec.materialIndex));
+
+  switch (materialType) {
+    case MATERIALTYPE_LAMBERTIAN:
+      LambertianMaterial lambertianMaterial = lambertianMaterials[materialIndex];
+
+      //attenuation = vec3(lambertianMaterial.textureIndex, lambertianMaterial.textureType, 0.0);
+      // attenuation = vec3(lambertianMaterial.textureType, lambertianMaterial.textureIndex, 0.0);
+
+      // if (lambertianMaterial.textureType < 5)
+      //   attenuation = vec3(1.0, 0.0, 0.0);
+      // else
+      //   attenuation = vec3(0.0, 1.0, 0.0);
+      // return true;
+
+      return lambertianScatter(lambertianMaterial, ray, rec, attenuation, scattered);
+      break;
+  }
+
+  // if (rec.materialType == 0) {
+  //   attenuation = vec3(1.0, 0.0, 0.0);
+  //   return true;
+  // }
+
+  return false;
+}
+
+#endif  //MATERIAL_INC

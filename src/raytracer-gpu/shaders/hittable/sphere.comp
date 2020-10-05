@@ -1,0 +1,54 @@
+#ifndef SPHERE_INC
+#define SPHERE_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#include "../ray.comp"
+#include "../utils.comp"
+
+struct SphereHittable {
+  vec3  center;
+  float radius;
+  float materialType;
+  float materialIndex;
+};
+
+layout(std430, set = 0, binding = 4) buffer Spheres {
+  SphereHittable sphereHittables[];
+};
+
+bool sphereHittableHit(const SphereHittable sphere, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
+  vec3  oc           = ray.origin - sphere.center;
+  float a            = lengthSquared(ray.direction);
+  float half_b       = dot(oc, ray.direction);
+  float c            = lengthSquared(oc) - sphere.radius * sphere.radius;
+  float discriminant = half_b * half_b - a * c;
+
+  if (discriminant > 0.0) {
+    float root = sqrt(discriminant);
+    float temp = (-half_b - root) / a;
+    if (temp < tMax && temp > tMin) {
+      rec.t               = temp;
+      rec.p               = rayAt(ray, rec.t);
+      vec3 outward_normal = (rec.p - sphere.center) / sphere.radius;
+      setFaceNormal(rec, ray, outward_normal);
+      rec.materialType  = sphere.materialType;
+      rec.materialIndex = sphere.materialIndex;
+      return true;
+    }
+    temp = (-half_b + root) / a;
+    if (temp < tMax && temp > tMin) {
+      rec.t               = temp;
+      rec.p               = rayAt(ray, rec.t);
+      vec3 outward_normal = (rec.p - sphere.center) / sphere.radius;
+      setFaceNormal(rec, ray, outward_normal);
+      rec.materialType  = sphere.materialType;
+      rec.materialIndex = sphere.materialIndex;
+      return true;
+    }
+  }
+
+  return false;
+}
+
+#endif  // SPHERE_INC

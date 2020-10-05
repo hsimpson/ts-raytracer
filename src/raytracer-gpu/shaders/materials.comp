@@ -18,12 +18,12 @@ float schlick(float cosine, float refractIdx) {
 bool materialBSDF(const Ray r_in, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
   if (rec.materialType < MATERIAL_LAMBERT) {
     vec3 scatterDirection = rec.normal + randomUnitVector();
-    scattered             = Ray(rec.p, scatterDirection);
+    scattered             = Ray(rec.p, scatterDirection, r_in.time);
     attenuation           = rec.albedo;
     return true;
   } else if (rec.materialType < MATERIAL_METAL) {
     vec3 reflected = reflect(normalize(r_in.direction), rec.normal);
-    scattered      = Ray(rec.p, reflected + rec.roughness * randomInUnitSphere());
+    scattered      = Ray(rec.p, reflected + rec.roughness * randomInUnitSphere(), r_in.time);
     attenuation    = rec.albedo;
     return (dot(scattered.direction, rec.normal) > 0.0);
   } else {
@@ -35,19 +35,19 @@ bool materialBSDF(const Ray r_in, const HitRecord rec, out vec3 attenuation, out
 
     if (etai_over_etat * sin_theta > 1.0) {
       vec3 reflected = reflect(unit_direction, rec.normal);
-      scattered      = Ray(rec.p, reflected);
+      scattered      = Ray(rec.p, reflected, r_in.time);
       return true;
     }
 
     float reflect_prob = schlick(cos_theta, etai_over_etat);
     if (random() < reflect_prob) {
       vec3 reflected = reflect(unit_direction, rec.normal);
-      scattered      = Ray(rec.p, reflected);
+      scattered      = Ray(rec.p, reflected, r_in.time);
       return true;
     }
 
     vec3 refracted = refract(unit_direction, rec.normal, etai_over_etat);
-    scattered      = Ray(rec.p, refracted);
+    scattered      = Ray(rec.p, refracted, r_in.time);
     return true;
   }
 

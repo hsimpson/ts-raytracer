@@ -9,7 +9,7 @@ import { HittableList } from './hittablelist';
 import LambertianMaterial from './lambertian';
 import Material from './material';
 import MetalMaterial from './metal';
-import Sphere from './sphere';
+import { Sphere } from './sphere';
 import { CheckerTexture, ImageTexture, NoiseTexture } from './texture';
 import { RotateY } from './rotation';
 import { Hittable } from './hittable';
@@ -17,6 +17,17 @@ import Translate from './translate';
 import { ConstantMedium } from './constantmedium';
 import MovingSphere from './movingsphere';
 import BVHNode from './bvhnode';
+
+export function gpuTestScene(): HittableList {
+  const objects = new HittableList();
+  const red = new LambertianMaterial([0.65, 0.05, 0.05]);
+  const green = new LambertianMaterial([0.12, 0.45, 0.15]);
+
+  objects.add(new Sphere([-1, 0, 0], 1, red));
+  objects.add(new Sphere([1, 0, 0], 1, green));
+
+  return objects;
+}
 
 export function twoSpheres(): HittableList {
   const objects = new HittableList();

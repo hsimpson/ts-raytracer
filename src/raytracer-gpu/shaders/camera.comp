@@ -1,0 +1,33 @@
+#ifndef CAMERA_INC
+#define CAMERA_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#include "./ray.comp"
+#include "./utils.comp"
+
+layout(set = 0, binding = 1) uniform Camera {
+  vec4  origin;
+  vec4  lowerLeftCorner;
+  vec4  horizontal;
+  vec4  vertical;
+  vec4  u;
+  vec4  v;
+  vec4  w;
+  float lensRadius;
+  float t0;
+  float t1;
+}
+camera;
+
+Ray cameraGetRay(float s, float t) {
+  vec3 rd     = camera.lensRadius * randomInUnitDisc();
+  vec3 offset = camera.u.xyz * rd.x + camera.v.xyz * rd.y;
+  return Ray(
+      camera.origin.xyz + offset,
+      camera.lowerLeftCorner.xyz + s * camera.horizontal.xyz + t * camera.vertical.xyz - camera.origin.xyz - offset,
+      random(camera.t0, camera.t1));
+  // random(0.0, 1.0));
+}
+
+#endif  //CAMERA_INC

@@ -1,36 +1,54 @@
-import WebGPUPipelineBase from './webgpupipelinebase';
-import WebGPUContext from './webgpucontext';
-import { createBuffer } from './webgpuhelpers';
 import Camera from '../camera';
+import { HittableList } from '../raytracer-cpu/hittablelist';
+import LambertianMaterial from '../raytracer-cpu/lambertian';
+import { Sphere } from '../raytracer-cpu/sphere';
+import { SolidColor, CheckerTexture } from '../raytracer-cpu/texture';
+import { WebGPUBuffer } from './webgpubuffer';
+import { WebGPUContext } from './webgpucontext';
+import WebGPUPipelineBase from './webgpupipelinebase';
 
 interface ComputeUniformParams {
   fWidth: number;
   fHeight: number;
   fSamplesPerPixel: number;
   fMaxBounces: number;
-  fSphereCount: number;
   fRandomSeed?: number;
 }
 
 interface WebGPUComputePiplineOptions {
   computeShaderUrl: string;
   uniformParams: ComputeUniformParams;
-  randomScene: Float32Array;
+  // randomScene: Float32Array;
   camera: Camera;
+  world: HittableList;
+}
+
+enum Bindings {
+  ComputeParams = 0,
+  Camera = 1,
+  PixelBuffer = 2,
+
+  HittableList = 3,
+  SpheresHittables = 4,
+
+  LambertianMaterials = 5,
+
+  SolidTextures = 6,
+  CheckerTextures = 7,
 }
 
 export default class WebGPUComputePipline extends WebGPUPipelineBase {
   private _options: WebGPUComputePiplineOptions;
 
-  private _computeParamsUniformBuffer: GPUBuffer;
-  private _computeParamsUniformBufferSize = 0;
+  private _computeParamsUniformBuffer = new WebGPUBuffer();
+  private _computeCameraUniformBuffer = new WebGPUBuffer();
+  private _pixelBuffer = new WebGPUBuffer();
 
-  private _computeCameraUniformBuffer: GPUBuffer;
-  private _computeCameraUniformBufferSize = 0;
-
-  private _pixelBuffer: GPUBuffer;
-
-  private _randomSceneBuffer: GPUBuffer;
+  private _hittableListBuffer = new WebGPUBuffer();
+  private _spheresHittablesBuffer = new WebGPUBuffer();
+  private _lambertianMaterialsBuffer = new WebGPUBuffer();
+  private _solidTexturesBuffer = new WebGPUBuffer();
+  private _checkerTexturesBuffer = new WebGPUBuffer();
 
   public constructor(options: WebGPUComputePiplineOptions) {
     super();
@@ -38,58 +56,62 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
     this._options.uniformParams.fRandomSeed = Math.random();
   }
 
-  public async initialize(context: WebGPUContext): Promise<void> {
+  public async initialize(): Promise<void> {
     if (this._initialized) {
       return;
     }
     this._initialized = true;
 
-    this._context = context;
-
     const pixelArray = new Float32Array(this._options.uniformParams.fWidth * this._options.uniformParams.fHeight * 4);
-    this._pixelBuffer = createBuffer(
-      this._context.device,
-      pixelArray,
-      GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
-    );
+    this._pixelBuffer.create(pixelArray, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
 
     const uniformArray = this.getParamsArray(this._options.uniformParams);
-    this._computeParamsUniformBufferSize = uniformArray.byteLength;
-    this._computeParamsUniformBuffer = createBuffer(
-      context.device,
-      uniformArray,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-    );
+    this._computeParamsUniformBuffer.create(uniformArray, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
 
     const cameraArray = this._options.camera.getUniformArray();
-    this._computeCameraUniformBufferSize = cameraArray.byteLength;
-    this._computeCameraUniformBuffer = createBuffer(
-      context.device,
-      cameraArray,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-    );
+    this._computeCameraUniformBuffer.create(cameraArray, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
 
-    this._randomSceneBuffer = createBuffer(this._context.device, this._options.randomScene, GPUBufferUsage.STORAGE);
+    this.createObjects();
 
-    this._bindGroupLayout = this._context.device.createBindGroupLayout({
+    this._bindGroupLayout = WebGPUContext.device.createBindGroupLayout({
       entries: [
         {
-          binding: 0,
+          binding: Bindings.ComputeParams,
           visibility: GPUShaderStage.COMPUTE,
           type: 'uniform-buffer',
         },
         {
-          binding: 1,
+          binding: Bindings.Camera,
           visibility: GPUShaderStage.COMPUTE,
           type: 'uniform-buffer',
         },
         {
-          binding: 2,
+          binding: Bindings.PixelBuffer,
           visibility: GPUShaderStage.COMPUTE,
           type: 'storage-buffer',
         },
         {
-          binding: 3,
+          binding: Bindings.HittableList,
+          visibility: GPUShaderStage.COMPUTE,
+          type: 'storage-buffer',
+        },
+        {
+          binding: Bindings.SpheresHittables,
+          visibility: GPUShaderStage.COMPUTE,
+          type: 'storage-buffer',
+        },
+        {
+          binding: Bindings.LambertianMaterials,
+          visibility: GPUShaderStage.COMPUTE,
+          type: 'storage-buffer',
+        },
+        {
+          binding: Bindings.SolidTextures,
+          visibility: GPUShaderStage.COMPUTE,
+          type: 'storage-buffer',
+        },
+        {
+          binding: Bindings.CheckerTextures,
           visibility: GPUShaderStage.COMPUTE,
           type: 'storage-buffer',
         },
@@ -97,54 +119,100 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
     });
 
     await this.createBindGroup();
+
+    this.resetObjects();
+  }
+
+  private resetObjects(): void {
+    HittableList.resetGPUBuffer();
+    Sphere.resetGPUBuffer();
+    LambertianMaterial.resetGPUBuffer();
+    SolidColor.resetGPUBuffer();
+    CheckerTexture.resetGPUBuffer();
+  }
+
+  public createObjects(): void {
+    this._hittableListBuffer.create(HittableList.gpuBufferArray, GPUBufferUsage.STORAGE);
+    this._spheresHittablesBuffer.create(Sphere.gpuBufferArray, GPUBufferUsage.STORAGE);
+    this._lambertianMaterialsBuffer.create(LambertianMaterial.gpuBufferArray, GPUBufferUsage.STORAGE);
+    this._solidTexturesBuffer.create(SolidColor.gpuBufferArray, GPUBufferUsage.STORAGE);
+    this._checkerTexturesBuffer.create(CheckerTexture.gpuBufferArray, GPUBufferUsage.STORAGE);
   }
 
   public updateUniformBuffer(): void {
     if (this._initialized) {
       this._options.uniformParams.fRandomSeed = Math.random();
       const uniformArray = this.getParamsArray(this._options.uniformParams);
-      this._context.queue.writeBuffer(this._computeParamsUniformBuffer, 0, uniformArray.buffer);
+      WebGPUContext.queue.writeBuffer(this._computeParamsUniformBuffer.gpuBuffer, 0, uniformArray.buffer);
     }
   }
 
   protected async createBindGroup(): Promise<void> {
-    this._bindGroup = this._context.device.createBindGroup({
+    this._bindGroup = WebGPUContext.device.createBindGroup({
       layout: this._bindGroupLayout,
       entries: [
         {
-          binding: 0,
+          binding: Bindings.ComputeParams,
           resource: {
-            buffer: this._computeParamsUniformBuffer,
+            buffer: this._computeParamsUniformBuffer.gpuBuffer,
             offset: 0,
-            size: this._computeParamsUniformBufferSize,
+            size: this._computeParamsUniformBuffer.size,
           },
         },
         {
-          binding: 1,
+          binding: Bindings.Camera,
           resource: {
-            buffer: this._computeCameraUniformBuffer,
+            buffer: this._computeCameraUniformBuffer.gpuBuffer,
             offset: 0,
-            size: this._computeCameraUniformBufferSize,
+            size: this._computeCameraUniformBuffer.size,
           },
         },
         {
-          binding: 2,
+          binding: Bindings.PixelBuffer,
           resource: {
-            buffer: this._randomSceneBuffer,
+            buffer: this._pixelBuffer.gpuBuffer,
             offset: 0,
-            size: this._options.randomScene.byteLength,
+            size: this._pixelBuffer.size,
           },
         },
         {
-          binding: 3,
+          binding: Bindings.HittableList,
           resource: {
-            buffer: this._pixelBuffer,
+            buffer: this._hittableListBuffer.gpuBuffer,
             offset: 0,
-            size:
-              this._options.uniformParams.fWidth *
-              this._options.uniformParams.fHeight *
-              4 *
-              Float32Array.BYTES_PER_ELEMENT,
+            size: this._hittableListBuffer.size,
+          },
+        },
+        {
+          binding: Bindings.SpheresHittables,
+          resource: {
+            buffer: this._spheresHittablesBuffer.gpuBuffer,
+            offset: 0,
+            size: this._spheresHittablesBuffer.size,
+          },
+        },
+        {
+          binding: Bindings.LambertianMaterials,
+          resource: {
+            buffer: this._lambertianMaterialsBuffer.gpuBuffer,
+            offset: 0,
+            size: this._lambertianMaterialsBuffer.size,
+          },
+        },
+        {
+          binding: Bindings.SolidTextures,
+          resource: {
+            buffer: this._solidTexturesBuffer.gpuBuffer,
+            offset: 0,
+            size: this._solidTexturesBuffer.size,
+          },
+        },
+        {
+          binding: Bindings.CheckerTextures,
+          resource: {
+            buffer: this._checkerTexturesBuffer.gpuBuffer,
+            offset: 0,
+            size: this._checkerTexturesBuffer.size,
           },
         },
       ],
@@ -152,12 +220,12 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
 
     this._bindGroup.label = `${this.name}-BindGroup`;
 
-    const layout = this._context.device.createPipelineLayout({
+    const layout = WebGPUContext.device.createPipelineLayout({
       bindGroupLayouts: [this._bindGroupLayout],
     });
 
     const computeStage: GPUProgrammableStageDescriptor = {
-      module: await this.loadShader(this._context, this._options.computeShaderUrl),
+      module: await this.loadShader(this._options.computeShaderUrl),
       entryPoint: 'main',
     };
 
@@ -166,20 +234,14 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
       computeStage,
     };
 
-    this._pipeline = this._context.device.createComputePipeline(pipelineDesc);
-  }
-
-  private createCamera(): Float32Array {
-    const array = [];
-
-    return new Float32Array(array);
+    this._pipeline = WebGPUContext.device.createComputePipeline(pipelineDesc);
   }
 
   public get gpuPipeline(): GPUComputePipeline {
     return this._pipeline as GPUComputePipeline;
   }
 
-  public get pixelBuffer(): GPUBuffer {
+  public get pixelBuffer(): WebGPUBuffer {
     return this._pixelBuffer;
   }
 }

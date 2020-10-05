@@ -7,7 +7,7 @@ const devConfig = merge(commonConfig, {
   watch: true,
   devServer: {
     contentBase: './dist',
-    open: true,
+    open: false,
   },
 });
 

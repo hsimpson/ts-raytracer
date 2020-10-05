@@ -1,0 +1,33 @@
+#ifndef CHECKERTEXTURE_INC
+#define CHECKERTEXTURE_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#include "./solid.comp"
+
+// TODO: support other textures then SolidTexture
+
+struct CheckerTexture {
+  float odd;
+  float even;
+};
+
+layout(std430, set = 0, binding = 7) buffer CheckerTexturs {
+  CheckerTexture checkerTextures[];
+};
+
+vec3 checkerTextureValue(const CheckerTexture checkerTexture, const vec2 uv, const vec3 p) {
+  vec3  sine  = sin(p * 10.0);
+  float sines = sine.x * sine.y * sine.z;
+
+  int odd  = int(round(checkerTexture.odd));
+  int even = int(round(checkerTexture.even));
+
+  if (sines < 0.0) {
+    return solidTextureValue(solidTextures[odd], uv, p);
+  } else {
+    return solidTextureValue(solidTextures[even], uv, p);
+  }
+}
+
+#endif  //CHECKERTEXTURE_INC

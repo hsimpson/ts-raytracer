@@ -1,0 +1,34 @@
+#ifndef TEXTURE_INC
+#define TEXTURE_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#define TEXTURETYPE_SOLID 0
+#define TEXTURETYPE_CHECKER 1
+#define TEXTURETYPE_NOISE 2
+#define TEXTURETYPE_IMAGE 3
+
+#include "./solid.comp"
+#include "./checker.comp"
+
+vec3 textureValue(const int textureType, const int textureIndex, const vec2 uv, const vec3 p) {
+  vec3 color = vec3(0.0, 0.0, 0.0);
+
+  switch (textureType) {
+    case TEXTURETYPE_SOLID:
+      SolidTexture solidTexture = solidTextures[textureIndex];
+      color                     = solidTextureValue(solidTexture, uv, p);
+      break;
+    case TEXTURETYPE_CHECKER:
+      CheckerTexture checkerTexture = checkerTextures[textureIndex];
+      color                         = checkerTextureValue(checkerTexture, uv, p);
+      break;
+    default:
+      color = vec3(1.0, 0.0, 0.0);
+      break;
+  }
+
+  return color;
+}
+
+#endif  //TEXTURE_INC

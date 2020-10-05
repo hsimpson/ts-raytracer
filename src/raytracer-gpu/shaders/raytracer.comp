@@ -1,10 +1,11 @@
 #version 460
 #extension GL_GOOGLE_include_directive : enable
 
+// #include "materials.comp"
+#include "camera.comp"
+
 #include "utils.comp"
-#include "materials.comp"
 #include "ray.comp"
-//#include "camera.comp"
 
 //#define FLT_MAX 3.402823466e+38
 #define FLT_MAX 99999.99
@@ -17,115 +18,28 @@ layout(set = 0, binding = 0) uniform ComputeParams {
   float fHeight;
   float fSamplesPerPixel;
   float fMaxBounces;
-  float fSphereCount;
   float fRandomSeed;
 }
 params;
 
-layout(set = 0, binding = 1) uniform Camera {
-  vec4  origin;
-  vec4  lowerLeftCorner;
-  vec4  horizontal;
-  vec4  vertical;
-  vec4  u;
-  vec4  v;
-  vec4  w;
-  float lensRadius;
-}
-camera;
-
-layout(std140, set = 0, binding = 2) buffer RandomScene {
-  vec4 sceneArray[];
-}
-randomScene;
-
-layout(std140, set = 0, binding = 3) buffer PixelBuffer {
+layout(std140, set = 0, binding = 2) buffer PixelBuffer {
   vec4 pixels[];
 }
 pixelBuffer;
 
-Ray cameraGetRay(float s, float t) {
-  vec3 rd     = camera.lensRadius * randomInUnitDisc();
-  vec3 offset = camera.u.xyz * rd.x + camera.v.xyz * rd.y;
-  return Ray(camera.origin.xyz + offset, camera.lowerLeftCorner.xyz + s * camera.horizontal.xyz + t * camera.vertical.xyz - camera.origin.xyz - offset);
-}
-
-bool hitSphere(const uint sphereIdx, const Ray r, float t_min, float t_max, inout HitRecord rec) {
-  uint idx = sphereIdx * 3;
-  vec4 v1  = randomScene.sceneArray[idx++];
-  vec4 v2  = randomScene.sceneArray[idx++];
-  vec4 v3  = randomScene.sceneArray[idx++];
-
-  vec3  center       = v1.xyz;
-  float radius       = v1.w;
-  float materialType = v2.x;
-  vec3  albedo       = v2.yzw;
-  float roughness    = v3.x;
-  float refractIdx   = v3.y;
-
-  vec3  oc           = r.origin - center;
-  float a            = lengthSquared(r.direction);
-  float half_b       = dot(oc, r.direction);
-  float c            = lengthSquared(oc) - radius * radius;
-  float discriminant = half_b * half_b - a * c;
-
-  if (discriminant > 0) {
-    float root = sqrt(discriminant);
-    float temp = (-half_b - root) / a;
-    if (temp < t_max && temp > t_min) {
-      rec.t               = temp;
-      rec.p               = rayAt(r, rec.t);
-      vec3 outward_normal = (rec.p - center) / radius;
-      setFaceNormal(rec, r, outward_normal);
-      rec.materialType = materialType;
-      rec.albedo       = albedo;
-      rec.roughness    = roughness;
-      rec.refractIdx   = refractIdx;
-      return true;
-    }
-    temp = (-half_b + root) / a;
-    if (temp < t_max && temp > t_min) {
-      rec.t               = temp;
-      rec.p               = rayAt(r, rec.t);
-      vec3 outward_normal = (rec.p - center) / radius;
-      setFaceNormal(rec, r, outward_normal);
-      rec.materialType = materialType;
-      rec.albedo       = albedo;
-      rec.roughness    = roughness;
-      rec.refractIdx   = refractIdx;
-      return true;
-    }
-  }
-  return false;
-}
-
-bool hittablesHit(const Ray r, float t_min, float t_max, inout HitRecord rec) {
-  HitRecord temp_rec;
-  bool      hit_anything   = false;
-  float     closest_so_far = t_max;
-  const int count          = int(params.fSphereCount);
-
-  for (int i = 0; i < count; i++) {
-    if (hitSphere(i, r, t_min, closest_so_far, temp_rec)) {
-      hit_anything   = true;
-      closest_so_far = temp_rec.t;
-      rec            = temp_rec;
-    }
-  }
-
-  return hit_anything;
-}
+#include "./hittable/hittable.comp"
+#include "./material/material.comp"
 
 vec3 rayColor(Ray ray, uint depth) {
   HitRecord rec;
   vec3      color = vec3(1.0, 1.0, 1.0);
 
   for (int i = 0; i < depth; i++) {
-    if (hittablesHit(ray, 0.001, FLT_MAX, rec)) {
+    if (hittableListHit(ray, 0.001, FLT_MAX, rec)) {
       Ray  newRay;
       vec3 attenuation;
 
-      bool wasScattered = materialBSDF(ray, rec, attenuation, newRay);
+      bool wasScattered = materialScatter(ray, rec, attenuation, newRay);
 
       ray.origin    = newRay.origin;
       ray.direction = newRay.direction;
@@ -136,7 +50,6 @@ vec3 rayColor(Ray ray, uint depth) {
         color *= vec3(0.0, 0.0, 0.0);
         break;
       }
-
     } else {
       vec3  unit_direction = normalize(ray.direction);
       float t              = 0.5 * (unit_direction.y + 1.0);
@@ -144,6 +57,9 @@ vec3 rayColor(Ray ray, uint depth) {
       color *= skyColor;
       break;
     }
+
+    // ivec2 o = hittableList[1].object;
+    // color = vec3(o.xy, 1.0);
   }
 
   return color;

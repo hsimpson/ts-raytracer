@@ -2,19 +2,19 @@
 #define RAY_INC
 
 struct Ray {
-  vec3 origin;
-  vec3 direction;
+  vec3  origin;
+  vec3  direction;
+  float time;
 };
 
 struct HitRecord {
   vec3  p;
   vec3  normal;
   float t;
+  vec2  uv;
   bool  frontFace;
   float materialType;
-  vec3  albedo;
-  float roughness;
-  float refractIdx;
+  float materialIndex;
 };
 
 void setFaceNormal(inout HitRecord rec, const Ray r, const vec3 outwardNormal) {

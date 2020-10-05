@@ -1,0 +1,61 @@
+#ifndef HITTABLE_INC
+#define HITTABLE_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#define HITTABLETYPE_SPHERE 0
+#define HITTABLETYPE_MOVINGSPHERE 1
+#define HITTABLETYPE_XYRECT 2
+#define HITTABLETYPE_XZRECT 3
+#define HITTABLETYPE_YZRECT 4
+#define HITTABLETYPE_BOX 5
+#define HITTABLETYPE_CONSTANTMEDIUM 6
+
+#include "./sphere.comp"
+#include "../ray.comp"
+
+struct Hittable {
+  float hittableType;
+  float hittableIndex;
+};
+
+layout(std430, set = 0, binding = 3) buffer Hittables {
+  Hittable hittableList[];
+};
+
+bool hit(const Hittable hittable, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
+  int hittableType  = int(round(hittable.hittableType));
+  int hittableIndex = int(round(hittable.hittableIndex));
+
+  switch (hittableType) {
+    case HITTABLETYPE_SPHERE:
+      SphereHittable sphereHittable = sphereHittables[hittableIndex];
+      return sphereHittableHit(sphereHittable, ray, tMin, tMax, rec);
+      break;
+  }
+
+  return false;
+}
+
+bool hittableListHit(const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
+  HitRecord tempRec;
+  bool      hitAnything  = false;
+  float     closestSoFar = tMax;
+
+  // if (hittableList.length() > 2)
+  //   return true;
+  // else
+  //   return false;
+
+  for (int i = 0; i < hittableList.length(); i++) {
+    if (hit(hittableList[i], ray, tMin, closestSoFar, tempRec)) {
+      hitAnything  = true;
+      closestSoFar = tempRec.t;
+      rec          = tempRec;
+    }
+  }
+
+  return hitAnything;
+}
+
+#endif  //HITTABLE_INC
