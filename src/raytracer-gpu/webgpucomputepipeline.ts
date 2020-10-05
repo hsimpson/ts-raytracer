@@ -63,13 +63,19 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
     this._initialized = true;
 
     const pixelArray = new Float32Array(this._options.uniformParams.fWidth * this._options.uniformParams.fHeight * 4);
-    this._pixelBuffer.create(pixelArray, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
+    this._pixelBuffer.createWithArrayMapped(pixelArray, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
 
     const uniformArray = this.getParamsArray(this._options.uniformParams);
-    this._computeParamsUniformBuffer.create(uniformArray, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
+    this._computeParamsUniformBuffer.createWithArrayMapped(
+      uniformArray,
+      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+    );
 
     const cameraArray = this._options.camera.getUniformArray();
-    this._computeCameraUniformBuffer.create(cameraArray, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
+    this._computeCameraUniformBuffer.createWithArrayMapped(
+      cameraArray,
+      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+    );
 
     this.createObjects();
 
@@ -132,11 +138,11 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
   }
 
   public createObjects(): void {
-    this._hittableListBuffer.create(HittableList.gpuBufferArray, GPUBufferUsage.STORAGE);
-    this._spheresHittablesBuffer.create(Sphere.gpuBufferArray, GPUBufferUsage.STORAGE);
-    this._lambertianMaterialsBuffer.create(LambertianMaterial.gpuBufferArray, GPUBufferUsage.STORAGE);
-    this._solidTexturesBuffer.create(SolidColor.gpuBufferArray, GPUBufferUsage.STORAGE);
-    this._checkerTexturesBuffer.create(CheckerTexture.gpuBufferArray, GPUBufferUsage.STORAGE);
+    this._hittableListBuffer.createWithArrayMapped(HittableList.gpuBufferArray, GPUBufferUsage.STORAGE);
+    this._spheresHittablesBuffer.createWithArrayMapped(Sphere.gpuBufferArray, GPUBufferUsage.STORAGE);
+    this._lambertianMaterialsBuffer.createWithArrayMapped(LambertianMaterial.gpuBufferArray, GPUBufferUsage.STORAGE);
+    this._solidTexturesBuffer.createWithArrayMapped(SolidColor.gpuBufferArray, GPUBufferUsage.STORAGE);
+    this._checkerTexturesBuffer.createWithArrayMapped(CheckerTexture.gpuBufferArray, GPUBufferUsage.STORAGE);
   }
 
   public updateUniformBuffer(): void {

@@ -51,10 +51,13 @@ export default class WebGPURenderPipeline extends WebGPUPipelineBase {
     }
     this._initialized = true;
 
-    this._vertexPositionBuffer.create(_vertexPositions, GPUBufferUsage.VERTEX);
+    this._vertexPositionBuffer.createWithArrayMapped(_vertexPositions, GPUBufferUsage.VERTEX);
 
     const uniformArray = this.getParamsArray(this._options.uniformParams);
-    this._renderParamsUniformBuffer.create(uniformArray, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
+    this._renderParamsUniformBuffer.createWithArrayMapped(
+      uniformArray,
+      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+    );
 
     this._bindGroupLayout = WebGPUContext.device.createBindGroupLayout({
       entries: [

@@ -8,6 +8,7 @@ import type { Vec3 } from '../vec3';
 import WebGPUComputePipline from './webgpucomputepipeline';
 import { WebGPUContext } from './webgpucontext';
 import WebGPURenderPipeline from './webgpurenderpipeline';
+import { WebGPUBuffer } from './webgpubuffer';
 
 export default class RaytracerGPU extends RaytracerBase {
   private _initialized = false;
@@ -199,22 +200,22 @@ export default class RaytracerGPU extends RaytracerBase {
     }
 
     if (copyBuffer) {
-      const gpuReadBuffer = WebGPUContext.device.createBuffer({
-        size: this._imageWidth * this._imageHeight * 4 * 4,
-        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-      });
+      // FIXME: probably reuse buffer (maybe performance increase)
+      const gpuReadBuffer = new WebGPUBuffer();
+      gpuReadBuffer.create(
+        this._imageWidth * this._imageHeight * 4 * 4,
+        GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+      );
 
       commandEncoder.copyBufferToBuffer(
         computePipeline.pixelBuffer.gpuBuffer,
         0,
-        gpuReadBuffer,
+        gpuReadBuffer.gpuBuffer,
         0,
         this._imageWidth * this._imageHeight * 4 * 4
       );
       WebGPUContext.queue.submit([commandEncoder.finish()]);
-
-      await gpuReadBuffer.mapAsync(GPUMapMode.READ);
-      const arrayBuffer = gpuReadBuffer.getMappedRange();
+      const arrayBuffer = await gpuReadBuffer.mapRead();
 
       return new Float32Array(arrayBuffer);
     } else {
