@@ -20,11 +20,20 @@ import BVHNode from './bvhnode';
 
 export function gpuTestScene(): HittableList {
   const objects = new HittableList();
-  const red = new LambertianMaterial([0.65, 0.05, 0.05]);
-  const green = new LambertianMaterial([0.12, 0.45, 0.15]);
 
-  objects.add(new Sphere([-1, 0, 0], 1, red));
-  objects.add(new Sphere([1, 0, 0], 1, green));
+  // ground
+  const groundMaterial = new LambertianMaterial([0.5, 0.5, 0.5]);
+  objects.add(new Sphere([0, -1000, 0], 1000, groundMaterial));
+
+  // const red = new LambertianMaterial([0.65, 0.05, 0.05]);
+  const green = new LambertianMaterial([0.12, 0.45, 0.15]);
+  const metal1 = new MetalMaterial([0.7, 0.6, 0.5], 0.1);
+
+  objects.add(new Sphere([-0.6, 0.4, 0], 0.4, metal1));
+  objects.add(new Sphere([0.6, 0.4, 0], 0.4, green));
+
+  // dummy ;-)
+  // const checkerTexture = new CheckerTexture([0.2, 0.3, 0.1], [0.9, 0.9, 0.9]);
 
   return objects;
 }
@@ -93,8 +102,8 @@ export function randomScene(): HittableList {
           const albedo = Vector.multVec3(Vector.random(), Vector.random());
           sphereMaterial = new LambertianMaterial(albedo);
           const center2 = Vector.addVec3(center, [0, randomNumberRange(0, 0.5), 0]);
-          world.add(new MovingSphere(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
-          //world.add(new Sphere(center, 0.2, sphereMaterial));
+          // world.add(new MovingSphere(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
+          world.add(new Sphere(center, 0.2, sphereMaterial));
         } else if (chooseMat < 0.95) {
           // metal
           const albedo = Vector.randomRange(0.5, 1);

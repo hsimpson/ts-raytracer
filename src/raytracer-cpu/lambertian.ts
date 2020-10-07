@@ -26,7 +26,8 @@ export default class LambertianMaterial extends Material implements IWebGPUObjec
     const tex = (this._albedo as unknown) as IWebGPUObject;
     const texTypeId = tex?.gpuObjectTypeId ?? 0;
     const texIndex = tex?.gpuObjectIndex ?? 0;
-    LambertianMaterial._gpuBuffer.push(texTypeId, texIndex, -1, -1);
+    // LambertianMaterial._gpuBuffer.push(texTypeId, texIndex, -1, -1);
+    LambertianMaterial._gpuBuffer.push(texTypeId, texIndex);
   }
 
   public static resetGPUBuffer(): void {

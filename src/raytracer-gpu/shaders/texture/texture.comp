@@ -9,22 +9,24 @@
 #define TEXTURETYPE_IMAGE 3
 
 #include "./solid.comp"
-#include "./checker.comp"
+// #include "./checker.comp"
 
 vec3 textureValue(const int textureType, const int textureIndex, const vec2 uv, const vec3 p) {
   vec3 color = vec3(0.0, 0.0, 0.0);
 
+  // if (textureType < 0)
+  //   color = vec3(0.0, 1.0, 0.0);
   switch (textureType) {
     case TEXTURETYPE_SOLID:
       SolidTexture solidTexture = solidTextures[textureIndex];
       color                     = solidTextureValue(solidTexture, uv, p);
       break;
-    case TEXTURETYPE_CHECKER:
-      CheckerTexture checkerTexture = checkerTextures[textureIndex];
-      color                         = checkerTextureValue(checkerTexture, uv, p);
-      break;
+    // case TEXTURETYPE_CHECKER:
+    //   CheckerTexture checkerTexture = checkerTextures[textureIndex];
+    //   color                         = checkerTextureValue(checkerTexture, uv, p);
+    //   break;
     default:
-      color = vec3(1.0, 0.0, 0.0);
+      color = vec3(0.0, 0.0, 1.0);
       break;
   }
 

@@ -12,6 +12,7 @@
 #include "../utils.comp"
 #include "../ray.comp"
 #include "./lambertian.comp"
+#include "./metal.comp"
 
 bool materialScatter(const Ray ray, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
   int materialType  = int(round(rec.materialType));
@@ -31,6 +32,10 @@ bool materialScatter(const Ray ray, const HitRecord rec, out vec3 attenuation, o
       // return true;
 
       return lambertianScatter(lambertianMaterial, ray, rec, attenuation, scattered);
+      break;
+    case MATERIALTYPE_METAL:
+      MetalMaterial metalMaterial = metalMaterials[materialIndex];
+      return metalScatter(metalMaterial, ray, rec, attenuation, scattered);
       break;
   }
 

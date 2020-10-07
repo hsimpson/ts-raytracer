@@ -1,6 +1,7 @@
 import Camera from '../camera';
 import { HittableList } from '../raytracer-cpu/hittablelist';
 import LambertianMaterial from '../raytracer-cpu/lambertian';
+import MetalMaterial from '../raytracer-cpu/metal';
 import { Sphere } from '../raytracer-cpu/sphere';
 import { SolidColor, CheckerTexture } from '../raytracer-cpu/texture';
 import { WebGPUBuffer } from './webgpubuffer';
@@ -23,7 +24,7 @@ interface WebGPUComputePiplineOptions {
   world: HittableList;
 }
 
-enum Bindings {
+const enum Bindings {
   ComputeParams = 0,
   Camera = 1,
   PixelBuffer = 2,
@@ -34,7 +35,8 @@ enum Bindings {
   LambertianMaterials = 5,
 
   SolidTextures = 6,
-  CheckerTextures = 7,
+  // CheckerTextures = 7,
+  MetalMaterials = 7,
 }
 
 export default class WebGPUComputePipline extends WebGPUPipelineBase {
@@ -48,7 +50,8 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
   private _spheresHittablesBuffer = new WebGPUBuffer();
   private _lambertianMaterialsBuffer = new WebGPUBuffer();
   private _solidTexturesBuffer = new WebGPUBuffer();
-  private _checkerTexturesBuffer = new WebGPUBuffer();
+  // private _checkerTexturesBuffer = new WebGPUBuffer();
+  private _metalMaterialsBuffer = new WebGPUBuffer();
 
   public constructor(options: WebGPUComputePiplineOptions) {
     super();
@@ -116,8 +119,13 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
           visibility: GPUShaderStage.COMPUTE,
           type: 'storage-buffer',
         },
+        // {
+        //   binding: Bindings.CheckerTextures,
+        //   visibility: GPUShaderStage.COMPUTE,
+        //   type: 'storage-buffer',
+        // },
         {
-          binding: Bindings.CheckerTextures,
+          binding: Bindings.MetalMaterials,
           visibility: GPUShaderStage.COMPUTE,
           type: 'storage-buffer',
         },
@@ -135,6 +143,7 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
     LambertianMaterial.resetGPUBuffer();
     SolidColor.resetGPUBuffer();
     CheckerTexture.resetGPUBuffer();
+    MetalMaterial.resetGPUBuffer();
   }
 
   public createObjects(): void {
@@ -142,7 +151,8 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
     this._spheresHittablesBuffer.createWithArrayMapped(Sphere.gpuBufferArray, GPUBufferUsage.STORAGE);
     this._lambertianMaterialsBuffer.createWithArrayMapped(LambertianMaterial.gpuBufferArray, GPUBufferUsage.STORAGE);
     this._solidTexturesBuffer.createWithArrayMapped(SolidColor.gpuBufferArray, GPUBufferUsage.STORAGE);
-    this._checkerTexturesBuffer.createWithArrayMapped(CheckerTexture.gpuBufferArray, GPUBufferUsage.STORAGE);
+    // this._checkerTexturesBuffer.createWithArrayMapped(CheckerTexture.gpuBufferArray, GPUBufferUsage.STORAGE);
+    this._metalMaterialsBuffer.createWithArrayMapped(MetalMaterial.gpuBufferArray, GPUBufferUsage.STORAGE);
   }
 
   public updateUniformBuffer(): void {
@@ -213,12 +223,20 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
             size: this._solidTexturesBuffer.size,
           },
         },
+        // {
+        //   binding: Bindings.CheckerTextures,
+        //   resource: {
+        //     buffer: this._checkerTexturesBuffer.gpuBuffer,
+        //     offset: 0,
+        //     size: this._checkerTexturesBuffer.size,
+        //   },
+        // },
         {
-          binding: Bindings.CheckerTextures,
+          binding: Bindings.MetalMaterials,
           resource: {
-            buffer: this._checkerTexturesBuffer.gpuBuffer,
+            buffer: this._metalMaterialsBuffer.gpuBuffer,
             offset: 0,
-            size: this._checkerTexturesBuffer.size,
+            size: this._metalMaterialsBuffer.size,
           },
         },
       ],

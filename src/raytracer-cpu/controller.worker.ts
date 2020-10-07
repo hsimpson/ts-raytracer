@@ -51,10 +51,10 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
   switch (msg.data.sceneIdx) {
     case 1:
       background = [0.7, 0.8, 1.0];
-      lookFrom = [13, 2, 3];
+      lookFrom = [0, 2, 10];
       lookAt = [0, 0, 0];
-      fovY = 20.0;
-      aperture = 0.1;
+      fovY = 10.0;
+      aperture = 0.0;
       cameraT1 = 1.0;
       break;
 

@@ -32,7 +32,8 @@ pixelBuffer;
 
 vec3 rayColor(Ray ray, uint depth) {
   HitRecord rec;
-  vec3      color = vec3(1.0, 1.0, 1.0);
+  vec3      color    = vec3(1.0, 1.0, 1.0);
+  vec3      skyColor = vec3(0.7, 0.8, 1.0);
 
   for (int i = 0; i < depth; i++) {
     if (hittableListHit(ray, 0.001, FLT_MAX, rec)) {
@@ -51,9 +52,9 @@ vec3 rayColor(Ray ray, uint depth) {
         break;
       }
     } else {
-      vec3  unit_direction = normalize(ray.direction);
-      float t              = 0.5 * (unit_direction.y + 1.0);
-      vec3  skyColor       = (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
+      // vec3  unit_direction = normalize(ray.direction);
+      // float t              = 0.5 * (unit_direction.y + 1.0);
+      // vec3  skyColor       = (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
       color *= skyColor;
       break;
     }
@@ -92,7 +93,7 @@ void main() {
   // pixel_color *= scale;
   //pixel_color = vec3(random());
 
-  // gamma correction
+  // gamma correction 2.0
   pixel_color = sqrt(pixel_color);
 
   //pixel_color               = randomVec3();

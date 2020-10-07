@@ -64,13 +64,14 @@ export default class RaytracerGPU extends RaytracerBase {
     };
 
     const aspectRatio = this._imageWidth / this._imageHeight;
-    const lookFrom: Vec3 = [13, 2, 3];
+    // const lookFrom: Vec3 = [13, 2, 3];
+    const lookFrom: Vec3 = [0, 2, 10];
     const lookAt: Vec3 = [0, 0, 0];
     const vUp: Vec3 = [0, 1, 0];
     const focusDist = 10;
     //const aperture = 0.1;
     const aperture = 0.0;
-    const fovY = 20;
+    const fovY = 10;
     const camera = new Camera();
     camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist, 0.0, 0.1);
 
@@ -83,8 +84,8 @@ export default class RaytracerGPU extends RaytracerBase {
         fMaxBounces: this._maxBounces,
       },
       camera,
-      //world: gpuTestScene(),
-      world: twoSpheres(),
+      world: gpuTestScene(),
+      // world: twoSpheres(),
     });
 
     await computePipeline.initialize();
@@ -165,6 +166,14 @@ export default class RaytracerGPU extends RaytracerBase {
     const gpu = navigator.gpu;
 
     const adapter = await gpu.requestAdapter();
+
+    // const deviceDescriptor: GPUDeviceDescriptor = {
+    //   limits: {
+
+    //   }
+    // };
+
+    // const device = await adapter.requestDevice(deviceDescriptor);
     const device = await adapter.requestDevice();
     const queue = device.defaultQueue;
 

@@ -31,6 +31,8 @@ export class WebGPUBuffer {
     this._size = array.byteLength;
     let bufferMapped: ArrayBuffer;
 
+    // console.log(`createWithArrayMapped from ${array.constructor.name}`);
+
     // newer spec
     if (GPUBuffer.prototype.getMappedRange) {
       this._gpuBuffer = WebGPUContext.device.createBuffer({

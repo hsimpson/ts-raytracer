@@ -38,8 +38,8 @@ export class HittableList extends Hittable implements IWebGPUObject {
   public add(object: Hittable): void {
     this._objects.push(object);
     const obj = (object as unknown) as IWebGPUObject;
-    // HittableList._gpuBuffer.push(obj.gpuObjectTypeId, obj.gpuObjectIndex);
-    HittableList._gpuBuffer.push(obj.gpuObjectTypeId, obj.gpuObjectIndex, -1, -1);
+    HittableList._gpuBuffer.push(obj.gpuObjectTypeId, obj.gpuObjectIndex);
+    // HittableList._gpuBuffer.push(obj.gpuObjectTypeId, obj.gpuObjectIndex, -1, -1);
   }
 
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {

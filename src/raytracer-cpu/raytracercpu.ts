@@ -7,6 +7,7 @@ import {
   cornellBoxSmoke,
   earthSphere,
   finalScene,
+  gpuTestScene,
   randomScene,
   simpleLight,
   twoPerlinSpheres,
@@ -82,7 +83,7 @@ export default class RaytracerCPU extends RaytracerBase {
 
     switch (this._scene) {
       case 1:
-        world = randomScene();
+        world = gpuTestScene();
         break;
       case 2:
         world = twoSpheres();
