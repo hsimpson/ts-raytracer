@@ -3,7 +3,7 @@ import { merge } from 'webpack-merge';
 
 const devConfig = merge(commonConfig, {
   mode: 'development',
-  devtool: 'cheap-module-eval-source-map',
+  devtool: 'eval-cheap-module-source-map',
   watch: true,
   devServer: {
     contentBase: './dist',

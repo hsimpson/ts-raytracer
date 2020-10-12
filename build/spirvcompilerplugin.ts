@@ -18,7 +18,7 @@ export default class SpirVCompilerPlugin /*extends webpack.Plugin*/ {
     this.options = options;
   }
 
-  private async callCompiler(compilation: webpack.compilation.Compilation, cmd: string, args: string[]): Promise<void> {
+  private async callCompiler(compilation: webpack.Compilation, cmd: string, args: string[]): Promise<void> {
     const logger = compilation.getLogger(PLUGIN_NAME);
     return new Promise((resolve) => {
       const child = child_process.spawn(cmd, args);
