@@ -1,9 +1,6 @@
 import Camera from '../camera';
 import { HittableList } from '../raytracer-cpu/hittablelist';
-import LambertianMaterial from '../raytracer-cpu/lambertian';
-import MetalMaterial from '../raytracer-cpu/metal';
-import { Sphere } from '../raytracer-cpu/sphere';
-import { SolidColor, CheckerTexture } from '../raytracer-cpu/texture';
+import { RaytracingBuffers } from './raytracingbuffers';
 import { WebGPUBuffer } from './webgpubuffer';
 import { WebGPUContext } from './webgpucontext';
 import WebGPUPipelineBase from './webgpupipelinebase';
@@ -29,34 +26,27 @@ const enum Bindings {
   Camera = 1,
   PixelBuffer = 2,
 
-  HittableList = 3,
-  SpheresHittables = 4,
-
-  LambertianMaterials = 5,
-
-  SolidTextures = 6,
-  // CheckerTextures = 7,
-  MetalMaterials = 7,
+  Primitives = 3,
+  Materials = 4,
 }
 
 export default class WebGPUComputePipline extends WebGPUPipelineBase {
   private _options: WebGPUComputePiplineOptions;
+  private _raytracingBuffers: RaytracingBuffers;
 
   private _computeParamsUniformBuffer = new WebGPUBuffer();
   private _computeCameraUniformBuffer = new WebGPUBuffer();
   private _pixelBuffer = new WebGPUBuffer();
 
-  private _hittableListBuffer = new WebGPUBuffer();
-  private _spheresHittablesBuffer = new WebGPUBuffer();
-  private _lambertianMaterialsBuffer = new WebGPUBuffer();
-  private _solidTexturesBuffer = new WebGPUBuffer();
-  // private _checkerTexturesBuffer = new WebGPUBuffer();
-  private _metalMaterialsBuffer = new WebGPUBuffer();
+  private _primitivesBuffer = new WebGPUBuffer();
+  private _materialsBuffer = new WebGPUBuffer();
 
   public constructor(options: WebGPUComputePiplineOptions) {
     super();
     this._options = options;
     this._options.uniformParams.fRandomSeed = Math.random();
+
+    this._raytracingBuffers = new RaytracingBuffers(this._options.world);
   }
 
   public async initialize(): Promise<void> {
@@ -100,32 +90,12 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
           type: 'storage-buffer',
         },
         {
-          binding: Bindings.HittableList,
+          binding: Bindings.Primitives,
           visibility: GPUShaderStage.COMPUTE,
           type: 'storage-buffer',
         },
         {
-          binding: Bindings.SpheresHittables,
-          visibility: GPUShaderStage.COMPUTE,
-          type: 'storage-buffer',
-        },
-        {
-          binding: Bindings.LambertianMaterials,
-          visibility: GPUShaderStage.COMPUTE,
-          type: 'storage-buffer',
-        },
-        {
-          binding: Bindings.SolidTextures,
-          visibility: GPUShaderStage.COMPUTE,
-          type: 'storage-buffer',
-        },
-        // {
-        //   binding: Bindings.CheckerTextures,
-        //   visibility: GPUShaderStage.COMPUTE,
-        //   type: 'storage-buffer',
-        // },
-        {
-          binding: Bindings.MetalMaterials,
+          binding: Bindings.Materials,
           visibility: GPUShaderStage.COMPUTE,
           type: 'storage-buffer',
         },
@@ -133,26 +103,11 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
     });
 
     await this.createBindGroup();
-
-    this.resetObjects();
-  }
-
-  private resetObjects(): void {
-    HittableList.resetGPUBuffer();
-    Sphere.resetGPUBuffer();
-    LambertianMaterial.resetGPUBuffer();
-    SolidColor.resetGPUBuffer();
-    CheckerTexture.resetGPUBuffer();
-    MetalMaterial.resetGPUBuffer();
   }
 
   public createObjects(): void {
-    this._hittableListBuffer.createWithArrayMapped(HittableList.gpuBufferArray, GPUBufferUsage.STORAGE);
-    this._spheresHittablesBuffer.createWithArrayMapped(Sphere.gpuBufferArray, GPUBufferUsage.STORAGE);
-    this._lambertianMaterialsBuffer.createWithArrayMapped(LambertianMaterial.gpuBufferArray, GPUBufferUsage.STORAGE);
-    this._solidTexturesBuffer.createWithArrayMapped(SolidColor.gpuBufferArray, GPUBufferUsage.STORAGE);
-    // this._checkerTexturesBuffer.createWithArrayMapped(CheckerTexture.gpuBufferArray, GPUBufferUsage.STORAGE);
-    this._metalMaterialsBuffer.createWithArrayMapped(MetalMaterial.gpuBufferArray, GPUBufferUsage.STORAGE);
+    this._primitivesBuffer.createWithArrayMapped(this._raytracingBuffers.primitiveBuffer(), GPUBufferUsage.STORAGE);
+    this._materialsBuffer.createWithArrayMapped(this._raytracingBuffers.materialBuffer(), GPUBufferUsage.STORAGE);
   }
 
   public updateUniformBuffer(): void {
@@ -192,51 +147,19 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
           },
         },
         {
-          binding: Bindings.HittableList,
+          binding: Bindings.Primitives,
           resource: {
-            buffer: this._hittableListBuffer.gpuBuffer,
+            buffer: this._primitivesBuffer.gpuBuffer,
             offset: 0,
-            size: this._hittableListBuffer.size,
+            size: this._primitivesBuffer.size,
           },
         },
         {
-          binding: Bindings.SpheresHittables,
+          binding: Bindings.Materials,
           resource: {
-            buffer: this._spheresHittablesBuffer.gpuBuffer,
+            buffer: this._materialsBuffer.gpuBuffer,
             offset: 0,
-            size: this._spheresHittablesBuffer.size,
-          },
-        },
-        {
-          binding: Bindings.LambertianMaterials,
-          resource: {
-            buffer: this._lambertianMaterialsBuffer.gpuBuffer,
-            offset: 0,
-            size: this._lambertianMaterialsBuffer.size,
-          },
-        },
-        {
-          binding: Bindings.SolidTextures,
-          resource: {
-            buffer: this._solidTexturesBuffer.gpuBuffer,
-            offset: 0,
-            size: this._solidTexturesBuffer.size,
-          },
-        },
-        // {
-        //   binding: Bindings.CheckerTextures,
-        //   resource: {
-        //     buffer: this._checkerTexturesBuffer.gpuBuffer,
-        //     offset: 0,
-        //     size: this._checkerTexturesBuffer.size,
-        //   },
-        // },
-        {
-          binding: Bindings.MetalMaterials,
-          resource: {
-            buffer: this._metalMaterialsBuffer.gpuBuffer,
-            offset: 0,
-            size: this._metalMaterialsBuffer.size,
+            size: this._materialsBuffer.size,
           },
         },
       ],

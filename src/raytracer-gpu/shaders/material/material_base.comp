@@ -1,0 +1,20 @@
+#ifndef MATERIAL_BASE_INC
+#define MATERIAL_BASE_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+struct Material {
+  vec4  color;
+  float roughness;
+  float materialType;  // FIXME: make int or uint
+
+  // padding
+  float pad_0;
+  float pad_1;
+};
+
+layout(std430, set = 0, binding = 4) buffer MaterialBuffer {
+  Material materials[];
+};
+
+#endif  //MATERIAL_BASE_INC

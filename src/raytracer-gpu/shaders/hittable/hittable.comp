@@ -11,26 +11,16 @@
 #define HITTABLETYPE_BOX 5
 #define HITTABLETYPE_CONSTANTMEDIUM 6
 
-#include "./sphere.comp"
 #include "../ray.comp"
+#include "./hittable_base.comp"
+#include "./sphere.comp"
 
-struct Hittable {
-  float hittableType;
-  float hittableIndex;
-};
+bool hitPrimitive(const Primitive primitve, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
+  int primitiveType = int(round(primitve.primitiveType));  // FIXME: make int or uint
 
-layout(std430, set = 0, binding = 3) buffer Hittables {
-  Hittable hittableList[];
-};
-
-bool hit(const Hittable hittable, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
-  int hittableType  = int(round(hittable.hittableType));
-  int hittableIndex = int(round(hittable.hittableIndex));
-
-  switch (hittableType) {
+  switch (primitiveType) {
     case HITTABLETYPE_SPHERE:
-      SphereHittable sphereHittable = sphereHittables[hittableIndex];
-      return sphereHittableHit(sphereHittable, ray, tMin, tMax, rec);
+      return hitSphere(primitve, ray, tMin, tMax, rec);
       break;
   }
 
@@ -47,8 +37,8 @@ bool hittableListHit(const Ray ray, const float tMin, const float tMax, inout Hi
   // else
   //   return false;
 
-  for (int i = 0; i < hittableList.length(); i++) {
-    if (hit(hittableList[i], ray, tMin, closestSoFar, tempRec)) {
+  for (int i = 0; i < primitives.length(); i++) {
+    if (hitPrimitive(primitives[i], ray, tMin, closestSoFar, tempRec)) {
       hitAnything  = true;
       closestSoFar = tempRec.t;
       rec          = tempRec;

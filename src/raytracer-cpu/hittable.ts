@@ -29,40 +29,10 @@ export class HitRecord {
   }
 }
 
-export enum WebGPUHittableType {
-  Sphere = 0,
-  MovingSphere = 1,
-  XYRect = 2,
-  XZRect = 3,
-  YZRect = 4,
-  ConstantMedium = 5,
-  HittableList = 99,
-}
-
-export enum WebGPUMaterialType {
-  Lambertian = 0,
-  Metal = 1,
-  Dielectric = 2,
-  IsoTropic = 3,
-  DiffuseLight = 4,
-}
-
-export enum WebGPUTextureType {
-  Solid = 0,
-  Checker = 1,
-  Noise = 2,
-  Image = 3,
-}
-
-type WebGPUTypes = WebGPUHittableType | WebGPUMaterialType | WebGPUTextureType;
-
-export interface IWebGPUObject {
-  readonly gpuObjectTypeId: WebGPUTypes;
-  readonly gpuObjectIndex: number;
-  insertIntoBufferArray: () => void;
-}
-
 export abstract class Hittable {
   public abstract hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean;
   public abstract boundingBox(t0: number, t1: number, outputBox: AABB): boolean;
+  public get material(): Material | undefined {
+    return undefined;
+  }
 }

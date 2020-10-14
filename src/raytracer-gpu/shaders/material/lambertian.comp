@@ -5,24 +5,13 @@
 
 #include "../utils.comp"
 #include "../ray.comp"
-#include "../texture/texture.comp"
+#include "./material_base.comp"
 
-struct LambertianMaterial {
-  float textureType;
-  float textureIndex;
-};
-
-layout(std430, set = 0, binding = 5) buffer LambertianMaterials {
-  LambertianMaterial lambertianMaterials[];
-};
-
-bool lambertianScatter(const LambertianMaterial lambertianMaterial, const Ray ray, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
-  int textureType  = int(round(lambertianMaterial.textureType));
-  int textureIndex = int(round(lambertianMaterial.textureIndex));
-
+bool lambertianScatter(const Material material, const Ray ray, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
   vec3 scatterDirection = rec.normal + randomUnitVector();
   scattered             = Ray(rec.p, scatterDirection, ray.time);
-  attenuation           = textureValue(textureType, textureIndex, rec.uv, rec.p);
+  // attenuation           = textureValue(textureType, textureIndex, rec.uv, rec.p);
+  attenuation = material.color.rgb;
 
   return true;
 }

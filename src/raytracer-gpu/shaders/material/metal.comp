@@ -5,25 +5,15 @@
 
 #include "../utils.comp"
 #include "../ray.comp"
+#include "./material_base.comp"
 
-struct MetalMaterial {
-  vec3  albedo;
-  float roughness;
-};
-
-layout(std430, set = 0, binding = 7) buffer MetalMaterials {
-  MetalMaterial metalMaterials[];
-};
-
-bool metalScatter(const MetalMaterial metalMaterial, const Ray ray, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
+bool metalScatter(const Material material, const Ray ray, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
   vec3 reflected = reflect(normalize(ray.direction), rec.normal);
-  scattered      = Ray(rec.p, reflected + metalMaterial.roughness * randomInUnitSphere(), ray.time);
-  attenuation    = metalMaterial.albedo;
+  scattered      = Ray(rec.p, reflected + material.roughness * randomInUnitSphere(), ray.time);
+  attenuation    = material.color.rgb;
   return (dot(scattered.direction, rec.normal) > 0.0);
 
-  // attenuation = vec3(metalMaterial.roughness, 0.0, 0.0);
-  // attenuation = metalMaterial.albedo;
-  return true;
+  // return true;
 }
 
 #endif  //METALMATERIAL_INC

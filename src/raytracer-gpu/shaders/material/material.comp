@@ -11,38 +11,25 @@
 
 #include "../utils.comp"
 #include "../ray.comp"
+#include "./material_base.comp"
+
 #include "./lambertian.comp"
 #include "./metal.comp"
 
 bool materialScatter(const Ray ray, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
-  int materialType  = int(round(rec.materialType));
-  int materialIndex = int(round(rec.materialIndex));
+  int materialIndex = int(round(rec.materialIndex));  // FIXME: make int or uint
+
+  Material material     = materials[materialIndex];
+  int      materialType = int(round(material.materialType));  // FIXME: make int or uint
 
   switch (materialType) {
     case MATERIALTYPE_LAMBERTIAN:
-      LambertianMaterial lambertianMaterial = lambertianMaterials[materialIndex];
-
-      //attenuation = vec3(lambertianMaterial.textureIndex, lambertianMaterial.textureType, 0.0);
-      // attenuation = vec3(lambertianMaterial.textureType, lambertianMaterial.textureIndex, 0.0);
-
-      // if (lambertianMaterial.textureType < 5)
-      //   attenuation = vec3(1.0, 0.0, 0.0);
-      // else
-      //   attenuation = vec3(0.0, 1.0, 0.0);
-      // return true;
-
-      return lambertianScatter(lambertianMaterial, ray, rec, attenuation, scattered);
+      return lambertianScatter(material, ray, rec, attenuation, scattered);
       break;
     case MATERIALTYPE_METAL:
-      MetalMaterial metalMaterial = metalMaterials[materialIndex];
-      return metalScatter(metalMaterial, ray, rec, attenuation, scattered);
+      return metalScatter(material, ray, rec, attenuation, scattered);
       break;
   }
-
-  // if (rec.materialType == 0) {
-  //   attenuation = vec3(1.0, 0.0, 0.0);
-  //   return true;
-  // }
 
   return false;
 }

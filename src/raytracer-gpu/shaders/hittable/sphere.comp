@@ -5,19 +5,9 @@
 
 #include "../ray.comp"
 #include "../utils.comp"
+#include "./hittable_base.comp"
 
-struct SphereHittable {
-  vec3  center;
-  float radius;
-  float materialType;
-  float materialIndex;
-};
-
-layout(std430, set = 0, binding = 4) buffer Spheres {
-  SphereHittable sphereHittables[];
-};
-
-bool sphereHittableHit(const SphereHittable sphere, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
+bool hitSphere(const Primitive sphere, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
   vec3  oc           = ray.origin - sphere.center;
   float a            = lengthSquared(ray.direction);
   float half_b       = dot(oc, ray.direction);
@@ -32,7 +22,7 @@ bool sphereHittableHit(const SphereHittable sphere, const Ray ray, const float t
       rec.p               = rayAt(ray, rec.t);
       vec3 outward_normal = (rec.p - sphere.center) / sphere.radius;
       setFaceNormal(rec, ray, outward_normal);
-      rec.materialType  = sphere.materialType;
+      // rec.materialType  = sphere.materialType;
       rec.materialIndex = sphere.materialIndex;
       return true;
     }
@@ -42,7 +32,7 @@ bool sphereHittableHit(const SphereHittable sphere, const Ray ray, const float t
       rec.p               = rayAt(ray, rec.t);
       vec3 outward_normal = (rec.p - sphere.center) / sphere.radius;
       setFaceNormal(rec, ray, outward_normal);
-      rec.materialType  = sphere.materialType;
+      // rec.materialType  = sphere.materialType;
       rec.materialIndex = sphere.materialIndex;
       return true;
     }
