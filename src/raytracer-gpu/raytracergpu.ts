@@ -233,6 +233,8 @@ export default class RaytracerGPU extends RaytracerBase {
     return new Float32Array(this._imageWidth * this._imageHeight * 4 * 4);
   }
 
+  /* 
+  // unused at the moment
   private compute2(computePipeline: WebGPUComputePipline, renderPipeLine: WebGPURenderPipeline, sample: number): void {
     const commandEncoder = WebGPUContext.device.createCommandEncoder();
 
@@ -268,4 +270,5 @@ export default class RaytracerGPU extends RaytracerBase {
 
     WebGPUContext.queue.submit([commandEncoder.finish()]);
   }
+  */
 }

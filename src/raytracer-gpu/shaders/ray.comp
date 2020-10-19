@@ -13,7 +13,7 @@ struct HitRecord {
   float t;
   vec2  uv;
   bool  frontFace;
-  float materialIndex;  // FIXME: make int or uint
+  uint  materialIndex;
 };
 
 void setFaceNormal(inout HitRecord rec, const Ray r, const vec3 outwardNormal) {

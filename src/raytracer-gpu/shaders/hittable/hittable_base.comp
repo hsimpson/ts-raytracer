@@ -6,8 +6,8 @@
 struct Primitive {
   vec3  center;
   float radius;
-  float primitiveType;  // FIXME: make int or uint
-  float materialIndex;  // FIXME: make int or uint
+  uint  primitiveType;
+  uint  materialIndex;
 
   // padding
   float pad_0;

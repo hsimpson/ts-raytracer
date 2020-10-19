@@ -1,11 +1,12 @@
+import DielectricMaterial from '../raytracer-cpu/dielectric';
+import { Hittable } from '../raytracer-cpu/hittable';
 import { HittableList } from '../raytracer-cpu/hittablelist';
-import Material from '../raytracer-cpu/material';
 import LambertianMaterial from '../raytracer-cpu/lambertian';
+import Material from '../raytracer-cpu/material';
 import MetalMaterial from '../raytracer-cpu/metal';
+import { Sphere } from '../raytracer-cpu/sphere';
 import { SolidColor } from '../raytracer-cpu/texture';
 import type { Vec3 } from '../vec3';
-import { Hittable } from '../raytracer-cpu/hittable';
-import { Sphere } from '../raytracer-cpu/sphere';
 
 enum WebGPUMaterialType {
   Lambertian = 0,
@@ -35,11 +36,11 @@ export enum WebGPUPrimitiveType {
 interface WebGPUMaterial {
   color: [...rgb: Vec3, a: number]; // TODO: use vec4
   roughness: number;
+  indexOfRefraction: number;
   materialType: WebGPUMaterialType;
 
   // padding
   pad_0: number;
-  pad_1: number;
 }
 
 interface WebGPUPrimitive {
@@ -78,19 +79,28 @@ export class RaytracingBuffers {
       gpuMat = {
         color: [...tex.color, 1.0],
         roughness: 0,
+        indexOfRefraction: 1,
         materialType: WebGPUMaterialType.Lambertian,
 
         pad_0: PADDING_VALUE,
-        pad_1: PADDING_VALUE,
       };
     } else if (mat instanceof MetalMaterial) {
       gpuMat = {
         color: [...mat.color, 1],
         roughness: mat.roughness,
+        indexOfRefraction: 1,
         materialType: WebGPUMaterialType.Metal,
 
         pad_0: PADDING_VALUE,
-        pad_1: PADDING_VALUE,
+      };
+    } else if (mat instanceof DielectricMaterial) {
+      gpuMat = {
+        color: [1, 1, 1, 1],
+        roughness: 0,
+        indexOfRefraction: mat.indexOfRefraction,
+        materialType: WebGPUMaterialType.Dielectric,
+
+        pad_0: PADDING_VALUE,
       };
     }
 
@@ -122,36 +132,69 @@ export class RaytracingBuffers {
     return idx;
   }
 
-  public materialBuffer(): Float32Array {
-    const arr = [];
+  public materialBuffer(): ArrayBuffer {
+    const elementCount = 8;
+    const materialSize = elementCount * 4;
 
-    for (const mat of this._gpuMaterials) {
-      arr.push(...mat.color);
-      arr.push(mat.roughness);
-      arr.push(mat.materialType);
+    const bufferData = new ArrayBuffer(materialSize * this._gpuMaterials.length);
+    const bufferDataF32 = new Float32Array(bufferData);
+    const bufferDataU32 = new Uint32Array(bufferData);
 
-      arr.push(mat.pad_0);
-      arr.push(mat.pad_1);
+    let offset = 0;
+    for (const material of this._gpuMaterials) {
+      bufferDataF32[offset++] = material.color[0];
+      bufferDataF32[offset++] = material.color[1];
+      bufferDataF32[offset++] = material.color[2];
+      bufferDataF32[offset++] = material.color[3];
+
+      bufferDataF32[offset++] = material.roughness;
+      bufferDataF32[offset++] = material.indexOfRefraction;
+
+      bufferDataU32[offset++] = material.materialType;
+
+      bufferDataF32[offset++] = material.pad_0;
     }
 
-    console.log('Materials:', arr);
-    return new Float32Array(arr);
+    const bytes = new Uint8Array(bufferData);
+    let byteString = '';
+    bytes.forEach((value) => {
+      byteString += value.toString(16).padStart(2, '0') + '';
+    });
+
+    // console.log('Materials:', byteString);
+    return bufferData;
   }
 
-  public primitiveBuffer(): Float32Array {
-    const arr = [];
+  public primitiveBuffer(): ArrayBuffer {
+    const elementCount = 8;
+    const primitiveSize = elementCount * 4;
 
+    const bufferData = new ArrayBuffer(primitiveSize * this._gpuPrimitives.length);
+    const bufferDataF32 = new Float32Array(bufferData);
+    const bufferDataU32 = new Uint32Array(bufferData);
+
+    let offset = 0;
     for (const primitiv of this._gpuPrimitives) {
-      arr.push(...primitiv.center);
-      arr.push(primitiv.radius);
-      arr.push(primitiv.primitiveType);
-      arr.push(primitiv.materialIndex);
+      bufferDataF32[offset++] = primitiv.center[0];
+      bufferDataF32[offset++] = primitiv.center[1];
+      bufferDataF32[offset++] = primitiv.center[2];
+      bufferDataF32[offset++] = primitiv.radius;
 
-      arr.push(primitiv.pad_0);
-      arr.push(primitiv.pad_1);
+      bufferDataU32[offset++] = primitiv.primitiveType;
+      bufferDataU32[offset++] = primitiv.materialIndex;
+
+      bufferDataF32[offset++] = primitiv.pad_0;
+      bufferDataF32[offset++] = primitiv.pad_1;
     }
 
-    console.log('Primitives:', arr);
-    return new Float32Array(arr);
+    const bytes = new Uint8Array(bufferData);
+    let byteString = '';
+    bytes.forEach((value) => {
+      byteString += value.toString(16).padStart(2, '0') + '';
+    });
+
+    // console.log('Primitives:', byteString);
+
+    return bufferData;
   }
 }

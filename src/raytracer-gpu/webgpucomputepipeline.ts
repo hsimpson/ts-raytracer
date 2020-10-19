@@ -56,19 +56,18 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
     this._initialized = true;
 
     const pixelArray = new Float32Array(this._options.uniformParams.fWidth * this._options.uniformParams.fHeight * 4);
+    //COPY_SRC is needed because the pixel buffer is read after each compute call
     this._pixelBuffer.createWithArrayMapped(pixelArray, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
 
     const uniformArray = this.getParamsArray(this._options.uniformParams);
+    //COPY_DST is needed because the uniforms are updated after each compute call
     this._computeParamsUniformBuffer.createWithArrayMapped(
       uniformArray,
       GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
     );
 
     const cameraArray = this._options.camera.getUniformArray();
-    this._computeCameraUniformBuffer.createWithArrayMapped(
-      cameraArray,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-    );
+    this._computeCameraUniformBuffer.createWithArrayMapped(cameraArray, GPUBufferUsage.UNIFORM);
 
     this.createObjects();
 

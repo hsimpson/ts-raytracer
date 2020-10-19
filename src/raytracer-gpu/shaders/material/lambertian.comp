@@ -10,8 +10,7 @@
 bool lambertianScatter(const Material material, const Ray ray, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
   vec3 scatterDirection = rec.normal + randomUnitVector();
   scattered             = Ray(rec.p, scatterDirection, ray.time);
-  // attenuation           = textureValue(textureType, textureIndex, rec.uv, rec.p);
-  attenuation = material.color.rgb;
+  attenuation           = material.color.rgb;
 
   return true;
 }

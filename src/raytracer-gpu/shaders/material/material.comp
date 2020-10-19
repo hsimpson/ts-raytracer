@@ -15,12 +15,13 @@
 
 #include "./lambertian.comp"
 #include "./metal.comp"
+#include "./dielectric.comp"
 
 bool materialScatter(const Ray ray, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
-  int materialIndex = int(round(rec.materialIndex));  // FIXME: make int or uint
+  uint materialIndex = rec.materialIndex;
 
   Material material     = materials[materialIndex];
-  int      materialType = int(round(material.materialType));  // FIXME: make int or uint
+  uint     materialType = material.materialType;
 
   switch (materialType) {
     case MATERIALTYPE_LAMBERTIAN:
@@ -28,6 +29,9 @@ bool materialScatter(const Ray ray, const HitRecord rec, out vec3 attenuation, o
       break;
     case MATERIALTYPE_METAL:
       return metalScatter(material, ray, rec, attenuation, scattered);
+      break;
+    case MATERIALTYPE_DIELECTRIC:
+      return dielectricScatter(material, ray, rec, attenuation, scattered);
       break;
   }
 

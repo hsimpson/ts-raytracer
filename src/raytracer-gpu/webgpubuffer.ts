@@ -27,8 +27,8 @@ export class WebGPUBuffer {
     });
   }
 
-  public createWithArrayMapped<T extends TypedArray>(array: T, usage: GPUBufferUsageFlags): void {
-    this._size = array.byteLength;
+  public createWithArrayMapped(srcArrayBuffer: ArrayBuffer, usage: GPUBufferUsageFlags): void {
+    this._size = srcArrayBuffer.byteLength;
     let bufferMapped: ArrayBuffer;
 
     // console.log(`createWithArrayMapped from ${array.constructor.name}`);
@@ -49,9 +49,9 @@ export class WebGPUBuffer {
       });
     }
 
-    // const writeArray = new T(bufferMapped);
-    const writeArray = new (array.constructor as TypedArrayConstructor<T>)(bufferMapped);
-    writeArray.set(array);
+    // new Uint8Array(bufferMapped).set(new Uint8Array(srcArrayBuffer)); // memcpy
+    new Float32Array(bufferMapped).set(new Float32Array(srcArrayBuffer)); // memcpy
+
     this._gpuBuffer.unmap();
   }
 

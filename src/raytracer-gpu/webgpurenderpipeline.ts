@@ -54,10 +54,7 @@ export default class WebGPURenderPipeline extends WebGPUPipelineBase {
     this._vertexPositionBuffer.createWithArrayMapped(_vertexPositions, GPUBufferUsage.VERTEX);
 
     const uniformArray = this.getParamsArray(this._options.uniformParams);
-    this._renderParamsUniformBuffer.createWithArrayMapped(
-      uniformArray,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-    );
+    this._renderParamsUniformBuffer.createWithArrayMapped(uniformArray, GPUBufferUsage.UNIFORM);
 
     this._bindGroupLayout = WebGPUContext.device.createBindGroupLayout({
       entries: [

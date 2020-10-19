@@ -82,9 +82,11 @@ void main() {
   const uint ssp     = uint(params.fSamplesPerPixel);
   const uint bounces = uint(params.fMaxBounces);
 
+  const float rnd = random();
+
   // for (int s = 0; s < ssp; s++) {
-  float u = (i + random()) / (params.fWidth - 1.0);
-  float v = (j + random()) / (params.fHeight - 1.0);
+  float u = (i + rnd) / (params.fWidth - 1.0);
+  float v = (j + rnd) / (params.fHeight - 1.0);
   Ray   r = cameraGetRay(u, v);
   pixel_color += rayColor(r, bounces);
   // }
