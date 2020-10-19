@@ -1,19 +1,5 @@
 import { WebGPUContext } from './webgpucontext';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type TypedArray = ArrayLike<any> & {
-  // BYTES_PER_ELEMENT: number;
-  byteLength: number;
-  set(array: ArrayLike<number>, offset?: number): void;
-};
-
-type TypedArrayConstructor<T> = {
-  // new (): T;
-  // new (size: number): T;
-  new (buffer: ArrayBuffer): T;
-  // BYTES_PER_ELEMENT: number;
-};
-
 export class WebGPUBuffer {
   private _gpuBuffer: GPUBuffer;
   private _size = 0;
