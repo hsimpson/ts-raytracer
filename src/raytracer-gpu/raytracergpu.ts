@@ -165,33 +165,38 @@ export default class RaytracerGPU extends RaytracerBase {
     }
     const gpu = navigator.gpu;
 
-    const adapter = await gpu.requestAdapter();
+    try {
+      const adapter = await gpu.requestAdapter();
 
-    // const deviceDescriptor: GPUDeviceDescriptor = {
-    //   limits: {
+      // const deviceDescriptor: GPUDeviceDescriptor = {
+      //   limits: {
 
-    //   }
-    // };
+      //   }
+      // };
 
-    // const device = await adapter.requestDevice(deviceDescriptor);
-    const device = await adapter.requestDevice();
-    const queue = device.defaultQueue;
+      // const device = await adapter.requestDevice(deviceDescriptor);
+      const device = await adapter.requestDevice();
 
-    WebGPUContext.createContext(device, queue);
+      const queue = device.defaultQueue;
 
-    this._context2D = this._canvas.getContext('2d');
-    // swapchain
+      WebGPUContext.createContext(device, queue);
 
-    /*
-    const context: GPUCanvasContext = (this._canvas.getContext('gpupresent') as unknown) as GPUCanvasContext;
-    const swapChainDesc: GPUSwapChainDescriptor = {
-      device,
-      format: 'bgra8unorm',
-      usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC,
-    };
-    this._swapchain = context.configureSwapChain(swapChainDesc);
-    */
-    this._initialized = true;
+      this._context2D = this._canvas.getContext('2d');
+      // swapchain
+
+      /*
+      const context: GPUCanvasContext = (this._canvas.getContext('gpupresent') as unknown) as GPUCanvasContext;
+      const swapChainDesc: GPUSwapChainDescriptor = {
+        device,
+        format: 'bgra8unorm',
+        usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC,
+      };
+      this._swapchain = context.configureSwapChain(swapChainDesc);
+      */
+      this._initialized = true;
+    } catch (error: unknown) {
+      console.log(error);
+    }
   }
 
   private async compute(computePipeline: WebGPUComputePipline, copyBuffer = false): Promise<Float32Array> {
