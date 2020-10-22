@@ -1,11 +1,13 @@
-import Camera from '../camera';
+import { Camera } from '../camera';
 import { HittableList } from '../raytracer-cpu/hittablelist';
 import { RaytracingBuffers } from './raytracingbuffers';
 import { WebGPUBuffer } from './webgpubuffer';
 import { WebGPUContext } from './webgpucontext';
 import WebGPUPipelineBase from './webgpupipelinebase';
+import type { Vec3 } from '../vec3';
 
 interface ComputeUniformParams {
+  background: Vec3;
   fWidth: number;
   fHeight: number;
   fSamplesPerPixel: number;
@@ -16,7 +18,6 @@ interface ComputeUniformParams {
 interface WebGPUComputePiplineOptions {
   computeShaderUrl: string;
   uniformParams: ComputeUniformParams;
-  // randomScene: Float32Array;
   camera: Camera;
   world: HittableList;
 }

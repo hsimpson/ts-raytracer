@@ -56,6 +56,15 @@ interface WebGPUPrimitive {
 
 const PADDING_VALUE = -99;
 
+function log(message: string, bufferData: ArrayBuffer): void {
+  const bytes = new Uint8Array(bufferData);
+  let byteString = '';
+  bytes.forEach((value) => {
+    byteString += value.toString(16).padStart(2, '0') + '';
+  });
+  console.log(message, byteString);
+}
+
 export class RaytracingBuffers {
   private _gpuMaterials: WebGPUMaterial[] = [];
   private _gpuPrimitives: WebGPUPrimitive[] = [];
@@ -155,13 +164,7 @@ export class RaytracingBuffers {
       bufferDataF32[offset++] = material.pad_0;
     }
 
-    const bytes = new Uint8Array(bufferData);
-    let byteString = '';
-    bytes.forEach((value) => {
-      byteString += value.toString(16).padStart(2, '0') + '';
-    });
-
-    // console.log('Materials:', byteString);
+    //log('Materials:', bufferData);
     return bufferData;
   }
 
@@ -187,13 +190,7 @@ export class RaytracingBuffers {
       bufferDataF32[offset++] = primitiv.pad_1;
     }
 
-    const bytes = new Uint8Array(bufferData);
-    let byteString = '';
-    bytes.forEach((value) => {
-      byteString += value.toString(16).padStart(2, '0') + '';
-    });
-
-    // console.log('Primitives:', byteString);
+    //log('Primitives:', bufferData);
 
     return bufferData;
   }

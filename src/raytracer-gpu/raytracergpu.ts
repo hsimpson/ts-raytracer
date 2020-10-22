@@ -83,6 +83,7 @@ export default class RaytracerGPU extends RaytracerBase {
     const computePipeline = new WebGPUComputePipline({
       computeShaderUrl: 'raytracer.comp.spv',
       uniformParams: {
+        background: cameraOptions.background,
         fWidth: this._imageWidth,
         fHeight: this._imageHeight,
         fSamplesPerPixel: this._samplesPerPixel,
