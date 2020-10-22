@@ -1,6 +1,5 @@
 import { JsonObject } from '../serializing';
 import type { Vec3 } from '../vec3';
-import { HittableList } from './hittablelist';
 
 export enum ControllerCommands {
   START,
@@ -31,6 +30,8 @@ export interface ControllerStartMessage extends WorkerMessage {
     computeWorkers: number;
     sceneIdx: number;
     world: JsonObject;
+    camera: JsonObject;
+    background: Vec3;
   };
 }
 

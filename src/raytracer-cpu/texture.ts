@@ -87,7 +87,7 @@ export class ImageTexture extends Texture {
   public async load(imageUrl: string): Promise<void> {
     const response = await fetch(imageUrl);
     const blob = await response.blob();
-    const imgBitmap = await createImageBitmap(blob);
+    const imgBitmap = await window.createImageBitmap(blob);
 
     // Firefox do not support 2D context on OffscreenCanvas :-(
     //const canvas = new OffscreenCanvas(imgBitmap.width, imgBitmap.height);

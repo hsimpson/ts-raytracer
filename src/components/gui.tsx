@@ -22,14 +22,14 @@ const Gui = (): React.ReactElement => {
   };
 
   const sceneConfig: DropDownItem[] = [
-    { text: 'Random Spheres', value: 1 },
-    { text: '2 Checkboard spheres', value: 2 },
-    { text: '2 Perlin noise spheres', value: 3 },
-    { text: 'Earth sphere', value: 4 },
-    { text: 'Area light', value: 5 },
-    { text: 'Cornell Box', value: 6 },
-    { text: 'Cornell Box Smoke', value: 7 },
-    { text: 'Final Scene', value: 8 },
+    { text: 'Random Spheres', value: 0 },
+    { text: '2 Checkboard spheres', value: 1 },
+    { text: '2 Perlin noise spheres', value: 2 },
+    { text: 'Earth sphere', value: 3 },
+    { text: 'Area light', value: 4 },
+    { text: 'Cornell Box', value: 5 },
+    { text: 'Cornell Box Smoke', value: 6 },
+    { text: 'Final Scene', value: 7 },
   ];
 
   return (
@@ -78,6 +78,7 @@ const Gui = (): React.ReactElement => {
         label="Scene:"
         disabled={raytracerState.webGPUenabled}
         items={sceneConfig}
+        default={raytracerState.scene}
         onValueChange={(scene) => setRaytracerState({ ...raytracerState, scene })}></DropDown>
       <button className="resetButton" onClick={onReset}>
         Reset to default

@@ -1,7 +1,6 @@
 import ComputeWorker from 'worker-loader!./compute.worker';
-import Camera from '../camera';
+import { Camera } from '../camera';
 import { deserialize, serialize } from '../serializing';
-import type { Vec3 } from '../vec3';
 import { DeserializerMap } from './deserializermap';
 import { HittableList } from './hittablelist';
 import {
@@ -33,89 +32,8 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
 
   _array = new Uint8ClampedArray(_imageWidth * _imageHeight * 3);
 
-  const aspectRatio = msg.data.imageWidth / msg.data.imageHeight;
-  let lookFrom: Vec3;
-  let lookAt: Vec3;
-
-  const focusDist = 10;
-  let aperture = 0.0;
-  //const aperture = 0.0;
-  //const fovY = 20;
-  let fovY = 40;
-  let background: Vec3 = [0, 0, 0];
-  const cameraT0 = 0.0;
-  let cameraT1 = 0.0;
-
   const world = deserialize(HittableList, msg.data.world);
-
-  switch (msg.data.sceneIdx) {
-    case 1:
-      background = [0.7, 0.8, 1.0];
-      lookFrom = [0, 2, 10];
-      lookAt = [0, 0, 0];
-      fovY = 10.0;
-      aperture = 0.0;
-      cameraT1 = 1.0;
-      break;
-
-    case 2:
-      background = [0.7, 0.8, 1.0];
-      lookFrom = [13, 2, 3];
-      lookAt = [0, 0, 0];
-      fovY = 20.0;
-      break;
-
-    case 3:
-      background = [0.7, 0.8, 1.0];
-      lookFrom = [13, 2, 3];
-      lookAt = [0, 0, 0];
-      fovY = 20.0;
-      break;
-
-    case 4:
-      background = [0.7, 0.8, 1.0];
-      lookFrom = [13, 2, 3];
-      lookAt = [0, 0, 0];
-      fovY = 20.0;
-      break;
-
-    case 5:
-      background = [0, 0, 0];
-      lookFrom = [26, 3, 6];
-      lookAt = [0, 2, 0];
-      fovY = 20.0;
-      break;
-
-    case 6:
-      background = [0, 0, 0];
-      lookFrom = [278, 278, -800];
-      lookAt = [278, 278, 0];
-      fovY = 40.0;
-      break;
-
-    case 7:
-      background = [0, 0, 0];
-      lookFrom = [278, 278, -800];
-      lookAt = [278, 278, 0];
-      fovY = 40.0;
-      break;
-
-    case 8:
-      background = [0, 0, 0];
-      lookFrom = [478, 278, -600];
-      lookAt = [278, 278, 0];
-      fovY = 40.0;
-      cameraT1 = 1.0;
-      break;
-
-    default:
-      background = [0, 0, 0];
-      break;
-  }
-
-  const camera = new Camera();
-  const vUp: Vec3 = [0, 1, 0];
-  camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist, cameraT0, cameraT1);
+  const camera = deserialize(Camera, msg.data.camera);
 
   let startLine = msg.data.imageHeight - 1;
   let availableLines = msg.data.imageHeight;
@@ -130,7 +48,7 @@ const start = async (msg: ControllerStartMessage): Promise<void> => {
         workerId,
         camera: serialize(Camera, camera),
         world: serialize(HittableList, world),
-        background: background,
+        background: msg.data.background,
         imageWidth: msg.data.imageWidth,
         imageHeight: msg.data.imageHeight,
         scanlineCount: availableLines - lineLoad < 0 ? availableLines : lineLoad,

@@ -9,6 +9,7 @@ export interface DropDownProps {
   items: DropDownItem[];
   label: string;
   disabled: boolean;
+  default: number;
   onValueChange: (value: number) => void;
 }
 
@@ -21,7 +22,7 @@ export const DropDown = (props: DropDownProps): React.ReactElement => {
   return (
     <div className="dropdown">
       <span>{props.label}</span>
-      <select disabled={props.disabled} onChange={onSelectChange}>
+      <select disabled={props.disabled} defaultValue={props.default} onChange={onSelectChange}>
         {props.items.map((item) => {
           return (
             <option key={item.value} value={item.value}>

@@ -8,14 +8,14 @@ export interface CameraOptions {
   lookFrom: Vec3;
   lookAt: Vec3;
   vUp: Vec3;
+  background: Vec3;
   fovY: number;
-  aspectRatio: number;
   aperture: number;
   focusDist: number;
 }
 
 @serializable
-export default class Camera {
+export class Camera {
   private lookFrom: Vec3;
   private lowerLeftCorner: Vec3;
   private horizontal: Vec3;

@@ -1,14 +1,13 @@
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="../../node_modules/@webgpu/types/dist/index.d.ts" />
 
-import Camera from '../camera';
-import { gpuTestScene, twoSpheres } from '../raytracer-cpu/scenes';
+import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase } from '../raytracerbase';
-import type { Vec3 } from '../vec3';
+import { getScene } from '../scenes';
+import { WebGPUBuffer } from './webgpubuffer';
 import WebGPUComputePipline from './webgpucomputepipeline';
 import { WebGPUContext } from './webgpucontext';
 import WebGPURenderPipeline from './webgpurenderpipeline';
-import { WebGPUBuffer } from './webgpubuffer';
 
 export default class RaytracerGPU extends RaytracerBase {
   private _initialized = false;
@@ -64,16 +63,22 @@ export default class RaytracerGPU extends RaytracerBase {
     };
 
     const aspectRatio = this._imageWidth / this._imageHeight;
-    // const lookFrom: Vec3 = [13, 2, 3];
-    const lookFrom: Vec3 = [0, 2, 10];
-    const lookAt: Vec3 = [0, 0, 0];
-    const vUp: Vec3 = [0, 1, 0];
-    const focusDist = 10;
-    //const aperture = 0.1;
-    const aperture = 0.0;
-    const fovY = 10;
+
+    //FIXME: scene index
+    const { world, cameraOptions } = await getScene(0);
+
     const camera = new Camera();
-    camera.init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist, 0.0, 0.1);
+    camera.init(
+      cameraOptions.lookFrom,
+      cameraOptions.lookAt,
+      cameraOptions.vUp,
+      cameraOptions.fovY,
+      aspectRatio,
+      cameraOptions.aperture,
+      cameraOptions.focusDist,
+      0.0,
+      0.1
+    );
 
     const computePipeline = new WebGPUComputePipline({
       computeShaderUrl: 'raytracer.comp.spv',
@@ -84,8 +89,7 @@ export default class RaytracerGPU extends RaytracerBase {
         fMaxBounces: this._maxBounces,
       },
       camera,
-      world: gpuTestScene(),
-      // world: twoSpheres(),
+      world,
     });
 
     await computePipeline.initialize();
