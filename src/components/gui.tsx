@@ -22,14 +22,14 @@ const Gui = (): React.ReactElement => {
   };
 
   const sceneConfig: DropDownItem[] = [
-    { text: 'Random Spheres', value: 0 },
-    { text: '2 Checkboard spheres', value: 1 },
-    { text: '2 Perlin noise spheres', value: 2 },
-    { text: 'Earth sphere', value: 3 },
-    { text: 'Area light', value: 4 },
-    { text: 'Cornell Box', value: 5 },
-    { text: 'Cornell Box Smoke', value: 6 },
-    { text: 'Final Scene', value: 7 },
+    { text: 'Random Spheres', value: 0, disabled: false },
+    { text: '2 Checkboard spheres', value: 1, disabled: raytracerState.webGPUenabled },
+    { text: '2 Perlin noise spheres', value: 2, disabled: raytracerState.webGPUenabled },
+    { text: 'Earth sphere', value: 3, disabled: raytracerState.webGPUenabled },
+    { text: 'Area light', value: 4, disabled: raytracerState.webGPUenabled },
+    { text: 'Cornell Box', value: 5, disabled: raytracerState.webGPUenabled },
+    { text: 'Cornell Box Smoke', value: 6, disabled: raytracerState.webGPUenabled },
+    { text: 'Final Scene', value: 7, disabled: raytracerState.webGPUenabled },
   ];
 
   return (
@@ -76,7 +76,6 @@ const Gui = (): React.ReactElement => {
         onValueChange={(webGPUenabled) => setRaytracerState({ ...raytracerState, webGPUenabled })}></CheckBox>
       <DropDown
         label="Scene:"
-        disabled={raytracerState.webGPUenabled}
         items={sceneConfig}
         default={raytracerState.scene}
         onValueChange={(scene) => setRaytracerState({ ...raytracerState, scene })}></DropDown>

@@ -64,8 +64,7 @@ export default class RaytracerGPU extends RaytracerBase {
 
     const aspectRatio = this._imageWidth / this._imageHeight;
 
-    //FIXME: scene index
-    const { world, cameraOptions } = await getScene(0);
+    const { world, cameraOptions } = await getScene(this._scene);
 
     const camera = new Camera();
     camera.init(
