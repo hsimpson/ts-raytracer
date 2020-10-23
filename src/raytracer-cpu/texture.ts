@@ -20,6 +20,10 @@ export class SolidColor extends Texture {
   public value(_u: number, _v: number, _p: Vec3): Vec3 {
     return this._color;
   }
+
+  public get color(): Vec3 {
+    return this._color;
+  }
 }
 
 @serializable
@@ -41,6 +45,14 @@ export class CheckerTexture extends Texture {
       return this._even.value(u, v, p);
     }
   }
+
+  public get odd(): Vec3 {
+    return (this._odd as SolidColor).color;
+  }
+
+  public get even(): Vec3 {
+    return (this._even as SolidColor).color;
+  }
 }
 
 @serializable
@@ -51,6 +63,10 @@ export class NoiseTexture extends Texture {
   public constructor(scale: number) {
     super();
     this._scale = scale;
+  }
+
+  public get scale(): number {
+    return this._scale;
   }
 
   public value(u: number, v: number, p: Vec3): Vec3 {
@@ -83,7 +99,7 @@ export class ImageTexture extends Texture {
   public async load(imageUrl: string): Promise<void> {
     const response = await fetch(imageUrl);
     const blob = await response.blob();
-    const imgBitmap = await createImageBitmap(blob);
+    const imgBitmap = await window.createImageBitmap(blob);
 
     // Firefox do not support 2D context on OffscreenCanvas :-(
     //const canvas = new OffscreenCanvas(imgBitmap.width, imgBitmap.height);

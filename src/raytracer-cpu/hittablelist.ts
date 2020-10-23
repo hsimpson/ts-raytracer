@@ -1,7 +1,7 @@
+import { serializable } from '../serializing';
+import AABB from './aabb';
 import { HitRecord, Hittable } from './hittable';
 import Ray from './ray';
-import AABB from './aabb';
-import { serializable } from '../serializing';
 
 @serializable
 export class HittableList extends Hittable {

@@ -1,0 +1,46 @@
+#ifndef HITTABLE_INC
+#define HITTABLE_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#define HITTABLETYPE_SPHERE 0
+#define HITTABLETYPE_MOVINGSPHERE 1
+#define HITTABLETYPE_XYRECT 2
+#define HITTABLETYPE_XZRECT 3
+#define HITTABLETYPE_YZRECT 4
+#define HITTABLETYPE_BOX 5
+#define HITTABLETYPE_CONSTANTMEDIUM 6
+
+#include "../ray.comp"
+#include "./hittable_base.comp"
+#include "./sphere.comp"
+
+bool hitPrimitive(const Primitive primitve, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
+  uint primitiveType = primitve.primitiveType;
+
+  switch (primitiveType) {
+    case HITTABLETYPE_SPHERE:
+      return hitSphere(primitve, ray, tMin, tMax, rec);
+      break;
+  }
+
+  return false;
+}
+
+bool hittableListHit(const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
+  HitRecord tempRec;
+  bool      hitAnything  = false;
+  float     closestSoFar = tMax;
+
+  for (int i = 0; i < primitives.length(); i++) {
+    if (hitPrimitive(primitives[i], ray, tMin, closestSoFar, tempRec)) {
+      hitAnything  = true;
+      closestSoFar = tempRec.t;
+      rec          = tempRec;
+    }
+  }
+
+  return hitAnything;
+}
+
+#endif  //HITTABLE_INC

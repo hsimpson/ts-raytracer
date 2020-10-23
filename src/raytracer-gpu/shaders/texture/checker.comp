@@ -1,0 +1,21 @@
+#ifndef CHECKERTEXTURE_INC
+#define CHECKERTEXTURE_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#include "./texture_base.comp"
+
+// TODO: support other textures then SolidTexture
+
+vec3 checkerTextureValue(const Texture texture, const vec2 uv, const vec3 p) {
+  vec3  sine  = sin(p * 10.0);
+  float sines = sine.x * sine.y * sine.z;
+
+  if (sines < 0.0) {
+    return texture.checkerOdd.rgb;
+  } else {
+    return texture.checkerEven.rgb;
+  }
+}
+
+#endif  //CHECKERTEXTURE_INC

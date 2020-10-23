@@ -1,5 +1,5 @@
+import { WebGPUContext } from './webgpucontext';
 import WebGPUObjectBase from './webgpuobjectbase';
-import WebGPUContext from './webgpucontext';
 
 interface IUniformParams {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -11,13 +11,12 @@ export default abstract class WebGPUPipelineBase extends WebGPUObjectBase {
   protected _pipeline: GPURenderPipeline | GPUComputePipeline;
   protected _bindGroupLayout: GPUBindGroupLayout;
   protected _bindGroup: GPUBindGroup;
-  protected _context: WebGPUContext;
 
-  protected async loadShader(context: WebGPUContext, shaderUrl: string): Promise<GPUShaderModule> {
+  protected async loadShader(shaderUrl: string): Promise<GPUShaderModule> {
     const response = await fetch(shaderUrl);
     const buffer = await response.arrayBuffer();
 
-    const shaderModule = context.device.createShaderModule({
+    const shaderModule = WebGPUContext.device.createShaderModule({
       code: new Uint32Array(buffer),
     });
 

@@ -8,11 +8,15 @@ import { serializable } from '../serializing';
 
 @serializable
 export default class DielectricMaterial extends Material {
-  private _refIdx: number;
+  private _indexOfRefraction: number;
 
   public constructor(refIdx: number) {
     super();
-    this._refIdx = refIdx;
+    this._indexOfRefraction = refIdx;
+  }
+
+  public get indexOfRefraction(): number {
+    return this._indexOfRefraction;
   }
 
   public schlick(cosine: number, refIdx: number): number {
@@ -23,7 +27,7 @@ export default class DielectricMaterial extends Material {
 
   public scatter(r_in: Ray, rec: HitRecord, attenuation: Vec3, scattered: Ray): boolean {
     Vector.set(attenuation, 1.0, 1.0, 1.0);
-    const etai_over_etat = rec.frontFace ? 1 / this._refIdx : this._refIdx;
+    const etai_over_etat = rec.frontFace ? 1 / this._indexOfRefraction : this._indexOfRefraction;
 
     const unit_direction = Vector.unitVector(r_in.direction);
 

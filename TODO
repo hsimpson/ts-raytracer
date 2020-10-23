@@ -7,6 +7,7 @@ Bugs:
     ☐ Uncaught in Promise->on heavy GPU frame load
     ✔ Adapt new WebGPU Buffer Spec see: https://hackmd.io/szV68rOVQ56GYzPJMBko8A @done(20-09-01 21:33)
       ☐ Firefox do not support the current spec
+    ☐ Perlin noise random values are now static and not created per texture
   
   CPU:
     ✔ ImageTexture not working on Firefox due to OffscreenCanvas is not able to use 2d context @done(20-09-11 00:52)
@@ -20,7 +21,7 @@ Features:
   GPU:
     ☐ Add acceleration data stucture like BVH (https://research.nvidia.com/sites/default/files/pubs/2012-06_Maximizing-Parallelism-in/karras2012hpg_paper.pdf)
     ☐ Add motion blur
-    ☐ Add textures (solid and checkerboard)
+    ✔ Add textures (solid and checkerboard) @done(20-10-23 23:01)
     ☐ Optional frame seperation like Blender Cycles with e.g. hilbert spiral
     ☐ Cancel GPU rendering
 

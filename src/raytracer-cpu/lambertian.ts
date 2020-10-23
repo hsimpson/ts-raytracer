@@ -21,6 +21,10 @@ export default class LambertianMaterial extends Material {
     this._albedo = texture;
   }
 
+  public get texture(): Texture {
+    return this._albedo;
+  }
+
   public scatter(r_in: Ray, rec: HitRecord, attenuation: Vec3, scattered: Ray): boolean {
     const scatter_direction = Vector.addVec3(rec.normal, Vector.randomUnitVector());
     new Ray(rec.p, scatter_direction, r_in.time).copyTo(scattered);

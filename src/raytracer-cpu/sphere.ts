@@ -15,7 +15,7 @@ function getSphereUV(p: Vec3): { u: number; v: number } {
 }
 
 @serializable
-export default class Sphere extends Hittable {
+export class Sphere extends Hittable {
   private _center: Vec3;
   private _radius: number;
   private _material: Material;
@@ -25,6 +25,18 @@ export default class Sphere extends Hittable {
     this._center = center;
     this._radius = radius;
     this._material = mat;
+  }
+
+  public get material(): Material | undefined {
+    return this._material;
+  }
+
+  public get center(): Vec3 {
+    return this._center;
+  }
+
+  public get radius(): number {
+    return this._radius;
   }
 
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {

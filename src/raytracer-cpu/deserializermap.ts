@@ -11,7 +11,7 @@ import MetalMaterial from './metal';
 import MovingSphere from './movingsphere';
 import Perlin from './perlin';
 import { RotateY } from './rotation';
-import Sphere from './sphere';
+import { Sphere } from './sphere';
 import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor } from './texture';
 import Translate from './translate';
 

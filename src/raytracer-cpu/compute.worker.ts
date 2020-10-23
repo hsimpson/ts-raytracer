@@ -1,4 +1,4 @@
-import Camera from '../camera';
+import { Camera } from '../camera';
 import { deserialize } from '../serializing/deserialize';
 import { randomNumber } from '../util';
 import type { Vec3 } from '../vec3';
@@ -8,6 +8,7 @@ import { HittableList } from './hittablelist';
 import { rayColor } from './ray';
 import { ComputeCommands, ComputeEndMessage, ComputeStartMessage, WorkerMessage } from './workerinterfaces';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const map = DeserializerMap;
 const _controllerCtx: Worker = self as never;
 let _id: number;

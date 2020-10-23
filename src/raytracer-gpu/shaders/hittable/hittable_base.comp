@@ -1,0 +1,21 @@
+#ifndef HITTABLE_BASE_INC
+#define HITTABLE_BASE_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+struct Primitive {
+  vec3  center;
+  float radius;
+  uint  primitiveType;
+  uint  materialIndex;
+
+  // padding
+  float pad_0;
+  float pad_1;
+};
+
+layout(std430, set = 0, binding = 3) buffer PrimitiveBuffer {
+  Primitive primitives[];
+};
+
+#endif  // HITTABLE_BASE_INC

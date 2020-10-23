@@ -1,17 +1,9 @@
 import ControllerWorker from 'worker-loader!./controller.worker';
+import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase } from '../raytracerbase';
+import { getScene } from '../scenes';
 import { serialize } from '../serializing';
 import { HittableList } from './hittablelist';
-import {
-  cornellBox,
-  cornellBoxSmoke,
-  earthSphere,
-  finalScene,
-  randomScene,
-  simpleLight,
-  twoPerlinSpheres,
-  twoSpheres,
-} from './scenes';
 import {
   ControllerCommands,
   ControllerEndMessage,
@@ -78,34 +70,22 @@ export default class RaytracerCPU extends RaytracerBase {
 
     this._controllerWorker.onmessage = (event) => this.onControllerMessage(event);
 
-    let world: HittableList;
+    const { world, cameraOptions } = await getScene(this._scene);
 
-    switch (this._scene) {
-      case 1:
-        world = randomScene();
-        break;
-      case 2:
-        world = twoSpheres();
-        break;
-      case 3:
-        world = twoPerlinSpheres();
-        break;
-      case 4:
-        world = await earthSphere();
-        break;
-      case 5:
-        world = simpleLight();
-        break;
-      case 6:
-        world = cornellBox();
-        break;
-      case 7:
-        world = cornellBoxSmoke();
-        break;
-      case 8:
-        world = await finalScene();
-        break;
-    }
+    const aspectRatio = this._imageWidth / this._imageHeight;
+
+    const camera = new Camera();
+    camera.init(
+      cameraOptions.lookFrom,
+      cameraOptions.lookAt,
+      cameraOptions.vUp,
+      cameraOptions.fovY,
+      aspectRatio,
+      cameraOptions.aperture,
+      cameraOptions.focusDist,
+      0.0,
+      0.1
+    );
 
     const controllerStartMessage: ControllerStartMessage = {
       cmd: ControllerCommands.START,
@@ -117,6 +97,8 @@ export default class RaytracerCPU extends RaytracerBase {
         computeWorkers: this._numOfWorkers,
         sceneIdx: this._scene,
         world: serialize(HittableList, world),
+        camera: serialize(Camera, camera),
+        background: cameraOptions.background,
       },
     };
 

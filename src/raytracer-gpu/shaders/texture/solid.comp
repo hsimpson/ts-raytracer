@@ -1,0 +1,12 @@
+#ifndef SOLIDTEXTURE_INC
+#define SOLIDTEXTURE_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#include "./texture_base.comp"
+
+vec3 solidTextureValue(const Texture texture, const vec2 uv, const vec3 p) {
+  return texture.color.rgb;
+}
+
+#endif  //SOLIDTEXTURE_INC
