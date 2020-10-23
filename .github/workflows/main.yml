@@ -12,18 +12,15 @@ jobs:
       matrix:
         node-version: [15.x]
     steps:
+      - name: install vulkan sdk
+        run: |
+          wget -O vulkansdk-linux-x86_64-1.2.154.0.tar.gz https://vulkan.lunarg.com/sdk/download/1.2.154.0/linux/vulkansdk-linux-x86_64-1.2.154.0.tar.gz?Human=true
+          tar -xvf ./vulkansdk-linux-x86_64-1.2.154.0.tar.gz
+          echo "$HOME/1.2.154.0/x86_64/bin" >> $GITHUB_PATH
+          glslc --version
+
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Download Vulkan sdk
-        uses: teddyking/dependency-action@master
-        with:
-          deps: https://vulkan.lunarg.com/sdk/download/1.2.154.0/linux/vulkansdk-linux-x86_64-1.2.154.0.tar.gz
-
-      - name: Vulkan SDK path env
-        run: |
-          echo '$HOME/1.2.154.0/x86_64/bin' >> $GITHUB_PATH
-          echo 'EOF' >> $GITHUB_PATH
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
