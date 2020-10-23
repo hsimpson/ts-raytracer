@@ -1,0 +1,23 @@
+#ifndef TEXTURE_BASE_INC
+#define TEXTURE_BASE_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+struct Texture {
+  vec4 color;
+  vec4 checkerOdd;
+  vec4 checkerEven;
+
+  uint textureType;
+
+  // padding
+  float pad_0;
+  float pad_1;
+  float pad_2;
+};
+
+layout(std430, set = 0, binding = 5) buffer TextureBuffer {
+  Texture textures[];
+};
+
+#endif  //TEXTURE_BASE_INC

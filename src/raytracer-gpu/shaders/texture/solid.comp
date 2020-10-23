@@ -2,16 +2,11 @@
 #define SOLIDTEXTURE_INC
 
 #extension GL_GOOGLE_include_directive : enable
-struct SolidTexture {
-  vec3 color;
-};
 
-layout(std430, set = 0, binding = 6) buffer SolidTextures {
-  SolidTexture solidTextures[];
-};
+#include "./texture_base.comp"
 
-vec3 solidTextureValue(const SolidTexture tex, const vec2 uv, const vec3 p) {
-  return tex.color;
+vec3 solidTextureValue(const Texture texture, const vec2 uv, const vec3 p) {
+  return texture.color.rgb;
 }
 
 #endif  //SOLIDTEXTURE_INC

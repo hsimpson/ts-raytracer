@@ -10,7 +10,8 @@
 bool metalScatter(const Material material, const Ray ray, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
   vec3 reflected = reflect(normalize(ray.direction), rec.normal);
   scattered      = Ray(rec.p, reflected + material.roughness * randomInUnitSphere(), ray.time);
-  attenuation    = material.color.rgb;
+
+  attenuation = material.baseColor.rgb;
   return (dot(scattered.direction, rec.normal) > 0.0);
 
   // return true;

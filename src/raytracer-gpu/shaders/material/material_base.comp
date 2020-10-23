@@ -4,13 +4,11 @@
 #extension GL_GOOGLE_include_directive : enable
 
 struct Material {
-  vec4  color;
+  vec4  baseColor;
   float roughness;
   float indexOfRefraction;
   uint  materialType;
-
-  // padding
-  float pad_0;
+  uint  textureIndex;
 };
 
 layout(std430, set = 0, binding = 4) buffer MaterialBuffer {

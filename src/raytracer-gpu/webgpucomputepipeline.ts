@@ -29,6 +29,7 @@ const enum Bindings {
 
   Primitives = 3,
   Materials = 4,
+  Textures = 5,
 }
 
 export default class WebGPUComputePipline extends WebGPUPipelineBase {
@@ -41,6 +42,7 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
 
   private _primitivesBuffer = new WebGPUBuffer();
   private _materialsBuffer = new WebGPUBuffer();
+  private _texturesBuffer = new WebGPUBuffer();
 
   public constructor(options: WebGPUComputePiplineOptions) {
     super();
@@ -99,6 +101,11 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
           visibility: GPUShaderStage.COMPUTE,
           type: 'storage-buffer',
         },
+        {
+          binding: Bindings.Textures,
+          visibility: GPUShaderStage.COMPUTE,
+          type: 'storage-buffer',
+        },
       ],
     });
 
@@ -108,6 +115,7 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
   public createObjects(): void {
     this._primitivesBuffer.createWithArrayMapped(this._raytracingBuffers.primitiveBuffer(), GPUBufferUsage.STORAGE);
     this._materialsBuffer.createWithArrayMapped(this._raytracingBuffers.materialBuffer(), GPUBufferUsage.STORAGE);
+    this._texturesBuffer.createWithArrayMapped(this._raytracingBuffers.textureBuffer(), GPUBufferUsage.STORAGE);
   }
 
   public updateUniformBuffer(): void {
@@ -160,6 +168,14 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
             buffer: this._materialsBuffer.gpuBuffer,
             offset: 0,
             size: this._materialsBuffer.size,
+          },
+        },
+        {
+          binding: Bindings.Textures,
+          resource: {
+            buffer: this._texturesBuffer.gpuBuffer,
+            offset: 0,
+            size: this._texturesBuffer.size,
           },
         },
       ],

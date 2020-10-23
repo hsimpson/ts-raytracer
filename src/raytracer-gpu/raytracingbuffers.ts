@@ -5,6 +5,7 @@ import LambertianMaterial from '../raytracer-cpu/lambertian';
 import Material from '../raytracer-cpu/material';
 import MetalMaterial from '../raytracer-cpu/metal';
 import { Sphere } from '../raytracer-cpu/sphere';
+import { CheckerTexture, Texture } from '../raytracer-cpu/texture';
 import { SolidColor } from '../raytracer-cpu/texture';
 import type { Vec3 } from '../vec3';
 
@@ -26,21 +27,30 @@ export enum WebGPUPrimitiveType {
   // HittableList = 99,
 }
 
-// export enum WebGPUTextureType {
-//   Solid = 0,
-//   Checker = 1,
-//   Noise = 2,
-//   Image = 3,
-// }
+export enum WebGPUTextureType {
+  Solid = 0,
+  Checker = 1,
+  Noise = 2,
+  Image = 3,
+}
 
-interface WebGPUMaterial {
+interface WebGPUTexture {
   color: [...rgb: Vec3, a: number]; // TODO: use vec4
-  roughness: number;
-  indexOfRefraction: number;
-  materialType: WebGPUMaterialType;
+  checkerOdd: [...rgb: Vec3, a: number]; // TODO: use vec4
+  checkerEven: [...rgb: Vec3, a: number]; // TODO: use vec4
+  textureType: number;
 
   // padding
   pad_0: number;
+  pad_1: number;
+  pad_2: number;
+}
+interface WebGPUMaterial {
+  baseColor: [...rgb: Vec3, a: number]; // TODO: use vec4
+  roughness: number;
+  indexOfRefraction: number;
+  materialType: WebGPUMaterialType;
+  textureIndex: number;
 }
 
 interface WebGPUPrimitive {
@@ -68,6 +78,7 @@ function log(message: string, bufferData: ArrayBuffer): void {
 export class RaytracingBuffers {
   private _gpuMaterials: WebGPUMaterial[] = [];
   private _gpuPrimitives: WebGPUPrimitive[] = [];
+  private _gpuTextures: WebGPUTexture[] = [];
 
   public constructor(world: HittableList) {
     this.traverseHittables(world);
@@ -79,37 +90,67 @@ export class RaytracingBuffers {
     }
   }
 
+  private addTexture(tex: Texture): number {
+    const idx = this._gpuTextures.length;
+    let gpuTex: WebGPUTexture;
+
+    if (tex instanceof SolidColor) {
+      gpuTex = {
+        color: [...tex.color, 1],
+        checkerOdd: [1, 1, 1, 1],
+        checkerEven: [1, 1, 1, 1],
+        textureType: WebGPUTextureType.Solid,
+        pad_0: PADDING_VALUE,
+        pad_1: PADDING_VALUE,
+        pad_2: PADDING_VALUE,
+      };
+    } else if (tex instanceof CheckerTexture) {
+      gpuTex = {
+        color: [1, 1, 1, 1],
+        checkerOdd: [...tex.odd, 1],
+        checkerEven: [...tex.even, 1],
+        textureType: WebGPUTextureType.Checker,
+        pad_0: PADDING_VALUE,
+        pad_1: PADDING_VALUE,
+        pad_2: PADDING_VALUE,
+      };
+    }
+
+    this._gpuTextures.push(gpuTex);
+
+    return idx;
+  }
+
   private addMaterial(mat: Material): number {
     const idx = this._gpuMaterials.length;
     let gpuMat: WebGPUMaterial;
 
+    const tex = mat.texture;
+    const textureIndex = mat.texture ? this.addTexture(tex) : -1;
+
     if (mat instanceof LambertianMaterial) {
-      const tex = mat.texture as SolidColor;
       gpuMat = {
-        color: [...tex.color, 1.0],
+        baseColor: [1, 1, 1, 1],
         roughness: 0,
         indexOfRefraction: 1,
         materialType: WebGPUMaterialType.Lambertian,
-
-        pad_0: PADDING_VALUE,
+        textureIndex,
       };
     } else if (mat instanceof MetalMaterial) {
       gpuMat = {
-        color: [...mat.color, 1],
+        baseColor: [...mat.baseColor, 1],
         roughness: mat.roughness,
         indexOfRefraction: 1,
         materialType: WebGPUMaterialType.Metal,
-
-        pad_0: PADDING_VALUE,
+        textureIndex,
       };
     } else if (mat instanceof DielectricMaterial) {
       gpuMat = {
-        color: [1, 1, 1, 1],
+        baseColor: [1, 1, 1, 1],
         roughness: 0,
         indexOfRefraction: mat.indexOfRefraction,
         materialType: WebGPUMaterialType.Dielectric,
-
-        pad_0: PADDING_VALUE,
+        textureIndex,
       };
     }
 
@@ -141,6 +182,43 @@ export class RaytracingBuffers {
     return idx;
   }
 
+  public textureBuffer(): ArrayBuffer {
+    const elementCount = 16;
+    const materialSize = elementCount * 4;
+
+    const bufferData = new ArrayBuffer(materialSize * this._gpuTextures.length);
+    const bufferDataF32 = new Float32Array(bufferData);
+    const bufferDataU32 = new Uint32Array(bufferData);
+
+    let offset = 0;
+    for (const texture of this._gpuTextures) {
+      bufferDataF32[offset++] = texture.color[0];
+      bufferDataF32[offset++] = texture.color[1];
+      bufferDataF32[offset++] = texture.color[2];
+      bufferDataF32[offset++] = texture.color[3];
+
+      bufferDataF32[offset++] = texture.checkerOdd[0];
+      bufferDataF32[offset++] = texture.checkerOdd[1];
+      bufferDataF32[offset++] = texture.checkerOdd[2];
+      bufferDataF32[offset++] = texture.checkerOdd[3];
+
+      bufferDataF32[offset++] = texture.checkerEven[0];
+      bufferDataF32[offset++] = texture.checkerEven[1];
+      bufferDataF32[offset++] = texture.checkerEven[2];
+      bufferDataF32[offset++] = texture.checkerEven[3];
+
+      bufferDataU32[offset++] = texture.textureType;
+
+      // paddings
+      bufferDataF32[offset++] = texture.pad_0;
+      bufferDataF32[offset++] = texture.pad_1;
+      bufferDataF32[offset++] = texture.pad_2;
+    }
+
+    // log('Textures:', bufferData);
+    return bufferData;
+  }
+
   public materialBuffer(): ArrayBuffer {
     const elementCount = 8;
     const materialSize = elementCount * 4;
@@ -151,17 +229,15 @@ export class RaytracingBuffers {
 
     let offset = 0;
     for (const material of this._gpuMaterials) {
-      bufferDataF32[offset++] = material.color[0];
-      bufferDataF32[offset++] = material.color[1];
-      bufferDataF32[offset++] = material.color[2];
-      bufferDataF32[offset++] = material.color[3];
+      bufferDataF32[offset++] = material.baseColor[0];
+      bufferDataF32[offset++] = material.baseColor[1];
+      bufferDataF32[offset++] = material.baseColor[2];
+      bufferDataF32[offset++] = material.baseColor[3];
 
       bufferDataF32[offset++] = material.roughness;
       bufferDataF32[offset++] = material.indexOfRefraction;
-
       bufferDataU32[offset++] = material.materialType;
-
-      bufferDataF32[offset++] = material.pad_0;
+      bufferDataU32[offset++] = material.textureIndex;
     }
 
     //log('Materials:', bufferData);

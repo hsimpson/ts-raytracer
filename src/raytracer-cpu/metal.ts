@@ -7,17 +7,17 @@ import Ray from './ray';
 
 @serializable
 export default class MetalMaterial extends Material {
-  private _albedo: Vec3;
+  private _baseColor: Vec3;
   private _roughness: number;
 
   public constructor(color: Vec3, roughness: number) {
     super();
-    this._albedo = color;
+    this._baseColor = color;
     this._roughness = roughness;
   }
 
-  public get color(): Vec3 {
-    return this._albedo;
+  public get baseColor(): Vec3 {
+    return this._baseColor;
   }
 
   public get roughness(): number {
@@ -32,7 +32,7 @@ export default class MetalMaterial extends Material {
       Vector.addVec3(reflect, Vector.multScalarVec3(Vector.randomInUnitSphere(), this._roughness)),
       r_in.time
     ).copyTo(scattered);
-    Vector.copyTo(this._albedo, attenuation);
+    Vector.copyTo(this._baseColor, attenuation);
     return Vector.dot(scattered.direction, rec.normal) > 0;
   }
 }

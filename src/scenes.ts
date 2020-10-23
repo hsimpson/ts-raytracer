@@ -29,26 +29,28 @@ const defaultCameraOptions: CameraOptions = {
   fovY: 40,
 };
 
-// function gpuTestScene(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
-//   const objects = new HittableList();
+async function gpuTestScene(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+  const world = new HittableList();
 
-//   // ground
-//   // const red = new LambertianMaterial([0.65, 0.05, 0.05]);
-//   const groundMaterial = new LambertianMaterial([0.5, 0.5, 0.5]);
-//   objects.add(new Sphere([0, -1000, 0], 1000, groundMaterial));
+  // ground
+  const red = new LambertianMaterial([0.65, 0.05, 0.05]);
+  const green = new LambertianMaterial([0.12, 0.45, 0.15]);
+  // const checkerTexture = new CheckerTexture([0.2, 0.3, 0.1], [0.9, 0.9, 0.9]);
+  const groundMaterial = new LambertianMaterial([0.5, 0.5, 0.5]);
+  // const groundMaterial = new LambertianMaterial();
+  // groundMaterial.texture = checkerTexture;
+  world.add(new Sphere([0, -1000, 0], 1000, groundMaterial));
 
-//   // const greenLambert = new LambertianMaterial([0.12, 0.45, 0.15]);
-//   const metal1 = new MetalMaterial([0.7, 0.6, 0.5], 0.1);
-//   const dielectric1 = new DielectricMaterial(1.5);
+  // const metal1 = new MetalMaterial([0.7, 0.6, 0.5], 0.1);
+  // const dielectric1 = new DielectricMaterial(1.5);
 
-//   objects.add(new Sphere([-0.6, 0.4, 0], 0.4, metal1));
-//   objects.add(new Sphere([0.6, 0.4, 0], 0.4, dielectric1));
+  world.add(new Sphere([-0.6, 0.4, 0], 0.4, red));
+  world.add(new Sphere([0.6, 0.4, 0], 0.4, green));
 
-//   // dummy ;-)
-//   // const checkerTexture = new CheckerTexture([0.2, 0.3, 0.1], [0.9, 0.9, 0.9]);
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [0, 2, 10], fovY: 10 };
 
-//   return objects;
-// }
+  return { world, cameraOptions };
+}
 
 async function randomScene(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
   const world = new HittableList();
@@ -106,7 +108,7 @@ async function randomScene(): Promise<{ world: HittableList; cameraOptions: Came
   return { world, cameraOptions };
 }
 
-async function twoSpheres(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+async function twoCheckerSpheres(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
   const world = new HittableList();
 
   const checkerTexture = new CheckerTexture([0.2, 0.3, 0.1], [0.9, 0.9, 0.9]);
@@ -323,8 +325,9 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
 }
 
 const sceneCreators = [
+  // gpuTestScene,
   randomScene,
-  twoSpheres,
+  twoCheckerSpheres,
   twoPerlinSpheres,
   earthSphere,
   simpleLight,

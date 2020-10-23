@@ -45,6 +45,14 @@ export class CheckerTexture extends Texture {
       return this._even.value(u, v, p);
     }
   }
+
+  public get odd(): Vec3 {
+    return (this._odd as SolidColor).color;
+  }
+
+  public get even(): Vec3 {
+    return (this._even as SolidColor).color;
+  }
 }
 
 @serializable
