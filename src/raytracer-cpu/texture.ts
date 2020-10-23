@@ -65,6 +65,10 @@ export class NoiseTexture extends Texture {
     this._scale = scale;
   }
 
+  public get scale(): number {
+    return this._scale;
+  }
+
   public value(u: number, v: number, p: Vec3): Vec3 {
     // return Vec3.multScalarVec3(
     //   Vec3.multScalarVec3(new Vec3(1, 1, 1), 0.5),

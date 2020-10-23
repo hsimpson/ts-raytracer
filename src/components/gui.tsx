@@ -24,7 +24,7 @@ const Gui = (): React.ReactElement => {
   const sceneConfig: DropDownItem[] = [
     { text: 'Random Spheres', value: 0, disabled: false },
     { text: '2 Checkboard spheres', value: 1, disabled: false },
-    { text: '2 Perlin noise spheres', value: 2, disabled: raytracerState.webGPUenabled },
+    { text: '2 Perlin noise spheres', value: 2, disabled: false },
     { text: 'Earth sphere', value: 3, disabled: raytracerState.webGPUenabled },
     { text: 'Area light', value: 4, disabled: raytracerState.webGPUenabled },
     { text: 'Cornell Box', value: 5, disabled: raytracerState.webGPUenabled },

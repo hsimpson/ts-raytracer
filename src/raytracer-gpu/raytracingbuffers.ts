@@ -5,7 +5,7 @@ import LambertianMaterial from '../raytracer-cpu/lambertian';
 import Material from '../raytracer-cpu/material';
 import MetalMaterial from '../raytracer-cpu/metal';
 import { Sphere } from '../raytracer-cpu/sphere';
-import { CheckerTexture, Texture } from '../raytracer-cpu/texture';
+import { CheckerTexture, NoiseTexture, Texture } from '../raytracer-cpu/texture';
 import { SolidColor } from '../raytracer-cpu/texture';
 import type { Vec3 } from '../vec3';
 
@@ -38,12 +38,12 @@ interface WebGPUTexture {
   color: [...rgb: Vec3, a: number]; // TODO: use vec4
   checkerOdd: [...rgb: Vec3, a: number]; // TODO: use vec4
   checkerEven: [...rgb: Vec3, a: number]; // TODO: use vec4
+  noiseScale: number;
   textureType: number;
 
   // padding
   pad_0: number;
   pad_1: number;
-  pad_2: number;
 }
 interface WebGPUMaterial {
   baseColor: [...rgb: Vec3, a: number]; // TODO: use vec4
@@ -99,20 +99,30 @@ export class RaytracingBuffers {
         color: [...tex.color, 1],
         checkerOdd: [1, 1, 1, 1],
         checkerEven: [1, 1, 1, 1],
+        noiseScale: 1,
         textureType: WebGPUTextureType.Solid,
         pad_0: PADDING_VALUE,
         pad_1: PADDING_VALUE,
-        pad_2: PADDING_VALUE,
       };
     } else if (tex instanceof CheckerTexture) {
       gpuTex = {
         color: [1, 1, 1, 1],
         checkerOdd: [...tex.odd, 1],
         checkerEven: [...tex.even, 1],
+        noiseScale: 1,
         textureType: WebGPUTextureType.Checker,
         pad_0: PADDING_VALUE,
         pad_1: PADDING_VALUE,
-        pad_2: PADDING_VALUE,
+      };
+    } else if (tex instanceof NoiseTexture) {
+      gpuTex = {
+        color: [1, 1, 1, 1],
+        checkerOdd: [1, 1, 1, 1],
+        checkerEven: [1, 1, 1, 1],
+        noiseScale: tex.scale,
+        textureType: WebGPUTextureType.Noise,
+        pad_0: PADDING_VALUE,
+        pad_1: PADDING_VALUE,
       };
     }
 
@@ -207,12 +217,13 @@ export class RaytracingBuffers {
       bufferDataF32[offset++] = texture.checkerEven[2];
       bufferDataF32[offset++] = texture.checkerEven[3];
 
+      bufferDataF32[offset++] = texture.noiseScale;
+
       bufferDataU32[offset++] = texture.textureType;
 
       // paddings
       bufferDataF32[offset++] = texture.pad_0;
       bufferDataF32[offset++] = texture.pad_1;
-      bufferDataF32[offset++] = texture.pad_2;
     }
 
     // log('Textures:', bufferData);

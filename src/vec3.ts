@@ -177,3 +177,14 @@ export function writeColor(array: Uint8ClampedArray, offset: number, color: Vec3
   array[offset++] = b * 255;
   array[offset++] = 255;
 }
+
+/*
+function createRandomVecs(count: number): void {
+  for (let i = 0; i < count; i++) {
+    const v = unitVector(randomRange(-1, 1));
+    console.log(`vec3(${v[0]}, ${v[1]}, ${v[2]}),`);
+  }
+}
+
+createRandomVecs(256);
+*/
