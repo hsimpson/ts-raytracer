@@ -15,8 +15,8 @@ jobs:
       - name: install vulkan sdk
         run: |
           wget -O vulkansdk-linux-x86_64-1.2.154.0.tar.gz https://vulkan.lunarg.com/sdk/download/1.2.154.0/linux/vulkansdk-linux-x86_64-1.2.154.0.tar.gz?Human=true
-          tar -xvf ./vulkansdk-linux-x86_64-1.2.154.0.tar.gz
-          echo "$HOME/1.2.154.0/x86_64/bin" >> $GITHUB_PATH
+          tar -xf ./vulkansdk-linux-x86_64-1.2.154.0.tar.gz
+          echo /home/runner/1.2.154.0/x86_64/bin >> $GITHUB_PATH
           glslc --version
 
       - name: Checkout repository
