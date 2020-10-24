@@ -1,6 +1,7 @@
 import * as child_process from 'child_process';
 import path from 'path';
 import webpack from 'webpack';
+import fs from 'fs';
 
 const PLUGIN_NAME = 'spirvcompiler-webpack-plugin';
 
@@ -50,11 +51,15 @@ export default class SpirVCompilerPlugin /*extends webpack.Plugin*/ {
       compilation.hooks.additionalAssets.tapAsync('spirvcompiler-webpack-plugin', async (callback) => {
         const promises = [];
 
+        const outputDir = compiler.options.output.path;
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir);
+        }
+
         for (const inputFile of this.options.inputFiles) {
           // console.log(`+++ inputfile: ${inputFile}`);
           // console.log(`+++ outputFile: ${outputFile}`);
 
-          const outputDir = compiler.options.output.path;
           const fileName = path.basename(inputFile);
           const outputFile = path.join(outputDir, `${fileName}.spv`);
 
