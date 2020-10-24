@@ -2,7 +2,8 @@ name: Build Web
 
 on:
   push:
-    branches: [master]
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -12,13 +13,6 @@ jobs:
       matrix:
         node-version: [15.x]
     steps:
-      - name: install vulkan sdk
-        run: |
-          wget -O vulkansdk-linux-x86_64-1.2.154.0.tar.gz https://vulkan.lunarg.com/sdk/download/1.2.154.0/linux/vulkansdk-linux-x86_64-1.2.154.0.tar.gz?Human=true
-          tar -xf ./vulkansdk-linux-x86_64-1.2.154.0.tar.gz
-          echo "::add-path::$HOME/1.2.154.0/x86_64/bin"
-          glslc --version
-
       - name: Checkout repository
         uses: actions/checkout@v2
 
