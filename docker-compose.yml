@@ -1,0 +1,8 @@
+version: '3.8'
+services:
+  buildsystem:
+    build: .
+    environment:
+      - GIT_CONFIG_NAME=${GIT_CONFIG_NAME}
+      - GIT_CONFIG_EMAIL=${GIT_CONFIG_EMAIL}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
