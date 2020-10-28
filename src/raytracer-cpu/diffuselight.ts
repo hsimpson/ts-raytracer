@@ -16,6 +16,10 @@ export default class DiffuseLight extends Material {
     }
   }
 
+  public get texture(): Texture {
+    return this._emit;
+  }
+
   public scatter(_r_in: Ray, _rec: HitRecord, _attenuation: Vec3, _scattered: Ray): boolean {
     return false;
   }

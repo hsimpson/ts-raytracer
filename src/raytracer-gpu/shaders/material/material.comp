@@ -16,6 +16,7 @@
 #include "./lambertian.comp"
 #include "./metal.comp"
 #include "./dielectric.comp"
+#include "./diffuselight.comp"
 
 bool materialScatter(const Ray ray, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
   uint materialIndex = rec.materialIndex;
@@ -36,6 +37,21 @@ bool materialScatter(const Ray ray, const HitRecord rec, out vec3 attenuation, o
   }
 
   return false;
+}
+
+vec3 materialEmitted(const Ray ray, const HitRecord rec) {
+  uint materialIndex = rec.materialIndex;
+
+  Material material     = materials[materialIndex];
+  uint     materialType = material.materialType;
+
+  switch (materialType) {
+    case MATERIALTYPE_DIFFUSELIGHT:
+      return diffuseLightEmitted(material, rec);
+      break;
+  }
+
+  return vec3(0.0, 0.0, 0.0);
 }
 
 #endif  //MATERIAL_INC

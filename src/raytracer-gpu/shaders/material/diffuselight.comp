@@ -1,0 +1,17 @@
+#ifndef DIFFUSELIGHT_INC
+#define DIFFUSELIGHT_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#include "../ray.comp"
+#include "./material_base.comp"
+#include "../texture/texture.comp"
+
+vec3 diffuseLightEmitted(const Material material, const HitRecord rec) {
+  uint    textureIndex = material.textureIndex;
+  Texture texture      = textures[textureIndex];
+
+  return textureValue(texture, rec.uv, rec.p);
+}
+
+#endif  // DIFFUSELIGHT_INC

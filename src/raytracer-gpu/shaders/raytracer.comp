@@ -39,22 +39,18 @@ vec3 rayColor(Ray ray, vec3 background, uint depth) {
     if (hittableListHit(ray, 0.001, FLT_MAX, rec)) {
       Ray  newRay;
       vec3 attenuation;
-
+      vec3 emitted      = materialEmitted(ray, rec);
       bool wasScattered = materialScatter(ray, rec, attenuation, newRay);
 
-      ray.origin    = newRay.origin;
-      ray.direction = newRay.direction;
+      ray = newRay;
 
       if (wasScattered) {
-        color *= attenuation;
+        color *= (emitted + attenuation);
       } else {
-        color *= vec3(0.0, 0.0, 0.0);
+        color *= emitted;
         break;
       }
     } else {
-      // vec3  unit_direction = normalize(ray.direction);
-      // float t              = 0.5 * (unit_direction.y + 1.0);
-      // vec3  skyColor       = (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
       color *= background;
       break;
     }

@@ -8,13 +8,13 @@ Bugs:
     ✔ Adapt new WebGPU Buffer Spec see: https://hackmd.io/szV68rOVQ56GYzPJMBko8A @done(20-09-01 21:33)
       ☐ Firefox do not support the current spec
     ☐ Perlin noise random values are now static and not created per texture
-  
+
   CPU:
     ✔ ImageTexture not working on Firefox due to OffscreenCanvas is not able to use 2d context @done(20-09-11 00:52)
-    
-  
+
   GUI:
     ☐ Reset to default disable WebGPU -> probably check again
+    ☐ When layout is not completely visible (scrolling) with some combinations of resolution
     
 
 Features:
@@ -24,10 +24,16 @@ Features:
     ✔ Add textures (solid and checkerboard) @done(20-10-23 23:01)
     ☐ Optional frame seperation like Blender Cycles with e.g. hilbert spiral
     ☐ Cancel GPU rendering
+    ☐ Display the render result with WebGPU with progressive rendering
+    ☐ Add WGSL implemenation
+    ☐ Add tone mapping like ACES filmic
+    ☐ Add color correction/grading
 
   CPU:
     ☐ Add progressive rendering like on GPU show each sample image
     ☐ Look if Woker logik could be made with comlink: https://github.com/GoogleChromeLabs/comlink
+    ☐ Add tone mapping like ACES filmic
+    ☐ Add color correction/grading
 
   Common:
     ☐ Add favicon

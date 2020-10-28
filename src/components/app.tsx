@@ -11,9 +11,11 @@ const App = (): React.ReactElement => {
     <React.Fragment>
       <Gui></Gui>
       <Canvas></Canvas>
-      <button className="renderButton" onClick={() => setStartRendering(!startRendering)}>
-        {startRendering ? 'Stop rendering!' : 'Start rendering!'}
-      </button>
+      <div className="renderButtonContainer">
+        <button className="renderButton" onClick={() => setStartRendering(!startRendering)}>
+          {startRendering ? 'Stop rendering!' : 'Start rendering!'}
+        </button>
+      </div>
     </React.Fragment>
   );
 };

@@ -1,4 +1,5 @@
 import DielectricMaterial from '../raytracer-cpu/dielectric';
+import DiffuseLight from '../raytracer-cpu/diffuselight';
 import { Hittable } from '../raytracer-cpu/hittable';
 import { HittableList } from '../raytracer-cpu/hittablelist';
 import LambertianMaterial from '../raytracer-cpu/lambertian';
@@ -160,6 +161,14 @@ export class RaytracingBuffers {
         roughness: 0,
         indexOfRefraction: mat.indexOfRefraction,
         materialType: WebGPUMaterialType.Dielectric,
+        textureIndex,
+      };
+    } else if (mat instanceof DiffuseLight) {
+      gpuMat = {
+        baseColor: [1, 1, 1, 1],
+        roughness: 0,
+        indexOfRefraction: 1,
+        materialType: WebGPUMaterialType.DiffuseLight,
         textureIndex,
       };
     }
