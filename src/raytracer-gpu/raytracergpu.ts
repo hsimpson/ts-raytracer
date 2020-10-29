@@ -123,7 +123,8 @@ export default class RaytracerGPU extends RaytracerBase {
           // const lastframe = sample === this._samplesPerPixel;
           this.compute(computePipeline, true).then((rayTracedArray) => {
             for (let j = 0; j <= rayTracedArray.length; j++) {
-              imageData.data[j] = (rayTracedArray[j] / sample) * 255;
+              // imageData.data[j] = (rayTracedArray[j] / sample) * 255;
+              imageData.data[j] = rayTracedArray[j] * 255;
             }
             this._context2D.putImageData(imageData, 0, 0);
             if (sample < this._samplesPerPixel) {

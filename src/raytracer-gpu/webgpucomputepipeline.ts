@@ -26,10 +26,11 @@ const enum Bindings {
   ComputeParams = 0,
   Camera = 1,
   PixelBuffer = 2,
+  AccumulationBuffer = 3,
 
-  Primitives = 3,
-  Materials = 4,
-  Textures = 5,
+  Primitives = 4,
+  Materials = 5,
+  Textures = 6,
 }
 
 export default class WebGPUComputePipline extends WebGPUPipelineBase {
@@ -39,6 +40,7 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
   private _computeParamsUniformBuffer = new WebGPUBuffer();
   private _computeCameraUniformBuffer = new WebGPUBuffer();
   private _pixelBuffer = new WebGPUBuffer();
+  private _accumulationBuffer = new WebGPUBuffer();
 
   private _primitivesBuffer = new WebGPUBuffer();
   private _materialsBuffer = new WebGPUBuffer();
@@ -48,6 +50,7 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
     super();
     this._options = options;
     this._options.uniformParams.fRandomSeed = Math.random();
+    this._options.uniformParams.fSamplesPerPixel = 1;
 
     this._raytracingBuffers = new RaytracingBuffers(this._options.world);
   }
@@ -58,9 +61,12 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
     }
     this._initialized = true;
 
-    const pixelArray = new Float32Array(this._options.uniformParams.fWidth * this._options.uniformParams.fHeight * 4);
+    const pixelBufferSize =
+      this._options.uniformParams.fWidth * this._options.uniformParams.fHeight * 4 * Float32Array.BYTES_PER_ELEMENT;
+
     //COPY_SRC is needed because the pixel buffer is read after each compute call
-    this._pixelBuffer.createWithArrayMapped(pixelArray, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
+    this._pixelBuffer.create(pixelBufferSize, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
+    this._accumulationBuffer.create(pixelBufferSize, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
 
     const uniformArray = this.getParamsArray(this._options.uniformParams);
     //COPY_DST is needed because the uniforms are updated after each compute call
@@ -88,6 +94,11 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
         },
         {
           binding: Bindings.PixelBuffer,
+          visibility: GPUShaderStage.COMPUTE,
+          type: 'storage-buffer',
+        },
+        {
+          binding: Bindings.AccumulationBuffer,
           visibility: GPUShaderStage.COMPUTE,
           type: 'storage-buffer',
         },
@@ -121,6 +132,7 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
   public updateUniformBuffer(): void {
     if (this._initialized) {
       this._options.uniformParams.fRandomSeed = Math.random();
+      this._options.uniformParams.fSamplesPerPixel++;
       const uniformArray = this.getParamsArray(this._options.uniformParams);
       WebGPUContext.queue.writeBuffer(this._computeParamsUniformBuffer.gpuBuffer, 0, uniformArray.buffer);
     }
@@ -152,6 +164,14 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
             buffer: this._pixelBuffer.gpuBuffer,
             offset: 0,
             size: this._pixelBuffer.size,
+          },
+        },
+        {
+          binding: Bindings.AccumulationBuffer,
+          resource: {
+            buffer: this._accumulationBuffer.gpuBuffer,
+            offset: 0,
+            size: this._accumulationBuffer.size,
           },
         },
         {
