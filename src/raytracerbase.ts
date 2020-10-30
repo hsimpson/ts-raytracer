@@ -1,10 +1,9 @@
-export type DoneCallback = (duration: number) => void;
+export type DoneCallback = (stats: string) => void;
 
 export abstract class RaytracerBase {
   protected _isRunning = false;
   protected _startTime = 0;
   protected _doneCallback: DoneCallback;
-  protected _context2D: CanvasRenderingContext2D;
 
   public constructor(
     protected _canvas: HTMLCanvasElement,
@@ -32,20 +31,22 @@ export abstract class RaytracerBase {
       .padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
   }
 
-  protected writeStatsToImage(duration: number): void {
-    const renderTime = `spp: ${this._samplesPerPixel}, max-bounces: ${
+  protected getStats(duration: number): string {
+    const stats = `spp: ${this._samplesPerPixel}, max-bounces: ${
       this._maxBounces
     }, rendertime: ${RaytracerBase.msToTimeString(duration)}`;
-    console.log(renderTime);
+    console.log(stats);
+    return stats;
+  }
 
-    this._context2D.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    this._context2D.fillRect(0, 0, this._canvas.width, 22);
-
-    this._context2D.fillStyle = 'rgb(0, 0, 0)';
-    this._context2D.strokeStyle = 'rgb(0, 0, 0)';
-    this._context2D.font = '16px Arial';
-    this._context2D.textBaseline = 'top';
-    this._context2D.fillText(renderTime, 5, 5);
+  protected writeStatsToImage(stats: string, context2D: CanvasRenderingContext2D): void {
+    context2D.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    context2D.fillRect(0, 0, this._canvas.width, 22);
+    context2D.fillStyle = 'rgb(0, 0, 0)';
+    context2D.strokeStyle = 'rgb(0, 0, 0)';
+    context2D.font = '16px Arial';
+    context2D.textBaseline = 'top';
+    context2D.fillText(stats, 5, 5);
   }
 
   public get isRunning(): boolean {

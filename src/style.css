@@ -40,9 +40,18 @@ body {
   padding: 5px;
 }
 
-.canvas_container {
+.render-container {
+  display: grid;
+  grid-template-rows: 30px auto;
   border-left: 4px solid #909090;
   background-color: #b4b4b4;
+}
+
+.stats {
+  padding: 5px;
+}
+
+.canvas-container {
   padding: 20px;
   justify-items: center;
   align-items: center;

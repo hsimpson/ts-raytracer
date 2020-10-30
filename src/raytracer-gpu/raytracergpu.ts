@@ -152,10 +152,15 @@ export default class RaytracerGPU extends RaytracerBase {
 
     // raytracer finished
     const duration = performance.now() - this._startTime;
-    this.writeStatsToImage(duration);
+    const canvas2d = document.createElement('canvas') as HTMLCanvasElement;
+    canvas2d.width = this._imageWidth;
+    canvas2d.height = this._imageHeight;
+    const cavnas2dContext = canvas2d.getContext('2d');
+    const stats = this.getStats(duration);
+    this.writeStatsToImage(stats, cavnas2dContext);
 
     if (this._doneCallback) {
-      this._doneCallback(duration);
+      this._doneCallback(stats);
     }
     this._isRunning = false;
   }

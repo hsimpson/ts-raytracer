@@ -1,20 +1,19 @@
 import React from 'react';
-import { RaytracerProperties } from './atoms';
 import { useRecoilState } from 'recoil';
-import { StartRendering } from './atoms';
 import RaytracerCPU from '../raytracer-cpu/raytracercpu';
 import RaytracerGPU from '../raytracer-gpu/raytracergpu';
+import { RaytracerProperties, RaytracerRunningState } from './atoms';
 
 const Canvas = (): React.ReactElement => {
   const canvasRef = React.useRef<HTMLCanvasElement>(undefined);
   const [raytracerState] = useRecoilState(RaytracerProperties);
-  const [startRendering, setStartRendering] = useRecoilState(StartRendering);
+  const [raytracerRunningState, setRaytracerRunningState] = useRecoilState(RaytracerRunningState);
 
   const rayTracerCPURef = React.useRef<RaytracerCPU>(undefined);
   const rayTracerGPURef = React.useRef<RaytracerGPU>(undefined);
 
-  const onRayTracerDone = (_duration: number): void => {
-    setStartRendering(false);
+  const onRayTracerDone = (stats: string): void => {
+    setRaytracerRunningState({ ...raytracerRunningState, isRunning: false, stats });
   };
 
   React.useEffect(() => {
@@ -65,22 +64,25 @@ const Canvas = (): React.ReactElement => {
       raytracer = rayTracerGPURef.current;
     }
 
-    if (startRendering && !raytracer.isRunning) {
+    if (raytracerRunningState.isRunning && !raytracer.isRunning) {
       raytracer.start(onRayTracerDone);
-    } else if (!startRendering && raytracer.isRunning) {
+    } else if (!raytracerRunningState.isRunning && raytracer.isRunning) {
       raytracer.stop();
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startRendering]);
+  }, [raytracerRunningState.isRunning]);
 
   return (
-    <div className="canvas_container">
-      <canvas
-        className="canvas"
-        ref={canvasRef}
-        width={raytracerState.imageWidth}
-        height={raytracerState.imageHeight}></canvas>
+    <div className="render-container">
+      <span className="stats">{`Render stats: ${raytracerRunningState.stats}`}</span>
+      <div className="canvas-container">
+        <canvas
+          className="canvas"
+          ref={canvasRef}
+          width={raytracerState.imageWidth}
+          height={raytracerState.imageHeight}></canvas>
+      </div>
     </div>
   );
 };

@@ -14,7 +14,10 @@ export const RaytracerProperties = atom({
   },
 });
 
-export const StartRendering = atom({
-  key: 'startRendering',
-  default: false,
+export const RaytracerRunningState = atom({
+  key: 'raytracerState',
+  default: {
+    isRunning: false,
+    stats: '',
+  },
 });

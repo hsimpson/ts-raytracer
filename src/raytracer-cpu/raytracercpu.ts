@@ -14,6 +14,7 @@ import {
 
 export default class RaytracerCPU extends RaytracerBase {
   private _controllerWorker: ControllerWorker;
+  private _context2D: CanvasRenderingContext2D;
 
   public constructor(
     canvas: HTMLCanvasElement,
@@ -43,10 +44,11 @@ export default class RaytracerCPU extends RaytracerBase {
     this._context2D.putImageData(imageData, 0, 0);
 
     const duration = performance.now() - this._startTime;
-    this.writeStatsToImage(duration);
+    const stats = this.getStats(duration);
+    this.writeStatsToImage(stats, this._context2D);
 
     if (this._doneCallback) {
-      this._doneCallback(duration);
+      this._doneCallback(stats);
     }
   }
 
