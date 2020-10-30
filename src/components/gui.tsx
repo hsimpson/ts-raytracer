@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRecoilState, useResetRecoilState } from 'recoil';
 import RaytracerGPU from '../raytracer-gpu/raytracergpu';
-import { RaytracerProperties } from './atoms';
+import { RaytracerProperties, StartRendering } from './atoms';
 import CheckBox from './checkbox';
 import NumberInput from './input';
 import { DropDownItem, DropDown } from './dropdown';
@@ -9,6 +9,7 @@ import { DropDownItem, DropDown } from './dropdown';
 const Gui = (): React.ReactElement => {
   const [raytracerState, setRaytracerState] = useRecoilState(RaytracerProperties);
   const resetRaytracerState = useResetRecoilState(RaytracerProperties);
+  const [startRendering, setStartRendering] = useRecoilState(StartRendering);
 
   React.useEffect(() => {
     if (RaytracerGPU.supportsWebGPU()) {
@@ -79,8 +80,12 @@ const Gui = (): React.ReactElement => {
         items={sceneConfig}
         default={raytracerState.scene}
         onValueChange={(scene) => setRaytracerState({ ...raytracerState, scene })}></DropDown>
+
       <button className="resetButton" onClick={onReset}>
         Reset to default
+      </button>
+      <button className="renderButton" onClick={() => setStartRendering(!startRendering)}>
+        {startRendering ? 'Stop rendering!' : 'Start rendering!'}
       </button>
     </div>
   );
