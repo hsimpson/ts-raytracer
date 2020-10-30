@@ -3,9 +3,8 @@ import { WebGPUContext } from './webgpucontext';
 import WebGPUPipelineBase from './webgpupipelinebase';
 
 interface RenderUniformParams {
-  fWidth: number;
-  fHeight: number;
-  fSample: number;
+  width: number;
+  height: number;
 }
 
 interface WebGPURenderPipelineOptions {
@@ -36,7 +35,7 @@ const _vertexPositions = new Float32Array([
 export default class WebGPURenderPipeline extends WebGPUPipelineBase {
   private _options: WebGPURenderPipelineOptions;
   private _vertexPositionBuffer = new WebGPUBuffer();
-  private _vertexColorBuffer = new WebGPUBuffer();
+  // private _vertexColorBuffer = new WebGPUBuffer();
 
   private _renderParamsUniformBuffer = new WebGPUBuffer();
 
@@ -165,13 +164,13 @@ export default class WebGPURenderPipeline extends WebGPUPipelineBase {
     this._pipeline = WebGPUContext.device.createRenderPipeline(pipelineDesc);
   }
 
-  public updateUniformBuffer(sample: number): void {
-    if (this._initialized) {
-      this._options.uniformParams.fSample = sample;
-      const uniformArray = this.getParamsArray(this._options.uniformParams);
-      WebGPUContext.queue.writeBuffer(this._renderParamsUniformBuffer.gpuBuffer, 0, uniformArray.buffer);
-    }
-  }
+  // public updateUniformBuffer(sample: number): void {
+  //   if (this._initialized) {
+  //     this._options.uniformParams.fSample = sample;
+  //     const uniformArray = this.getParamsArray(this._options.uniformParams);
+  //     WebGPUContext.queue.writeBuffer(this._renderParamsUniformBuffer.gpuBuffer, 0, uniformArray.buffer);
+  //   }
+  // }
 
   public get gpuPipeline(): GPURenderPipeline {
     return this._pipeline as GPURenderPipeline;

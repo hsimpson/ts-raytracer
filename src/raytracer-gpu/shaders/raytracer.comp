@@ -15,11 +15,11 @@ layout(local_size_x = 8, local_size_y = 8) in;
 
 layout(set = 0, binding = 0) uniform ComputeParams {
   vec3  background;
-  float fWidth;
-  float fHeight;
-  float fSamplesPerPixel;
-  float fMaxBounces;
-  float fRandomSeed;
+  float width;
+  float height;
+  float currentSample;
+  float maxBounces;
+  float randomSeed;
 }
 params;
 
@@ -59,9 +59,6 @@ vec3 rayColor(Ray ray, vec3 background, uint depth) {
       color *= background;
       break;
     }
-
-    // ivec2 o = hittableList[1].object;
-    // color = vec3(o.xy, 1.0);
   }
 
   return color;
@@ -70,31 +67,27 @@ vec3 rayColor(Ray ray, vec3 background, uint depth) {
 void main() {
   uvec3 index = gl_GlobalInvocationID;
 
-  // float j = params.fHeight - (floor(float(index.x) / params.fWidth));
-  // float i = mod(float(index.y), params.fWidth);
+  // float j = params.height - (floor(float(index.x) / params.width));
+  // float i = mod(float(index.y), params.width);
   float i = index.x;
-  float j = params.fHeight - index.y;
+  float j = params.height - index.y;
 
   //initSeed(index * 1099087573U);
-  initSeed(index.x * index.y * uint(floor(params.fRandomSeed * 1000000000U)));
+  initSeed(index.x * index.y * uint(floor(params.randomSeed * 1000000000U)));
 
-  vec3 pixelColor = vec3(0.0, 0.0, 0.0);
-
-  const uint ssp     = uint(params.fSamplesPerPixel);
-  const uint bounces = uint(params.fMaxBounces);
+  const uint currentSample = uint(params.currentSample);
+  const uint bounces       = uint(params.maxBounces);
 
   const float rnd = random();
 
-  // for (int s = 0; s < ssp; s++) {
-  float u = (i + rnd) / (params.fWidth - 1.0);
-  float v = (j + rnd) / (params.fHeight - 1.0);
-  Ray   r = cameraGetRay(u, v);
-  pixelColor += rayColor(r, params.background, bounces);
-  // }
+  float u          = (i + rnd) / (params.width - 1.0);
+  float v          = (j + rnd) / (params.height - 1.0);
+  Ray   r          = cameraGetRay(u, v);
+  vec3  pixelColor = rayColor(r, params.background, bounces);
 
-  const uint pixelIndex                     = index.y * uint(params.fWidth) + index.x;
+  const uint pixelIndex                     = index.y * uint(params.width) + index.x;
   const vec3 accumulatedColor               = accumulationBuffer.pixels[pixelIndex].rgb + pixelColor;
-  pixelColor                                = accumulatedColor * (1.0 / ssp);
+  pixelColor                                = accumulatedColor * (1.0 / currentSample);
   accumulationBuffer.pixels[pixelIndex].rgb = accumulatedColor;
 
   // gamma correction 2.0

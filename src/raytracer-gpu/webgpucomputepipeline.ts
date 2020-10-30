@@ -8,11 +8,11 @@ import type { Vec3 } from '../vec3';
 
 interface ComputeUniformParams {
   background: Vec3;
-  fWidth: number;
-  fHeight: number;
-  fSamplesPerPixel: number;
-  fMaxBounces: number;
-  fRandomSeed?: number;
+  width: number;
+  height: number;
+  currentSample: number;
+  maxBounces: number;
+  randomSeed: number;
 }
 
 interface WebGPUComputePiplineOptions {
@@ -49,8 +49,8 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
   public constructor(options: WebGPUComputePiplineOptions) {
     super();
     this._options = options;
-    this._options.uniformParams.fRandomSeed = Math.random();
-    this._options.uniformParams.fSamplesPerPixel = 1;
+    this._options.uniformParams.randomSeed = Math.random();
+    this._options.uniformParams.currentSample = 1;
 
     this._raytracingBuffers = new RaytracingBuffers(this._options.world);
   }
@@ -62,7 +62,7 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
     this._initialized = true;
 
     const pixelBufferSize =
-      this._options.uniformParams.fWidth * this._options.uniformParams.fHeight * 4 * Float32Array.BYTES_PER_ELEMENT;
+      this._options.uniformParams.width * this._options.uniformParams.height * 4 * Float32Array.BYTES_PER_ELEMENT;
 
     //COPY_SRC is needed because the pixel buffer is read after each compute call
     this._pixelBuffer.create(pixelBufferSize, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
@@ -131,8 +131,8 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
 
   public updateUniformBuffer(): void {
     if (this._initialized) {
-      this._options.uniformParams.fRandomSeed = Math.random();
-      this._options.uniformParams.fSamplesPerPixel++;
+      this._options.uniformParams.randomSeed = Math.random();
+      this._options.uniformParams.currentSample++;
       const uniformArray = this.getParamsArray(this._options.uniformParams);
       WebGPUContext.queue.writeBuffer(this._computeParamsUniformBuffer.gpuBuffer, 0, uniformArray.buffer);
     }
