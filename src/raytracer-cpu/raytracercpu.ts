@@ -1,6 +1,6 @@
 import ControllerWorker from 'worker-loader!./controller.worker';
 import { Camera } from '../camera';
-import { DoneCallback, RaytracerBase } from '../raytracerbase';
+import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
 import { serialize } from '../serializing';
 import { HittableList } from './hittablelist';
@@ -12,26 +12,26 @@ import {
   WorkerMessage,
 } from './workerinterfaces';
 
-export default class RaytracerCPU extends RaytracerBase {
+export interface RayTracerCPUOptions extends RayTracerBaseOptions {
+  numOfWorkers: number;
+}
+
+export class RaytracerCPU extends RaytracerBase {
   private _controllerWorker: ControllerWorker;
   private _context2D: CanvasRenderingContext2D;
 
-  public constructor(
-    canvas: HTMLCanvasElement,
-    imageWidth: number,
-    imageHeight: number,
-    samplesPerPixel: number,
-    maxBounces: number,
-    scene: number,
-    private _numOfWorkers: number
-  ) {
-    super(canvas, imageWidth, imageHeight, samplesPerPixel, maxBounces, scene);
+  public constructor(rayTracerCPUOptions: RayTracerCPUOptions) {
+    super();
+    this._rayTracerOptions = rayTracerCPUOptions;
     this._controllerWorker = new ControllerWorker();
   }
 
   private onControllerFinshed(msg: ControllerEndMessage): void {
     this._isRunning = false;
-    const imageData = this._context2D.createImageData(this._imageWidth, this._imageHeight);
+    const imageData = this._context2D.createImageData(
+      this._rayTracerOptions.imageWidth,
+      this._rayTracerOptions.imageHeight
+    );
 
     let j = 0;
     for (let i = 0; i < imageData.data.length; ) {
@@ -66,15 +66,15 @@ export default class RaytracerCPU extends RaytracerBase {
 
   public async start(doneCallback?: DoneCallback): Promise<void> {
     this._doneCallback = doneCallback;
-    this._context2D = this._canvas.getContext('2d');
+    this._context2D = this._rayTracerOptions.canvas.getContext('2d');
     this._isRunning = true;
     this._startTime = performance.now();
 
     this._controllerWorker.onmessage = (event) => this.onControllerMessage(event);
 
-    const { world, cameraOptions } = await getScene(this._scene);
+    const { world, cameraOptions } = await getScene(this._rayTracerOptions.scene);
 
-    const aspectRatio = this._imageWidth / this._imageHeight;
+    const aspectRatio = this._rayTracerOptions.imageWidth / this._rayTracerOptions.imageHeight;
 
     const camera = new Camera();
     camera.init(
@@ -92,12 +92,12 @@ export default class RaytracerCPU extends RaytracerBase {
     const controllerStartMessage: ControllerStartMessage = {
       cmd: ControllerCommands.START,
       data: {
-        imageWidth: this._imageWidth,
-        imageHeight: this._imageHeight,
-        samplesPerPixel: this._samplesPerPixel,
-        maxBounces: this._maxBounces,
-        computeWorkers: this._numOfWorkers,
-        sceneIdx: this._scene,
+        imageWidth: this._rayTracerOptions.imageWidth,
+        imageHeight: this._rayTracerOptions.imageHeight,
+        samplesPerPixel: this._rayTracerOptions.samplesPerPixel,
+        maxBounces: this._rayTracerOptions.maxBounces,
+        computeWorkers: (this._rayTracerOptions as RayTracerCPUOptions).numOfWorkers,
+        sceneIdx: this._rayTracerOptions.scene,
         world: serialize(HittableList, world),
         camera: serialize(Camera, camera),
         background: cameraOptions.background,
@@ -117,6 +117,6 @@ export default class RaytracerCPU extends RaytracerBase {
   }
 
   public set numOfWorkers(numOfWorkers: number) {
-    this._numOfWorkers = numOfWorkers;
+    (this._rayTracerOptions as RayTracerCPUOptions).numOfWorkers = numOfWorkers;
   }
 }

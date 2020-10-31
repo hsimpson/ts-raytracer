@@ -1,18 +1,24 @@
 export type DoneCallback = (stats: string) => void;
 
+export interface RayTracerBaseOptions {
+  canvas: HTMLCanvasElement;
+  imageWidth: number;
+  imageHeight: number;
+  samplesPerPixel: number;
+  maxBounces: number;
+  scene: number;
+  download: boolean;
+}
+
 export abstract class RaytracerBase {
   protected _isRunning = false;
   protected _startTime = 0;
+  protected _rayTracerOptions: RayTracerBaseOptions;
   protected _doneCallback: DoneCallback;
 
-  public constructor(
-    protected _canvas: HTMLCanvasElement,
-    protected _imageWidth: number,
-    protected _imageHeight: number,
-    protected _samplesPerPixel: number,
-    protected _maxBounces: number,
-    protected _scene: number
-  ) {}
+  // public constructor(rayTracerOptions: RayTracerBaseOptions) {
+  //   this._rayTracerOptions = rayTracerOptions;
+  // }
 
   public abstract async start(doneCallback?: DoneCallback): Promise<void>;
   public abstract stop(): void;
@@ -32,8 +38,8 @@ export abstract class RaytracerBase {
   }
 
   protected getStats(duration: number): string {
-    const stats = `spp: ${this._samplesPerPixel}, max-bounces: ${
-      this._maxBounces
+    const stats = `spp: ${this._rayTracerOptions.samplesPerPixel}, max-bounces: ${
+      this._rayTracerOptions.maxBounces
     }, rendertime: ${RaytracerBase.msToTimeString(duration)}`;
     console.log(stats);
     return stats;
@@ -41,7 +47,7 @@ export abstract class RaytracerBase {
 
   protected writeStatsToImage(stats: string, context2D: CanvasRenderingContext2D): void {
     context2D.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    context2D.fillRect(0, 0, this._canvas.width, 22);
+    context2D.fillRect(0, 0, this._rayTracerOptions.canvas.width, 22);
     context2D.fillStyle = 'rgb(0, 0, 0)';
     context2D.strokeStyle = 'rgb(0, 0, 0)';
     context2D.font = '16px Arial';
@@ -54,22 +60,26 @@ export abstract class RaytracerBase {
   }
 
   public set imageWidth(imageWidth: number) {
-    this._imageWidth = imageWidth;
+    this._rayTracerOptions.imageWidth = imageWidth;
   }
 
   public set imageHeight(imageHeight: number) {
-    this._imageHeight = imageHeight;
+    this._rayTracerOptions.imageHeight = imageHeight;
   }
 
   public set samplesPerPixel(samplesPerPixel: number) {
-    this._samplesPerPixel = samplesPerPixel;
+    this._rayTracerOptions.samplesPerPixel = samplesPerPixel;
   }
 
   public set maxBounces(maxBounces: number) {
-    this._maxBounces = maxBounces;
+    this._rayTracerOptions.maxBounces = maxBounces;
   }
 
   public set scene(scene: number) {
-    this._scene = scene;
+    this._rayTracerOptions.scene = scene;
+  }
+
+  public set download(download: boolean) {
+    this._rayTracerOptions.download = download;
   }
 }

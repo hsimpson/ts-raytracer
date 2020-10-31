@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRecoilState, useResetRecoilState } from 'recoil';
-import RaytracerGPU from '../raytracer-gpu/raytracergpu';
+import { RaytracerGPU } from '../raytracer-gpu/raytracergpu';
 import { RaytracerProperties, RaytracerRunningState } from './atoms';
 import CheckBox from './checkbox';
 import NumberInput from './input';
@@ -84,6 +84,12 @@ const Gui = (): React.ReactElement => {
         items={sceneConfig}
         default={raytracerState.scene}
         onValueChange={(scene) => setRaytracerState({ ...raytracerState, scene })}></DropDown>
+
+      <CheckBox
+        label="Download"
+        checked={raytracerState.download}
+        disabled={false}
+        onValueChange={(download) => setRaytracerState({ ...raytracerState, download })}></CheckBox>
 
       <button className="resetButton" onClick={onResetClicked}>
         Reset to default

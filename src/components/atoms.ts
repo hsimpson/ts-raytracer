@@ -10,7 +10,7 @@ export const RaytracerProperties = atom({
     numOfWorkers: navigator.hardwareConcurrency,
     webGPUavailable: false,
     webGPUenabled: false,
-    scene: 0,
+    download: false,
   },
 });
 
