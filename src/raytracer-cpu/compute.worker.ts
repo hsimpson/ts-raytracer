@@ -14,11 +14,11 @@ const _controllerCtx: Worker = self as never;
 let _id: number;
 const gamma22Exponent = 1.0 / 2.2;
 
-const writeColor = (array: Uint8ClampedArray, offset: number, color: Vec3, ssp: number): void => {
+const writeColor = (array: Uint8ClampedArray, offset: number, color: Vec3, spp: number): void => {
   let [r, g, b] = color;
 
   // Divide the color total by the number of samples
-  const scale = 1.0 / ssp;
+  const scale = 1.0 / spp;
 
   // gamma 2.0
   // r = Math.sqrt(scale * r);
@@ -45,7 +45,7 @@ const start = (msg: ComputeStartMessage): void => {
   const imageHeight = msg.data.imageHeight;
   const scanlineCount = msg.data.scanlineCount;
   const startLine = msg.data.startLine;
-  const ssp = msg.data.samplesPerPixel;
+  const spp = msg.data.samplesPerPixel;
   const maxBounces = msg.data.maxBounces;
 
   console.log(`worker[${_id}] startLine: ${startLine}`);
@@ -58,7 +58,7 @@ const start = (msg: ComputeStartMessage): void => {
   let linesToCalc = scanlineCount;
 
   // const sampleOffsets = [];
-  // for (let sample = 0; sample < ssp; sample++) {
+  // for (let sample = 0; sample < spp; sample++) {
   //   sampleOffsets.push(randomNumber());
   // }
 
@@ -67,7 +67,7 @@ const start = (msg: ComputeStartMessage): void => {
     for (let i = 0; i < imageWidth; i++) {
       let pixelColor: Vec3 = [0, 0, 0];
 
-      for (let s = 0; s < ssp; s++) {
+      for (let s = 0; s < spp; s++) {
         // const rnd = sampleOffsets[s];
         const u = (i + randomNumber()) / (imageWidth - 1);
         const v = (j + randomNumber()) / (imageHeight - 1);
@@ -78,7 +78,7 @@ const start = (msg: ComputeStartMessage): void => {
         pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, world, maxBounces));
       }
 
-      writeColor(dataArray, offset, pixelColor, ssp);
+      writeColor(dataArray, offset, pixelColor, spp);
       offset += 3;
     }
   }

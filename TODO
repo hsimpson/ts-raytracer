@@ -6,7 +6,6 @@ Bugs:
     ☐ Missing pixels when width or height is not devidable by fixed worksize devisor (8)
     ☐ Uncaught in Promise->on heavy GPU frame load
     ✔ Adapt new WebGPU Buffer Spec see: https://hackmd.io/szV68rOVQ56GYzPJMBko8A @done(20-09-01 21:33)
-      ☐ Firefox do not support the current spec
     ☐ Perlin noise random values are now static and not created per texture
 
   CPU:
@@ -24,16 +23,18 @@ Features:
     ✔ Add textures (solid and checkerboard) @done(20-10-23 23:01)
     ☐ Optional frame seperation like Blender Cycles with e.g. hilbert spiral
     ☐ Cancel GPU rendering
-    ☐ Display the render result with WebGPU with progressive rendering
+    ✔ Display the render result with WebGPU with progressive rendering @done(20-11-07 20:37)
     ☐ Add WGSL implemenation
     ☐ Add tone mapping like ACES filmic
     ☐ Add color correction/grading
+    ☐ Environment Textures
 
   CPU:
     ☐ Add progressive rendering like on GPU show each sample image
     ☐ Look if Woker logik could be made with comlink: https://github.com/GoogleChromeLabs/comlink
     ☐ Add tone mapping like ACES filmic
     ☐ Add color correction/grading
+    ☐ Environment Textures
 
   Common:
     ☐ Add favicon
