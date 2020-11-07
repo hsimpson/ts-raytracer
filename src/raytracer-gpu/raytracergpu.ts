@@ -8,6 +8,9 @@ import { WebGPUBuffer } from './webgpubuffer';
 import WebGPUComputePipline from './webgpucomputepipeline';
 import { WebGPUContext } from './webgpucontext';
 import WebGPURenderPipeline from './webgpurenderpipeline';
+import { sleep } from '../util';
+
+const LOCAL_SIZE = 8;
 
 export type RayTracerGPUOptions = RayTracerBaseOptions;
 
@@ -31,6 +34,7 @@ export class RaytracerGPU extends RaytracerBase {
   }
 
   public async start(doneCallback?: DoneCallback): Promise<void> {
+    console.time('RaytracerGPU initialization');
     this._startTime = performance.now();
     await this.initialize();
     this._doneCallback = doneCallback;
@@ -109,7 +113,7 @@ export class RaytracerGPU extends RaytracerBase {
       return new Promise((resolve) => {
         let sample = 1;
         let prevTime = performance.now();
-        const frame = (): void => {
+        const frame = async (): Promise<void> => {
           const currentTime = performance.now();
           console.log(`duration: ${(currentTime - prevTime).toFixed(3)} ms`);
           prevTime = currentTime;
@@ -136,6 +140,7 @@ export class RaytracerGPU extends RaytracerBase {
           this.compute2(computePipeline, renderPipeline);
           if (sample < this._rayTracerOptions.samplesPerPixel) {
             sample++;
+            await sleep(25);
             window.requestAnimationFrame(frame);
           } else {
             resolve();
@@ -145,6 +150,7 @@ export class RaytracerGPU extends RaytracerBase {
       });
     };
 
+    console.timeEnd('RaytracerGPU initialization');
     // raytracer finished
     await raytracing();
 
@@ -220,7 +226,7 @@ export class RaytracerGPU extends RaytracerBase {
       const passEncoder = commandEncoder.beginComputePass();
       passEncoder.setPipeline(computePipeline.gpuPipeline);
       passEncoder.setBindGroup(0, computePipeline.bindGroup);
-      passEncoder.dispatch(this._imageWidth / 8, this._imageHeight / 8, 1);
+      passEncoder.dispatch(this._imageWidth / LOCAL_SIZE, this._imageHeight / LOCAL_SIZE, 1);
       passEncoder.endPass();
 
       computePipeline.updateUniformBuffer();
@@ -261,7 +267,11 @@ export class RaytracerGPU extends RaytracerBase {
       const passEncoder = commandEncoder.beginComputePass();
       passEncoder.setPipeline(computePipeline.gpuPipeline);
       passEncoder.setBindGroup(0, computePipeline.bindGroup);
-      passEncoder.dispatch(this._rayTracerOptions.imageWidth / 8, this._rayTracerOptions.imageHeight / 8, 1);
+      passEncoder.dispatch(
+        this._rayTracerOptions.imageWidth / LOCAL_SIZE,
+        this._rayTracerOptions.imageHeight / LOCAL_SIZE,
+        1
+      );
       passEncoder.endPass();
 
       computePipeline.updateUniformBuffer();

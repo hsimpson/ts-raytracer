@@ -32,3 +32,7 @@ export function sortArrayRange<T>(array: T[], start: number, end: number, compar
     ...array.slice(start + end, array.length)
   );
 }
+
+export async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
