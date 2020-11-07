@@ -50,7 +50,7 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
     super();
     this._options = options;
     this._options.uniformParams.randomSeed = Math.random();
-    this._options.uniformParams.currentSample = 1;
+    this._options.uniformParams.currentSample = 0;
 
     this._raytracingBuffers = new RaytracingBuffers(this._options.world);
   }

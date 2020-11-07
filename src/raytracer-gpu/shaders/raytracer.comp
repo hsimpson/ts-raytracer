@@ -77,8 +77,7 @@ void main() {
   //initSeed(index * 1099087573U);
   initSeed(index.x * index.y * uint(floor(params.randomSeed * 1000000000U)));
 
-  const uint currentSample = uint(params.currentSample);
-  const uint bounces       = uint(params.maxBounces);
+  const uint bounces = uint(params.maxBounces);
 
   const float rnd = random();
 
@@ -89,7 +88,7 @@ void main() {
 
   const uint pixelIndex                     = index.y * uint(params.width) + index.x;
   const vec3 accumulatedColor               = accumulationBuffer.pixels[pixelIndex].rgb + pixelColor;
-  pixelColor                                = accumulatedColor * (1.0 / currentSample);
+  pixelColor                                = accumulatedColor * (1.0 / params.currentSample);
   accumulationBuffer.pixels[pixelIndex].rgb = accumulatedColor;
 
   // gamma correction 2.0

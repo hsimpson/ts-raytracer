@@ -264,6 +264,7 @@ export class RaytracerGPU extends RaytracerBase {
 
     // compute pass
     {
+      computePipeline.updateUniformBuffer();
       const passEncoder = commandEncoder.beginComputePass();
       passEncoder.setPipeline(computePipeline.gpuPipeline);
       passEncoder.setBindGroup(0, computePipeline.bindGroup);
@@ -273,8 +274,6 @@ export class RaytracerGPU extends RaytracerBase {
         1
       );
       passEncoder.endPass();
-
-      computePipeline.updateUniformBuffer();
     }
 
     // render pass
