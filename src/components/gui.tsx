@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRecoilState, useResetRecoilState } from 'recoil';
-import RaytracerGPU from '../raytracer-gpu/raytracergpu';
-import { RaytracerProperties } from './atoms';
+import { RaytracerGPU } from '../raytracer-gpu/raytracergpu';
+import { RaytracerProperties, RaytracerRunningState } from './atoms';
 import CheckBox from './checkbox';
 import NumberInput from './input';
 import { DropDownItem, DropDown } from './dropdown';
@@ -9,6 +9,7 @@ import { DropDownItem, DropDown } from './dropdown';
 const Gui = (): React.ReactElement => {
   const [raytracerState, setRaytracerState] = useRecoilState(RaytracerProperties);
   const resetRaytracerState = useResetRecoilState(RaytracerProperties);
+  const [raytracerRunningState, setRaytracerRunningState] = useRecoilState(RaytracerRunningState);
 
   React.useEffect(() => {
     if (RaytracerGPU.supportsWebGPU()) {
@@ -17,8 +18,12 @@ const Gui = (): React.ReactElement => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onReset = (): void => {
+  const onResetClicked = (): void => {
     resetRaytracerState();
+  };
+
+  const onStartRenderClicked = (): void => {
+    setRaytracerRunningState({ ...raytracerRunningState, isRunning: true, stats: '' });
   };
 
   const sceneConfig: DropDownItem[] = [
@@ -79,8 +84,24 @@ const Gui = (): React.ReactElement => {
         items={sceneConfig}
         default={raytracerState.scene}
         onValueChange={(scene) => setRaytracerState({ ...raytracerState, scene })}></DropDown>
-      <button className="resetButton" onClick={onReset}>
+
+      <CheckBox
+        label="Download"
+        checked={raytracerState.download}
+        disabled={false}
+        onValueChange={(download) => setRaytracerState({ ...raytracerState, download })}></CheckBox>
+
+      <CheckBox
+        label="Add stats to download"
+        checked={raytracerState.addStatsToImage}
+        disabled={!raytracerState.download}
+        onValueChange={(addStatsToImage) => setRaytracerState({ ...raytracerState, addStatsToImage })}></CheckBox>
+
+      <button className="resetButton" onClick={onResetClicked}>
         Reset to default
+      </button>
+      <button className="renderButton" onClick={onStartRenderClicked}>
+        {raytracerRunningState.isRunning ? 'Stop rendering!' : 'Start rendering!'}
       </button>
     </div>
   );

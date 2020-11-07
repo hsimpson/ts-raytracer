@@ -1,19 +1,25 @@
-export type DoneCallback = (duration: number) => void;
+export type DoneCallback = (stats: string) => void;
+
+export interface RayTracerBaseOptions {
+  canvas: HTMLCanvasElement;
+  imageWidth: number;
+  imageHeight: number;
+  samplesPerPixel: number;
+  maxBounces: number;
+  scene: number;
+  download: boolean;
+  addStatsToImage: boolean;
+}
 
 export abstract class RaytracerBase {
   protected _isRunning = false;
   protected _startTime = 0;
+  protected _rayTracerOptions: RayTracerBaseOptions;
   protected _doneCallback: DoneCallback;
-  protected _context2D: CanvasRenderingContext2D;
 
-  public constructor(
-    protected _canvas: HTMLCanvasElement,
-    protected _imageWidth: number,
-    protected _imageHeight: number,
-    protected _samplesPerPixel: number,
-    protected _maxBounces: number,
-    protected _scene: number
-  ) {}
+  // public constructor(rayTracerOptions: RayTracerBaseOptions) {
+  //   this._rayTracerOptions = rayTracerOptions;
+  // }
 
   public abstract async start(doneCallback?: DoneCallback): Promise<void>;
   public abstract stop(): void;
@@ -32,20 +38,52 @@ export abstract class RaytracerBase {
       .padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
   }
 
-  protected writeStatsToImage(duration: number): void {
-    const renderTime = `spp: ${this._samplesPerPixel}, max-bounces: ${
-      this._maxBounces
+  protected getStats(duration: number): string {
+    const stats = `spp: ${this._rayTracerOptions.samplesPerPixel}, max-bounces: ${
+      this._rayTracerOptions.maxBounces
     }, rendertime: ${RaytracerBase.msToTimeString(duration)}`;
-    console.log(renderTime);
+    console.log(stats);
+    return stats;
+  }
 
-    this._context2D.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    this._context2D.fillRect(0, 0, this._canvas.width, 22);
+  protected writeStatsToImage(stats: string, context2D: CanvasRenderingContext2D): void {
+    context2D.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    context2D.fillRect(0, 0, this._rayTracerOptions.canvas.width, 22);
+    context2D.fillStyle = 'rgb(0, 0, 0)';
+    context2D.strokeStyle = 'rgb(0, 0, 0)';
+    context2D.font = '16px Arial';
+    context2D.textBaseline = 'top';
+    context2D.fillText(stats, 5, 5);
+  }
 
-    this._context2D.fillStyle = 'rgb(0, 0, 0)';
-    this._context2D.strokeStyle = 'rgb(0, 0, 0)';
-    this._context2D.font = '16px Arial';
-    this._context2D.textBaseline = 'top';
-    this._context2D.fillText(renderTime, 5, 5);
+  protected async downloadImage(
+    canvas: HTMLCanvasElement,
+    context: CanvasRenderingContext2D,
+    stats: string
+  ): Promise<void> {
+    const canvasDownload = async (): Promise<Blob> => {
+      return new Promise((resolve) => {
+        canvas.toBlob(
+          (blob) => {
+            resolve(blob);
+          },
+          'image/png',
+          1.0
+        );
+      });
+    };
+
+    if (this._rayTracerOptions.addStatsToImage) {
+      this.writeStatsToImage(stats, context);
+    }
+
+    const blob = await canvasDownload();
+    const anchor = document.createElement('a');
+    anchor.download = 'rendering.png'; // optional, but you can give the file a name
+    anchor.href = URL.createObjectURL(blob);
+    anchor.click(); // ✨ magic!
+
+    URL.revokeObjectURL(anchor.href); // remove it from memory and save on memory!
   }
 
   public get isRunning(): boolean {
@@ -53,22 +91,30 @@ export abstract class RaytracerBase {
   }
 
   public set imageWidth(imageWidth: number) {
-    this._imageWidth = imageWidth;
+    this._rayTracerOptions.imageWidth = imageWidth;
   }
 
   public set imageHeight(imageHeight: number) {
-    this._imageHeight = imageHeight;
+    this._rayTracerOptions.imageHeight = imageHeight;
   }
 
   public set samplesPerPixel(samplesPerPixel: number) {
-    this._samplesPerPixel = samplesPerPixel;
+    this._rayTracerOptions.samplesPerPixel = samplesPerPixel;
   }
 
   public set maxBounces(maxBounces: number) {
-    this._maxBounces = maxBounces;
+    this._rayTracerOptions.maxBounces = maxBounces;
   }
 
   public set scene(scene: number) {
-    this._scene = scene;
+    this._rayTracerOptions.scene = scene;
+  }
+
+  public set download(download: boolean) {
+    this._rayTracerOptions.download = download;
+  }
+
+  public set addStatsToImage(addStatsToImage: boolean) {
+    this._rayTracerOptions.addStatsToImage = addStatsToImage;
   }
 }

@@ -11,15 +11,17 @@
 #define FLT_MAX 99999.99
 //const float INFINITY     = 1. / 0.;
 
-layout(local_size_x = 8, local_size_y = 8) in;
+#define LOCAL_SIZE 8
+
+layout(local_size_x = LOCAL_SIZE, local_size_y = LOCAL_SIZE) in;
 
 layout(set = 0, binding = 0) uniform ComputeParams {
   vec3  background;
-  float fWidth;
-  float fHeight;
-  float fSamplesPerPixel;
-  float fMaxBounces;
-  float fRandomSeed;
+  float width;
+  float height;
+  float currentSample;
+  float maxBounces;
+  float randomSeed;
 }
 params;
 
@@ -27,6 +29,11 @@ layout(std140, set = 0, binding = 2) buffer PixelBuffer {
   vec4 pixels[];
 }
 pixelBuffer;
+
+layout(std140, set = 0, binding = 3) buffer AccumlationBuffer {
+  vec4 pixels[];
+}
+accumulationBuffer;
 
 #include "./hittable/hittable.comp"
 #include "./material/material.comp"
@@ -54,9 +61,6 @@ vec3 rayColor(Ray ray, vec3 background, uint depth) {
       color *= background;
       break;
     }
-
-    // ivec2 o = hittableList[1].object;
-    // color = vec3(o.xy, 1.0);
   }
 
   return color;
@@ -65,40 +69,36 @@ vec3 rayColor(Ray ray, vec3 background, uint depth) {
 void main() {
   uvec3 index = gl_GlobalInvocationID;
 
-  // float j = params.fHeight - (floor(float(index.x) / params.fWidth));
-  // float i = mod(float(index.y), params.fWidth);
+  // float j = params.height - (floor(float(index.x) / params.width));
+  // float i = mod(float(index.y), params.width);
   float i = index.x;
-  float j = params.fHeight - index.y;
+  float j = params.height - index.y;
 
   //initSeed(index * 1099087573U);
-  initSeed(index.x * index.y * uint(floor(params.fRandomSeed * 1000000000U)));
+  initSeed(index.x * index.y * uint(floor(params.randomSeed * 1000000000U)));
 
-  vec3 pixel_color = vec3(0.0, 0.0, 0.0);
-
-  const uint ssp     = uint(params.fSamplesPerPixel);
-  const uint bounces = uint(params.fMaxBounces);
+  const uint currentSample = uint(params.currentSample);
+  const uint bounces       = uint(params.maxBounces);
 
   const float rnd = random();
 
-  // for (int s = 0; s < ssp; s++) {
-  float u = (i + rnd) / (params.fWidth - 1.0);
-  float v = (j + rnd) / (params.fHeight - 1.0);
-  Ray   r = cameraGetRay(u, v);
-  pixel_color += rayColor(r, params.background, bounces);
-  // }
+  float u          = (i + rnd) / (params.width - 1.0);
+  float v          = (j + rnd) / (params.height - 1.0);
+  Ray   r          = cameraGetRay(u, v);
+  vec3  pixelColor = rayColor(r, params.background, bounces);
 
-  // float scale = 1.0 / params.fSamplesPerPixel;
-  // pixel_color *= scale;
-  //pixel_color = vec3(random());
+  const uint pixelIndex                     = index.y * uint(params.width) + index.x;
+  const vec3 accumulatedColor               = accumulationBuffer.pixels[pixelIndex].rgb + pixelColor;
+  pixelColor                                = accumulatedColor * (1.0 / currentSample);
+  accumulationBuffer.pixels[pixelIndex].rgb = accumulatedColor;
 
   // gamma correction 2.0
-  pixel_color = sqrt(pixel_color);
+  // pixelColor = sqrt(pixelColor);
 
-  //pixel_color               = randomVec3();
-  //pixelBuffer.pixels[index] = vec4(pixel_color, 1.0);
+  // gamma correction 2.2
+  pixelColor = pow(pixelColor, vec3(1.0 / 2.2));
 
-  const uint pixelIndex = index.y * uint(params.fWidth) + index.x;
-  pixelBuffer.pixels[pixelIndex] += vec4(pixel_color, 1.0);
+  pixelBuffer.pixels[pixelIndex] = vec4(pixelColor, 1.0);
 }
 
 /*

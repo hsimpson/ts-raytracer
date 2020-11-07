@@ -16,7 +16,7 @@ struct Texture {
   float pad_1;
 };
 
-layout(std430, set = 0, binding = 5) buffer TextureBuffer {
+layout(std430, set = 0, binding = 6) buffer TextureBuffer {
   Texture textures[];
 };
 

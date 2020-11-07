@@ -19,7 +19,7 @@ const NumberInput = (props: InputProps): React.ReactElement => {
 
   return (
     <div className="input">
-      <span>{props.label}</span>
+      <label>{props.label}</label>
       <input
         type="number"
         size={props.size}

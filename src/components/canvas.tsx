@@ -1,42 +1,37 @@
 import React from 'react';
-import { RaytracerProperties } from './atoms';
 import { useRecoilState } from 'recoil';
-import { StartRendering } from './atoms';
-import RaytracerCPU from '../raytracer-cpu/raytracercpu';
-import RaytracerGPU from '../raytracer-gpu/raytracergpu';
+import { RaytracerCPU, RayTracerCPUOptions } from '../raytracer-cpu/raytracercpu';
+import { RaytracerGPU, RayTracerGPUOptions } from '../raytracer-gpu/raytracergpu';
+import { RaytracerProperties, RaytracerRunningState } from './atoms';
 
 const Canvas = (): React.ReactElement => {
   const canvasRef = React.useRef<HTMLCanvasElement>(undefined);
   const [raytracerState] = useRecoilState(RaytracerProperties);
-  const [startRendering, setStartRendering] = useRecoilState(StartRendering);
+  const [raytracerRunningState, setRaytracerRunningState] = useRecoilState(RaytracerRunningState);
 
   const rayTracerCPURef = React.useRef<RaytracerCPU>(undefined);
   const rayTracerGPURef = React.useRef<RaytracerGPU>(undefined);
 
-  const onRayTracerDone = (_duration: number): void => {
-    setStartRendering(false);
+  const onRayTracerDone = (stats: string): void => {
+    setRaytracerRunningState({ ...raytracerRunningState, isRunning: false, stats });
   };
 
   React.useEffect(() => {
-    rayTracerCPURef.current = new RaytracerCPU(
-      canvasRef.current,
-      raytracerState.imageWidth,
-      raytracerState.imageHeight,
-      raytracerState.samplesPerPixel,
-      raytracerState.maxBounces,
-      raytracerState.scene,
-      raytracerState.numOfWorkers
-    );
+    const options: RayTracerCPUOptions | RayTracerGPUOptions = {
+      canvas: canvasRef.current,
+      imageWidth: raytracerState.imageWidth,
+      imageHeight: raytracerState.imageHeight,
+      samplesPerPixel: raytracerState.samplesPerPixel,
+      maxBounces: raytracerState.maxBounces,
+      scene: raytracerState.scene,
+      download: raytracerState.download,
+      addStatsToImage: raytracerState.addStatsToImage,
+    };
+
+    rayTracerCPURef.current = new RaytracerCPU({ ...options, numOfWorkers: raytracerState.numOfWorkers });
 
     if (RaytracerGPU.supportsWebGPU()) {
-      rayTracerGPURef.current = new RaytracerGPU(
-        canvasRef.current,
-        raytracerState.imageWidth,
-        raytracerState.imageHeight,
-        raytracerState.samplesPerPixel,
-        raytracerState.maxBounces,
-        raytracerState.scene
-      );
+      rayTracerGPURef.current = new RaytracerGPU(options);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -49,6 +44,8 @@ const Canvas = (): React.ReactElement => {
     rayTracerCPURef.current.maxBounces = raytracerState.maxBounces;
     rayTracerCPURef.current.scene = raytracerState.scene;
     rayTracerCPURef.current.numOfWorkers = raytracerState.numOfWorkers;
+    rayTracerCPURef.current.download = raytracerState.download;
+    rayTracerCPURef.current.addStatsToImage = raytracerState.addStatsToImage;
 
     if (rayTracerGPURef.current) {
       rayTracerGPURef.current.imageWidth = raytracerState.imageWidth;
@@ -56,6 +53,8 @@ const Canvas = (): React.ReactElement => {
       rayTracerGPURef.current.samplesPerPixel = raytracerState.samplesPerPixel;
       rayTracerGPURef.current.maxBounces = raytracerState.maxBounces;
       rayTracerGPURef.current.scene = raytracerState.scene;
+      rayTracerGPURef.current.download = raytracerState.download;
+      rayTracerGPURef.current.addStatsToImage = raytracerState.addStatsToImage;
     }
   }, [raytracerState]);
 
@@ -65,22 +64,27 @@ const Canvas = (): React.ReactElement => {
       raytracer = rayTracerGPURef.current;
     }
 
-    if (startRendering && !raytracer.isRunning) {
+    if (raytracerRunningState.isRunning && !raytracer.isRunning) {
       raytracer.start(onRayTracerDone);
-    } else if (!startRendering && raytracer.isRunning) {
+    } else if (!raytracerRunningState.isRunning && raytracer.isRunning) {
       raytracer.stop();
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startRendering]);
+  }, [raytracerRunningState.isRunning]);
 
   return (
-    <div className="canvas_container">
-      <canvas
-        className="canvas"
-        ref={canvasRef}
-        width={raytracerState.imageWidth}
-        height={raytracerState.imageHeight}></canvas>
+    <div className="render-container">
+      <div className="stats">
+        <span>{`Render stats: ${raytracerRunningState.stats}`}</span>
+      </div>
+      <div className="canvas-container">
+        <canvas
+          className="canvas"
+          ref={canvasRef}
+          width={raytracerState.imageWidth}
+          height={raytracerState.imageHeight}></canvas>
+      </div>
     </div>
   );
 };
