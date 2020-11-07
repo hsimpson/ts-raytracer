@@ -4,6 +4,7 @@
 import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
+import { WebGPUBuffer } from './webgpubuffer';
 import WebGPUComputePipline from './webgpucomputepipeline';
 import { WebGPUContext } from './webgpucontext';
 import WebGPURenderPipeline from './webgpurenderpipeline';
@@ -144,16 +145,32 @@ export class RaytracerGPU extends RaytracerBase {
       });
     };
 
+    // raytracer finished
     await raytracing();
 
-    // raytracer finished
     const duration = performance.now() - this._startTime;
-    const canvas2d = document.createElement('canvas') as HTMLCanvasElement;
-    canvas2d.width = this._rayTracerOptions.imageWidth;
-    canvas2d.height = this._rayTracerOptions.imageHeight;
-    const cavnas2dContext = canvas2d.getContext('2d');
     const stats = this.getStats(duration);
-    this.writeStatsToImage(stats, cavnas2dContext);
+
+    if (this._rayTracerOptions.download) {
+      const pixelBuffer = await this.copyBuffer(computePipeline);
+
+      const canvas2d = document.createElement('canvas') as HTMLCanvasElement;
+      canvas2d.width = this._rayTracerOptions.imageWidth;
+      canvas2d.height = this._rayTracerOptions.imageHeight;
+      const canvas2dContext = canvas2d.getContext('2d');
+
+      const imageData = canvas2dContext.createImageData(
+        this._rayTracerOptions.imageWidth,
+        this._rayTracerOptions.imageHeight
+      );
+
+      for (let i = 0; i < pixelBuffer.length; i++) {
+        imageData.data[i] = pixelBuffer[i] * 255;
+      }
+
+      canvas2dContext.putImageData(imageData, 0, 0);
+      this.downloadImage(canvas2d, canvas2dContext, stats);
+    }
 
     if (this._doneCallback) {
       this._doneCallback(stats);
@@ -268,5 +285,20 @@ export class RaytracerGPU extends RaytracerBase {
     }
 
     WebGPUContext.queue.submit([commandEncoder.finish()]);
+  }
+
+  private async copyBuffer(computePipeline: WebGPUComputePipline): Promise<Float32Array> {
+    const commandEncoder = WebGPUContext.device.createCommandEncoder();
+
+    const bufferSize = this._rayTracerOptions.imageWidth * this._rayTracerOptions.imageHeight * 4 * 4;
+    const gpuDestBuffer = new WebGPUBuffer();
+    gpuDestBuffer.create(bufferSize, GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ);
+
+    commandEncoder.copyBufferToBuffer(computePipeline.pixelBuffer.gpuBuffer, 0, gpuDestBuffer.gpuBuffer, 0, bufferSize);
+
+    WebGPUContext.queue.submit([commandEncoder.finish()]);
+    const arrayBuffer = await gpuDestBuffer.mapRead();
+
+    return new Float32Array(arrayBuffer);
   }
 }

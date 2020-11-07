@@ -8,6 +8,7 @@ export interface RayTracerBaseOptions {
   maxBounces: number;
   scene: number;
   download: boolean;
+  addStatsToImage: boolean;
 }
 
 export abstract class RaytracerBase {
@@ -55,6 +56,36 @@ export abstract class RaytracerBase {
     context2D.fillText(stats, 5, 5);
   }
 
+  protected async downloadImage(
+    canvas: HTMLCanvasElement,
+    context: CanvasRenderingContext2D,
+    stats: string
+  ): Promise<void> {
+    const canvasDownload = async (): Promise<Blob> => {
+      return new Promise((resolve) => {
+        canvas.toBlob(
+          (blob) => {
+            resolve(blob);
+          },
+          'image/png',
+          1.0
+        );
+      });
+    };
+
+    if (this._rayTracerOptions.addStatsToImage) {
+      this.writeStatsToImage(stats, context);
+    }
+
+    const blob = await canvasDownload();
+    const anchor = document.createElement('a');
+    anchor.download = 'rendering.png'; // optional, but you can give the file a name
+    anchor.href = URL.createObjectURL(blob);
+    anchor.click(); // ✨ magic!
+
+    URL.revokeObjectURL(anchor.href); // remove it from memory and save on memory!
+  }
+
   public get isRunning(): boolean {
     return this._isRunning;
   }
@@ -81,5 +112,9 @@ export abstract class RaytracerBase {
 
   public set download(download: boolean) {
     this._rayTracerOptions.download = download;
+  }
+
+  public set addStatsToImage(addStatsToImage: boolean) {
+    this._rayTracerOptions.addStatsToImage = addStatsToImage;
   }
 }

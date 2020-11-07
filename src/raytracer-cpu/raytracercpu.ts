@@ -45,7 +45,10 @@ export class RaytracerCPU extends RaytracerBase {
 
     const duration = performance.now() - this._startTime;
     const stats = this.getStats(duration);
-    this.writeStatsToImage(stats, this._context2D);
+
+    if (this._rayTracerOptions.download) {
+      this.downloadImage(this._rayTracerOptions.canvas, this._context2D, stats);
+    }
 
     if (this._doneCallback) {
       this._doneCallback(stats);

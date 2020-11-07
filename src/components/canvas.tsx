@@ -25,6 +25,7 @@ const Canvas = (): React.ReactElement => {
       maxBounces: raytracerState.maxBounces,
       scene: raytracerState.scene,
       download: raytracerState.download,
+      addStatsToImage: raytracerState.addStatsToImage,
     };
 
     rayTracerCPURef.current = new RaytracerCPU({ ...options, numOfWorkers: raytracerState.numOfWorkers });
@@ -43,6 +44,8 @@ const Canvas = (): React.ReactElement => {
     rayTracerCPURef.current.maxBounces = raytracerState.maxBounces;
     rayTracerCPURef.current.scene = raytracerState.scene;
     rayTracerCPURef.current.numOfWorkers = raytracerState.numOfWorkers;
+    rayTracerCPURef.current.download = raytracerState.download;
+    rayTracerCPURef.current.addStatsToImage = raytracerState.addStatsToImage;
 
     if (rayTracerGPURef.current) {
       rayTracerGPURef.current.imageWidth = raytracerState.imageWidth;
@@ -50,6 +53,8 @@ const Canvas = (): React.ReactElement => {
       rayTracerGPURef.current.samplesPerPixel = raytracerState.samplesPerPixel;
       rayTracerGPURef.current.maxBounces = raytracerState.maxBounces;
       rayTracerGPURef.current.scene = raytracerState.scene;
+      rayTracerGPURef.current.download = raytracerState.download;
+      rayTracerGPURef.current.addStatsToImage = raytracerState.addStatsToImage;
     }
   }, [raytracerState]);
 

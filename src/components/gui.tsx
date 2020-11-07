@@ -91,6 +91,12 @@ const Gui = (): React.ReactElement => {
         disabled={false}
         onValueChange={(download) => setRaytracerState({ ...raytracerState, download })}></CheckBox>
 
+      <CheckBox
+        label="Add stats to download"
+        checked={raytracerState.addStatsToImage}
+        disabled={!raytracerState.download}
+        onValueChange={(addStatsToImage) => setRaytracerState({ ...raytracerState, addStatsToImage })}></CheckBox>
+
       <button className="resetButton" onClick={onResetClicked}>
         Reset to default
       </button>
