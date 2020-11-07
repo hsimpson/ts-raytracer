@@ -75,7 +75,9 @@ const Canvas = (): React.ReactElement => {
 
   return (
     <div className="render-container">
-      <span className="stats">{`Render stats: ${raytracerRunningState.stats}`}</span>
+      <div className="stats">
+        <span>{`Render stats: ${raytracerRunningState.stats}`}</span>
+      </div>
       <div className="canvas-container">
         <canvas
           className="canvas"

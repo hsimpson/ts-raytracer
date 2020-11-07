@@ -14,7 +14,7 @@ Bugs:
 
   GUI:
     ☐ Reset to default disable WebGPU -> probably check again
-    ☐ When layout is not completely visible (scrolling) with some combinations of resolution
+    ✔ When layout is not completely visible (scrolling) with some combinations of resolution @done(20-11-07 17:02)
     
 
 Features:
