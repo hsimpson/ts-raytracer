@@ -15,25 +15,14 @@ export class WebGPUBuffer {
 
   public createWithArrayMapped(srcArrayBuffer: ArrayBuffer, usage: GPUBufferUsageFlags): void {
     this._size = srcArrayBuffer.byteLength;
-    let bufferMapped: ArrayBuffer;
-
     // console.log(`createWithArrayMapped from ${array.constructor.name}`);
 
-    // newer spec
-    if (GPUBuffer.prototype.getMappedRange) {
-      this._gpuBuffer = WebGPUContext.device.createBuffer({
-        mappedAtCreation: true,
-        size: this._size,
-        usage,
-      });
-      bufferMapped = this._gpuBuffer.getMappedRange();
-    } else {
-      // FIXME: remove when all browsers support this
-      [this._gpuBuffer, bufferMapped] = WebGPUContext.device['createBufferMapped']({
-        size: this._size,
-        usage,
-      });
-    }
+    this._gpuBuffer = WebGPUContext.device.createBuffer({
+      mappedAtCreation: true,
+      size: this._size,
+      usage,
+    });
+    const bufferMapped = this._gpuBuffer.getMappedRange();
 
     // new Uint8Array(bufferMapped).set(new Uint8Array(srcArrayBuffer)); // memcpy
     new Float32Array(bufferMapped).set(new Float32Array(srcArrayBuffer)); // memcpy
@@ -42,25 +31,13 @@ export class WebGPUBuffer {
   }
 
   public async mapRead(offset?: number, size?: number): Promise<ArrayBuffer> {
-    // newer spec
-    if (GPUBuffer.prototype.mapAsync) {
-      await this._gpuBuffer.mapAsync(GPUMapMode.READ);
-      return this._gpuBuffer.getMappedRange(offset, size);
-    } else {
-      // FIXME: remove when all browsers support this
-      return this._gpuBuffer['mapReadAsync']();
-    }
+    await this._gpuBuffer.mapAsync(GPUMapMode.READ);
+    return this._gpuBuffer.getMappedRange(offset, size);
   }
 
   public async mapWrite(offset?: number, size?: number): Promise<ArrayBuffer> {
-    // newer spec
-    if (GPUBuffer.prototype.mapAsync) {
-      await this._gpuBuffer.mapAsync(GPUMapMode.WRITE);
-      return this._gpuBuffer.getMappedRange(offset, size);
-    } else {
-      // FIXME: remove when all browsers support this
-      return this._gpuBuffer['mapWriteAsync']();
-    }
+    await this._gpuBuffer.mapAsync(GPUMapMode.WRITE);
+    return this._gpuBuffer.getMappedRange(offset, size);
   }
 
   public get gpuBuffer(): GPUBuffer {
