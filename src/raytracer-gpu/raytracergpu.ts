@@ -140,7 +140,7 @@ export class RaytracerGPU extends RaytracerBase {
           this.compute2(computePipeline, renderPipeline);
           if (sample < this._rayTracerOptions.samplesPerPixel) {
             sample++;
-            await sleep(25);
+            //await sleep(25);
             window.requestAnimationFrame(frame);
           } else {
             resolve();
