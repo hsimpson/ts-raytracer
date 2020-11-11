@@ -18,5 +18,8 @@
     "node_modules": true
   },
   "glsllint.glslangValidatorArgs": "-V -o %temp%/shader.spv",
+  "python.languageServer": "Pylance",
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
   "typescript.tsdk": "node_modules/typescript/lib"
 }
