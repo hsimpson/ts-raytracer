@@ -32,7 +32,7 @@ const Gui = (): React.ReactElement => {
     { text: '2 Perlin noise spheres', value: 2, disabled: false },
     { text: 'Earth sphere', value: 3, disabled: raytracerState.webGPUenabled },
     { text: 'Area light', value: 4, disabled: false },
-    { text: 'Cornell Box', value: 5, disabled: raytracerState.webGPUenabled },
+    { text: 'Cornell Box', value: 5, disabled: false },
     { text: 'Cornell Box Smoke', value: 6, disabled: raytracerState.webGPUenabled },
     { text: 'Final Scene', value: 7, disabled: raytracerState.webGPUenabled },
   ];

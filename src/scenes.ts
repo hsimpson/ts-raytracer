@@ -193,17 +193,17 @@ async function cornellBox(): Promise<{ world: HittableList; cameraOptions: Camer
   world.add(new XZRect(0, 555, 0, 555, 555, white)); // ceiling
   world.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
 
-  let box1: Hittable;
-  box1 = new Box([0, 0, 0], [165, 330, 165], white);
-  box1 = new RotateY(box1, 15);
-  box1 = new Translate(box1, [265, 0, 295]);
-  world.add(box1);
+  // let box1: Hittable;
+  // box1 = new Box([0, 0, 0], [165, 330, 165], white);
+  // box1 = new RotateY(box1, 15);
+  // box1 = new Translate(box1, [265, 0, 295]);
+  // world.add(box1);
 
-  let box2: Hittable;
-  box2 = new Box([0, 0, 0], [165, 165, 165], white);
-  box2 = new RotateY(box2, -18);
-  box2 = new Translate(box2, [130, 0, 65]);
-  world.add(box2);
+  // let box2: Hittable;
+  // box2 = new Box([0, 0, 0], [165, 165, 165], white);
+  // box2 = new RotateY(box2, -18);
+  // box2 = new Translate(box2, [130, 0, 65]);
+  // world.add(box2);
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
