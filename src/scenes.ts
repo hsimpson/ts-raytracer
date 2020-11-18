@@ -164,7 +164,7 @@ async function simpleLight(): Promise<{ world: HittableList; cameraOptions: Came
   world.add(new Sphere([0, 2, 0], 2, sphereMaterial));
 
   const diffuseLight = new DiffuseLight([4, 4, 4]);
-  // world.add(new XYRect(3, 5, 1, 3, -2, diffuseLight));
+  world.add(new XYRect(3, 5, 1, 3, -2, diffuseLight));
   world.add(new Sphere([0, 7, 0], 2, diffuseLight));
 
   const cameraOptions: CameraOptions = {

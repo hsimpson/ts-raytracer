@@ -18,17 +18,12 @@ function getSphereUV(p: Vec3): { u: number; v: number } {
 export class Sphere extends Hittable {
   private _center: Vec3;
   private _radius: number;
-  private _material: Material;
 
   public constructor(center: Vec3, radius: number, mat: Material) {
     super();
     this._center = center;
     this._radius = radius;
-    this._material = mat;
-  }
-
-  public get material(): Material | undefined {
-    return this._material;
+    this.material = mat;
   }
 
   public get center(): Vec3 {
@@ -57,7 +52,7 @@ export class Sphere extends Hittable {
         const uv = getSphereUV(Vector.divScalarVec(Vector.subVec3(rec.p, this._center), this._radius));
         rec.u = uv.u;
         rec.v = uv.v;
-        rec.mat = this._material;
+        rec.mat = this.material;
         return true;
       }
       temp = (-half_b + root) / a;
@@ -69,7 +64,7 @@ export class Sphere extends Hittable {
         const uv = getSphereUV(Vector.divScalarVec(Vector.subVec3(rec.p, this._center), this._radius));
         rec.u = uv.u;
         rec.v = uv.v;
-        rec.mat = this._material;
+        rec.mat = this.material;
         return true;
       }
     }

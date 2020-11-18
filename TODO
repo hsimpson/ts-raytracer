@@ -17,24 +17,27 @@ Bugs:
     
 
 Features:
-  GPU:
-    ☐ Add acceleration data stucture like BVH (https://research.nvidia.com/sites/default/files/pubs/2012-06_Maximizing-Parallelism-in/karras2012hpg_paper.pdf)
-    ☐ Add motion blur
-    ✔ Add textures (solid and checkerboard) @done(20-10-23 23:01)
-    ☐ Optional frame seperation like Blender Cycles with e.g. hilbert spiral
-    ☐ Cancel GPU rendering
-    ✔ Display the render result with WebGPU with progressive rendering @done(20-11-07 20:37)
-    ☐ Add WGSL implemenation
-    ☐ Add tone mapping like ACES filmic
-    ☐ Add color correction/grading
-    ☐ Environment Textures
+  Raytracer:
+    GPU:
+      ☐ Add acceleration data stucture like BVH (https://research.nvidia.com/sites/default/files/pubs/2012-06_Maximizing-Parallelism-in/karras2012hpg_paper.pdf)
+      ☐ Add motion blur
+      ✔ Add textures (solid and checkerboard) @done(20-10-23 23:01)
+      ☐ Optional frame seperation like Blender Cycles with e.g. hilbert spiral
+      ☐ Cancel GPU rendering
+      ✔ Display the render result with WebGPU with progressive rendering @done(20-11-07 20:37)
+      ☐ Add WGSL implemenation
+      ☐ Add tone mapping like ACES filmic
+      ☐ Add color correction/grading
+      ☐ Environment Textures
+      ☐ Add PBR Material (probably Disney Principled BSDF)
 
-  CPU:
-    ☐ Add progressive rendering like on GPU show each sample image
-    ☐ Look if Woker logik could be made with comlink: https://github.com/GoogleChromeLabs/comlink
-    ☐ Add tone mapping like ACES filmic
-    ☐ Add color correction/grading
-    ☐ Environment Textures
+    CPU:
+      ☐ Add progressive rendering like on GPU show each sample image
+      ☐ Look if Woker logik could be made with comlink: https://github.com/GoogleChromeLabs/comlink
+      ☐ Add tone mapping like ACES filmic
+      ☐ Add color correction/grading
+      ☐ Environment Textures
+      ☐ Add PBR Material (probably Disney Principled BSDF)
 
   Common:
     ☐ Add favicon

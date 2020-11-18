@@ -14,6 +14,7 @@
 #include "../ray.comp"
 #include "./hittable_base.comp"
 #include "./sphere.comp"
+#include "./rect.comp"
 
 bool hitPrimitive(const Primitive primitve, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
   uint primitiveType = primitve.primitiveType;
@@ -21,6 +22,15 @@ bool hitPrimitive(const Primitive primitve, const Ray ray, const float tMin, con
   switch (primitiveType) {
     case HITTABLETYPE_SPHERE:
       return hitSphere(primitve, ray, tMin, tMax, rec);
+      break;
+    case HITTABLETYPE_XYRECT:
+      return hitXYRect(primitve, ray, tMin, tMax, rec);
+      break;
+    case HITTABLETYPE_XZRECT:
+      return hitXZRect(primitve, ray, tMin, tMax, rec);
+      break;
+    case HITTABLETYPE_YZRECT:
+      return hitYZRect(primitve, ray, tMin, tMax, rec);
       break;
   }
 

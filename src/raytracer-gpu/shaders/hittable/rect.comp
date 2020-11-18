@@ -1,0 +1,118 @@
+#ifndef RECT_INC
+#define RECT_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#include "../ray.comp"
+#include "../utils.comp"
+#include "./hittable_base.comp"
+
+bool hitXYRect(const Primitive rect, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
+  float t = (rect.k - ray.origin.z) / ray.direction.z;
+  if (t < tMin || t > tMax) {
+    return false;
+  }
+
+  float x = ray.origin.x + t * ray.direction.x;
+  float y = ray.origin.y + t * ray.direction.y;
+
+  if (x < rect.bounds.x || x > rect.bounds.y || y < rect.bounds.z || y > rect.bounds.w) {
+    return false;
+  }
+
+  rec.uv.x = (x - rect.bounds.x) / (rect.bounds.y - rect.bounds.x);
+  rec.uv.y = (y - rect.bounds.z) / (rect.bounds.w - rect.bounds.z);
+  rec.t    = t;
+
+  // optimized
+  /*
+  vec2 xy = ray.origin.xy + t * ray.direction.xy;
+
+   if (xy.x < rect.bounds.x || xy.x > rect.bounds.y || xy.y < rect.bounds.z || xy.y > rect.bounds.w) {
+     return false;
+  }
+
+  rec.uv = (xy - rect.bounds.xz) / (rect.bounds.yw - rect.bounds.xz);
+  rec.t = t;
+  */
+
+  vec3 outwardNormal = vec3(0.0, 0.0, 1.0);
+  setFaceNormal(rec, ray, outwardNormal);
+  rec.materialIndex = rect.materialIndex;
+  rec.p             = rayAt(ray, rec.t);
+  return true;
+}
+
+bool hitXZRect(const Primitive rect, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
+  float t = (rect.k - ray.origin.y) / ray.direction.y;
+  if (t < tMin || t > tMax) {
+    return false;
+  }
+
+  float x = ray.origin.x + t * ray.direction.x;
+  float z = ray.origin.z + t * ray.direction.z;
+
+  if (x < rect.bounds.x || x > rect.bounds.y || z < rect.bounds.z || z > rect.bounds.w) {
+    return false;
+  }
+
+  rec.uv.x = (x - rect.bounds.x) / (rect.bounds.y - rect.bounds.x);
+  rec.uv.y = (z - rect.bounds.z) / (rect.bounds.w - rect.bounds.z);
+  rec.t    = t;
+
+  // optimized
+  /*
+  vec2 xy = ray.origin.xy + t * ray.direction.xy;
+
+   if (xy.x < rect.bounds.x || xy.x > rect.bounds.y || xy.y < rect.bounds.z || xy.y > rect.bounds.w) {
+     return false;
+  }
+
+  rec.uv = (xy - rect.bounds.xz) / (rect.bounds.yw - rect.bounds.xz);
+  rec.t = t;
+  */
+
+  vec3 outwardNormal = vec3(0.0, 1.0, 0.0);
+  setFaceNormal(rec, ray, outwardNormal);
+  rec.materialIndex = rect.materialIndex;
+  rec.p             = rayAt(ray, rec.t);
+  return true;
+}
+
+bool hitYZRect(const Primitive rect, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
+  float t = (rect.k - ray.origin.x) / ray.direction.x;
+  if (t < tMin || t > tMax) {
+    return false;
+  }
+
+  float y = ray.origin.y + t * ray.direction.y;
+  float z = ray.origin.z + t * ray.direction.z;
+
+  if (y < rect.bounds.x || y > rect.bounds.y || z < rect.bounds.z || z > rect.bounds.w) {
+    return false;
+  }
+
+  rec.uv.x = (y - rect.bounds.x) / (rect.bounds.y - rect.bounds.x);
+  rec.uv.y = (z - rect.bounds.z) / (rect.bounds.w - rect.bounds.z);
+  rec.t    = t;
+
+  // optimized
+  /*
+  vec2 xy = ray.origin.xy + t * ray.direction.xy;
+
+   if (xy.x < rect.bounds.x || xy.x > rect.bounds.y || xy.y < rect.bounds.z || xy.y > rect.bounds.w) {
+     return false;
+  }
+
+  rec.uv = (xy - rect.bounds.xz) / (rect.bounds.yw - rect.bounds.xz);
+  rec.t = t;
+  */
+
+  vec3 outwardNormal = vec3(1.0, 0.0, 0.0);
+  setFaceNormal(rec, ray, outwardNormal);
+  rec.materialIndex = rect.materialIndex;
+  rec.p             = rayAt(ray, rec.t);
+  return true;
+}
+
+#endif  // RECT_INC
