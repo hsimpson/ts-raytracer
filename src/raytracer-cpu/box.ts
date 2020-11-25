@@ -28,6 +28,10 @@ export default class Box extends Hittable {
     this._sides.add(new YZRect(p0[1], p1[1], p0[2], p1[2], p0[0], mat));
   }
 
+  public get sides(): HittableList {
+    return this._sides;
+  }
+
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
     return this._sides.hit(r, t_min, t_max, rec);
   }

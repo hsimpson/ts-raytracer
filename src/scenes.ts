@@ -193,6 +193,12 @@ function cornellBox(): { world: HittableList; cameraOptions: CameraOptions } {
   world.add(new XZRect(0, 555, 0, 555, 555, white)); // ceiling
   world.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
 
+  const box1 = new Box([265, 0, 295], [430, 330, 460], white);
+  world.add(box1);
+
+  const box2 = new Box([130, 0, 65], [295, 165, 230], white);
+  world.add(box2);
+
   // let box1: Hittable;
   // box1 = new Box([0, 0, 0], [165, 330, 165], white);
   // box1 = new RotateY(box1, 15);

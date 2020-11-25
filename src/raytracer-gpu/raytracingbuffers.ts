@@ -1,4 +1,5 @@
 import { XYRect, XZRect, YZRect } from '../raytracer-cpu/aarect';
+import Box from '../raytracer-cpu/box';
 import DielectricMaterial from '../raytracer-cpu/dielectric';
 import DiffuseLight from '../raytracer-cpu/diffuselight';
 import { Hittable } from '../raytracer-cpu/hittable';
@@ -90,7 +91,11 @@ export class RaytracingBuffers {
 
   private traverseHittables(list: HittableList): void {
     for (const object of list.objects) {
-      this.addPrimitive(object);
+      if (object instanceof Box) {
+        this.traverseHittables(object.sides);
+      } else {
+        this.addPrimitive(object);
+      }
     }
   }
 
@@ -238,7 +243,9 @@ export class RaytracingBuffers {
       };
     }
 
-    this._gpuPrimitives.push(gpuPrimitive);
+    if (gpuPrimitive) {
+      this._gpuPrimitives.push(gpuPrimitive);
+    }
     return idx;
   }
 
