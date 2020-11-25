@@ -28,7 +28,9 @@ Features:
       ☐ Add WGSL implemenation
       ☐ Add tone mapping like ACES filmic
       ☐ Add color correction/grading
-      ☐ Environment Textures
+      Environment Textures:
+        ☐ HDR files
+        ☐ Open EXR files
       ☐ Add PBR Material (probably Disney Principled BSDF)
 
     CPU:
@@ -36,7 +38,9 @@ Features:
       ☐ Look if Woker logik could be made with comlink: https://github.com/GoogleChromeLabs/comlink
       ☐ Add tone mapping like ACES filmic
       ☐ Add color correction/grading
-      ☐ Environment Textures
+      Environment Textures:
+        ☐ HDR files
+        ☐ Open EXR files 
       ☐ Add PBR Material (probably Disney Principled BSDF)
 
   Common:

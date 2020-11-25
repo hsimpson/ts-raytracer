@@ -24,7 +24,7 @@ let _samplesPerPixel: number;
 let _maxBounces: number;
 const _computeWorkers: Map<number, ComputeWorker> = new Map<number, ComputeWorker>();
 
-const start = async (msg: ControllerStartMessage): Promise<void> => {
+const start = (msg: ControllerStartMessage): void => {
   _imageWidth = msg.data.imageWidth;
   _imageHeight = msg.data.imageHeight;
   _samplesPerPixel = msg.data.samplesPerPixel;

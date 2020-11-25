@@ -29,7 +29,7 @@ const defaultCameraOptions: CameraOptions = {
   fovY: 40,
 };
 
-async function gpuTestScene(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+function gpuTestScene(): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
   // ground
@@ -52,7 +52,7 @@ async function gpuTestScene(): Promise<{ world: HittableList; cameraOptions: Cam
   return { world, cameraOptions };
 }
 
-async function randomScene(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+function randomScene(): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
   const groundMaterial = new LambertianMaterial([0.5, 0.5, 0.5]);
@@ -108,7 +108,7 @@ async function randomScene(): Promise<{ world: HittableList; cameraOptions: Came
   return { world, cameraOptions };
 }
 
-async function twoCheckerSpheres(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+function twoCheckerSpheres(): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
   const checkerTexture = new CheckerTexture([0.2, 0.3, 0.1], [0.9, 0.9, 0.9]);
@@ -123,7 +123,7 @@ async function twoCheckerSpheres(): Promise<{ world: HittableList; cameraOptions
   return { world, cameraOptions };
 }
 
-async function twoPerlinSpheres(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+function twoPerlinSpheres(): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
   const perlinTexture = new NoiseTexture(4);
@@ -154,7 +154,7 @@ async function earthSphere(): Promise<{ world: HittableList; cameraOptions: Came
   return { world, cameraOptions };
 }
 
-async function simpleLight(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+function simpleLight(): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
   const perlinTexture = new NoiseTexture(4);
   const sphereMaterial = new LambertianMaterial();
@@ -178,7 +178,7 @@ async function simpleLight(): Promise<{ world: HittableList; cameraOptions: Came
   return { world, cameraOptions };
 }
 
-async function cornellBox(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+function cornellBox(): { world: HittableList; cameraOptions: CameraOptions } {
   // http://www.graphics.cornell.edu/online/box/data.html
   const world = new HittableList();
   const red = new LambertianMaterial([0.65, 0.05, 0.05]);
@@ -215,7 +215,7 @@ async function cornellBox(): Promise<{ world: HittableList; cameraOptions: Camer
   return { world, cameraOptions };
 }
 
-async function cornellBoxSmoke(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+function cornellBoxSmoke(): { world: HittableList; cameraOptions: CameraOptions } {
   // http://www.graphics.cornell.edu/online/box/data.html
   const world = new HittableList();
   const red = new LambertianMaterial([0.65, 0.05, 0.05]);

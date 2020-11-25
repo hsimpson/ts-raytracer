@@ -66,4 +66,9 @@ body {
   max-width: 100%;
   max-height: 100%;
   border: 2px solid red;
+  display: none;
+}
+
+.canvas.enabled {
+  display: block;
 }

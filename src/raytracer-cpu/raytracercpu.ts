@@ -26,7 +26,7 @@ export class RaytracerCPU extends RaytracerBase {
     this._controllerWorker = new ControllerWorker();
   }
 
-  private onControllerFinshed(msg: ControllerEndMessage): void {
+  private async onControllerFinshed(msg: ControllerEndMessage): Promise<void> {
     this._isRunning = false;
     const imageData = this._context2D.createImageData(
       this._rayTracerOptions.imageWidth,
@@ -47,7 +47,7 @@ export class RaytracerCPU extends RaytracerBase {
     const stats = this.getStats(duration);
 
     if (this._rayTracerOptions.download) {
-      this.downloadImage(this._rayTracerOptions.canvas, this._context2D, stats);
+      await this.downloadImage(this._rayTracerOptions.canvas, this._context2D, stats);
     }
 
     if (this._doneCallback) {
@@ -55,11 +55,11 @@ export class RaytracerCPU extends RaytracerBase {
     }
   }
 
-  private onControllerMessage(event): void {
+  private async onControllerMessage(event): Promise<void> {
     const msg = event.data as WorkerMessage;
     switch (msg.cmd as ControllerCommands) {
       case ControllerCommands.END:
-        this.onControllerFinshed(msg as ControllerEndMessage);
+        await this.onControllerFinshed(msg as ControllerEndMessage);
         break;
 
       default:
@@ -73,7 +73,7 @@ export class RaytracerCPU extends RaytracerBase {
     this._isRunning = true;
     this._startTime = performance.now();
 
-    this._controllerWorker.onmessage = (event) => this.onControllerMessage(event);
+    this._controllerWorker.onmessage = async (event) => this.onControllerMessage(event);
 
     const { world, cameraOptions } = await getScene(this._rayTracerOptions.scene);
 

@@ -37,9 +37,9 @@ export default abstract class WebGPUPipelineBase extends WebGPUObjectBase {
     return new Float32Array(array);
   }
 
-  protected abstract async createBindGroup(): Promise<void>;
+  protected abstract createBindGroup(): Promise<void>;
 
-  public abstract async initialize(context: WebGPUContext): Promise<void>;
+  public abstract initialize(context: WebGPUContext): Promise<void>;
 
   public get gpuPipeline(): GPURenderPipeline | GPUComputePipeline {
     return this._pipeline;

@@ -8,7 +8,7 @@ import { WebGPUBuffer } from './webgpubuffer';
 import WebGPUComputePipline from './webgpucomputepipeline';
 import { WebGPUContext } from './webgpucontext';
 import WebGPURenderPipeline from './webgpurenderpipeline';
-import { sleep } from '../util';
+// import { sleep } from '../util';
 
 const LOCAL_SIZE = 8;
 
@@ -113,7 +113,7 @@ export class RaytracerGPU extends RaytracerBase {
       return new Promise((resolve) => {
         let sample = 1;
         let prevTime = performance.now();
-        const frame = async (): Promise<void> => {
+        const frame = (): void => {
           const currentTime = performance.now();
           console.log(`duration: ${(currentTime - prevTime).toFixed(3)} ms`);
           prevTime = currentTime;
@@ -175,7 +175,7 @@ export class RaytracerGPU extends RaytracerBase {
       }
 
       canvas2dContext.putImageData(imageData, 0, 0);
-      this.downloadImage(canvas2d, canvas2dContext, stats);
+      await this.downloadImage(canvas2d, canvas2dContext, stats);
     }
 
     if (this._doneCallback) {

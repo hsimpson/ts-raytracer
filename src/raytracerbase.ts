@@ -21,7 +21,7 @@ export abstract class RaytracerBase {
   //   this._rayTracerOptions = rayTracerOptions;
   // }
 
-  public abstract async start(doneCallback?: DoneCallback): Promise<void>;
+  public abstract start(doneCallback?: DoneCallback): Promise<void>;
   public abstract stop(): void;
 
   private static msToTimeString(duration: number): string {

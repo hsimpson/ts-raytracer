@@ -5,7 +5,8 @@ import { RaytracerGPU, RayTracerGPUOptions } from '../raytracer-gpu/raytracergpu
 import { RaytracerProperties, RaytracerRunningState } from './atoms';
 
 const Canvas = (): React.ReactElement => {
-  const canvasRef = React.useRef<HTMLCanvasElement>(undefined);
+  const canvasCPURef = React.useRef<HTMLCanvasElement>(undefined);
+  const canvasGPURef = React.useRef<HTMLCanvasElement>(undefined);
   const [raytracerState] = useRecoilState(RaytracerProperties);
   const [raytracerRunningState, setRaytracerRunningState] = useRecoilState(RaytracerRunningState);
 
@@ -17,8 +18,7 @@ const Canvas = (): React.ReactElement => {
   };
 
   React.useEffect(() => {
-    const options: RayTracerCPUOptions | RayTracerGPUOptions = {
-      canvas: canvasRef.current,
+    const options: Omit<RayTracerCPUOptions, 'canvas'> | Omit<RayTracerGPUOptions, 'canvas'> = {
       imageWidth: raytracerState.imageWidth,
       imageHeight: raytracerState.imageHeight,
       samplesPerPixel: raytracerState.samplesPerPixel,
@@ -28,50 +28,47 @@ const Canvas = (): React.ReactElement => {
       addStatsToImage: raytracerState.addStatsToImage,
     };
 
-    rayTracerCPURef.current = new RaytracerCPU({ ...options, numOfWorkers: raytracerState.numOfWorkers });
-
-    if (RaytracerGPU.supportsWebGPU()) {
-      rayTracerGPURef.current = new RaytracerGPU(options);
+    // create CPU raytracer
+    if (!rayTracerCPURef.current) {
+      rayTracerCPURef.current = new RaytracerCPU({
+        ...options,
+        canvas: canvasCPURef.current,
+        numOfWorkers: raytracerState.numOfWorkers,
+      });
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  React.useEffect(() => {
-    rayTracerCPURef.current.imageWidth = raytracerState.imageWidth;
-    rayTracerCPURef.current.imageHeight = raytracerState.imageHeight;
-    rayTracerCPURef.current.samplesPerPixel = raytracerState.samplesPerPixel;
-    rayTracerCPURef.current.maxBounces = raytracerState.maxBounces;
-    rayTracerCPURef.current.scene = raytracerState.scene;
-    rayTracerCPURef.current.numOfWorkers = raytracerState.numOfWorkers;
-    rayTracerCPURef.current.download = raytracerState.download;
-    rayTracerCPURef.current.addStatsToImage = raytracerState.addStatsToImage;
-
-    if (rayTracerGPURef.current) {
-      rayTracerGPURef.current.imageWidth = raytracerState.imageWidth;
-      rayTracerGPURef.current.imageHeight = raytracerState.imageHeight;
-      rayTracerGPURef.current.samplesPerPixel = raytracerState.samplesPerPixel;
-      rayTracerGPURef.current.maxBounces = raytracerState.maxBounces;
-      rayTracerGPURef.current.scene = raytracerState.scene;
-      rayTracerGPURef.current.download = raytracerState.download;
-      rayTracerGPURef.current.addStatsToImage = raytracerState.addStatsToImage;
+    // create GPU raytracer
+    if (RaytracerGPU.supportsWebGPU() && !rayTracerGPURef.current) {
+      rayTracerGPURef.current = new RaytracerGPU({ ...options, canvas: canvasGPURef.current });
     }
-  }, [raytracerState]);
 
-  React.useEffect(() => {
-    let raytracer: RaytracerCPU | RaytracerGPU = rayTracerCPURef.current;
+    let raytracer: RaytracerCPU | RaytracerGPU;
     if (raytracerState.webGPUenabled) {
       raytracer = rayTracerGPURef.current;
+    } else {
+      raytracer = rayTracerCPURef.current;
+      raytracer.numOfWorkers = raytracerState.numOfWorkers;
     }
 
+    raytracer.imageWidth = raytracerState.imageWidth;
+    raytracer.imageHeight = raytracerState.imageHeight;
+    raytracer.samplesPerPixel = raytracerState.samplesPerPixel;
+    raytracer.maxBounces = raytracerState.maxBounces;
+    raytracer.scene = raytracerState.scene;
+    raytracer.download = raytracerState.download;
+    raytracer.addStatsToImage = raytracerState.addStatsToImage;
+
     if (raytracerRunningState.isRunning && !raytracer.isRunning) {
-      raytracer.start(onRayTracerDone);
+      void raytracer.start(onRayTracerDone);
     } else if (!raytracerRunningState.isRunning && raytracer.isRunning) {
       raytracer.stop();
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [raytracerRunningState.isRunning]);
+
+  const cpuCanvasClasses = `canvas ${raytracerState.webGPUenabled ? '' : 'enabled'}`;
+  const gpuCanvasClasses = `canvas ${raytracerState.webGPUenabled ? 'enabled' : ''}`;
 
   return (
     <div className="render-container">
@@ -80,8 +77,15 @@ const Canvas = (): React.ReactElement => {
       </div>
       <div className="canvas-container">
         <canvas
-          className="canvas"
-          ref={canvasRef}
+          id="canvas-cpu"
+          className={cpuCanvasClasses}
+          ref={canvasCPURef}
+          width={raytracerState.imageWidth}
+          height={raytracerState.imageHeight}></canvas>
+        <canvas
+          id="canvas-gpu"
+          className={gpuCanvasClasses}
+          ref={canvasGPURef}
           width={raytracerState.imageWidth}
           height={raytracerState.imageHeight}></canvas>
       </div>
