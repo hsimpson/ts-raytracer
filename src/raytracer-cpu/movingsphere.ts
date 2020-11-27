@@ -1,7 +1,7 @@
 import { serializable } from '../serializing';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
-import AABB from './aabb';
+import { AABB } from './aabb';
 import { HitRecord, Hittable } from './hittable';
 import Material from './material';
 import Ray from './ray';

@@ -11,10 +11,9 @@ import LambertianMaterial from './raytracer-cpu/lambertian';
 import Material from './raytracer-cpu/material';
 import MetalMaterial from './raytracer-cpu/metal';
 import MovingSphere from './raytracer-cpu/movingsphere';
-import { RotateY } from './raytracer-cpu/rotation';
 import { Sphere } from './raytracer-cpu/sphere';
 import { CheckerTexture, ImageTexture, NoiseTexture } from './raytracer-cpu/texture';
-import Translate from './raytracer-cpu/translate';
+import { Transformation } from './raytracer-cpu/transformation';
 import { randomNumber, randomNumberRange } from './util';
 import type { Vec3 } from './vec3';
 import * as Vector from './vec3';
@@ -193,23 +192,23 @@ function cornellBox(): { world: HittableList; cameraOptions: CameraOptions } {
   world.add(new XZRect(0, 555, 0, 555, 555, white)); // ceiling
   world.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
 
-  const box1 = new Box([265, 0, 295], [430, 330, 460], white);
-  world.add(box1);
-
-  const box2 = new Box([130, 0, 65], [295, 165, 230], white);
-  world.add(box2);
-
-  // let box1: Hittable;
-  // box1 = new Box([0, 0, 0], [165, 330, 165], white);
-  // box1 = new RotateY(box1, 15);
-  // box1 = new Translate(box1, [265, 0, 295]);
+  // const box1 = new Box([265, 0, 295], [430, 330, 460], white);
   // world.add(box1);
 
-  // let box2: Hittable;
-  // box2 = new Box([0, 0, 0], [165, 165, 165], white);
-  // box2 = new RotateY(box2, -18);
-  // box2 = new Translate(box2, [130, 0, 65]);
+  // const box2 = new Box([130, 0, 65], [295, 165, 230], white);
   // world.add(box2);
+
+  let box1: Hittable = new Box([0, 0, 0], [165, 330, 165], white);
+  box1 = new Transformation(box1);
+  (box1 as Transformation).translate([265, 0, 295]);
+  (box1 as Transformation).rotateEuler(0.0, 15.0, 0.0);
+  world.add(box1);
+
+  let box2: Hittable = new Box([0, 0, 0], [165, 165, 165], white);
+  box2 = new Transformation(box2);
+  (box2 as Transformation).translate([130, 0, 65]);
+  (box2 as Transformation).rotateEuler(0.0, -18.0, 0.0);
+  world.add(box2);
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
@@ -238,14 +237,16 @@ function cornellBoxSmoke(): { world: HittableList; cameraOptions: CameraOptions 
 
   let box1: Hittable;
   box1 = new Box([0, 0, 0], [165, 330, 165], white);
-  box1 = new RotateY(box1, 15);
-  box1 = new Translate(box1, [265, 0, 295]);
+  box1 = new Transformation(box1);
+  (box1 as Transformation).translate([265, 0, 295]);
+  (box1 as Transformation).rotateEuler(0.0, 15.0, 0.0);
   world.add(new ConstantMedium(box1, 0.01, [0, 0, 0]));
 
   let box2: Hittable;
   box2 = new Box([0, 0, 0], [165, 165, 165], white);
-  box2 = new RotateY(box2, -18);
-  box2 = new Translate(box2, [130, 0, 65]);
+  box2 = new Transformation(box2);
+  (box2 as Transformation).translate([130, 0, 65]);
+  (box2 as Transformation).rotateEuler(0.0, -18.0, 0.0);
   world.add(new ConstantMedium(box2, 0.01, [1, 1, 1]));
 
   const cameraOptions: CameraOptions = {
@@ -319,7 +320,10 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
   }
 
   //objects.add(new Translate(new RotateY(boxes2, 15), [-100, 270, 395)));
-  world.add(new Translate(new RotateY(BVHNode.createFromHitableList(boxes2, 0, 1), 15), [-100, 270, 395]));
+  const transform = new Transformation(BVHNode.createFromHitableList(boxes2, 0, 1));
+  transform.translate([-100, 270, 395]);
+  transform.rotateEuler(0, 15, 0);
+  world.add(transform);
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,

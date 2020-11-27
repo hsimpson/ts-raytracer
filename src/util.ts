@@ -1,3 +1,5 @@
+import { mat4 } from 'gl-matrix';
+
 export function degreeToRadians(degrees: number): number {
   return (degrees * Math.PI) / 180;
 }
@@ -35,4 +37,16 @@ export function sortArrayRange<T>(array: T[], start: number, end: number, compar
 
 export async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function logMatrix(mat: mat4): void {
+  const m = [];
+  for (let i = 0; i < mat.length; i++) {
+    m.push(mat[i].toFixed(2));
+  }
+
+  console.log(`${m[0]}, ${m[4]}, ${m[8]}, ${m[12]}`);
+  console.log(`${m[1]}, ${m[5]}, ${m[9]}, ${m[13]}`);
+  console.log(`${m[2]}, ${m[6]}, ${m[10]}, ${m[14]}`);
+  console.log(`${m[3]}, ${m[7]}, ${m[11]}, ${m[15]}`);
 }

@@ -32,6 +32,7 @@ Features:
         ☐ HDR files
         ☐ Open EXR files
       ☐ Add PBR Material (probably Disney Principled BSDF)
+      ☐ Add denoising
 
     CPU:
       ☐ Add progressive rendering like on GPU show each sample image
@@ -42,6 +43,7 @@ Features:
         ☐ HDR files
         ☐ Open EXR files 
       ☐ Add PBR Material (probably Disney Principled BSDF)
+      ☐ Add denoising
 
   Common:
     ☐ Add favicon

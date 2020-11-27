@@ -3,7 +3,7 @@ import Ray from './ray';
 import { serializable } from '../serializing';
 
 @serializable
-export default class AABB {
+export class AABB {
   private _min: Vec3;
   private _max: Vec3;
 

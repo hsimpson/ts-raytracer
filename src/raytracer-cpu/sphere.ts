@@ -3,7 +3,7 @@ import { HitRecord, Hittable } from './hittable';
 import Ray from './ray';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
-import AABB from './aabb';
+import { AABB } from './aabb';
 import { serializable } from '../serializing';
 
 function getSphereUV(p: Vec3): { u: number; v: number } {

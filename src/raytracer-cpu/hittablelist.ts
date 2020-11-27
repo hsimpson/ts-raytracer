@@ -1,5 +1,5 @@
 import { serializable } from '../serializing';
-import AABB from './aabb';
+import { AABB } from './aabb';
 import { HitRecord, Hittable } from './hittable';
 import Ray from './ray';
 

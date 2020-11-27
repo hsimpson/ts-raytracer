@@ -2,7 +2,7 @@ import { serializable } from '../serializing';
 import { randomNumber } from '../util';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
-import AABB from './aabb';
+import { AABB } from './aabb';
 import { HitRecord, Hittable } from './hittable';
 import { IsoTropic } from './isotropic';
 import Material from './material';

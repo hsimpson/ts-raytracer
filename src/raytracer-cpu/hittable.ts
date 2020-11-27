@@ -2,7 +2,7 @@ import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
 import Ray from './ray';
 import Material from './material';
-import AABB from './aabb';
+import { AABB } from './aabb';
 
 export class HitRecord {
   public p: Vec3 = [0, 0, 0];

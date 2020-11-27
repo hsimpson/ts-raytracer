@@ -1,5 +1,5 @@
 import { HitRecord, Hittable } from './hittable';
-import AABB from './aabb';
+import { AABB } from './aabb';
 import { HittableList } from './hittablelist';
 import Ray from './ray';
 import { randomInt, sortArrayRange } from '../util';
