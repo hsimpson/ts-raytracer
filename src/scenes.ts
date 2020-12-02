@@ -13,7 +13,7 @@ import MetalMaterial from './raytracer-cpu/metal';
 import MovingSphere from './raytracer-cpu/movingsphere';
 import { Sphere } from './raytracer-cpu/sphere';
 import { CheckerTexture, ImageTexture, NoiseTexture } from './raytracer-cpu/texture';
-import { Transformation } from './raytracer-cpu/transformation';
+// import { Transformation } from './raytracer-cpu/transformation';
 import { randomNumber, randomNumberRange } from './util';
 import type { Vec3 } from './vec3';
 import * as Vector from './vec3';
@@ -38,19 +38,22 @@ function gpuTestScene(): { world: HittableList; cameraOptions: CameraOptions } {
   const groundMaterial = new LambertianMaterial([0.5, 0.5, 0.5]);
   // const groundMaterial = new LambertianMaterial();
   // groundMaterial.texture = checkerTexture;
-  world.add(new Sphere([0, -1000, 0], 1000, groundMaterial));
+
+  const groundSphere = new Sphere([0, -1000, 0], 1000, groundMaterial);
+  groundSphere.name = 'groundSphere';
+  world.add(groundSphere);
 
   // const metal1 = new MetalMaterial([0.7, 0.6, 0.5], 0.1);
   // const dielectric1 = new DielectricMaterial(1.5);
 
-  let redSphere: Hittable = new Sphere([0, 0, 0], 0.4, red);
-  let greenSphere: Hittable = new Sphere([0, 0, 0], 0.4, green);
+  const redSphere = new Sphere([-0.6, 0.4, 0], 0.4, red);
+  redSphere.name = 'redSphere';
 
-  redSphere = new Transformation(redSphere);
-  (redSphere as Transformation).translate([-0.4, 0.4, 0]);
+  const greenSphere = new Sphere([0.6, 0.4, 0], 0.4, green);
+  greenSphere.name = 'greenSphere';
 
-  greenSphere = new Transformation(greenSphere);
-  (greenSphere as Transformation).translate([0.6, 0.4, 1]);
+  redSphere.translate([-0.8, 0.0, 0.0]);
+  greenSphere.translate([0.8, 0.0, 0.0]);
 
   world.add(redSphere);
   world.add(greenSphere);
@@ -207,16 +210,14 @@ function cornellBox(): { world: HittableList; cameraOptions: CameraOptions } {
   // const box2 = new Box([130, 0, 65], [295, 165, 230], white);
   // world.add(box2);
 
-  let box1: Hittable = new Box([0, 0, 0], [165, 330, 165], white);
-  box1 = new Transformation(box1);
-  (box1 as Transformation).translate([265, 0, 295]);
-  (box1 as Transformation).rotateEuler(0.0, 15.0, 0.0);
+  const box1: Hittable = new Box([0, 0, 0], [165, 330, 165], white);
+  // box1.translate([265, 0, 295]);
+  // (box1 as Transformation).rotateEuler(0.0, 15.0, 0.0);
   world.add(box1);
 
-  let box2: Hittable = new Box([0, 0, 0], [165, 165, 165], white);
-  box2 = new Transformation(box2);
-  (box2 as Transformation).translate([130, 0, 65]);
-  (box2 as Transformation).rotateEuler(0.0, -18.0, 0.0);
+  const box2: Hittable = new Box([0, 0, 0], [165, 165, 165], white);
+  // box2.translate([130, 0, 65]);
+  // (box2 as Transformation).rotateEuler(0.0, -18.0, 0.0);
   world.add(box2);
 
   const cameraOptions: CameraOptions = {
@@ -244,18 +245,14 @@ function cornellBoxSmoke(): { world: HittableList; cameraOptions: CameraOptions 
   world.add(new XZRect(0, 555, 0, 555, 555, white)); // ceiling
   world.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
 
-  let box1: Hittable;
-  box1 = new Box([0, 0, 0], [165, 330, 165], white);
-  box1 = new Transformation(box1);
-  (box1 as Transformation).translate([265, 0, 295]);
-  (box1 as Transformation).rotateEuler(0.0, 15.0, 0.0);
+  const box1 = new Box([0, 0, 0], [165, 330, 165], white);
+  // box1.translate([265, 0, 295]);
+  // (box1 as Transformation).rotateEuler(0.0, 15.0, 0.0);
   world.add(new ConstantMedium(box1, 0.01, [0, 0, 0]));
 
-  let box2: Hittable;
-  box2 = new Box([0, 0, 0], [165, 165, 165], white);
-  box2 = new Transformation(box2);
-  (box2 as Transformation).translate([130, 0, 65]);
-  (box2 as Transformation).rotateEuler(0.0, -18.0, 0.0);
+  const box2 = new Box([0, 0, 0], [165, 165, 165], white);
+  // box2.translate([130, 0, 65]);
+  // (box2 as Transformation).rotateEuler(0.0, -18.0, 0.0);
   world.add(new ConstantMedium(box2, 0.01, [1, 1, 1]));
 
   const cameraOptions: CameraOptions = {
@@ -329,10 +326,11 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
   }
 
   //objects.add(new Translate(new RotateY(boxes2, 15), [-100, 270, 395)));
-  const transform = new Transformation(BVHNode.createFromHitableList(boxes2, 0, 1));
-  transform.translate([-100, 270, 395]);
-  transform.rotateEuler(0, 15, 0);
-  world.add(transform);
+  // const transform = new Transformation(BVHNode.createFromHitableList(boxes2, 0, 1));
+  // transform.translate([-100, 270, 395]);
+  // transform.rotateEuler(0, 15, 0);
+  // world.add(transform);
+  world.add(BVHNode.createFromHitableList(boxes2, 0, 1));
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
@@ -344,8 +342,8 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
 }
 
 const sceneCreators = [
-  // gpuTestScene,
-  randomScene,
+  gpuTestScene,
+  // randomScene,
   twoCheckerSpheres,
   twoPerlinSpheres,
   earthSphere,

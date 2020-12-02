@@ -34,7 +34,9 @@ export class Sphere extends Hittable {
     return this._radius;
   }
 
-  public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
+  public hit(ray: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
+    const r = this._transformRay(ray);
+
     const oc = Vector.subVec3(r.origin, this._center);
     const a = Vector.lengthSquared(r.direction);
     const half_b = Vector.dot(oc, r.direction);
@@ -53,6 +55,7 @@ export class Sphere extends Hittable {
         rec.u = uv.u;
         rec.v = uv.v;
         rec.mat = this.material;
+        this._transformRecord(r, rec);
         return true;
       }
       temp = (-half_b + root) / a;
@@ -65,6 +68,7 @@ export class Sphere extends Hittable {
         rec.u = uv.u;
         rec.v = uv.v;
         rec.mat = this.material;
+        this._transformRecord(r, rec);
         return true;
       }
     }
