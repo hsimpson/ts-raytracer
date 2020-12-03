@@ -43,8 +43,17 @@ function gpuTestScene(): { world: HittableList; cameraOptions: CameraOptions } {
   // const metal1 = new MetalMaterial([0.7, 0.6, 0.5], 0.1);
   // const dielectric1 = new DielectricMaterial(1.5);
 
-  world.add(new Sphere([-0.6, 0.4, 0], 0.4, red));
-  world.add(new Sphere([0.6, 0.4, 0], 0.4, green));
+  let redSphere: Hittable = new Sphere([0, 0, 0], 0.4, red);
+  let greenSphere: Hittable = new Sphere([0, 0, 0], 0.4, green);
+
+  redSphere = new Transformation(redSphere);
+  (redSphere as Transformation).translate([-0.4, 0.4, 0]);
+
+  greenSphere = new Transformation(greenSphere);
+  (greenSphere as Transformation).translate([0.6, 0.4, 1]);
+
+  world.add(redSphere);
+  world.add(greenSphere);
 
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [0, 2, 10], fovY: 10 };
 
