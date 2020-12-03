@@ -4,6 +4,7 @@
 #extension GL_GOOGLE_include_directive : enable
 
 struct Primitive {
+  mat4  modelMatrix;
   vec4  bounds;
   vec3  center;
   float radius;

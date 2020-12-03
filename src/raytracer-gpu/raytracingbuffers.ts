@@ -10,7 +10,9 @@ import MetalMaterial from '../raytracer-cpu/metal';
 import { Sphere } from '../raytracer-cpu/sphere';
 import { CheckerTexture, NoiseTexture, Texture } from '../raytracer-cpu/texture';
 import { SolidColor } from '../raytracer-cpu/texture';
+import { Transformation } from '../raytracer-cpu/transformation';
 import type { Vec3 } from '../vec3';
+import { mat4 } from 'gl-matrix';
 
 enum WebGPUMaterialType {
   Lambertian = 0,
@@ -57,6 +59,7 @@ interface WebGPUMaterial {
 }
 
 interface WebGPUPrimitive {
+  modelMatrix: mat4;
   bounds: [...abc: Vec3, d: number]; // TODO: use vec4
   center: Vec3;
   radius: number;
@@ -86,15 +89,21 @@ export class RaytracingBuffers {
   private _gpuTextures: WebGPUTexture[] = [];
 
   public constructor(world: HittableList) {
-    this.traverseHittables(world);
+    this.traverseHittables(world, mat4.create());
   }
 
-  private traverseHittables(list: HittableList): void {
+  private traverseHittables(list: HittableList, modelMatrix: mat4): void {
     for (const object of list.objects) {
-      if (object instanceof Box) {
-        this.traverseHittables(object.sides);
+      if (object instanceof Transformation) {
+        if (object.hittable instanceof Box) {
+          this.traverseHittables(object.hittable.sides, object.modelMatrix);
+        } else {
+          this.addPrimitive(object.hittable, object.modelMatrix);
+        }
+      } else if (object instanceof Box) {
+        this.traverseHittables(object.sides, modelMatrix);
       } else {
-        this.addPrimitive(object);
+        this.addPrimitive(object, modelMatrix);
       }
     }
   }
@@ -186,7 +195,7 @@ export class RaytracingBuffers {
     return idx;
   }
 
-  private addPrimitive(obj: Hittable): number {
+  private addPrimitive(obj: Hittable, modelMatrix: mat4): number {
     const idx = this._gpuPrimitives.length;
     let gpuPrimitive: WebGPUPrimitive;
 
@@ -195,6 +204,7 @@ export class RaytracingBuffers {
 
     if (obj instanceof Sphere) {
       gpuPrimitive = {
+        modelMatrix,
         bounds: [0, 0, 0, 0],
         center: obj.center,
         radius: obj.radius,
@@ -207,6 +217,7 @@ export class RaytracingBuffers {
       };
     } else if (obj instanceof XYRect) {
       gpuPrimitive = {
+        modelMatrix,
         bounds: [obj.x0, obj.x1, obj.y0, obj.y1],
         center: [0, 0, 0],
         radius: 0,
@@ -219,6 +230,7 @@ export class RaytracingBuffers {
       };
     } else if (obj instanceof XZRect) {
       gpuPrimitive = {
+        modelMatrix,
         bounds: [obj.x0, obj.x1, obj.z0, obj.z1],
         center: [0, 0, 0],
         radius: 0,
@@ -231,6 +243,7 @@ export class RaytracingBuffers {
       };
     } else if (obj instanceof YZRect) {
       gpuPrimitive = {
+        modelMatrix,
         bounds: [obj.y0, obj.y1, obj.z0, obj.z1],
         center: [0, 0, 0],
         radius: 0,
@@ -313,7 +326,7 @@ export class RaytracingBuffers {
   }
 
   public primitiveBuffer(): ArrayBuffer {
-    const elementCount = 12;
+    const elementCount = 28;
     const primitiveSize = elementCount * 4;
 
     const bufferData = new ArrayBuffer(primitiveSize * this._gpuPrimitives.length);
@@ -322,6 +335,23 @@ export class RaytracingBuffers {
 
     let offset = 0;
     for (const primitiv of this._gpuPrimitives) {
+      bufferDataF32[offset++] = primitiv.modelMatrix[0];
+      bufferDataF32[offset++] = primitiv.modelMatrix[1];
+      bufferDataF32[offset++] = primitiv.modelMatrix[2];
+      bufferDataF32[offset++] = primitiv.modelMatrix[3];
+      bufferDataF32[offset++] = primitiv.modelMatrix[4];
+      bufferDataF32[offset++] = primitiv.modelMatrix[5];
+      bufferDataF32[offset++] = primitiv.modelMatrix[6];
+      bufferDataF32[offset++] = primitiv.modelMatrix[7];
+      bufferDataF32[offset++] = primitiv.modelMatrix[8];
+      bufferDataF32[offset++] = primitiv.modelMatrix[9];
+      bufferDataF32[offset++] = primitiv.modelMatrix[10];
+      bufferDataF32[offset++] = primitiv.modelMatrix[11];
+      bufferDataF32[offset++] = primitiv.modelMatrix[12];
+      bufferDataF32[offset++] = primitiv.modelMatrix[13];
+      bufferDataF32[offset++] = primitiv.modelMatrix[14];
+      bufferDataF32[offset++] = primitiv.modelMatrix[15];
+
       bufferDataF32[offset++] = primitiv.bounds[0];
       bufferDataF32[offset++] = primitiv.bounds[1];
       bufferDataF32[offset++] = primitiv.bounds[2];

@@ -21,6 +21,14 @@ export class Transformation extends Hittable {
     this._hittable = hittable;
   }
 
+  public get hittable(): Hittable {
+    return this._hittable;
+  }
+
+  public get modelMatrix(): mat4 {
+    return this._modelMatrix;
+  }
+
   public translate(translation: vec3): Transformation {
     vec3.add(this._position, this._position, translation);
     this._updateModelMatrix();
