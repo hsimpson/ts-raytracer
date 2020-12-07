@@ -10,7 +10,6 @@ import MetalMaterial from '../raytracer-cpu/metal';
 import { Sphere } from '../raytracer-cpu/sphere';
 import { CheckerTexture, NoiseTexture, Texture } from '../raytracer-cpu/texture';
 import { SolidColor } from '../raytracer-cpu/texture';
-import { Transformation } from '../raytracer-cpu/transformation';
 import type { Vec3 } from '../vec3';
 import { mat4 } from 'gl-matrix';
 
@@ -94,16 +93,13 @@ export class RaytracingBuffers {
 
   private traverseHittables(list: HittableList, modelMatrix: mat4): void {
     for (const object of list.objects) {
-      if (object instanceof Transformation) {
-        if (object.hittable instanceof Box) {
-          this.traverseHittables(object.hittable.sides, object.modelMatrix);
-        } else {
-          this.addPrimitive(object.hittable, object.modelMatrix);
-        }
-      } else if (object instanceof Box) {
-        this.traverseHittables(object.sides, modelMatrix);
+      const objectModelMatrix = object.modelMatrix;
+      mat4.multiply(objectModelMatrix, modelMatrix, objectModelMatrix);
+
+      if (object instanceof Box) {
+        this.traverseHittables(object.sides, objectModelMatrix);
       } else {
-        this.addPrimitive(object, modelMatrix);
+        this.addPrimitive(object, objectModelMatrix);
       }
     }
   }

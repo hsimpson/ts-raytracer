@@ -12,7 +12,6 @@ import MovingSphere from './movingsphere';
 import Perlin from './perlin';
 import { Sphere } from './sphere';
 import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor } from './texture';
-import { Transformation } from './transformation';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const DeserializerMap = {
@@ -33,7 +32,6 @@ export const DeserializerMap = {
   xzRect: XZRect,
   yzRect: YZRect,
   box: Box,
-  transformation: Transformation,
   constantMedium: ConstantMedium,
   isoTropic: IsoTropic,
 };
