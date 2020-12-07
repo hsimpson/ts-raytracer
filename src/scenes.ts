@@ -336,8 +336,8 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
 }
 
 const sceneCreators = [
-  gpuTestScene,
-  // randomScene,
+  // gpuTestScene,
+  randomScene,
   twoCheckerSpheres,
   twoPerlinSpheres,
   earthSphere,
