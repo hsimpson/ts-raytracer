@@ -61,6 +61,10 @@ export abstract class Hittable {
     this.rotateQuat(tempQuat);
   }
 
+  public get modelMatrix(): mat4 {
+    return this._modelMatrix;
+  }
+
   private _updateModelMatrix(): void {
     this._isTransformed = true;
     const translationMatrix = mat4.create();
