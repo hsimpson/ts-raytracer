@@ -317,12 +317,14 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
     boxes2.add(new Sphere(Vector.randomRange(0, 165), 10, white));
   }
 
-  //objects.add(new Translate(new RotateY(boxes2, 15), [-100, 270, 395)));
   // const transform = new Transformation(BVHNode.createFromHitableList(boxes2, 0, 1));
   // transform.translate([-100, 270, 395]);
   // transform.rotateEuler(0, 15, 0);
   // world.add(transform);
-  world.add(BVHNode.createFromHitableList(boxes2, 0, 1));
+
+  boxes2.translate([-100, 270, 395]);
+  boxes2.rotateEuler(0, 15, 0);
+  world.add(boxes2);
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
