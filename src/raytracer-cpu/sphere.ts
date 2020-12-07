@@ -35,11 +35,11 @@ export class Sphere extends Hittable {
   }
 
   public hit(ray: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const r = this._transformRay(ray);
+    const transformedRay = this._transformRay(ray);
 
-    const oc = Vector.subVec3(r.origin, this._center);
-    const a = Vector.lengthSquared(r.direction);
-    const half_b = Vector.dot(oc, r.direction);
+    const oc = Vector.subVec3(transformedRay.origin, this._center);
+    const a = Vector.lengthSquared(transformedRay.direction);
+    const half_b = Vector.dot(oc, transformedRay.direction);
     const c = Vector.lengthSquared(oc) - this._radius * this._radius;
     const discriminat = half_b * half_b - a * c;
 
@@ -48,27 +48,27 @@ export class Sphere extends Hittable {
       let temp = (-half_b - root) / a;
       if (temp < t_max && temp > t_min) {
         rec.t = temp;
-        rec.p = r.at(rec.t);
+        rec.p = transformedRay.at(rec.t);
         const outward_normal = Vector.divScalarVec(Vector.subVec3(rec.p, this._center), this._radius);
-        rec.setFaceNormal(r, outward_normal);
+        rec.setFaceNormal(transformedRay, outward_normal);
         const uv = getSphereUV(Vector.divScalarVec(Vector.subVec3(rec.p, this._center), this._radius));
         rec.u = uv.u;
         rec.v = uv.v;
         rec.mat = this.material;
-        this._transformRecord(r, rec);
+        this._transformRecord(transformedRay, rec);
         return true;
       }
       temp = (-half_b + root) / a;
       if (temp < t_max && temp > t_min) {
         rec.t = temp;
-        rec.p = r.at(rec.t);
+        rec.p = transformedRay.at(rec.t);
         const outward_normal = Vector.divScalarVec(Vector.subVec3(rec.p, this._center), this._radius);
-        rec.setFaceNormal(r, outward_normal);
+        rec.setFaceNormal(transformedRay, outward_normal);
         const uv = getSphereUV(Vector.divScalarVec(Vector.subVec3(rec.p, this._center), this._radius));
         rec.u = uv.u;
         rec.v = uv.v;
         rec.mat = this.material;
-        this._transformRecord(r, rec);
+        this._transformRecord(transformedRay, rec);
         return true;
       }
     }

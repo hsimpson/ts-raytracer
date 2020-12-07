@@ -32,8 +32,16 @@ export default class Box extends Hittable {
     return this._sides;
   }
 
-  public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    return this._sides.hit(r, t_min, t_max, rec);
+  public hit(ray: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
+    const transformedRay = this._transformRay(ray);
+
+    if (!this._sides.hit(transformedRay, t_min, t_max, rec)) {
+      return false;
+    }
+
+    this._transformRecord(transformedRay, rec);
+
+    return true;
   }
 
   public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {

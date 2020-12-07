@@ -93,10 +93,13 @@ export class RaytracingBuffers {
 
   private traverseHittables(list: HittableList, modelMatrix: mat4): void {
     for (const object of list.objects) {
+      const objectModelMatrix = object.modelMatrix;
+      mat4.multiply(objectModelMatrix, modelMatrix, objectModelMatrix);
+
       if (object instanceof Box) {
-        this.traverseHittables(object.sides, modelMatrix);
+        this.traverseHittables(object.sides, objectModelMatrix);
       } else {
-        this.addPrimitive(object, object.modelMatrix);
+        this.addPrimitive(object, objectModelMatrix);
       }
     }
   }

@@ -85,20 +85,18 @@ export abstract class Hittable {
       return ray;
     }
     const movedOrigin = vec3.create();
-    // const movedDirection = vec3.create();
     vec3.set(movedOrigin, ray.origin[0], ray.origin[1], ray.origin[2]);
-    // vec3.set(movedDirection, ray.direction[0], ray.direction[1], ray.direction[2]);
     vec3.transformMat4(movedOrigin, movedOrigin, this._inverseModelMatrix);
-    // vec3.transformMat4(movedDirection, movedDirection, this._inverseRotationMatrix);
+
+    const movedDirection = vec3.create();
+    vec3.set(movedDirection, ray.direction[0], ray.direction[1], ray.direction[2]);
+    vec3.transformMat4(movedDirection, movedDirection, this._inverseRotationMatrix);
 
     //FIXME: when replace vec3
-    ray.origin = [movedOrigin[0], movedOrigin[1], movedOrigin[2]];
-    // ray.direction = [movedDirection[0], movedDirection[1], movedDirection[2]];
-
     return new Ray(
       [movedOrigin[0], movedOrigin[1], movedOrigin[2]],
-      // [movedDirection[0], movedDirection[1], movedDirection[2]],
-      ray.direction,
+      [movedDirection[0], movedDirection[1], movedDirection[2]],
+      // ray.direction,
       ray.time
     );
   }
@@ -113,11 +111,11 @@ export abstract class Hittable {
     vec3.set(movedP, rec.p[0], rec.p[1], rec.p[2]);
     vec3.transformMat4(movedP, movedP, this._modelMatrix);
 
-    // const movedN = vec3.create();
-    // vec3.set(movedN, rec.normal[0], rec.normal[1], rec.normal[2]);
-    // vec3.transformMat4(movedN, movedN, this._rotationMatrix);
+    const movedN = vec3.create();
+    vec3.set(movedN, rec.normal[0], rec.normal[1], rec.normal[2]);
+    vec3.transformMat4(movedN, movedN, this._rotationMatrix);
 
     rec.p = [movedP[0], movedP[1], movedP[2]];
-    // rec.setFaceNormal(ray, [movedN[0], movedN[1], movedN[2]]);
+    rec.setFaceNormal(ray, [movedN[0], movedN[1], movedN[2]]);
   }
 }

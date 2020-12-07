@@ -13,7 +13,6 @@ import MetalMaterial from './raytracer-cpu/metal';
 import MovingSphere from './raytracer-cpu/movingsphere';
 import { Sphere } from './raytracer-cpu/sphere';
 import { CheckerTexture, ImageTexture, NoiseTexture } from './raytracer-cpu/texture';
-// import { Transformation } from './raytracer-cpu/transformation';
 import { randomNumber, randomNumberRange } from './util';
 import type { Vec3 } from './vec3';
 import * as Vector from './vec3';
@@ -203,20 +202,14 @@ function cornellBox(): { world: HittableList; cameraOptions: CameraOptions } {
   world.add(new XZRect(0, 555, 0, 555, 555, white)); // ceiling
   world.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
 
-  // const box1 = new Box([265, 0, 295], [430, 330, 460], white);
-  // world.add(box1);
-
-  // const box2 = new Box([130, 0, 65], [295, 165, 230], white);
-  // world.add(box2);
-
   const box1: Hittable = new Box([0, 0, 0], [165, 330, 165], white);
-  // box1.translate([265, 0, 295]);
-  // (box1 as Transformation).rotateEuler(0.0, 15.0, 0.0);
+  box1.translate([265, 0, 295]);
+  box1.rotateEuler(0.0, 15.0, 0.0);
   world.add(box1);
 
   const box2: Hittable = new Box([0, 0, 0], [165, 165, 165], white);
-  // box2.translate([130, 0, 65]);
-  // (box2 as Transformation).rotateEuler(0.0, -18.0, 0.0);
+  box2.translate([130, 0, 65]);
+  box2.rotateEuler(0.0, -18.0, 0.0);
   world.add(box2);
 
   const cameraOptions: CameraOptions = {
@@ -245,13 +238,13 @@ function cornellBoxSmoke(): { world: HittableList; cameraOptions: CameraOptions 
   world.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
 
   const box1 = new Box([0, 0, 0], [165, 330, 165], white);
-  // box1.translate([265, 0, 295]);
-  // (box1 as Transformation).rotateEuler(0.0, 15.0, 0.0);
+  box1.translate([265, 0, 295]);
+  box1.rotateEuler(0.0, 15.0, 0.0);
   world.add(new ConstantMedium(box1, 0.01, [0, 0, 0]));
 
   const box2 = new Box([0, 0, 0], [165, 165, 165], white);
-  // box2.translate([130, 0, 65]);
-  // (box2 as Transformation).rotateEuler(0.0, -18.0, 0.0);
+  box2.translate([130, 0, 65]);
+  box2.rotateEuler(0.0, -18.0, 0.0);
   world.add(new ConstantMedium(box2, 0.01, [1, 1, 1]));
 
   const cameraOptions: CameraOptions = {
