@@ -1,3 +1,4 @@
+import { mat4 } from 'gl-matrix';
 import { XYRect, XZRect, YZRect } from '../raytracer-cpu/aarect';
 import Box from '../raytracer-cpu/box';
 import DielectricMaterial from '../raytracer-cpu/dielectric';
@@ -8,10 +9,11 @@ import LambertianMaterial from '../raytracer-cpu/lambertian';
 import Material from '../raytracer-cpu/material';
 import MetalMaterial from '../raytracer-cpu/metal';
 import { Sphere } from '../raytracer-cpu/sphere';
-import { CheckerTexture, NoiseTexture, Texture } from '../raytracer-cpu/texture';
-import { SolidColor } from '../raytracer-cpu/texture';
+import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor, Texture } from '../raytracer-cpu/texture';
+import { nextPowerOf2 } from '../util';
 import type { Vec3 } from '../vec3';
-import { mat4 } from 'gl-matrix';
+import { WebGPUBuffer } from './webgpubuffer';
+import { WebGPUContext } from './webgpucontext';
 
 enum WebGPUMaterialType {
   Lambertian = 0,
@@ -42,12 +44,18 @@ interface WebGPUTexture {
   color: [...rgb: Vec3, a: number]; // TODO: use vec4
   checkerOdd: [...rgb: Vec3, a: number]; // TODO: use vec4
   checkerEven: [...rgb: Vec3, a: number]; // TODO: use vec4
+  uvOffset: [u: number, v: number]; // TODO use vec2
   noiseScale: number;
   textureType: number;
+  imageTextureIndex: number;
 
   // padding
   pad_0: number;
   pad_1: number;
+  pad_2: number;
+
+  // optional for managing
+  hasImageTexture?: boolean;
 }
 interface WebGPUMaterial {
   baseColor: [...rgb: Vec3, a: number]; // TODO: use vec4
@@ -86,6 +94,8 @@ export class RaytracingBuffers {
   private _gpuMaterials: WebGPUMaterial[] = [];
   private _gpuPrimitives: WebGPUPrimitive[] = [];
   private _gpuTextures: WebGPUTexture[] = [];
+  private _textureSize = 2;
+  private _imageTextures: ImageTexture[] = [];
 
   public constructor(world: HittableList) {
     this.traverseHittables(world, mat4.create());
@@ -113,31 +123,57 @@ export class RaytracingBuffers {
         color: [...tex.color, 1],
         checkerOdd: [1, 1, 1, 1],
         checkerEven: [1, 1, 1, 1],
+        uvOffset: [1, 1],
         noiseScale: 1,
         textureType: WebGPUTextureType.Solid,
+        imageTextureIndex: -1,
         pad_0: PADDING_VALUE,
         pad_1: PADDING_VALUE,
+        pad_2: PADDING_VALUE,
       };
     } else if (tex instanceof CheckerTexture) {
       gpuTex = {
         color: [1, 1, 1, 1],
         checkerOdd: [...tex.odd, 1],
         checkerEven: [...tex.even, 1],
+        uvOffset: [1, 1],
         noiseScale: 1,
         textureType: WebGPUTextureType.Checker,
+        imageTextureIndex: -1,
         pad_0: PADDING_VALUE,
         pad_1: PADDING_VALUE,
+        pad_2: PADDING_VALUE,
       };
     } else if (tex instanceof NoiseTexture) {
       gpuTex = {
         color: [1, 1, 1, 1],
         checkerOdd: [1, 1, 1, 1],
         checkerEven: [1, 1, 1, 1],
+        uvOffset: [1, 1],
         noiseScale: tex.scale,
         textureType: WebGPUTextureType.Noise,
+        imageTextureIndex: -1,
         pad_0: PADDING_VALUE,
         pad_1: PADDING_VALUE,
+        pad_2: PADDING_VALUE,
       };
+    } else if (tex instanceof ImageTexture) {
+      this._textureSize = Math.max(this.getNextPowerOf2(tex.width, tex.height), this._textureSize);
+      gpuTex = {
+        color: [1, 1, 1, 1],
+        checkerOdd: [1, 1, 1, 1],
+        checkerEven: [1, 1, 1, 1],
+        uvOffset: [1, 1],
+        noiseScale: 1,
+        textureType: WebGPUTextureType.Image,
+        imageTextureIndex: this._imageTextures.length,
+        pad_0: PADDING_VALUE,
+        pad_1: PADDING_VALUE,
+        pad_2: PADDING_VALUE,
+
+        hasImageTexture: true,
+      };
+      this._imageTextures.push(tex);
     }
 
     this._gpuTextures.push(gpuTex);
@@ -258,8 +294,12 @@ export class RaytracingBuffers {
     return idx;
   }
 
+  private getNextPowerOf2(width: number, height: number): number {
+    return nextPowerOf2(Math.max(width, height));
+  }
+
   public textureBuffer(): ArrayBuffer {
-    const elementCount = 16;
+    const elementCount = 20;
     const materialSize = elementCount * 4;
 
     const bufferData = new ArrayBuffer(materialSize * this._gpuTextures.length);
@@ -283,17 +323,133 @@ export class RaytracingBuffers {
       bufferDataF32[offset++] = texture.checkerEven[2];
       bufferDataF32[offset++] = texture.checkerEven[3];
 
+      let uOffset = texture.uvOffset[0];
+      let vOffset = texture.uvOffset[0];
+      if (texture.hasImageTexture) {
+        const tex = this._imageTextures[texture.imageTextureIndex];
+        uOffset = tex.width / this._textureSize;
+        vOffset = tex.height / this._textureSize;
+      }
+
+      bufferDataF32[offset++] = uOffset;
+      bufferDataF32[offset++] = vOffset;
+
       bufferDataF32[offset++] = texture.noiseScale;
 
       bufferDataU32[offset++] = texture.textureType;
+      bufferDataU32[offset++] = texture.imageTextureIndex;
 
       // paddings
       bufferDataF32[offset++] = texture.pad_0;
       bufferDataF32[offset++] = texture.pad_1;
+      bufferDataF32[offset++] = texture.pad_2;
     }
 
     // log('Textures:', bufferData);
     return bufferData;
+  }
+
+  public async imageTexture(): Promise<{ sampler: GPUSampler; textureView: GPUTextureView }> {
+    const sampler = WebGPUContext.device.createSampler({
+      minFilter: 'linear',
+      magFilter: 'linear',
+      // addressModeU: 'repeat',
+      // addressModeV: 'repeat',
+      // addressModeW: 'repeat',
+    });
+
+    /*
+    dictionary GPUTextureDescriptor : GPUObjectDescriptorBase {
+      required GPUExtent3D size;
+      GPUIntegerCoordinate mipLevelCount = 1;
+      GPUSize32 sampleCount = 1;
+      GPUTextureDimension dimension = "2d";
+      required GPUTextureFormat format;
+      required GPUTextureUsageFlags usage;
+    };
+    */
+
+    const tex = this._imageTextures[0];
+
+    const image = new Image();
+    image.src = tex.url;
+    await image.decode();
+    const imageBitmap = await window.createImageBitmap(image);
+
+    const imageSize = {
+      width: tex.width,
+      height: tex.height,
+      depth: 1,
+    };
+
+    const texture = WebGPUContext.device.createTexture({
+      size: imageSize,
+      // mipLevelCount: 1,
+      // sampleCount: 1,
+      // dimension: '2d',
+      format: 'rgba8unorm', // rgba8unorm-srgb ???
+      usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
+    });
+
+    /*
+    dictionary GPUTextureViewDescriptor : GPUObjectDescriptorBase {
+      GPUTextureFormat format;
+      GPUTextureViewDimension dimension;
+      GPUTextureAspect aspect = "all";
+      GPUIntegerCoordinate baseMipLevel = 0;
+      GPUIntegerCoordinate mipLevelCount;
+      GPUIntegerCoordinate baseArrayLayer = 0;
+      GPUIntegerCoordinate arrayLayerCount;
+    };
+    */
+
+    const textureView = texture
+      .createView
+      /*
+      {
+      format: 'rgba8unorm', // rgba8unorm-srgb ???
+      dimension: '2d-array',
+      aspect: 'all',
+      baseArrayLayer: 0,
+      baseMipLevel: 0,
+      arrayLayerCount: this._imageTextures.length,
+      mipLevelCount: 1,
+    }*/
+      ();
+
+    WebGPUContext.queue.copyImageBitmapToTexture({ imageBitmap }, { texture }, imageSize);
+
+    /*
+    const textureCopyBuffer = new WebGPUBuffer();
+    textureCopyBuffer.create(
+      this._textureSize * this._textureSize * 4,
+      GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
+    );
+
+    for (let i = 0; i < this._imageTextures.length; i++) {
+      const tex = this._imageTextures[i];
+      const data = tex.data;
+      WebGPUContext.queue.writeBuffer(textureCopyBuffer.gpuBuffer, 0, data);
+
+      const commandEncoder = WebGPUContext.device.createCommandEncoder();
+      commandEncoder.copyBufferToTexture(
+        {
+          buffer: textureCopyBuffer.gpuBuffer,
+          bytesPerRow: this._textureSize * 4,
+        },
+        {
+          texture,
+        },
+        {
+          width: this._textureSize,
+          height: this._textureSize,
+          depth: i,
+        }
+      );
+      WebGPUContext.queue.submit([commandEncoder.finish()]);
+    }*/
+
+    return { sampler, textureView };
   }
 
   public materialBuffer(): ArrayBuffer {

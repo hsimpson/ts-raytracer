@@ -31,6 +31,9 @@ const enum Bindings {
   Primitives = 4,
   Materials = 5,
   Textures = 6,
+
+  Sampler = 7,
+  ImageTexture = 8,
 }
 
 export default class WebGPUComputePipline extends WebGPUPipelineBase {
@@ -117,6 +120,16 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
           visibility: GPUShaderStage.COMPUTE,
           type: 'storage-buffer',
         },
+        {
+          binding: Bindings.Sampler,
+          visibility: GPUShaderStage.COMPUTE,
+          type: 'sampler',
+        },
+        {
+          binding: Bindings.ImageTexture,
+          visibility: GPUShaderStage.COMPUTE,
+          type: 'sampled-texture',
+        },
       ],
     });
 
@@ -139,6 +152,8 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
   }
 
   protected async createBindGroup(): Promise<void> {
+    const { sampler, textureView } = await this._raytracingBuffers.imageTexture();
+
     this._bindGroup = WebGPUContext.device.createBindGroup({
       layout: this._bindGroupLayout,
       entries: [
@@ -197,6 +212,14 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
             offset: 0,
             size: this._texturesBuffer.size,
           },
+        },
+        {
+          binding: Bindings.Sampler,
+          resource: sampler,
+        },
+        {
+          binding: Bindings.ImageTexture,
+          resource: textureView,
         },
       ],
     });

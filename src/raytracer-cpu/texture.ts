@@ -90,6 +90,7 @@ export class ImageTexture extends Texture {
   private _height = 0;
   private _bytesPerScanLine = 0;
   private _data: Uint8ClampedArray;
+  private _url = '';
   private static BytesPerPixel = 4;
 
   public constructor() {
@@ -97,6 +98,7 @@ export class ImageTexture extends Texture {
   }
 
   public async load(imageUrl: string): Promise<void> {
+    this._url = imageUrl;
     const response = await fetch(imageUrl);
     const blob = await response.blob();
     const imgBitmap = await window.createImageBitmap(blob);
@@ -142,5 +144,21 @@ export class ImageTexture extends Texture {
       this._data[pixelOffset++] * colorScale,
       this._data[pixelOffset++] * colorScale,
     ];
+  }
+
+  public get width(): number {
+    return this._width;
+  }
+
+  public get height(): number {
+    return this._height;
+  }
+
+  public get data(): Uint8ClampedArray {
+    return this._data;
+  }
+
+  public get url(): string {
+    return this._url;
   }
 }

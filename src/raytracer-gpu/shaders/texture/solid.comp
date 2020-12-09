@@ -5,8 +5,8 @@
 
 #include "./texture_base.comp"
 
-vec3 solidTextureValue(const Texture texture, const vec2 uv, const vec3 p) {
-  return texture.color.rgb;
+vec3 solidTextureValue(const Texture textureObj, const vec2 uv, const vec3 p) {
+  return textureObj.color.rgb;
 }
 
 #endif  //SOLIDTEXTURE_INC

@@ -7,6 +7,15 @@
 #include "../utils.comp"
 #include "./hittable_base.comp"
 
+vec2 getSphereUV(vec3 p) {
+  float phi   = atan(p.z, p.x);
+  float theta = asin(p.y);
+  vec2  uv;
+  uv.x = 1 - (phi + PI) / (2 * PI);
+  uv.y = (theta + PI / 2) / PI;
+  return uv;
+}
+
 bool hitSphere(const Primitive sphere, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
   vec3  oc           = ray.origin - sphere.center;
   float a            = lengthSquared(ray.direction);
@@ -22,7 +31,8 @@ bool hitSphere(const Primitive sphere, const Ray ray, const float tMin, const fl
       rec.p               = rayAt(ray, rec.t);
       vec3 outward_normal = (rec.p - sphere.center) / sphere.radius;
       setFaceNormal(rec, ray, outward_normal);
-      // rec.materialType  = sphere.materialType;
+      vec2 uv           = getSphereUV(outward_normal);
+      rec.uv            = uv;
       rec.materialIndex = sphere.materialIndex;
       return true;
     }
@@ -32,7 +42,8 @@ bool hitSphere(const Primitive sphere, const Ray ray, const float tMin, const fl
       rec.p               = rayAt(ray, rec.t);
       vec3 outward_normal = (rec.p - sphere.center) / sphere.radius;
       setFaceNormal(rec, ray, outward_normal);
-      // rec.materialType  = sphere.materialType;
+      vec2 uv           = getSphereUV(outward_normal);
+      rec.uv            = uv;
       rec.materialIndex = sphere.materialIndex;
       return true;
     }

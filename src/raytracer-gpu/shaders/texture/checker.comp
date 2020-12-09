@@ -7,14 +7,14 @@
 
 // TODO: support other textures then SolidTexture
 
-vec3 checkerTextureValue(const Texture texture, const vec2 uv, const vec3 p) {
+vec3 checkerTextureValue(const Texture textureObj, const vec2 uv, const vec3 p) {
   vec3  sine  = sin(p * 10.0);
   float sines = sine.x * sine.y * sine.z;
 
   if (sines < 0.0) {
-    return texture.checkerOdd.rgb;
+    return textureObj.checkerOdd.rgb;
   } else {
-    return texture.checkerEven.rgb;
+    return textureObj.checkerEven.rgb;
   }
 }
 

@@ -50,3 +50,11 @@ export function logMatrix(mat: mat4): void {
   console.log(`${m[2]}, ${m[6]}, ${m[10]}, ${m[14]}`);
   console.log(`${m[3]}, ${m[7]}, ${m[11]}, ${m[15]}`);
 }
+
+export function isPowerOf2(value: number): boolean {
+  return (value & (value - 1)) === 0 && value !== 0;
+}
+
+export function nextPowerOf2(value: number): number {
+  return Math.pow(2, Math.ceil(Math.log(value) / Math.LN2));
+}

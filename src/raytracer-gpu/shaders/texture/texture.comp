@@ -12,6 +12,7 @@
 #include "./solid.comp"
 #include "./checker.comp"
 #include "./noise.comp"
+#include "./image.comp"
 
 vec3 textureValue(Texture texture, const vec2 uv, const vec3 p) {
   vec3 color       = vec3(0.0, 0.0, 0.0);
@@ -28,6 +29,9 @@ vec3 textureValue(Texture texture, const vec2 uv, const vec3 p) {
       break;
     case TEXTURETYPE_NOISE:
       color = noiseTextureValue(texture, uv, p);
+      break;
+    case TEXTURETYPE_IMAGE:
+      color = imageTextureValue(texture, uv, p);
       break;
     default:
       color = vec3(0.0, 0.0, 1.0);

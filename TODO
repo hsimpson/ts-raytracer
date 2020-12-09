@@ -18,6 +18,19 @@ Bugs:
 
 Features:
   Raytracer:
+    CPU:
+    ☐ Add progressive rendering like on GPU show each sample image
+    ☐ Look if Woker logik could be made with comlink: https://github.com/GoogleChromeLabs/comlink
+    ☐ Add tone mapping like ACES filmic
+    ☐ Add color correction/grading
+    Environment Textures:
+      ☐ HDR files
+      ☐ Open EXR files
+    ☐ Add PBR Material (probably Disney Principled BSDF)
+      https://academy.substance3d.com/courses/the-pbr-guide-part-1
+      https://academy.substance3d.com/courses/the-pbr-guide-part-2
+    ☐ Add denoising
+
     GPU:
       ☐ Add acceleration data stucture like BVH (https://research.nvidia.com/sites/default/files/pubs/2012-06_Maximizing-Parallelism-in/karras2012hpg_paper.pdf)
       ☐ Add motion blur
@@ -31,17 +44,6 @@ Features:
       Environment Textures:
         ☐ HDR files
         ☐ Open EXR files
-      ☐ Add PBR Material (probably Disney Principled BSDF)
-      ☐ Add denoising
-
-    CPU:
-      ☐ Add progressive rendering like on GPU show each sample image
-      ☐ Look if Woker logik could be made with comlink: https://github.com/GoogleChromeLabs/comlink
-      ☐ Add tone mapping like ACES filmic
-      ☐ Add color correction/grading
-      Environment Textures:
-        ☐ HDR files
-        ☐ Open EXR files 
       ☐ Add PBR Material (probably Disney Principled BSDF)
       ☐ Add denoising
 

@@ -1,0 +1,24 @@
+#ifndef IMAGE_INC
+#define IMAGE_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#include "./texture_base.comp"
+
+precision highp sampler;
+precision highp texture2D;
+
+layout(set = 0, binding = 7) uniform sampler textureSampler;
+// layout(set = 0, binding = 8) uniform texture2DArray TextureArray;
+layout(set = 0, binding = 8) uniform texture2D imageTexture;
+
+vec3 imageTextureValue(const Texture textureObj, const vec2 uv, const vec3 p) {
+  vec2 clamped = clamp(uv, 0.0, 1.0);
+  clamped.y    = 1.0 - clamped.y;
+
+  vec3 color = texture(sampler2D(imageTexture, textureSampler), clamped).rgb;
+  // vec3 color = vec3(uv, 0.0);
+  return color;
+}
+
+#endif  //IMAGE_INC

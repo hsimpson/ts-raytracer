@@ -7,13 +7,16 @@ struct Texture {
   vec4  color;
   vec4  checkerOdd;
   vec4  checkerEven;
+  vec2  uvOffset;
   float noiseScale;
 
   uint textureType;
+  uint imageTextureIndex;
 
   // padding
   float pad_0;
   float pad_1;
+  float pad_2;
 };
 
 layout(std430, set = 0, binding = 6) buffer TextureBuffer {
