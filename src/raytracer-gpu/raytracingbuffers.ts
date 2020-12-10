@@ -369,18 +369,28 @@ export class RaytracingBuffers {
     };
     */
 
-    const tex = this._imageTextures[0];
-
-    const image = new Image();
-    image.src = tex.url;
-    await image.decode();
-    const imageBitmap = await window.createImageBitmap(image);
-
+    let imageBitmap: ImageBitmap;
+    
     const imageSize = {
-      width: tex.width,
-      height: tex.height,
+      width: 2,
+      height: 2,
       depth: 1,
     };
+
+    if(this._imageTextures.length) {
+      const tex = this._imageTextures[0];
+      const image = new Image();
+      image.src = tex.url;
+      await image.decode();
+      imageBitmap = await window.createImageBitmap(image);
+      imageSize.width = tex.width;
+      imageSize.height = tex.height;
+    } else {
+      // create fake imageBitmap
+      imageBitmap = await window.createImageBitmap(new ImageData(2,2));
+    }
+
+
 
     const texture = WebGPUContext.device.createTexture({
       size: imageSize,
