@@ -427,7 +427,7 @@ export class RaytracingBuffers {
     }*/
       ();
 
-    WebGPUContext.queue.copyImageBitmapToTexture({ imageBitmap }, { texture }, imageSize);
+    //WebGPUContext.queue.copyImageBitmapToTexture({ imageBitmap }, { texture }, imageSize);
 
     /*
     const textureCopyBuffer = new WebGPUBuffer();

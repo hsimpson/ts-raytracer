@@ -55,8 +55,8 @@ export default class WebGPURenderPipeline extends WebGPUPipelineBase {
     const uniformArray = this.getParamsArray(this._options.uniformParams);
     this._renderParamsUniformBuffer.createWithArrayMapped(uniformArray, GPUBufferUsage.UNIFORM);
 
-    this._bindGroupLayout = WebGPUContext.device.createBindGroupLayout({
-      entries: [
+    const bindGroupLayoutDescriptor = {
+      bindings: [
         {
           binding: 0,
           visibility: GPUShaderStage.FRAGMENT,
@@ -68,15 +68,19 @@ export default class WebGPURenderPipeline extends WebGPUPipelineBase {
           type: 'storage-buffer',
         },
       ],
-    });
+    };
+
+    this._bindGroupLayout = WebGPUContext.device.createBindGroupLayout(
+      (bindGroupLayoutDescriptor as any) as GPUBindGroupLayoutDescriptor
+    );
 
     await this.createBindGroup();
   }
 
   protected async createBindGroup(): Promise<void> {
-    this._bindGroup = WebGPUContext.device.createBindGroup({
+    const bindGroupDescriptor = {
       layout: this._bindGroupLayout,
-      entries: [
+      bindings: [
         {
           binding: 0,
           resource: {
@@ -94,7 +98,9 @@ export default class WebGPURenderPipeline extends WebGPUPipelineBase {
           },
         },
       ],
-    });
+    };
+
+    this._bindGroup = WebGPUContext.device.createBindGroup((bindGroupDescriptor as any) as GPUBindGroupDescriptor);
 
     this._bindGroup.label = `${this.name}-BindGroup`;
 

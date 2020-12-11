@@ -5,6 +5,7 @@ import { WebGPUBuffer } from './webgpubuffer';
 import { WebGPUContext } from './webgpucontext';
 import WebGPUPipelineBase from './webgpupipelinebase';
 import type { Vec3 } from '../vec3';
+import * as Bowser from 'bowser';
 
 interface ComputeUniformParams {
   background: Vec3;
@@ -49,6 +50,8 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
   private _materialsBuffer = new WebGPUBuffer();
   private _texturesBuffer = new WebGPUBuffer();
 
+  private _isSafari = false;
+
   public constructor(options: WebGPUComputePiplineOptions) {
     super();
     this._options = options;
@@ -63,6 +66,8 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
       return;
     }
     this._initialized = true;
+
+    this._isSafari = Bowser.getParser(window.navigator.userAgent).isBrowser('safari');
 
     const pixelBufferSize =
       this._options.uniformParams.width * this._options.uniformParams.height * 4 * Float32Array.BYTES_PER_ELEMENT;
@@ -83,8 +88,8 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
 
     this.createObjects();
 
-    this._bindGroupLayout = WebGPUContext.device.createBindGroupLayout({
-      entries: [
+    const bindGroupLayoutDescriptor = {
+      bindings: [
         {
           binding: Bindings.ComputeParams,
           visibility: GPUShaderStage.COMPUTE,
@@ -131,7 +136,11 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
           type: 'sampled-texture',
         },
       ],
-    });
+    };
+
+    this._bindGroupLayout = WebGPUContext.device.createBindGroupLayout(
+      (bindGroupLayoutDescriptor as any) as GPUBindGroupLayoutDescriptor
+    );
 
     await this.createBindGroup();
   }
@@ -154,9 +163,9 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
   protected async createBindGroup(): Promise<void> {
     const { sampler, textureView } = await this._raytracingBuffers.imageTexture();
 
-    this._bindGroup = WebGPUContext.device.createBindGroup({
+    const bindGroupDescriptor = {
       layout: this._bindGroupLayout,
-      entries: [
+      bindings: [
         {
           binding: Bindings.ComputeParams,
           resource: {
@@ -222,7 +231,9 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
           resource: textureView,
         },
       ],
-    });
+    };
+
+    this._bindGroup = WebGPUContext.device.createBindGroup((bindGroupDescriptor as any) as GPUBindGroupDescriptor);
 
     this._bindGroup.label = `${this.name}-BindGroup`;
 

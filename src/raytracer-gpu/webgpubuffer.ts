@@ -17,12 +17,25 @@ export class WebGPUBuffer {
     this._size = srcArrayBuffer.byteLength;
     // console.log(`createWithArrayMapped from ${array.constructor.name}`);
 
-    this._gpuBuffer = WebGPUContext.device.createBuffer({
-      mappedAtCreation: true,
-      size: this._size,
-      usage,
-    });
-    const bufferMapped = this._gpuBuffer.getMappedRange();
+    let bufferMapped: ArrayBuffer;
+
+    // console.log(`createWithArrayMapped from ${array.constructor.name}`);
+
+    // newer spec
+    if (GPUBuffer.prototype.getMappedRange) {
+      this._gpuBuffer = WebGPUContext.device.createBuffer({
+        mappedAtCreation: true,
+        size: this._size,
+        usage,
+      });
+      bufferMapped = this._gpuBuffer.getMappedRange();
+    } else {
+      // FIXME: remove when all browsers support this
+      [this._gpuBuffer, bufferMapped] = WebGPUContext.device['createBufferMapped']({
+        size: this._size,
+        usage,
+      });
+    }
 
     // new Uint8Array(bufferMapped).set(new Uint8Array(srcArrayBuffer)); // memcpy
     new Float32Array(bufferMapped).set(new Float32Array(srcArrayBuffer)); // memcpy

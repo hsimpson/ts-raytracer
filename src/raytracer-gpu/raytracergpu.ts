@@ -9,6 +9,7 @@ import WebGPUComputePipline from './webgpucomputepipeline';
 import { WebGPUContext } from './webgpucontext';
 import WebGPURenderPipeline from './webgpurenderpipeline';
 // import { sleep } from '../util';
+import './safari-polyfill';
 
 const LOCAL_SIZE = 8;
 
@@ -201,9 +202,18 @@ export class RaytracerGPU extends RaytracerBase {
 
       WebGPUContext.createContext(device, queue);
 
-      const context: GPUCanvasContext = (this._rayTracerOptions.canvas.getContext(
+      
+      let context: GPUCanvasContext = (this._rayTracerOptions.canvas.getContext(
         'gpupresent'
       ) as unknown) as GPUCanvasContext;
+
+      // fallback for safari
+      if(!context) {
+        context = (this._rayTracerOptions.canvas.getContext(
+          'gpu'
+        ) as unknown) as GPUCanvasContext;
+      }
+
       const swapChainDesc: GPUSwapChainDescriptor = {
         device,
         format: 'bgra8unorm',

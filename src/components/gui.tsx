@@ -68,7 +68,7 @@ const Gui = (): React.ReactElement => {
           label="Num of CPU workers:"
           size={5}
           min={1}
-          max={navigator.hardwareConcurrency}
+          max={navigator.hardwareConcurrency || 128}
           value={raytracerState.numOfWorkers}
           onValueChange={(numOfWorkers) => setRaytracerState({ ...raytracerState, numOfWorkers })}></NumberInput>
       ) : (
