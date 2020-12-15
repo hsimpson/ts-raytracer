@@ -51,9 +51,8 @@ const commonConfig: webpack.Configuration = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: './src/assets/textures/*.*',
-          to: 'assets/textures',
-          flatten: true,
+          from: './src/assets/textures/**/*',
+          to: 'assets/textures/[name].[ext]',
         },
       ],
     }),
