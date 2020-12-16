@@ -1,5 +1,5 @@
-#ifndef SPHERE_INC
-#define SPHERE_INC
+#ifndef MOVINGSPHERE_INC
+#define MOVINGSPHERE_INC
 
 #extension GL_GOOGLE_include_directive : enable
 
@@ -7,9 +7,21 @@
 #include "../utils.comp"
 #include "./hittable_base.comp"
 
-bool hitSphere(const Primitive sphere, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
-  vec3  center       = sphere.center0.xyz;
-  vec3  oc           = ray.origin - center;
+vec3 center(const Primitive sphere, const float time) {
+  vec3 center0 = sphere.center0.xyz;
+  vec3 center1 = sphere.center1.xyz;
+
+  float time0 = sphere.center0.w;
+  float time1 = sphere.center1.w;
+
+  float timeDiff   = (time - time0) / (time1 - time0);
+  vec3  centerDiff = center1 - center0;
+
+  return center0 + (centerDiff * timeDiff);
+}
+
+bool hitMovingSphere(const Primitive sphere, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
+  vec3  oc           = ray.origin - center(sphere, ray.time);
   float a            = lengthSquared(ray.direction);
   float half_b       = dot(oc, ray.direction);
   float c            = lengthSquared(oc) - sphere.radius * sphere.radius;
@@ -21,7 +33,7 @@ bool hitSphere(const Primitive sphere, const Ray ray, const float tMin, const fl
     if (temp < tMax && temp > tMin) {
       rec.t               = temp;
       rec.p               = rayAt(ray, rec.t);
-      vec3 outward_normal = (rec.p - center) / sphere.radius;
+      vec3 outward_normal = (rec.p - center(sphere, ray.time)) / sphere.radius;
       setFaceNormal(rec, ray, outward_normal);
       vec2 uv           = getSphereUV(outward_normal);
       rec.uv            = uv;
@@ -32,7 +44,7 @@ bool hitSphere(const Primitive sphere, const Ray ray, const float tMin, const fl
     if (temp < tMax && temp > tMin) {
       rec.t               = temp;
       rec.p               = rayAt(ray, rec.t);
-      vec3 outward_normal = (rec.p - center) / sphere.radius;
+      vec3 outward_normal = (rec.p - center(sphere, ray.time)) / sphere.radius;
       setFaceNormal(rec, ray, outward_normal);
       vec2 uv           = getSphereUV(outward_normal);
       rec.uv            = uv;
@@ -44,4 +56,4 @@ bool hitSphere(const Primitive sphere, const Ray ray, const float tMin, const fl
   return false;
 }
 
-#endif  // SPHERE_INC
+#endif  //MOVINGSPHERE_INC

@@ -8,6 +8,7 @@ import { HittableList } from '../raytracer-cpu/hittablelist';
 import LambertianMaterial from '../raytracer-cpu/lambertian';
 import Material from '../raytracer-cpu/material';
 import MetalMaterial from '../raytracer-cpu/metal';
+import MovingSphere from '../raytracer-cpu/movingsphere';
 import { Sphere } from '../raytracer-cpu/sphere';
 import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor, Texture } from '../raytracer-cpu/texture';
 import { nextPowerOf2 } from '../util';
@@ -68,7 +69,8 @@ interface WebGPUMaterial {
 interface WebGPUPrimitive {
   modelMatrix: mat4;
   bounds: [...abc: Vec3, d: number]; // TODO: use vec4
-  center: Vec3;
+  center0: [...rgb: Vec3, a: number]; // TODO: use vec4
+  center1: [...rgb: Vec3, a: number]; // TODO: use vec4
   radius: number;
   k: number;
 
@@ -76,7 +78,7 @@ interface WebGPUPrimitive {
   materialIndex: number;
 
   // padding
-  pad_0: number;
+  // pad_0: number;
 }
 
 const PADDING_VALUE = -99;
@@ -238,53 +240,71 @@ export class RaytracingBuffers {
       gpuPrimitive = {
         modelMatrix,
         bounds: [0, 0, 0, 0],
-        center: obj.center,
+        center0: [...obj.center, 0],
+        center1: [0, 0, 0, 1],
         radius: obj.radius,
         k: 0,
 
         primitiveType: WebGPUPrimitiveType.Sphere,
         materialIndex,
 
-        pad_0: PADDING_VALUE,
+        // pad_0: PADDING_VALUE,
+      };
+    } else if (obj instanceof MovingSphere) {
+      gpuPrimitive = {
+        modelMatrix,
+        bounds: [0, 0, 0, 0],
+        center0: [...obj.center0, obj.time0],
+        center1: [...obj.center1, obj.time1],
+        radius: obj.radius,
+        k: 0,
+
+        primitiveType: WebGPUPrimitiveType.MovingSphere,
+        materialIndex,
+
+        // pad_0: PADDING_VALUE,
       };
     } else if (obj instanceof XYRect) {
       gpuPrimitive = {
         modelMatrix,
         bounds: [obj.x0, obj.x1, obj.y0, obj.y1],
-        center: [0, 0, 0],
+        center0: [0, 0, 0, 0],
+        center1: [0, 0, 0, 1],
         radius: 0,
         k: obj.k,
 
         primitiveType: WebGPUPrimitiveType.XYRect,
         materialIndex,
 
-        pad_0: PADDING_VALUE,
+        // pad_0: PADDING_VALUE,
       };
     } else if (obj instanceof XZRect) {
       gpuPrimitive = {
         modelMatrix,
         bounds: [obj.x0, obj.x1, obj.z0, obj.z1],
-        center: [0, 0, 0],
+        center0: [0, 0, 0, 0],
+        center1: [0, 0, 0, 1],
         radius: 0,
         k: obj.k,
 
         primitiveType: WebGPUPrimitiveType.XZRect,
         materialIndex,
 
-        pad_0: PADDING_VALUE,
+        // pad_0: PADDING_VALUE,
       };
     } else if (obj instanceof YZRect) {
       gpuPrimitive = {
         modelMatrix,
         bounds: [obj.y0, obj.y1, obj.z0, obj.z1],
-        center: [0, 0, 0],
+        center0: [0, 0, 0, 0],
+        center1: [0, 0, 0, 1],
         radius: 0,
         k: obj.k,
 
         primitiveType: WebGPUPrimitiveType.YZRect,
         materialIndex,
 
-        pad_0: PADDING_VALUE,
+        // pad_0: PADDING_VALUE,
       };
     }
 
@@ -370,14 +390,14 @@ export class RaytracingBuffers {
     */
 
     let imageBitmap: ImageBitmap;
-    
+
     const imageSize = {
       width: 2,
       height: 2,
       depth: 1,
     };
 
-    if(this._imageTextures.length) {
+    if (this._imageTextures.length) {
       const tex = this._imageTextures[0];
       const image = new Image();
       image.src = tex.url;
@@ -387,10 +407,8 @@ export class RaytracingBuffers {
       imageSize.height = tex.height;
     } else {
       // create fake imageBitmap
-      imageBitmap = await window.createImageBitmap(new ImageData(2,2));
+      imageBitmap = await window.createImageBitmap(new ImageData(2, 2));
     }
-
-
 
     const texture = WebGPUContext.device.createTexture({
       size: imageSize,
@@ -488,7 +506,7 @@ export class RaytracingBuffers {
   }
 
   public primitiveBuffer(): ArrayBuffer {
-    const elementCount = 28;
+    const elementCount = 32;
     const primitiveSize = elementCount * 4;
 
     const bufferData = new ArrayBuffer(primitiveSize * this._gpuPrimitives.length);
@@ -519,17 +537,21 @@ export class RaytracingBuffers {
       bufferDataF32[offset++] = primitiv.bounds[2];
       bufferDataF32[offset++] = primitiv.bounds[3];
 
-      bufferDataF32[offset++] = primitiv.center[0];
-      bufferDataF32[offset++] = primitiv.center[1];
-      bufferDataF32[offset++] = primitiv.center[2];
+      bufferDataF32[offset++] = primitiv.center0[0];
+      bufferDataF32[offset++] = primitiv.center0[1];
+      bufferDataF32[offset++] = primitiv.center0[2];
+      bufferDataF32[offset++] = primitiv.center0[3];
+
+      bufferDataF32[offset++] = primitiv.center1[0];
+      bufferDataF32[offset++] = primitiv.center1[1];
+      bufferDataF32[offset++] = primitiv.center1[2];
+      bufferDataF32[offset++] = primitiv.center1[3];
 
       bufferDataF32[offset++] = primitiv.radius;
       bufferDataF32[offset++] = primitiv.k;
 
       bufferDataU32[offset++] = primitiv.primitiveType;
       bufferDataU32[offset++] = primitiv.materialIndex;
-
-      bufferDataF32[offset++] = primitiv.pad_0;
     }
 
     // log('Primitives:', bufferData);

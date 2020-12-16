@@ -84,9 +84,9 @@ function randomScene(): { world: HittableList; cameraOptions: CameraOptions } {
           // diffuse aka lambertian
           const albedo = Vector.multVec3(Vector.random(), Vector.random());
           sphereMaterial = new LambertianMaterial(albedo);
-          // const center2 = Vector.addVec3(center, [0, randomNumberRange(0, 0.5), 0]);
-          // world.add(new MovingSphere(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
-          world.add(new Sphere(center, 0.2, sphereMaterial));
+          const center2 = Vector.addVec3(center, [0, randomNumberRange(0, 1.0), 0]);
+          world.add(new MovingSphere(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
+          // world.add(new Sphere(center, 0.2, sphereMaterial));
         } else if (chooseMat < 0.95) {
           // metal
           const albedo = Vector.randomRange(0.5, 1);

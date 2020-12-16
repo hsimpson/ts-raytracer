@@ -5,14 +5,7 @@ import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
 import { AABB } from './aabb';
 import { serializable } from '../serializing';
-
-function getSphereUV(p: Vec3): { u: number; v: number } {
-  const phi = Math.atan2(p[2], p[0]);
-  const theta = Math.asin(p[1]);
-  const u = 1 - (phi + Math.PI) / (2 * Math.PI);
-  const v = (theta + Math.PI / 2) / Math.PI;
-  return { u, v };
-}
+import { getSphereUV } from '../util';
 
 @serializable
 export class Sphere extends Hittable {

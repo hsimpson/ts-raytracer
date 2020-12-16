@@ -5,6 +5,7 @@ import { AABB } from './aabb';
 import { HitRecord, Hittable } from './hittable';
 import Material from './material';
 import Ray from './ray';
+import { getSphereUV } from '../util';
 
 @serializable
 export default class MovingSphere extends Hittable {
@@ -13,7 +14,6 @@ export default class MovingSphere extends Hittable {
   private _time0: number;
   private _time1: number;
   private _radius: number;
-  private _material: Material;
 
   public constructor(center0: Vec3, center1: Vec3, t0: number, t1: number, radius: number, mat: Material) {
     super();
@@ -22,13 +22,35 @@ export default class MovingSphere extends Hittable {
     this._time0 = t0;
     this._time1 = t1;
     this._radius = radius;
-    this._material = mat;
+    this.material = mat;
   }
 
-  public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const oc = Vector.subVec3(r.origin, this.center(r.time));
-    const a = Vector.lengthSquared(r.direction);
-    const half_b = Vector.dot(oc, r.direction);
+  public get center0(): Vec3 {
+    return this._center0;
+  }
+
+  public get center1(): Vec3 {
+    return this._center1;
+  }
+
+  public get radius(): number {
+    return this._radius;
+  }
+
+  public get time0(): number {
+    return this._time0;
+  }
+
+  public get time1(): number {
+    return this._time1;
+  }
+
+  public hit(ray: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
+    const transformedRay = this._transformRay(ray);
+
+    const oc = Vector.subVec3(transformedRay.origin, this.center(transformedRay.time));
+    const a = Vector.lengthSquared(transformedRay.direction);
+    const half_b = Vector.dot(oc, transformedRay.direction);
     const c = Vector.lengthSquared(oc) - this._radius * this._radius;
     const discriminat = half_b * half_b - a * c;
 
@@ -37,19 +59,37 @@ export default class MovingSphere extends Hittable {
       let temp = (-half_b - root) / a;
       if (temp < t_max && temp > t_min) {
         rec.t = temp;
-        rec.p = r.at(rec.t);
-        const outward_normal = Vector.divScalarVec(Vector.subVec3(rec.p, this.center(r.time)), this._radius);
-        rec.setFaceNormal(r, outward_normal);
-        rec.mat = this._material;
+        rec.p = transformedRay.at(rec.t);
+        const outward_normal = Vector.divScalarVec(
+          Vector.subVec3(rec.p, this.center(transformedRay.time)),
+          this._radius
+        );
+        rec.setFaceNormal(transformedRay, outward_normal);
+        const uv = getSphereUV(
+          Vector.divScalarVec(Vector.subVec3(rec.p, this.center(transformedRay.time)), this._radius)
+        );
+        rec.u = uv.u;
+        rec.v = uv.v;
+        rec.mat = this.material;
+        this._transformRecord(transformedRay, rec);
         return true;
       }
       temp = (-half_b + root) / a;
       if (temp < t_max && temp > t_min) {
         rec.t = temp;
-        rec.p = r.at(rec.t);
-        const outward_normal = Vector.divScalarVec(Vector.subVec3(rec.p, this.center(r.time)), this._radius);
-        rec.setFaceNormal(r, outward_normal);
-        rec.mat = this._material;
+        rec.p = transformedRay.at(rec.t);
+        const outward_normal = Vector.divScalarVec(
+          Vector.subVec3(rec.p, this.center(transformedRay.time)),
+          this._radius
+        );
+        rec.setFaceNormal(transformedRay, outward_normal);
+        const uv = getSphereUV(
+          Vector.divScalarVec(Vector.subVec3(rec.p, this.center(transformedRay.time)), this._radius)
+        );
+        rec.u = uv.u;
+        rec.v = uv.v;
+        rec.mat = this.material;
+        this._transformRecord(transformedRay, rec);
         return true;
       }
     }

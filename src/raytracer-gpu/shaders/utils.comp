@@ -88,4 +88,13 @@ vec3 randomInUnitDisc() {
   return normalize(p);
 }
 
+vec2 getSphereUV(vec3 p) {
+  float phi   = atan(p.z, p.x);
+  float theta = asin(p.y);
+  vec2  uv;
+  uv.x = 1.0 - (phi + PI) / (2.0 * PI);
+  uv.y = (theta + PI / 2.0) / PI;
+  return uv;
+}
+
 #endif  //UTILS_INC

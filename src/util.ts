@@ -1,4 +1,5 @@
 import { mat4 } from 'gl-matrix';
+import type { Vec3 } from './vec3';
 
 export function degreeToRadians(degrees: number): number {
   return (degrees * Math.PI) / 180;
@@ -57,4 +58,12 @@ export function isPowerOf2(value: number): boolean {
 
 export function nextPowerOf2(value: number): number {
   return Math.pow(2, Math.ceil(Math.log(value) / Math.LN2));
+}
+
+export function getSphereUV(p: Vec3): { u: number; v: number } {
+  const phi = Math.atan2(p[2], p[0]);
+  const theta = Math.asin(p[1]);
+  const u = 1 - (phi + Math.PI) / (2 * Math.PI);
+  const v = (theta + Math.PI / 2) / Math.PI;
+  return { u, v };
 }
