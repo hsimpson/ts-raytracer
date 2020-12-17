@@ -29,7 +29,7 @@ const Gui = (): React.ReactElement => {
   const sceneConfig: DropDownItem[] = [
     { text: 'Random Spheres', value: 0, disabled: false },
     { text: '2 Checkboard spheres', value: 1, disabled: false },
-    { text: '2 Perlin noise spheres', value: 2, disabled: false },
+    { text: '2 Noise spheres', value: 2, disabled: false },
     { text: 'Earth sphere', value: 3, disabled: false },
     { text: 'Area light', value: 4, disabled: false },
     { text: 'Cornell Box', value: 5, disabled: false },

@@ -132,7 +132,7 @@ function twoCheckerSpheres(): { world: HittableList; cameraOptions: CameraOption
   return { world, cameraOptions };
 }
 
-function twoPerlinSpheres(): { world: HittableList; cameraOptions: CameraOptions } {
+function twoNoiseSpheres(): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
   const perlinTexture = new NoiseTexture(4);
@@ -339,7 +339,7 @@ const sceneCreators = [
   // gpuTestScene,
   randomScene,
   twoCheckerSpheres,
-  twoPerlinSpheres,
+  twoNoiseSpheres,
   earthSphere,
   simpleLight,
   cornellBox,
