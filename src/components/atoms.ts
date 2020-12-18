@@ -6,7 +6,7 @@ export const RaytracerProperties = atom({
     imageWidth: 640,
     imageHeight: 360,
     samplesPerPixel: 20,
-    maxBounces: 50,
+    maxBounces: 12,
     numOfWorkers: navigator.hardwareConcurrency,
     // numOfWorkers: 1,
     webGPUavailable: false,

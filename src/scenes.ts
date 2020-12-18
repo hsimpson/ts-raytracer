@@ -71,8 +71,9 @@ function randomScene(): { world: HittableList; cameraOptions: CameraOptions } {
 
   world.add(new Sphere([0, -1000, 0], 1000, groundMaterial));
   // let i = 1;
-  for (let a = -11; a < 11; a++) {
-    for (let b = -11; b < 11; b++) {
+  const count = 8;
+  for (let a = -count; a < count; a++) {
+    for (let b = -count; b < count; b++) {
       //console.log(`${i++}`);
       const chooseMat = randomNumber();
       const center: Vec3 = [a + 0.9 * randomNumber(), 0.2, b + 0.9 * randomNumber()];

@@ -155,7 +155,7 @@ export class RaytracerGPU extends RaytracerBase {
     await raytracing();
 
     const duration = performance.now() - this._startTime;
-    const stats = this.getStats(duration);
+    const stats = `WebGPU -- ${this.getStats(duration)}`;
 
     if (this._rayTracerOptions.download) {
       const pixelBuffer = await this.copyBuffer(computePipeline);

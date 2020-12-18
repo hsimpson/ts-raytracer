@@ -44,7 +44,8 @@ export class RaytracerCPU extends RaytracerBase {
     this._context2D.putImageData(imageData, 0, 0);
 
     const duration = performance.now() - this._startTime;
-    const stats = this.getStats(duration);
+    const cores = (this._rayTracerOptions as RayTracerCPUOptions).numOfWorkers;
+    const stats = `CPU, cores: ${cores} -- ${this.getStats(duration)}`;
 
     if (this._rayTracerOptions.download) {
       await this.downloadImage(this._rayTracerOptions.canvas, this._context2D, stats);
