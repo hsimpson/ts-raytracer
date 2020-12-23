@@ -83,7 +83,7 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
 
     this.createObjects();
 
-    this._bindGroupLayout = WebGPUContext.device.createBindGroupLayout({
+    const bindGroupLayoutDescriptor: GPUBindGroupLayoutDescriptor = {
       entries: [
         {
           binding: Bindings.ComputeParams,
@@ -120,18 +120,26 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
           visibility: GPUShaderStage.COMPUTE,
           type: 'storage-buffer',
         },
-        {
-          binding: Bindings.Sampler,
-          visibility: GPUShaderStage.COMPUTE,
-          type: 'sampler',
-        },
-        {
-          binding: Bindings.ImageTexture,
-          visibility: GPUShaderStage.COMPUTE,
-          type: 'sampled-texture',
-        },
       ],
-    });
+    };
+
+    // if (this._raytracingBuffers.hasImageTextures) {
+    bindGroupLayoutDescriptor.entries = [
+      ...bindGroupLayoutDescriptor.entries,
+      {
+        binding: Bindings.Sampler,
+        visibility: GPUShaderStage.COMPUTE,
+        type: 'sampler',
+      },
+      {
+        binding: Bindings.ImageTexture,
+        visibility: GPUShaderStage.COMPUTE,
+        type: 'sampled-texture',
+      },
+    ];
+    // }
+
+    this._bindGroupLayout = WebGPUContext.device.createBindGroupLayout(bindGroupLayoutDescriptor);
 
     await this.createBindGroup();
   }
@@ -152,9 +160,7 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
   }
 
   protected async createBindGroup(): Promise<void> {
-    const { sampler, textureView } = await this._raytracingBuffers.imageTexture();
-
-    this._bindGroup = WebGPUContext.device.createBindGroup({
+    const bindGroupDescriptor: GPUBindGroupDescriptor = {
       layout: this._bindGroupLayout,
       entries: [
         {
@@ -213,16 +219,26 @@ export default class WebGPUComputePipline extends WebGPUPipelineBase {
             size: this._texturesBuffer.size,
           },
         },
-        {
-          binding: Bindings.Sampler,
-          resource: sampler,
-        },
-        {
-          binding: Bindings.ImageTexture,
-          resource: textureView,
-        },
       ],
-    });
+    };
+
+    // if (this._raytracingBuffers.hasImageTextures) {
+    const { sampler, textureView } = await this._raytracingBuffers.imageTexture();
+
+    bindGroupDescriptor.entries = [
+      ...bindGroupDescriptor.entries,
+      {
+        binding: Bindings.Sampler,
+        resource: sampler,
+      },
+      {
+        binding: Bindings.ImageTexture,
+        resource: textureView,
+      },
+    ];
+    // }
+
+    this._bindGroup = WebGPUContext.device.createBindGroup(bindGroupDescriptor);
 
     this._bindGroup.label = `${this.name}-BindGroup`;
 

@@ -103,6 +103,10 @@ export class RaytracingBuffers {
     this.traverseHittables(world, mat4.create());
   }
 
+  public get hasImageTextures(): boolean {
+    return this._imageTextures.length > 0;
+  }
+
   private traverseHittables(list: HittableList, modelMatrix: mat4): void {
     for (const object of list.objects) {
       const objectModelMatrix = object.modelMatrix;
