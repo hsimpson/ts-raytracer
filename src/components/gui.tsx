@@ -33,7 +33,7 @@ const Gui = (): React.ReactElement => {
     { text: 'Earth sphere', value: 3, disabled: false },
     { text: 'Area light', value: 4, disabled: false },
     { text: 'Cornell Box', value: 5, disabled: false },
-    { text: 'Cornell Box Smoke', value: 6, disabled: raytracerState.webGPUenabled },
+    { text: 'Cornell Box Smoke', value: 6, disabled: false },
     { text: 'Final Scene', value: 7, disabled: raytracerState.webGPUenabled },
   ];
 

@@ -11,9 +11,15 @@ struct Primitive {
 
   float radius;
   float k;
+  float negativeInverseDensity;
 
   uint primitiveType;
   uint materialIndex;
+  uint isVolumetric;
+
+  // padding
+  float pad_0;
+  float pad_1;
 };
 
 layout(std430, set = 0, binding = 4) buffer PrimitiveBuffer {

@@ -67,10 +67,66 @@ bool hittableListHit(const Ray ray, const float tMin, const float tMax, inout Hi
   float     closestSoFar = tMax;
 
   for (int i = 0; i < primitives.length(); i++) {
-    if (hitPrimitive(primitives[i], ray, tMin, closestSoFar, tempRec)) {
+    Primitive primitve = primitives[i];
+
+    if (primitve.isVolumetric != 0u) {
+      HitRecord rec1;
+      HitRecord rec2;
+
+      if (!hitPrimitive(primitve, ray, NEGATIVE_FLT_MAX, FLT_MAX, rec1)) {
+        continue;
+      }
+
       hitAnything  = true;
-      closestSoFar = tempRec.t;
-      rec          = tempRec;
+      closestSoFar = rec1.t;
+      rec          = rec1;
+
+      if (!hitPrimitive(primitve, ray, rec1.t + 0.0001, FLT_MAX, rec2)) {
+        continue;
+      }
+
+      // hitAnything = true;
+
+      // if (rec1.t < tMin) {
+      //   rec1.t = tMin;
+      // }
+
+      // if (rec2.t > tMax) {
+      //   rec2.t = tMax;
+      // }
+
+      // if (rec1.t >= rec2.t) {
+      //   continue;
+      // }
+
+      // if (rec1.t < 0.0) {
+      //   rec1.t = 0.0;
+      // }
+
+      // float rayLength              = length(ray.direction);
+      // float distanceInsideBoundary = (rec2.t - rec1.t) * rayLength;
+      // float hitDistance            = primitve.negativeInverseDensity * log(random());
+
+      // if (hitDistance > distanceInsideBoundary) {
+      //   continue;
+      // }
+
+      // rec.t         = rec1.t + hitDistance / rayLength;
+      // rec.p         = rayAt(ray, rec.t);
+      // rec.normal    = vec3(1.0, 0.0, 0.0);
+      // rec.frontFace = true;
+
+      // rec.materialIndex     = primitve.materialIndex;
+      // rec.isoTropicMaterial = true;
+      // closestSoFar          = rec.t;
+      // hitAnything           = true;
+
+    } else {
+      if (hitPrimitive(primitve, ray, tMin, closestSoFar, tempRec)) {
+        hitAnything  = true;
+        closestSoFar = tempRec.t;
+        rec          = tempRec;
+      }
     }
   }
 

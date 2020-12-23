@@ -1,6 +1,7 @@
 import { mat4 } from 'gl-matrix';
 import { XYRect, XZRect, YZRect } from '../raytracer-cpu/aarect';
 import Box from '../raytracer-cpu/box';
+import { ConstantMedium } from '../raytracer-cpu/constantmedium';
 import DielectricMaterial from '../raytracer-cpu/dielectric';
 import DiffuseLight from '../raytracer-cpu/diffuselight';
 import { Hittable } from '../raytracer-cpu/hittable';
@@ -73,12 +74,16 @@ interface WebGPUPrimitive {
   center1: [...rgb: Vec3, a: number]; // TODO: use vec4
   radius: number;
   k: number;
+  negativeInverseDensity: number;
 
   primitiveType: number;
   materialIndex: number;
+  isVolumetric: number;
 
   // padding
-  // pad_0: number;
+  pad_0: number;
+  pad_1: number;
+  // pad_2: number;
 }
 
 const PADDING_VALUE = -99;
@@ -100,19 +105,35 @@ export class RaytracingBuffers {
   private _imageTextures: ImageTexture[] = [];
 
   public constructor(world: HittableList) {
-    this.traverseHittables(world, mat4.create());
+    this.traverseHittables(world, mat4.create(), false, 1.0);
   }
 
-  private traverseHittables(list: HittableList, modelMatrix: mat4): void {
+  private traverseHittables(
+    list: HittableList,
+    modelMatrix: mat4,
+    isConstantMedium: boolean,
+    negativeInverseDensity: number
+  ): void {
     for (const object of list.objects) {
-      const objectModelMatrix = object.modelMatrix;
-      mat4.multiply(objectModelMatrix, modelMatrix, objectModelMatrix);
+      this.handleHittable(object, modelMatrix, isConstantMedium, negativeInverseDensity);
+    }
+  }
 
-      if (object instanceof Box) {
-        this.traverseHittables(object.sides, objectModelMatrix);
-      } else {
-        this.addPrimitive(object, objectModelMatrix);
-      }
+  private handleHittable(
+    object: Hittable,
+    modelMatrix: mat4,
+    isConstantMedium: boolean,
+    negativeInverseDensity: number
+  ): void {
+    const objectModelMatrix = object.modelMatrix;
+    mat4.multiply(objectModelMatrix, modelMatrix, objectModelMatrix);
+
+    if (object instanceof Box) {
+      this.traverseHittables(object.sides, objectModelMatrix, isConstantMedium, negativeInverseDensity);
+    } else if (object instanceof ConstantMedium) {
+      this.handleHittable(object.boundary, objectModelMatrix, true, object.negInvDensity);
+    } else {
+      this.addPrimitive(object, objectModelMatrix, isConstantMedium, negativeInverseDensity);
     }
   }
 
@@ -229,7 +250,12 @@ export class RaytracingBuffers {
     return idx;
   }
 
-  private addPrimitive(obj: Hittable, modelMatrix: mat4): number {
+  private addPrimitive(
+    obj: Hittable,
+    modelMatrix: mat4,
+    isConstantMedium: boolean,
+    negativeInverseDensity: number
+  ): number {
     const idx = this._gpuPrimitives.length;
     let gpuPrimitive: WebGPUPrimitive;
 
@@ -247,8 +273,12 @@ export class RaytracingBuffers {
 
         primitiveType: WebGPUPrimitiveType.Sphere,
         materialIndex,
+        isVolumetric: isConstantMedium ? 1 : 0,
+        negativeInverseDensity,
 
-        // pad_0: PADDING_VALUE,
+        pad_0: PADDING_VALUE,
+        pad_1: PADDING_VALUE,
+        // pad_2: PADDING_VALUE,
       };
     } else if (obj instanceof MovingSphere) {
       gpuPrimitive = {
@@ -261,8 +291,12 @@ export class RaytracingBuffers {
 
         primitiveType: WebGPUPrimitiveType.MovingSphere,
         materialIndex,
+        isVolumetric: isConstantMedium ? 1 : 0,
+        negativeInverseDensity,
 
-        // pad_0: PADDING_VALUE,
+        pad_0: PADDING_VALUE,
+        pad_1: PADDING_VALUE,
+        // pad_2: PADDING_VALUE,
       };
     } else if (obj instanceof XYRect) {
       gpuPrimitive = {
@@ -275,8 +309,12 @@ export class RaytracingBuffers {
 
         primitiveType: WebGPUPrimitiveType.XYRect,
         materialIndex,
+        isVolumetric: isConstantMedium ? 1 : 0,
+        negativeInverseDensity,
 
-        // pad_0: PADDING_VALUE,
+        pad_0: PADDING_VALUE,
+        pad_1: PADDING_VALUE,
+        // pad_2: PADDING_VALUE,
       };
     } else if (obj instanceof XZRect) {
       gpuPrimitive = {
@@ -289,8 +327,12 @@ export class RaytracingBuffers {
 
         primitiveType: WebGPUPrimitiveType.XZRect,
         materialIndex,
+        isVolumetric: isConstantMedium ? 1 : 0,
+        negativeInverseDensity,
 
-        // pad_0: PADDING_VALUE,
+        pad_0: PADDING_VALUE,
+        pad_1: PADDING_VALUE,
+        // pad_2: PADDING_VALUE,
       };
     } else if (obj instanceof YZRect) {
       gpuPrimitive = {
@@ -303,8 +345,12 @@ export class RaytracingBuffers {
 
         primitiveType: WebGPUPrimitiveType.YZRect,
         materialIndex,
+        isVolumetric: isConstantMedium ? 1 : 0,
+        negativeInverseDensity,
 
-        // pad_0: PADDING_VALUE,
+        pad_0: PADDING_VALUE,
+        pad_1: PADDING_VALUE,
+        // pad_2: PADDING_VALUE,
       };
     }
 
@@ -506,7 +552,7 @@ export class RaytracingBuffers {
   }
 
   public primitiveBuffer(): ArrayBuffer {
-    const elementCount = 32;
+    const elementCount = 36;
     const primitiveSize = elementCount * 4;
 
     const bufferData = new ArrayBuffer(primitiveSize * this._gpuPrimitives.length);
@@ -549,9 +595,16 @@ export class RaytracingBuffers {
 
       bufferDataF32[offset++] = primitiv.radius;
       bufferDataF32[offset++] = primitiv.k;
+      bufferDataF32[offset++] = primitiv.negativeInverseDensity;
 
       bufferDataU32[offset++] = primitiv.primitiveType;
       bufferDataU32[offset++] = primitiv.materialIndex;
+      bufferDataU32[offset++] = primitiv.isVolumetric;
+
+      // paddings
+      bufferDataF32[offset++] = primitiv.pad_0;
+      bufferDataF32[offset++] = primitiv.pad_1;
+      // bufferDataF32[offset++] = primitiv.pad_2;
     }
 
     // log('Primitives:', bufferData);

@@ -2,6 +2,10 @@
 #define UTILS_INC
 
 #define PI 3.1415926538
+//#define FLT_MAX 3.402823466e+38
+#define NEGATIVE_FLT_MAX -99999.99
+#define FLT_MAX 99999.99
+//const float INFINITY     = 1. / 0.;
 
 /*
 vec2 _seed;

@@ -24,16 +24,21 @@ bool materialScatter(const Ray ray, const HitRecord rec, out vec3 attenuation, o
   Material material     = materials[materialIndex];
   uint     materialType = material.materialType;
 
-  switch (materialType) {
-    case MATERIALTYPE_LAMBERTIAN:
-      return lambertianScatter(material, ray, rec, attenuation, scattered);
-      break;
-    case MATERIALTYPE_METAL:
-      return metalScatter(material, ray, rec, attenuation, scattered);
-      break;
-    case MATERIALTYPE_DIELECTRIC:
-      return dielectricScatter(material, ray, rec, attenuation, scattered);
-      break;
+  if (rec.isoTropicMaterial) {
+    attenuation = vec3(1.0, 0.0, 0.0);
+    return true;
+  } else {
+    switch (materialType) {
+      case MATERIALTYPE_LAMBERTIAN:
+        return lambertianScatter(material, ray, rec, attenuation, scattered);
+        break;
+      case MATERIALTYPE_METAL:
+        return metalScatter(material, ray, rec, attenuation, scattered);
+        break;
+      case MATERIALTYPE_DIELECTRIC:
+        return dielectricScatter(material, ray, rec, attenuation, scattered);
+        break;
+    }
   }
 
   return false;
