@@ -48,8 +48,8 @@ export function negate(v: Vec3): Vec3 {
   return [-v[0], -v[1], -v[2]];
 }
 
-export function add(v: Vec3, o: Vec3): Vec3 {
-  return [v[0] + o[0], v[1] + o[1], v[2] + o[2]];
+export function addScalar(v: Vec3, t: number): Vec3 {
+  return [v[0] + t, v[1] + t, v[2] + t];
 }
 
 export function multiplyScalar(v: Vec3, t: number): Vec3 {
