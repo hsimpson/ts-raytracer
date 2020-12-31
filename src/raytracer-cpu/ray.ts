@@ -1,6 +1,8 @@
+import { Triangle } from '../triangle';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
 import { HitRecord, Hittable } from './hittable';
+import { triangleListIntersect } from './triangleintersect';
 
 export default class Ray {
   private _orig: Vec3;
@@ -50,16 +52,27 @@ export default class Ray {
   }
 }
 
-export function rayColor(r: Ray, background: Vec3, world: Hittable, depth: number): Vec3 {
+// const testTriangles: Triangle[] = [
+//   new Triangle([-1, -1, 0], [-1, 1, -1], [1, 1, 0]),
+//   new Triangle([1, 1, 0], [1, -1, -1], [-1, -1, 0]),
+// ];
+
+export function rayColor(r: Ray, background: Vec3, world: Hittable | Triangle[], depth: number): Vec3 {
   const rec = new HitRecord();
   // If we've exceeded the ray bounce limit, no more light is gathered.
   if (depth <= 0) {
     return [0, 0, 0];
   }
 
-  // If the ray hits nothing, return the background color.
-  if (!world.hit(r, 0.001, Number.POSITIVE_INFINITY, rec)) {
-    return background;
+  if (world instanceof Hittable) {
+    // If the ray hits nothing, return the background color.
+    if (!world.hit(r, 0.001, Number.POSITIVE_INFINITY, rec)) {
+      return background;
+    }
+  } else {
+    if (!triangleListIntersect(world as Triangle[], r, 0.001, Number.POSITIVE_INFINITY, rec)) {
+      return background;
+    }
   }
 
   const scattered = new Ray();

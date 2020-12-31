@@ -54,6 +54,10 @@ const commonConfig: webpack.Configuration = {
           from: './src/assets/textures/**/*',
           to: 'assets/textures/[name].[ext]',
         },
+        {
+          from: './src/assets/models/**/*',
+          to: 'assets/models/[name].[ext]',
+        },
       ],
     }),
   ],

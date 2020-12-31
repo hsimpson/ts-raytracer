@@ -11,6 +11,7 @@ import {
   ControllerStopMessage,
   WorkerMessage,
 } from './workerinterfaces';
+import * as GLTFLoader from '../gltfloader';
 
 export interface RayTracerCPUOptions extends RayTracerBaseOptions {
   numOfWorkers: number;
@@ -78,6 +79,10 @@ export class RaytracerCPU extends RaytracerBase {
 
     const { world, cameraOptions } = await getScene(this._rayTracerOptions.scene);
 
+    // const triangleList = await GLTFLoader.load('assets/models/cube.gltf');
+    // const triangleList = await GLTFLoader.load('assets/models/uvsphere.gltf');
+    const triangleList = await GLTFLoader.load('assets/models/monkey.gltf');
+
     const aspectRatio = this._rayTracerOptions.imageWidth / this._rayTracerOptions.imageHeight;
 
     const camera = new Camera();
@@ -105,6 +110,7 @@ export class RaytracerCPU extends RaytracerBase {
         world: serialize(HittableList, world),
         camera: serialize(Camera, camera),
         background: cameraOptions.background,
+        triangleList: triangleList,
       },
     };
 

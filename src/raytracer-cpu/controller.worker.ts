@@ -55,6 +55,7 @@ const start = (msg: ControllerStartMessage): void => {
         startLine: startLine,
         samplesPerPixel: _samplesPerPixel,
         maxBounces: _maxBounces,
+        triangleList: msg.data.triangleList,
       },
     };
 

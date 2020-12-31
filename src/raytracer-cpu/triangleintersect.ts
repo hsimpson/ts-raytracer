@@ -2,6 +2,7 @@ import Ray from './ray';
 import { HitRecord } from './hittable';
 import { vec3 } from 'gl-matrix';
 import LambertianMaterial from './lambertian';
+import { NormalMaterial } from './normalmaterial';
 import { Triangle } from '../triangle';
 
 /*
@@ -57,6 +58,7 @@ bool RayIntersectsTriangle(Vector3D rayOrigin,
 
 const EPSILON = 0.0000001;
 const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
+const NORMALMATERIAL = new NormalMaterial();
 
 export function triangleIntersect(triangle: Triangle, ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
   //Vector3D edge1, edge2, h, s, q;
@@ -106,9 +108,19 @@ export function triangleIntersect(triangle: Triangle, ray: Ray, tMin: number, tM
     vec3.add(outIntersectionPoint, rayOrigin, rayDirection);
     vec3.scale(outIntersectionPoint, outIntersectionPoint, t);
     // rec.p = [outIntersectionPoint[0], outIntersectionPoint[0], outIntersectionPoint[0]];
-    rec.mat = REDMATERIAL;
-    // TODO Normal
-    // TODO UV
+    // rec.mat = REDMATERIAL;
+    rec.mat = NORMALMATERIAL;
+
+    //FIXME: replace when everything is gl-matrix vec3
+    rec.setFaceNormal(ray, [triangle.surfaceNormal[0], triangle.surfaceNormal[1], triangle.surfaceNormal[2]]);
+
+    // FIXME: this is only a hack, to avoid backfacing faces to show up
+    if (!rec.frontFace) {
+      return false;
+    }
+
+    // TODO: interpolated normal vectors
+    // TODO: UV
 
     return true;
   }

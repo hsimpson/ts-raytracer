@@ -56,7 +56,7 @@ function gpuTestScene(): { world: HittableList; cameraOptions: CameraOptions } {
   world.add(redSphere);
   world.add(greenSphere);
 
-  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [0, 2, 10], fovY: 10 };
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [0, 0, 20], fovY: 10 };
 
   return { world, cameraOptions };
 }
@@ -337,8 +337,8 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
 }
 
 const sceneCreators = [
-  // gpuTestScene,
-  randomScene,
+  gpuTestScene,
+  // randomScene,
   twoCheckerSpheres,
   twoNoiseSpheres,
   earthSphere,

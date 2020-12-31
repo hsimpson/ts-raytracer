@@ -36,7 +36,7 @@ const writeColor = (array: Uint8ClampedArray, offset: number, color: Vec3, spp: 
   array[offset++] = b * 255;
 };
 
-const start = (msg: ComputeStartMessage): void => {
+function start(msg: ComputeStartMessage): void {
   _id = msg.data.workerId;
   const camera = deserialize(Camera, msg.data.camera);
   const world = deserialize(HittableList, msg.data.world);
@@ -47,6 +47,7 @@ const start = (msg: ComputeStartMessage): void => {
   const startLine = msg.data.startLine;
   const spp = msg.data.samplesPerPixel;
   const maxBounces = msg.data.maxBounces;
+  const triangleList = msg.data.triangleList;
 
   console.log(`worker[${_id}] startLine: ${startLine}`);
   console.log(`worker[${_id}] linecount: ${scanlineCount}`);
@@ -75,7 +76,8 @@ const start = (msg: ComputeStartMessage): void => {
         // const v = (j + rnd) / (imageHeight - 1);
 
         const r = camera.getRay(u, v);
-        pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, world, maxBounces));
+        // pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, world, maxBounces));
+        pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, triangleList, maxBounces));
       }
 
       writeColor(dataArray, offset, pixelColor, spp);
@@ -93,7 +95,7 @@ const start = (msg: ComputeStartMessage): void => {
     },
   };
   _controllerCtx.postMessage(computeEndMessage);
-};
+}
 
 // Respond to message from parent thread
 _controllerCtx.addEventListener('message', (event) => {
