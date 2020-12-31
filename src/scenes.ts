@@ -1,16 +1,16 @@
 import { CameraOptions } from './camera';
 import { XYRect, XZRect, YZRect } from './raytracer-cpu/aarect';
-import Box from './raytracer-cpu/box';
-import BVHNode from './raytracer-cpu/bvhnode';
+import { Box } from './raytracer-cpu/box';
+import { BVHNode } from './raytracer-cpu/bvhnode';
 import { ConstantMedium } from './raytracer-cpu/constantmedium';
-import DielectricMaterial from './raytracer-cpu/dielectric';
-import DiffuseLight from './raytracer-cpu/diffuselight';
+import { DielectricMaterial } from './raytracer-cpu/dielectric';
+import { DiffuseLight } from './raytracer-cpu/diffuselight';
 import { Hittable } from './raytracer-cpu/hittable';
 import { HittableList } from './raytracer-cpu/hittablelist';
-import LambertianMaterial from './raytracer-cpu/lambertian';
-import Material from './raytracer-cpu/material';
-import MetalMaterial from './raytracer-cpu/metal';
-import MovingSphere from './raytracer-cpu/movingsphere';
+import { LambertianMaterial } from './raytracer-cpu/lambertian';
+import { Material } from './raytracer-cpu/material';
+import { MetalMaterial } from './raytracer-cpu/metal';
+import { MovingSphere } from './raytracer-cpu/movingsphere';
 import { Sphere } from './raytracer-cpu/sphere';
 import { CheckerTexture, ImageTexture, NoiseTexture } from './raytracer-cpu/texture';
 import { randomNumber, randomNumberRange } from './util';
@@ -47,11 +47,11 @@ function gpuTestScene(): { world: HittableList; cameraOptions: CameraOptions } {
 
   const redSphere = new Sphere([0, 0, 0], 0.4, red);
   redSphere.name = 'redSphere';
-  redSphere.translate([-0.4, 0.4, 0]);
+  redSphere.transform.translate([-0.4, 0.4, 0]);
 
   const greenSphere = new Sphere([0, 0, 0], 0.4, green);
   greenSphere.name = 'greenSphere';
-  greenSphere.translate([0.6, 0.4, 1]);
+  greenSphere.transform.translate([0.6, 0.4, 1]);
 
   world.add(redSphere);
   world.add(greenSphere);
@@ -204,13 +204,13 @@ function cornellBox(): { world: HittableList; cameraOptions: CameraOptions } {
   world.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
 
   const box1: Hittable = new Box([0, 0, 0], [165, 330, 165], white);
-  box1.translate([265, 0, 295]);
-  box1.rotateEuler(0.0, 15.0, 0.0);
+  box1.transform.translate([265, 0, 295]);
+  box1.transform.rotateEuler(0.0, 15.0, 0.0);
   world.add(box1);
 
   const box2: Hittable = new Box([0, 0, 0], [165, 165, 165], white);
-  box2.translate([130, 0, 65]);
-  box2.rotateEuler(0.0, -18.0, 0.0);
+  box2.transform.translate([130, 0, 65]);
+  box2.transform.rotateEuler(0.0, -18.0, 0.0);
   world.add(box2);
 
   const cameraOptions: CameraOptions = {
@@ -239,13 +239,13 @@ function cornellBoxSmoke(): { world: HittableList; cameraOptions: CameraOptions 
   world.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
 
   const box1 = new Box([0, 0, 0], [165, 330, 165], white);
-  box1.translate([265, 0, 295]);
-  box1.rotateEuler(0.0, 15.0, 0.0);
+  box1.transform.translate([265, 0, 295]);
+  box1.transform.rotateEuler(0.0, 15.0, 0.0);
   world.add(new ConstantMedium(box1, 0.01, [0, 0, 0]));
 
   const box2 = new Box([0, 0, 0], [165, 165, 165], white);
-  box2.translate([130, 0, 65]);
-  box2.rotateEuler(0.0, -18.0, 0.0);
+  box2.transform.translate([130, 0, 65]);
+  box2.transform.rotateEuler(0.0, -18.0, 0.0);
   world.add(new ConstantMedium(box2, 0.01, [1, 1, 1]));
 
   const cameraOptions: CameraOptions = {
@@ -323,8 +323,8 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
   // transform.rotateEuler(0, 15, 0);
   // world.add(transform);
 
-  boxes2.translate([-100, 270, 395]);
-  boxes2.rotateEuler(0, 15, 0);
+  boxes2.transform.translate([-100, 270, 395]);
+  boxes2.transform.rotateEuler(0, 15, 0);
   world.add(boxes2);
 
   const cameraOptions: CameraOptions = {

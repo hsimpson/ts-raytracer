@@ -1,8 +1,8 @@
+import { serializable } from '../serializing';
+import { clamp } from '../util';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
-import { serializable } from '../serializing';
-import Perlin from './perlin';
-import { clamp } from '../util';
+import { Perlin } from './perlin';
 
 export abstract class Texture {
   public abstract value(u: number, v: number, p: Vec3): Vec3;

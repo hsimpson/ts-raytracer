@@ -1,13 +1,13 @@
-import Material from './material';
-import { HitRecord } from './hittable';
-import Ray from './ray';
+import { serializable } from '../serializing';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
-import { serializable } from '../serializing';
-import { Texture, SolidColor } from './texture';
+import { HitRecord } from './hitrecord';
+import { Material } from './material';
+import { Ray } from './ray';
+import { SolidColor, Texture } from './texture';
 
 @serializable
-export default class LambertianMaterial extends Material {
+export class LambertianMaterial extends Material {
   private _albedo: Texture;
 
   public constructor(color?: Vec3) {

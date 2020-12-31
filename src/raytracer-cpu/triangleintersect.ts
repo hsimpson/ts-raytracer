@@ -1,9 +1,9 @@
-import Ray from './ray';
-import { HitRecord } from './hittable';
 import { vec3 } from 'gl-matrix';
-import LambertianMaterial from './lambertian';
-import { NormalMaterial } from './normalmaterial';
 import { Triangle } from '../triangle';
+import { HitRecord } from './hitrecord';
+import { LambertianMaterial } from './lambertian';
+import { NormalMaterial } from './normalmaterial';
+import { Ray } from './ray';
 
 /*
 

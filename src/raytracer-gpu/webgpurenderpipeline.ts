@@ -1,6 +1,6 @@
 import { WebGPUBuffer } from './webgpubuffer';
 import { WebGPUContext } from './webgpucontext';
-import WebGPUPipelineBase from './webgpupipelinebase';
+import { WebGPUPipelineBase } from './webgpupipelinebase';
 
 interface RenderUniformParams {
   width: number;
@@ -32,7 +32,7 @@ const _vertexPositions = new Float32Array([
 
 /* eslint-enable indent */
 
-export default class WebGPURenderPipeline extends WebGPUPipelineBase {
+export class WebGPURenderPipeline extends WebGPUPipelineBase {
   private _options: WebGPURenderPipelineOptions;
   private _vertexPositionBuffer = new WebGPUBuffer();
   // private _vertexColorBuffer = new WebGPUBuffer();

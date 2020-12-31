@@ -1,14 +1,15 @@
-import { HitRecord, Hittable } from './hittable';
-import { AABB } from './aabb';
-import { HittableList } from './hittablelist';
-import Ray from './ray';
-import { randomInt, sortArrayRange } from '../util';
 import { serializable } from '../serializing';
+import { randomInt, sortArrayRange } from '../util';
+import { AABB } from './aabb';
+import { HitRecord } from './hitrecord';
+import { Hittable } from './hittable';
+import { HittableList } from './hittablelist';
+import { Ray } from './ray';
 
 //let _id = 0;
 
 @serializable
-export default class BVHNode extends Hittable {
+export class BVHNode extends Hittable {
   private box = new AABB();
   private left: Hittable;
   private right: Hittable;

@@ -1,9 +1,9 @@
-import Material from './material';
-import { HitRecord } from './hittable';
-import Ray from './ray';
+import { serializable } from '../serializing';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
-import { serializable } from '../serializing';
+import { HitRecord } from './hitrecord';
+import { Material } from './material';
+import { Ray } from './ray';
 
 @serializable
 export class NormalMaterial extends Material {

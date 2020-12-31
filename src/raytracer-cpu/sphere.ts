@@ -1,11 +1,12 @@
-import Material from './material';
-import { HitRecord, Hittable } from './hittable';
-import Ray from './ray';
+import { serializable } from '../serializing';
+import { getSphereUV } from '../util';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
 import { AABB } from './aabb';
-import { serializable } from '../serializing';
-import { getSphereUV } from '../util';
+import { HitRecord } from './hitrecord';
+import { Hittable } from './hittable';
+import { Material } from './material';
+import { Ray } from './ray';
 
 @serializable
 export class Sphere extends Hittable {
@@ -28,7 +29,7 @@ export class Sphere extends Hittable {
   }
 
   public hit(ray: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const transformedRay = this._transformRay(ray);
+    const transformedRay = this.transform.transformRay(ray);
 
     const oc = Vector.subVec3(transformedRay.origin, this._center);
     const a = Vector.lengthSquared(transformedRay.direction);
@@ -48,7 +49,7 @@ export class Sphere extends Hittable {
         rec.u = uv.u;
         rec.v = uv.v;
         rec.mat = this.material;
-        this._transformRecord(transformedRay, rec);
+        this.transform.transformRecord(transformedRay, rec);
         return true;
       }
       temp = (-half_b + root) / a;
@@ -61,7 +62,7 @@ export class Sphere extends Hittable {
         rec.u = uv.u;
         rec.v = uv.v;
         rec.mat = this.material;
-        this._transformRecord(transformedRay, rec);
+        this.transform.transformRecord(transformedRay, rec);
         return true;
       }
     }

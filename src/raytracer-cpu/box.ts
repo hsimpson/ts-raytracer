@@ -2,13 +2,14 @@ import { serializable } from '../serializing';
 import type { Vec3 } from '../vec3';
 import { AABB } from './aabb';
 import { XYRect, XZRect, YZRect } from './aarect';
-import { HitRecord, Hittable } from './hittable';
+import { HitRecord } from './hitrecord';
+import { Hittable } from './hittable';
 import { HittableList } from './hittablelist';
-import Material from './material';
-import Ray from './ray';
+import { Material } from './material';
+import { Ray } from './ray';
 
 @serializable
-export default class Box extends Hittable {
+export class Box extends Hittable {
   private _boxMin: Vec3;
   private _boxMax: Vec3;
   private _sides = new HittableList();
@@ -33,13 +34,13 @@ export default class Box extends Hittable {
   }
 
   public hit(ray: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const transformedRay = this._transformRay(ray);
+    const transformedRay = this.transform.transformRay(ray);
 
     if (!this._sides.hit(transformedRay, t_min, t_max, rec)) {
       return false;
     }
 
-    this._transformRecord(transformedRay, rec);
+    this.transform.transformRecord(transformedRay, rec);
 
     return true;
   }

@@ -1,10 +1,10 @@
 import { Camera } from '../camera';
 import { HittableList } from '../raytracer-cpu/hittablelist';
+import type { Vec3 } from '../vec3';
 import { RaytracingBuffers } from './raytracingbuffers';
 import { WebGPUBuffer } from './webgpubuffer';
 import { WebGPUContext } from './webgpucontext';
-import WebGPUPipelineBase from './webgpupipelinebase';
-import type { Vec3 } from '../vec3';
+import { WebGPUPipelineBase } from './webgpupipelinebase';
 
 interface ComputeUniformParams {
   background: Vec3;
@@ -36,7 +36,7 @@ const enum Bindings {
   ImageTexture = 8,
 }
 
-export default class WebGPUComputePipline extends WebGPUPipelineBase {
+export class WebGPUComputePipline extends WebGPUPipelineBase {
   private _options: WebGPUComputePiplineOptions;
   private _raytracingBuffers: RaytracingBuffers;
 

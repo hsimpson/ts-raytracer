@@ -5,9 +5,9 @@ import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
 import { WebGPUBuffer } from './webgpubuffer';
-import WebGPUComputePipline from './webgpucomputepipeline';
+import { WebGPUComputePipline } from './webgpucomputepipeline';
 import { WebGPUContext } from './webgpucontext';
-import WebGPURenderPipeline from './webgpurenderpipeline';
+import { WebGPURenderPipeline } from './webgpurenderpipeline';
 // import { sleep } from '../util';
 
 const LOCAL_SIZE = 8;

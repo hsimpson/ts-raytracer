@@ -1,9 +1,10 @@
-import { AABB } from './aabb';
-import { HitRecord, Hittable } from './hittable';
-import Material from './material';
-import Ray from './ray';
-import type { Vec3 } from '../vec3';
 import { serializable } from '../serializing';
+import type { Vec3 } from '../vec3';
+import { AABB } from './aabb';
+import { HitRecord } from './hitrecord';
+import { Hittable } from './hittable';
+import { Material } from './material';
+import { Ray } from './ray';
 
 @serializable
 export class XYRect extends Hittable {

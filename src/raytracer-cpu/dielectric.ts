@@ -1,13 +1,13 @@
-import Material from './material';
-import { HitRecord } from './hittable';
-import Ray from './ray';
+import { serializable } from '../serializing';
 import { randomNumber } from '../util';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
-import { serializable } from '../serializing';
+import { HitRecord } from './hitrecord';
+import { Material } from './material';
+import { Ray } from './ray';
 
 @serializable
-export default class DielectricMaterial extends Material {
+export class DielectricMaterial extends Material {
   private _indexOfRefraction: number;
 
   public constructor(refIdx: number) {

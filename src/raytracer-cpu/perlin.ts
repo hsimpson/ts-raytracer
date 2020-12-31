@@ -4,7 +4,7 @@ import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
 
 @serializable
-export default class Perlin {
+export class Perlin {
   private static _pointCount = 256;
   private _ranVecs: Array<Vec3>;
   private _permX: Array<number>;

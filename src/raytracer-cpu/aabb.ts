@@ -1,6 +1,6 @@
-import type { Vec3 } from '../vec3';
-import Ray from './ray';
 import { serializable } from '../serializing';
+import type { Vec3 } from '../vec3';
+import { Ray } from './ray';
 
 @serializable
 export class AABB {

@@ -1,10 +1,11 @@
 import { Triangle } from '../triangle';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
-import { HitRecord, Hittable } from './hittable';
+import { HitRecord } from './hitrecord';
+import { Hittable } from './hittable';
 import { triangleListIntersect } from './triangleintersect';
 
-export default class Ray {
+export class Ray {
   private _orig: Vec3;
   private _dir: Vec3;
   private _time: number;

@@ -79,9 +79,9 @@ export class RaytracerCPU extends RaytracerBase {
 
     const { world, cameraOptions } = await getScene(this._rayTracerOptions.scene);
 
-    // const triangleList = await GLTFLoader.load('assets/models/cube.gltf');
+    const triangleList = await GLTFLoader.load('assets/models/cube.gltf');
     // const triangleList = await GLTFLoader.load('assets/models/uvsphere.gltf');
-    const triangleList = await GLTFLoader.load('assets/models/monkey.gltf');
+    // const triangleList = await GLTFLoader.load('assets/models/monkey.gltf');
 
     const aspectRatio = this._rayTracerOptions.imageWidth / this._rayTracerOptions.imageHeight;
 
