@@ -1,3 +1,4 @@
+// see: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#objects
 export interface GLTFBuffer {
   byteLength: number;
   uri: string;
@@ -36,3 +37,33 @@ export interface GLTFBufferView {
   byteLength: number;
   byteOffset: number;
 }
+
+export interface GLTFNode {
+  mesh: number;
+  name?: string;
+  rotation?: [number, number, number, number];
+  translation?: [number, number, number];
+}
+
+export interface GLTFMesh {
+  name?: string;
+  primitives: GLTFPrimitive[];
+}
+
+export interface GLTFPrimitive {
+  attributes: GLTFAttribute;
+  indices?: number;
+  material?: number;
+}
+
+export type GLTFAttributeName =
+  | 'POSITION'
+  | 'NORMAL'
+  | 'TANGENT'
+  | 'TEXCOORD_0'
+  | 'TEXCOORD_1'
+  | 'COLOR_0'
+  | 'JOINTS_0'
+  | 'WEIGHTS_0';
+
+export type GLTFAttribute = { [key in GLTFAttributeName]: number };

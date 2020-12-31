@@ -1,10 +1,10 @@
+import { vec2, vec3 } from 'gl-matrix';
+import { GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
 import { Triangle } from './triangle';
 import { TriangleMesh } from './trianglemesh';
-import { GLTFBuffer, GLTFBufferView, GLTFAccessor } from './gltftypes';
-import { vec2, vec3 } from 'gl-matrix';
 
-export async function load(url: string): Promise<TriangleMesh> {
-  const triangleMesh: TriangleMesh = new TriangleMesh();
+export async function load(url: string): Promise<TriangleMesh[]> {
+  const triangleMeshArray: TriangleMesh[] = [];
 
   const response = await fetch(url);
   const gltf = await response.json();
@@ -15,13 +15,23 @@ export async function load(url: string): Promise<TriangleMesh> {
   // get 1st scene
   const scene = gltf.scenes[0];
 
-  const accessors = gltf.accessors;
-  const bufferViews = gltf.bufferViews;
+  const accessors: GLTFAccessor[] = gltf.accessors;
+  const bufferViews: GLTFBufferView[] = gltf.bufferViews;
 
   // for each node
   for (const nodeIdx of scene.nodes) {
-    const node = gltf.nodes[nodeIdx];
-    const mesh = gltf.meshes[node.mesh];
+    const node: GLTFNode = gltf.nodes[nodeIdx];
+    const mesh: GLTFMesh = gltf.meshes[node.mesh];
+
+    const triangleMesh = new TriangleMesh();
+
+    if (node.translation) {
+      triangleMesh.transform.translate(node.translation);
+    }
+
+    if (node.rotation) {
+      triangleMesh.transform.rotateQuat(node.rotation);
+    }
 
     for (const primitive of mesh.primitives) {
       const positionAccessor: GLTFAccessor = accessors[primitive.attributes.POSITION];
@@ -89,9 +99,10 @@ export async function load(url: string): Promise<TriangleMesh> {
 
       // TODO: material
     }
+    triangleMeshArray.push(triangleMesh);
   }
 
-  return triangleMesh;
+  return triangleMeshArray;
 }
 
 async function decodeBuffers(buffers: GLTFBuffer[]): Promise<ArrayBuffer[]> {

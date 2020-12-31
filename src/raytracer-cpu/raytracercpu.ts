@@ -80,10 +80,12 @@ export class RaytracerCPU extends RaytracerBase {
 
     const { world, cameraOptions } = await getScene(this._rayTracerOptions.scene);
 
-    // const triangleList = await GLTFLoader.load('assets/models/cube.gltf');
-    const triangleMesh = await GLTFLoader.load('assets/models/cube_rotated.gltf');
-    // const triangleList = await GLTFLoader.load('assets/models/uvsphere.gltf');
-    // const triangleList = await GLTFLoader.load('assets/models/monkey.gltf');
+    // const triangleMeshes = await GLTFLoader.load('assets/models/cube.gltf');
+    // const triangleMeshes: TriangleMesh[] = await GLTFLoader.load('assets/models/cube_rotated.gltf');
+    // const triangleMeshes = await GLTFLoader.load('assets/models/uvsphere.gltf');
+    // const triangleMeshes = await GLTFLoader.load('assets/models/monkey.gltf');
+    // const triangleMeshes = await GLTFLoader.load('assets/models/torus.gltf');
+    const triangleMeshes = await GLTFLoader.load('assets/models/grid.gltf');
 
     const aspectRatio = this._rayTracerOptions.imageWidth / this._rayTracerOptions.imageHeight;
 
@@ -112,7 +114,7 @@ export class RaytracerCPU extends RaytracerBase {
         world: serialize(HittableList, world),
         camera: serialize(Camera, camera),
         background: cameraOptions.background,
-        triangleMesh: serialize(TriangleMesh, triangleMesh),
+        triangleMesh: serialize(TriangleMesh, triangleMeshes[0]), // FIXME: multiple meshes
       },
     };
 

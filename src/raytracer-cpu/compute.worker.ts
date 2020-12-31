@@ -77,8 +77,8 @@ function start(msg: ComputeStartMessage): void {
         // const v = (j + rnd) / (imageHeight - 1);
 
         const r = camera.getRay(u, v);
-        pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, world, maxBounces));
-        // pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, triangleMesh, maxBounces));
+        // pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, world, maxBounces));
+        pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, triangleMesh, maxBounces));
       }
 
       writeColor(dataArray, offset, pixelColor, spp);
