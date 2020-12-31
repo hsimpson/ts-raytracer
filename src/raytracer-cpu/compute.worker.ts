@@ -1,5 +1,6 @@
 import { Camera } from '../camera';
 import { deserialize } from '../serializing/deserialize';
+import { TriangleMesh } from '../trianglemesh';
 import { randomNumber } from '../util';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
@@ -47,7 +48,7 @@ function start(msg: ComputeStartMessage): void {
   const startLine = msg.data.startLine;
   const spp = msg.data.samplesPerPixel;
   const maxBounces = msg.data.maxBounces;
-  const triangleList = msg.data.triangleList;
+  const triangleMesh = deserialize(TriangleMesh, msg.data.triangleMesh);
 
   console.log(`worker[${_id}] startLine: ${startLine}`);
   console.log(`worker[${_id}] linecount: ${scanlineCount}`);
@@ -76,8 +77,8 @@ function start(msg: ComputeStartMessage): void {
         // const v = (j + rnd) / (imageHeight - 1);
 
         const r = camera.getRay(u, v);
-        // pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, world, maxBounces));
-        pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, triangleList, maxBounces));
+        pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, world, maxBounces));
+        // pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, triangleMesh, maxBounces));
       }
 
       writeColor(dataArray, offset, pixelColor, spp);

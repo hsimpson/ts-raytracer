@@ -1,9 +1,10 @@
 import { Triangle } from './triangle';
+import { TriangleMesh } from './trianglemesh';
 import { GLTFBuffer, GLTFBufferView, GLTFAccessor } from './gltftypes';
 import { vec2, vec3 } from 'gl-matrix';
 
-export async function load(url: string): Promise<Triangle[]> {
-  const triangleList: Triangle[] = [];
+export async function load(url: string): Promise<TriangleMesh> {
+  const triangleMesh: TriangleMesh = new TriangleMesh();
 
   const response = await fetch(url);
   const gltf = await response.json();
@@ -80,7 +81,7 @@ export async function load(url: string): Promise<Triangle[]> {
             textureCoords[b],
             textureCoords[c]
           );
-          triangleList.push(triangle);
+          triangleMesh.add(triangle);
         }
       } else {
         // TODO: non indexed vertices
@@ -90,7 +91,7 @@ export async function load(url: string): Promise<Triangle[]> {
     }
   }
 
-  return triangleList;
+  return triangleMesh;
 }
 
 async function decodeBuffers(buffers: GLTFBuffer[]): Promise<ArrayBuffer[]> {
