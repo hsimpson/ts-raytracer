@@ -55,7 +55,7 @@ export class Triangle {
     this.n1 = n1;
     this.n2 = n2;
 
-    if (!n0 || !n1 || n2) {
+    if (n0 === undefined || n1 === undefined || n2 === undefined) {
       /*
       For each triangle ABC
         n := normalize(cross(B-A, C-A))
@@ -82,13 +82,9 @@ export class Triangle {
     this.surfaceNormal = vec3.create();
     vec3.normalize(this.surfaceNormal, avgVector3([this.n0, this.n1, this.n2]));
 
-    this.uv0 = uv0;
-    this.uv1 = uv1;
-    this.uv2 = uv2;
-
-    this.uv0 = uv0 || [0, 0];
-    this.uv1 = uv1 || [0, 0];
-    this.uv2 = uv2 || [0, 0];
+    this.uv0 = uv0 ?? [0, 0];
+    this.uv1 = uv1 ?? [0, 0];
+    this.uv2 = uv2 ?? [0, 0];
   }
 
   public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
@@ -134,6 +130,18 @@ export class Triangle {
       rec.t = t;
       rec.p = ray.at(t);
 
+      const w = 1.0 - u - v;
+      const n0 = vec3.create();
+      const n1 = vec3.create();
+      const n2 = vec3.create();
+      vec3.scale(n0, this.n0, w);
+      vec3.scale(n1, this.n1, u);
+      vec3.scale(n2, this.n2, v);
+      const normal = vec3.create();
+      vec3.add(normal, n0, n1);
+      vec3.add(normal, normal, n2);
+      vec3.normalize(normal, normal);
+
       const outIntersectionPoint = vec3.create();
       vec3.add(outIntersectionPoint, rayOrigin, rayDirection);
       vec3.scale(outIntersectionPoint, outIntersectionPoint, t);
@@ -142,7 +150,8 @@ export class Triangle {
       rec.mat = NORMALMATERIAL;
 
       //FIXME: replace when everything is gl-matrix vec3
-      rec.setFaceNormal(ray, [this.surfaceNormal[0], this.surfaceNormal[1], this.surfaceNormal[2]]);
+      // rec.setFaceNormal(ray, [this.surfaceNormal[0], this.surfaceNormal[1], this.surfaceNormal[2]]);
+      rec.setFaceNormal(ray, [normal[0], normal[1], normal[2]]);
 
       // FIXME: this is only a hack, to avoid backfacing faces to show up
       if (!rec.frontFace) {

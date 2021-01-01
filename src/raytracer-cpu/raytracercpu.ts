@@ -83,9 +83,10 @@ export class RaytracerCPU extends RaytracerBase {
     // const triangleMeshes = await GLTFLoader.load('assets/models/cube.gltf');
     // const triangleMeshes: TriangleMesh[] = await GLTFLoader.load('assets/models/cube_rotated.gltf');
     // const triangleMeshes = await GLTFLoader.load('assets/models/uvsphere.gltf');
-    // const triangleMeshes = await GLTFLoader.load('assets/models/monkey.gltf');
+    // const triangleMeshes = await GLTFLoader.load('assets/models/uvsphere_smooth.gltf');
+    const triangleMeshes = await GLTFLoader.load('assets/models/monkey.gltf');
     // const triangleMeshes = await GLTFLoader.load('assets/models/torus.gltf');
-    const triangleMeshes = await GLTFLoader.load('assets/models/grid.gltf');
+    // const triangleMeshes = await GLTFLoader.load('assets/models/grid.gltf');
 
     const aspectRatio = this._rayTracerOptions.imageWidth / this._rayTracerOptions.imageHeight;
 
