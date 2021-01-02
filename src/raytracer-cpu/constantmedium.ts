@@ -5,8 +5,8 @@ import * as Vector from '../vec3';
 import { AABB } from './aabb';
 import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
-import { IsoTropic } from './isotropic';
-import { Material } from './material';
+import { IsoTropic } from '../material/isotropic';
+import { Material } from '../material/material';
 import { Ray } from './ray';
 import { Texture } from './texture';
 

@@ -1,13 +1,13 @@
 import { mat4 } from 'gl-matrix';
 import { XYRect, XZRect, YZRect } from '../raytracer-cpu/aarect';
 import { Box } from '../raytracer-cpu/box';
-import { DielectricMaterial } from '../raytracer-cpu/dielectric';
-import { DiffuseLight } from '../raytracer-cpu/diffuselight';
+import { DielectricMaterial } from '../material/dielectric';
+import { DiffuseLight } from '../material/diffuselight';
 import { Hittable } from '../raytracer-cpu/hittable';
 import { HittableList } from '../raytracer-cpu/hittablelist';
-import { LambertianMaterial } from '../raytracer-cpu/lambertian';
-import { Material } from '../raytracer-cpu/material';
-import { MetalMaterial } from '../raytracer-cpu/metal';
+import { LambertianMaterial } from '../material/lambertian';
+import { Material } from '../material/material';
+import { MetalMaterial } from '../material/metal';
 import { MovingSphere } from '../raytracer-cpu/movingsphere';
 import { Sphere } from '../raytracer-cpu/sphere';
 import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor, Texture } from '../raytracer-cpu/texture';

@@ -5,7 +5,7 @@ import { XYRect, XZRect, YZRect } from './aarect';
 import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
 import { HittableList } from './hittablelist';
-import { Material } from './material';
+import { Material } from '../material/material';
 import { Ray } from './ray';
 
 @serializable

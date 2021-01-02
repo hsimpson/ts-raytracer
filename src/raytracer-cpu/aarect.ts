@@ -3,7 +3,7 @@ import type { Vec3 } from '../vec3';
 import { AABB } from './aabb';
 import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
-import { Material } from './material';
+import { Material } from '../material/material';
 import { Ray } from './ray';
 
 @serializable

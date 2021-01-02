@@ -2,9 +2,9 @@ import { serializable } from '../serializing';
 import { randomNumber } from '../util';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
-import { HitRecord } from './hitrecord';
+import { HitRecord } from '../raytracer-cpu/hitrecord';
 import { Material } from './material';
-import { Ray } from './ray';
+import { Ray } from '../raytracer-cpu/ray';
 
 @serializable
 export class DielectricMaterial extends Material {

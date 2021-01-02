@@ -1,7 +1,7 @@
 import { vec2, vec3 } from 'gl-matrix';
 import { HitRecord } from './raytracer-cpu/hitrecord';
-import { LambertianMaterial } from './raytracer-cpu/lambertian';
-import { NormalMaterial } from './raytracer-cpu/normalmaterial';
+import { LambertianMaterial } from './material/lambertian';
+import { NormalMaterial } from './material/normalmaterial';
 import { Ray } from './raytracer-cpu/ray';
 import { serializable } from './serializing';
 
