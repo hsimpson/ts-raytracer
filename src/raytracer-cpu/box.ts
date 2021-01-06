@@ -7,6 +7,7 @@ import { Hittable } from './hittable';
 import { HittableList } from './hittablelist';
 import { Material } from '../material/material';
 import { Ray } from './ray';
+import { vec3, mat4 } from 'gl-matrix';
 
 @serializable
 export class Box extends Hittable {
@@ -46,7 +47,13 @@ export class Box extends Hittable {
   }
 
   public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
-    const newOutputBox = new AABB(this._boxMin, this._boxMax);
+    const transformedMin: vec3 = [this._boxMin[0], this._boxMin[1], this._boxMin[2]];
+    const transformedMax: vec3 = [this._boxMax[0], this._boxMax[1], this._boxMax[2]];
+
+    vec3.transformMat4(transformedMin, transformedMin, this.transform.modelMatrix);
+    vec3.transformMat4(transformedMax, transformedMax, this.transform.modelMatrix);
+
+    const newOutputBox = new AABB(transformedMin, transformedMax);
     newOutputBox.copyTo(outputBox);
     return true;
   }

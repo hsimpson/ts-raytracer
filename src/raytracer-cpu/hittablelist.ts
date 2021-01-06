@@ -19,21 +19,21 @@ export class HittableList extends Hittable {
     return this._objects;
   }
 
-  public clear(): void {
-    this._objects.length = 0;
-  }
+  // public clear(): void {
+  //   this._objects.length = 0;
+  // }
 
   public add(object: Hittable): void {
     this._objects.push(object);
   }
 
-  public hit(r: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
+  public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
     const tempRecord = new HitRecord();
     let hitAnything = false;
     let closestSoFar = tMax;
 
     for (const object of this._objects) {
-      if (object.hit(r, tMin, closestSoFar, tempRecord)) {
+      if (object.hit(ray, tMin, closestSoFar, tempRecord)) {
         hitAnything = true;
         closestSoFar = tempRecord.t;
 

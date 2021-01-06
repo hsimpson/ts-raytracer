@@ -1,7 +1,6 @@
 import ComputeWorker from 'worker-loader!./compute.worker';
 import { Camera } from '../camera';
 import { deserialize, serialize } from '../serializing';
-import { TriangleMesh } from '../trianglemesh';
 import { DeserializerMap } from './deserializermap';
 import { HittableList } from './hittablelist';
 import {
@@ -35,7 +34,7 @@ const start = (msg: ControllerStartMessage): void => {
 
   const world = deserialize(HittableList, msg.data.world);
   const camera = deserialize(Camera, msg.data.camera);
-  const triangleMesh = deserialize(TriangleMesh, msg.data.triangleMesh);
+  // const triangleMesh = deserialize(TriangleMesh, msg.data.triangleMesh);
 
   let startLine = msg.data.imageHeight - 1;
   let availableLines = msg.data.imageHeight;
@@ -57,7 +56,6 @@ const start = (msg: ControllerStartMessage): void => {
         startLine: startLine,
         samplesPerPixel: _samplesPerPixel,
         maxBounces: _maxBounces,
-        triangleMesh: serialize(TriangleMesh, triangleMesh),
       },
     };
 

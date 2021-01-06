@@ -1,9 +1,12 @@
 import { vec2, vec3 } from 'gl-matrix';
-import { HitRecord } from './raytracer-cpu/hitrecord';
 import { LambertianMaterial } from './material/lambertian';
 import { NormalMaterial } from './material/normalmaterial';
+import { AABB } from './raytracer-cpu/aabb';
+import { HitRecord } from './raytracer-cpu/hitrecord';
 import { Ray } from './raytracer-cpu/ray';
 import { serializable } from './serializing';
+import { Hittable } from './raytracer-cpu/hittable';
+import { Transform } from './raytracer-cpu/transform';
 
 function avgVector3(vectors: vec3[]): vec3 {
   let x = 0,
@@ -17,11 +20,12 @@ function avgVector3(vectors: vec3[]): vec3 {
   return [x / vectors.length, y / vectors.length, z / vectors.length];
 }
 
-const EPSILON = 0.0000001;
+const EPSILON = 0.000000000001;
+// const EPSILON = 0.01;
 const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
 const NORMALMATERIAL = new NormalMaterial();
 @serializable
-export class Triangle {
+export class Triangle extends Hittable {
   public readonly v0: vec3;
   public readonly n0: vec3;
   public readonly uv0: vec2;
@@ -35,6 +39,7 @@ export class Triangle {
   public readonly uv2: vec2;
 
   public readonly surfaceNormal: vec3;
+  public readonly transform: Transform = new Transform();
 
   public constructor(
     v0: vec3,
@@ -47,6 +52,7 @@ export class Triangle {
     uv1?: vec2,
     uv2?: vec2
   ) {
+    super();
     this.v0 = v0;
     this.v1 = v1;
     this.v2 = v2;
@@ -87,7 +93,18 @@ export class Triangle {
     this.uv2 = uv2 ?? [0, 0];
   }
 
+  public applyTransform(): void {
+    // vec3.transformMat4(this.v0, this.v0, this.transform.modelMatrix);
+    // vec3.transformMat4(this.v1, this.v1, this.transform.modelMatrix);
+    // vec3.transformMat4(this.v2, this.v2, this.transform.modelMatrix);
+    // vec3.transformMat4(this.n0, this.n0, this.transform.inverseTransposeModelMatrix);
+    // vec3.transformMat4(this.n1, this.n1, this.transform.inverseTransposeModelMatrix);
+    // vec3.transformMat4(this.n2, this.n2, this.transform.inverseTransposeModelMatrix);
+  }
+
   public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
+    const transformedRay = this.transform.transformRay(ray);
+
     const edge1 = vec3.create();
     const edge2 = vec3.create();
     const h = vec3.create();
@@ -95,10 +112,10 @@ export class Triangle {
     const q = vec3.create();
 
     const rayOrigin = vec3.create();
-    vec3.set(rayOrigin, ray.origin[0], ray.origin[1], ray.origin[2]);
+    vec3.set(rayOrigin, transformedRay.origin[0], transformedRay.origin[1], transformedRay.origin[2]);
 
     const rayDirection = vec3.create();
-    vec3.set(rayDirection, ray.direction[0], ray.direction[1], ray.direction[2]);
+    vec3.set(rayDirection, transformedRay.direction[0], transformedRay.direction[1], transformedRay.direction[2]);
 
     vec3.subtract(edge1, this.v1, this.v0);
     vec3.subtract(edge2, this.v2, this.v0);
@@ -128,7 +145,7 @@ export class Triangle {
     if (t > EPSILON) {
       //ray intersection
       rec.t = t;
-      rec.p = ray.at(t);
+      rec.p = transformedRay.at(t);
 
       const w = 1.0 - u - v;
       const n0 = vec3.create();
@@ -151,58 +168,43 @@ export class Triangle {
 
       //FIXME: replace when everything is gl-matrix vec3
       // rec.setFaceNormal(ray, [this.surfaceNormal[0], this.surfaceNormal[1], this.surfaceNormal[2]]);
-      rec.setFaceNormal(ray, [normal[0], normal[1], normal[2]]);
+      rec.setFaceNormal(transformedRay, [normal[0], normal[1], normal[2]]);
 
       // FIXME: this is only a hack, to avoid backfacing faces to show up
       if (!rec.frontFace) {
         return false;
       }
 
-      // TODO: interpolated normal vectors
       // TODO: UV
 
+      this.transform.transformRecord(transformedRay, rec);
       return true;
     }
 
     return false;
   }
-}
 
-/* Möller–Trumbore ray-triangle intersection algorithm (C++)
-bool RayIntersectsTriangle(Vector3D rayOrigin, 
-                           Vector3D rayDirection, 
-                           Triangle* inTriangle,
-                           Vector3D& outIntersectionPoint)
-{
-    const float EPSILON = 0.0000001;
-    Vector3D vertex0 = inTriangle->vertex0;
-    Vector3D vertex1 = inTriangle->vertex1;  
-    Vector3D vertex2 = inTriangle->vertex2;
-    Vector3D edge1, edge2, h, s, q;
-    float a,f,u,v;
-    edge1 = vertex1 - vertex0;
-    edge2 = vertex2 - vertex0;
-    h = rayDirection.crossProduct(edge2);
-    a = edge1.dotProduct(h);
-    if (a > -EPSILON && a < EPSILON)
-        return false;    // This ray is parallel to this triangle.
-    f = 1.0/a;
-    s = rayOrigin - vertex0;
-    u = f * s.dotProduct(h);
-    if (u < 0.0 || u > 1.0)
-        return false;
-    q = s.crossProduct(edge1);
-    v = f * rayDirection.dotProduct(q);
-    if (v < 0.0 || u + v > 1.0)
-        return false;
-    // At this stage we can compute t to find out where the intersection point is on the line.
-    float t = f * edge2.dotProduct(q);
-    if (t > EPSILON) // ray intersection
-    {
-        outIntersectionPoint = rayOrigin + rayDirection * t;
-        return true;
-    }
-    else // This means that there is a line intersection but not a ray intersection.
-        return false;
+  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
+    const v0 = vec3.create();
+    const v1 = vec3.create();
+    const v2 = vec3.create();
+
+    vec3.transformMat4(v0, this.v0, this.transform.modelMatrix);
+    vec3.transformMat4(v1, this.v1, this.transform.modelMatrix);
+    vec3.transformMat4(v2, this.v2, this.transform.modelMatrix);
+
+    const minX = Math.min(v0[0], v1[0], v2[0]) - EPSILON;
+    const minY = Math.min(v0[1], v1[1], v2[1]) - EPSILON;
+    const minZ = Math.min(v0[2], v1[2], v2[2]) - EPSILON;
+
+    const maxX = Math.max(v0[0], v1[0], v2[0]) + EPSILON;
+    const maxY = Math.max(v0[1], v1[1], v2[1]) + EPSILON;
+    const maxZ = Math.max(v0[2], v1[2], v2[2]) + EPSILON;
+
+    const newOutputBox = new AABB([minX, minY, minZ], [maxX, maxY, maxZ]);
+    newOutputBox.copyTo(outputBox);
+
+    // console.log('Triangle box');
+    return true;
+  }
 }
-*/

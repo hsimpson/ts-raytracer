@@ -6,15 +6,31 @@ import { Ray } from './ray';
 export class AABB {
   private _min: Vec3;
   private _max: Vec3;
+  private _size: Vec3;
+  private _center: Vec3;
 
   public constructor(min?: Vec3, max?: Vec3) {
     this._min = min ?? [0, 0, 0];
     this._max = max ?? [0, 0, 0];
+
+    this._size = [this._max[0] - this._min[0], this._max[1] - this._min[1], this._max[2] - this._min[2]];
+
+    this._center = [
+      this._min[0] + this._size[0] / 2,
+      this._min[1] + this._size[1] / 2,
+      this._min[2] + this._size[2] / 2,
+    ];
   }
 
   public copyTo(dest: AABB): void {
     dest._min = this._min;
     dest._max = this._max;
+    dest._size = this._size;
+    dest._center = this._center;
+  }
+
+  public logBox(): string {
+    return `center: ${this._center.toString()} | size: ${this._size.toString()}`;
   }
 
   public get min(): Vec3 {
@@ -25,45 +41,44 @@ export class AABB {
     return this._max;
   }
 
-  /*
-  public hit(r: Ray, tmin: number, tmax: number): boolean {
+  public hit(ray: Ray, tMin: number, tMax: number): boolean {
     for (let a = 0; a < 3; a++) {
-      const rOriginA = r.origin.array[a];
-      const rDirectionA = r.direction.array[a];
-      const t0 = Math.min((this._min.array[a] - rOriginA) / rDirectionA, (this._max.array[a] - rOriginA) / rDirectionA);
-      const t1 = Math.max((this._min.array[a] - rOriginA) / rDirectionA, (this._max.array[a] - rOriginA) / rDirectionA);
+      const rOriginA = ray.origin[a];
+      const rDirectionA = ray.direction[a];
+      const t0 = Math.min((this._min[a] - rOriginA) / rDirectionA, (this._max[a] - rOriginA) / rDirectionA);
+      const t1 = Math.max((this._min[a] - rOriginA) / rDirectionA, (this._max[a] - rOriginA) / rDirectionA);
 
-      tmin = Math.max(t0, tmin);
-      tmax = Math.min(t1, tmax);
+      tMin = Math.max(t0, tMin);
+      tMax = Math.min(t1, tMax);
 
-      if (tmax <= tmin) {
-        return false;
-      }
-    }
-
-    return true;
-  }*/
-
-  public hit(r: Ray, tmin: number, tmax: number): boolean {
-    for (let a = 0; a < 3; a++) {
-      const invD = 1.0 / r.direction[a];
-      let t0 = (this._min[a] - r.origin[a]) * invD;
-      let t1 = (this._max[a] - r.origin[a]) * invD;
-
-      if (invD < 0.0) {
-        const tmp = t0;
-        t0 = t1;
-        t1 = tmp;
-      }
-      tmin = t0 > tmin ? t0 : tmin;
-      tmax = t1 < tmax ? t1 : tmax;
-      if (tmax <= tmin) {
+      if (tMax <= tMin) {
         return false;
       }
     }
 
     return true;
   }
+
+  // public hit(ray: Ray, tMin: number, tMax: number): boolean {
+  //   for (let a = 0; a < 3; a++) {
+  //     const invD = 1.0 / ray.direction[a];
+  //     let t0 = (this._min[a] - ray.origin[a]) * invD;
+  //     let t1 = (this._max[a] - ray.origin[a]) * invD;
+
+  //     if (invD < 0.0) {
+  //       const tmp = t0;
+  //       t0 = t1;
+  //       t1 = tmp;
+  //     }
+  //     tMin = t0 > tMin ? t0 : tMin;
+  //     tMax = t1 < tMax ? t1 : tMax;
+  //     if (tMax <= tMin) {
+  //       return false;
+  //     }
+  //   }
+
+  //   return true;
+  // }
 
   public static surroundingBox(box0: AABB, box1: AABB): AABB {
     const small: Vec3 = [

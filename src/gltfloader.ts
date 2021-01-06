@@ -1,10 +1,11 @@
 import { vec2, vec3 } from 'gl-matrix';
 import { GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
 import { Triangle } from './triangle';
-import { TriangleMesh } from './trianglemesh';
+// import { TriangleMesh } from './trianglemesh';
+import { HittableList } from './raytracer-cpu/hittablelist';
 
-export async function load(url: string): Promise<TriangleMesh[]> {
-  const triangleMeshArray: TriangleMesh[] = [];
+export async function load(url: string): Promise<HittableList> {
+  const triangleMeshArray: HittableList = new HittableList();
 
   const response = await fetch(url);
   const gltf = await response.json();
@@ -23,15 +24,7 @@ export async function load(url: string): Promise<TriangleMesh[]> {
     const node: GLTFNode = gltf.nodes[nodeIdx];
     const mesh: GLTFMesh = gltf.meshes[node.mesh];
 
-    const triangleMesh = new TriangleMesh();
-
-    if (node.translation) {
-      triangleMesh.transform.translate(node.translation);
-    }
-
-    if (node.rotation) {
-      triangleMesh.transform.rotateQuat(node.rotation);
-    }
+    const triangleMesh = new HittableList();
 
     for (const primitive of mesh.primitives) {
       const positionAccessor: GLTFAccessor = accessors[primitive.attributes.POSITION];
@@ -39,8 +32,6 @@ export async function load(url: string): Promise<TriangleMesh[]> {
       const textureCoordAccessor: GLTFAccessor = accessors[primitive.attributes.TEXCOORD_0];
 
       const positionBufferView: GLTFBufferView = bufferViews[positionAccessor.bufferView];
-      const normalBufferView: GLTFBufferView = bufferViews[normalAccessor.bufferView];
-      const textureCoordBufferView: GLTFBufferView = bufferViews[textureCoordAccessor.bufferView];
 
       const vertices = getVec3List(
         new Float32Array(
@@ -50,21 +41,32 @@ export async function load(url: string): Promise<TriangleMesh[]> {
         )
       );
 
-      const normals = getVec3List(
-        new Float32Array(
-          buffers[normalBufferView.buffer],
-          normalBufferView.byteOffset,
-          normalBufferView.byteLength / Float32Array.BYTES_PER_ELEMENT
-        )
-      );
+      let normals;
+      let textureCoords;
 
-      const textureCoords = getVec2List(
-        new Float32Array(
-          buffers[textureCoordBufferView.buffer],
-          textureCoordBufferView.byteOffset,
-          textureCoordBufferView.byteLength / Float32Array.BYTES_PER_ELEMENT
-        )
-      );
+      if (normalAccessor) {
+        const normalBufferView: GLTFBufferView = bufferViews[normalAccessor.bufferView];
+
+        normals = getVec3List(
+          new Float32Array(
+            buffers[normalBufferView.buffer],
+            normalBufferView.byteOffset,
+            normalBufferView.byteLength / Float32Array.BYTES_PER_ELEMENT
+          )
+        );
+      }
+
+      if (textureCoordAccessor) {
+        const textureCoordBufferView: GLTFBufferView = bufferViews[textureCoordAccessor.bufferView];
+
+        textureCoords = getVec2List(
+          new Float32Array(
+            buffers[textureCoordBufferView.buffer],
+            textureCoordBufferView.byteOffset,
+            textureCoordBufferView.byteLength / Float32Array.BYTES_PER_ELEMENT
+          )
+        );
+      }
 
       if (primitive.indices !== undefined) {
         const indicesAccessor: GLTFAccessor = accessors[primitive.indices];
@@ -80,17 +82,47 @@ export async function load(url: string): Promise<TriangleMesh[]> {
           const b = indexArray[++i];
           const c = indexArray[++i];
 
+          const v0 = vertices[a];
+          const v1 = vertices[b];
+          const v2 = vertices[c];
+
+          let n0, n1, n2, uv0, uv1, uv2;
+
+          if (normals) {
+            n0 = normals[a];
+            n1 = normals[b];
+            n2 = normals[c];
+          }
+
+          if (textureCoords) {
+            uv0 = textureCoords[a];
+            uv1 = textureCoords[b];
+            uv2 = textureCoords[c];
+          }
+
           const triangle = new Triangle(
-            vertices[a],
-            vertices[b],
-            vertices[c],
-            normals[a],
-            normals[b],
-            normals[c],
-            textureCoords[a],
-            textureCoords[b],
-            textureCoords[c]
+            v0,
+            v1,
+            v2,
+
+            n0,
+            n1,
+            n2,
+
+            uv0,
+            uv1,
+            uv2
           );
+
+          if (node.translation) {
+            triangle.transform.translate(node.translation);
+          }
+          if (node.rotation) {
+            triangle.transform.rotateQuat(node.rotation);
+          }
+          // TODO scale
+
+          triangle.applyTransform();
           triangleMesh.add(triangle);
         }
       } else {
@@ -99,7 +131,7 @@ export async function load(url: string): Promise<TriangleMesh[]> {
 
       // TODO: material
     }
-    triangleMeshArray.push(triangleMesh);
+    triangleMeshArray.add(triangleMesh);
   }
 
   return triangleMeshArray;

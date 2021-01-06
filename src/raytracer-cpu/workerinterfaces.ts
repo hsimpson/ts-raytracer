@@ -1,6 +1,4 @@
 import { JsonObject } from '../serializing';
-import { Triangle } from '../triangle';
-import { TriangleMesh } from '../trianglemesh';
 import type { Vec3 } from '../vec3';
 
 export enum ControllerCommands {
@@ -34,7 +32,6 @@ export interface ControllerStartMessage extends WorkerMessage {
     world: JsonObject;
     camera: JsonObject;
     background: Vec3;
-    triangleMesh: JsonObject;
   };
 }
 
@@ -56,7 +53,6 @@ export interface ComputeStartMessage extends WorkerMessage {
     startLine: number;
     samplesPerPixel: number;
     maxBounces: number;
-    triangleMesh: JsonObject;
   };
 }
 

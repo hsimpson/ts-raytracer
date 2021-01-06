@@ -1,15 +1,16 @@
 import { CameraOptions } from './camera';
+import * as GLTFLoader from './gltfloader';
+import { DielectricMaterial } from './material/dielectric';
+import { DiffuseLight } from './material/diffuselight';
+import { LambertianMaterial } from './material/lambertian';
+import { Material } from './material/material';
+import { MetalMaterial } from './material/metal';
 import { XYRect, XZRect, YZRect } from './raytracer-cpu/aarect';
 import { Box } from './raytracer-cpu/box';
 import { BVHNode } from './raytracer-cpu/bvhnode';
 import { ConstantMedium } from './raytracer-cpu/constantmedium';
-import { DielectricMaterial } from './material/dielectric';
-import { DiffuseLight } from './material/diffuselight';
 import { Hittable } from './raytracer-cpu/hittable';
 import { HittableList } from './raytracer-cpu/hittablelist';
-import { LambertianMaterial } from './material/lambertian';
-import { Material } from './material/material';
-import { MetalMaterial } from './material/metal';
 import { MovingSphere } from './raytracer-cpu/movingsphere';
 import { Sphere } from './raytracer-cpu/sphere';
 import { CheckerTexture, ImageTexture, NoiseTexture } from './raytracer-cpu/texture';
@@ -56,9 +57,11 @@ function gpuTestScene(): { world: HittableList; cameraOptions: CameraOptions } {
   world.add(redSphere);
   world.add(greenSphere);
 
-  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [0, 0, 20], fovY: 10 };
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [0, 0, 10], fovY: 10 };
 
-  return { world, cameraOptions };
+  return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
+
+  // return { world, cameraOptions };
 }
 
 function randomScene(): { world: HittableList; cameraOptions: CameraOptions } {
@@ -111,11 +114,10 @@ function randomScene(): { world: HittableList; cameraOptions: CameraOptions } {
   world.add(new Sphere([-4, 1, 0], 1, material2));
   world.add(new Sphere([4, 1, 0], 1, material3));
 
-  // return new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0));
-
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [13, 2, 3], fovY: 20 };
 
-  return { world, cameraOptions };
+  return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
+  // return { world, cameraOptions };
 }
 
 function twoCheckerSpheres(): { world: HittableList; cameraOptions: CameraOptions } {
@@ -220,7 +222,8 @@ function cornellBox(): { world: HittableList; cameraOptions: CameraOptions } {
     background: [0, 0, 0],
   };
 
-  return { world, cameraOptions };
+  return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
+  // return { world, cameraOptions };
 }
 
 function cornellBoxSmoke(): { world: HittableList; cameraOptions: CameraOptions } {
@@ -255,6 +258,7 @@ function cornellBoxSmoke(): { world: HittableList; cameraOptions: CameraOptions 
     background: [0, 0, 0],
   };
 
+  return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
   return { world, cameraOptions };
 }
 
@@ -325,7 +329,8 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
 
   boxes2.transform.translate([-100, 270, 395]);
   boxes2.transform.rotateEuler(0, 15, 0);
-  world.add(boxes2);
+  // world.add(boxes2);
+  world.add(BVHNode.createFromHitableList(boxes2, 0, 1));
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
@@ -333,12 +338,35 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
     lookAt: [278, 278, 0],
     background: [0, 0, 0],
   };
-  return { world, cameraOptions };
+
+  return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
+  // return { world, cameraOptions };
+}
+
+async function gltfScene(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+  // const world = await GLTFLoader.load('assets/models/cube.gltf');
+  // const world = await GLTFLoader.load('assets/models/cube_transformed.gltf');
+  // const world = await GLTFLoader.load('assets/models/uvsphere.gltf');
+  // const world = await GLTFLoader.load('assets/models/uvsphere_smooth.gltf');
+  // const world = await GLTFLoader.load('assets/models/monkey.gltf');
+  // const world = await GLTFLoader.load('assets/models/torus.gltf');
+  // const world = await GLTFLoader.load('assets/models/grid.gltf');
+  const world = await GLTFLoader.load('assets/models/tetrahedron.gltf');
+  // const world = await GLTFLoader.load('assets/models/triangle.gltf');
+
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [0, 0, 12], fovY: 10 };
+
+  return {
+    world: new HittableList(BVHNode.createFromHitableList(world.objects[0] as HittableList, 0.0, 1.0)),
+    cameraOptions,
+  };
+
+  // return { world: world.objects[0] as HittableList, cameraOptions };
 }
 
 const sceneCreators = [
-  gpuTestScene,
-  // randomScene,
+  // gpuTestScene,
+  randomScene,
   twoCheckerSpheres,
   twoNoiseSpheres,
   earthSphere,
@@ -346,6 +374,7 @@ const sceneCreators = [
   cornellBox,
   cornellBoxSmoke,
   finalScene,
+  gltfScene,
 ];
 
 export async function getScene(sceneIndex: number): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {

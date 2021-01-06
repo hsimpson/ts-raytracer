@@ -7,6 +7,7 @@ import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
 import { Material } from '../material/material';
 import { Ray } from './ray';
+import { vec3, mat4 } from 'gl-matrix';
 
 @serializable
 export class Sphere extends Hittable {
@@ -70,9 +71,12 @@ export class Sphere extends Hittable {
   }
 
   public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
+    const transformedCenter: vec3 = [this._center[0], this._center[1], this._center[2]];
+    vec3.transformMat4(transformedCenter, transformedCenter, this.transform.modelMatrix);
+
     const newOutputBox = new AABB(
-      Vector.subVec3(this._center, [this._radius, this._radius, this._radius]),
-      Vector.addVec3(this._center, [this._radius, this._radius, this._radius])
+      Vector.subVec3(transformedCenter, [this._radius, this._radius, this._radius]),
+      Vector.addVec3(transformedCenter, [this._radius, this._radius, this._radius])
     );
     newOutputBox.copyTo(outputBox);
     return true;

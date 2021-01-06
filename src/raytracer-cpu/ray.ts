@@ -1,4 +1,3 @@
-import { TriangleMesh } from '../trianglemesh';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
 import { HitRecord } from './hitrecord';
@@ -57,7 +56,7 @@ export class Ray {
 //   new Triangle([1, 1, 0], [1, -1, -1], [-1, -1, 0]),
 // ];
 
-export function rayColor(r: Ray, background: Vec3, world: Hittable | TriangleMesh, depth: number): Vec3 {
+export function rayColor(ray: Ray, background: Vec3, world: Hittable, depth: number): Vec3 {
   const rec = new HitRecord();
   // If we've exceeded the ray bounce limit, no more light is gathered.
   if (depth <= 0) {
@@ -65,7 +64,7 @@ export function rayColor(r: Ray, background: Vec3, world: Hittable | TriangleMes
   }
 
   // If the ray hits nothing, return the background color.
-  if (!world.hit(r, 0.001, Number.POSITIVE_INFINITY, rec)) {
+  if (!world.hit(ray, 0.001, Number.POSITIVE_INFINITY, rec)) {
     return background;
   }
 
@@ -73,7 +72,7 @@ export function rayColor(r: Ray, background: Vec3, world: Hittable | TriangleMes
   const attenuation: Vec3 = [0, 0, 0];
   const emitted = rec.mat.emitted(rec.u, rec.v, rec.p);
 
-  if (!rec.mat.scatter(r, rec, attenuation, scattered)) {
+  if (!rec.mat.scatter(ray, rec, attenuation, scattered)) {
     return emitted;
   }
 

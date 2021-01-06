@@ -1,0 +1,105 @@
+{
+    "asset" : {
+        "generator" : "Khronos glTF Blender I/O v1.4.40",
+        "version" : "2.0"
+    },
+    "scene" : 0,
+    "scenes" : [
+        {
+            "name" : "Scene",
+            "nodes" : [
+                0
+            ]
+        }
+    ],
+    "nodes" : [
+        {
+            "mesh" : 0,
+            "name" : "Tetrahedron_applied",
+            "rotation" : [
+                0.3826834559440613,
+                0,
+                0,
+                0.9238795042037964
+            ]
+        }
+    ],
+    "materials" : [
+        {
+            "doubleSided" : true,
+            "name" : "Normal",
+            "pbrMetallicRoughness" : {
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.5
+            }
+        }
+    ],
+    "meshes" : [
+        {
+            "name" : "Solid.001",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1
+                    },
+                    "indices" : 2,
+                    "material" : 0
+                }
+            ]
+        }
+    ],
+    "accessors" : [
+        {
+            "bufferView" : 0,
+            "componentType" : 5126,
+            "count" : 12,
+            "max" : [
+                0.8164962530136108,
+                1.3333337306976318,
+                0.9428090453147888
+            ],
+            "min" : [
+                -0.8164968490600586,
+                4.76837158203125e-07,
+                -0.4714050590991974
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 1,
+            "componentType" : 5126,
+            "count" : 12,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 2,
+            "componentType" : 5123,
+            "count" : 12,
+            "type" : "SCALAR"
+        }
+    ],
+    "bufferViews" : [
+        {
+            "buffer" : 0,
+            "byteLength" : 144,
+            "byteOffset" : 0
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 144,
+            "byteOffset" : 144
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 24,
+            "byteOffset" : 288
+        }
+    ],
+    "buffers" : [
+        {
+            "byteLength" : 312,
+            "uri" : "data:application/octet-stream;base64,AAAAAK6qqj8AAACAAAAAAK6qqj8AAACAAAAAAK6qqj8AAACAAAAoNQAAADXvW3E/AAAoNQAAADXvW3E/AAAoNQAAADXvW3E/5gVRPwAACDUBXPG+5gVRPwAACDUBXPG+5gVRPwAACDUBXPG+8AVRvwAACDXdW/G+8AVRvwAACDXdW/G+8AVRvwAACDXdW/G+5wVRv6yqqj4BXPE+4kYmtauqqj7wW3G/8QVRP6uqqj7dW/E+5wVRv6yqqj4BXPE+U2p5qAAAgL/zBLWy8QVRP6uqqj7dW/E+4kYmtauqqj7wW3G/U2p5qAAAgL/zBLWy8QVRP6uqqj7dW/E+5wVRv6yqqj4BXPE+4kYmtauqqj7wW3G/U2p5qAAAgL/zBLWyAgAFAAgAAQAGAAoAAAAJAAMABAALAAcA"
+        }
+    ]
+}

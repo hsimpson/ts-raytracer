@@ -7,6 +7,7 @@ import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
 import { Material } from '../material/material';
 import { Ray } from './ray';
+import { vec3, mat4 } from 'gl-matrix';
 
 @serializable
 export class MovingSphere extends Hittable {
@@ -105,14 +106,23 @@ export class MovingSphere extends Hittable {
   }
 
   public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
+    const cT0 = this.center(t0);
+    const cT1 = this.center(t0);
+
+    const transformedCenterT0: vec3 = [cT0[0], cT0[1], cT0[2]];
+    const transformedCenterT1: vec3 = [cT1[0], cT1[1], cT1[2]];
+
+    vec3.transformMat4(transformedCenterT0, transformedCenterT0, this.transform.modelMatrix);
+    vec3.transformMat4(transformedCenterT1, transformedCenterT1, this.transform.modelMatrix);
+
     const box0 = new AABB(
-      Vector.subVec3(this.center(t0), [this._radius, this._radius, this._radius]),
-      Vector.addVec3(this.center(t0), [this._radius, this._radius, this._radius])
+      Vector.subVec3(transformedCenterT0, [this._radius, this._radius, this._radius]),
+      Vector.addVec3(transformedCenterT0, [this._radius, this._radius, this._radius])
     );
 
     const box1 = new AABB(
-      Vector.subVec3(this.center(t1), [this._radius, this._radius, this._radius]),
-      Vector.addVec3(this.center(t1), [this._radius, this._radius, this._radius])
+      Vector.subVec3(transformedCenterT1, [this._radius, this._radius, this._radius]),
+      Vector.addVec3(transformedCenterT1, [this._radius, this._radius, this._radius])
     );
 
     const newOutputBox = AABB.surroundingBox(box0, box1);

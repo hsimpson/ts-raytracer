@@ -9,12 +9,17 @@ export class Transform {
   private _rotationMatrix = mat4.create();
   private _inverseModelMatrix = mat4.create();
   private _inverseRotationMatrix = mat4.create();
+  private _inverseTransposeModelMatrix = mat4.create();
   private _position = vec3.create();
   private _rotation = quat.create();
   private _isTransformed = false;
 
   public get modelMatrix(): mat4 {
     return this._modelMatrix;
+  }
+
+  public get inverseTransposeModelMatrix(): mat4 {
+    return this._inverseTransposeModelMatrix;
   }
 
   public transformRay(ray: Ray): Ray {
@@ -83,6 +88,9 @@ export class Transform {
 
     mat4.invert(this._inverseModelMatrix, this._modelMatrix);
     mat4.invert(this._inverseRotationMatrix, this._rotationMatrix);
+
+    mat4.transpose(this._inverseTransposeModelMatrix, this._modelMatrix);
+    mat4.invert(this._inverseTransposeModelMatrix, this._inverseTransposeModelMatrix);
 
     // logMatrix(this._modelMatrix);
   }
