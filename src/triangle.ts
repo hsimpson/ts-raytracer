@@ -1,12 +1,11 @@
 import { vec2, vec3 } from 'gl-matrix';
-import { LambertianMaterial } from './material/lambertian';
-import { NormalMaterial } from './material/normalmaterial';
+import { Material } from './material/material';
 import { AABB } from './raytracer-cpu/aabb';
 import { HitRecord } from './raytracer-cpu/hitrecord';
-import { Ray } from './raytracer-cpu/ray';
-import { serializable } from './serializing';
 import { Hittable } from './raytracer-cpu/hittable';
+import { Ray } from './raytracer-cpu/ray';
 import { Transform } from './raytracer-cpu/transform';
+import { serializable } from './serializing';
 
 function avgVector3(vectors: vec3[]): vec3 {
   let x = 0,
@@ -20,10 +19,8 @@ function avgVector3(vectors: vec3[]): vec3 {
   return [x / vectors.length, y / vectors.length, z / vectors.length];
 }
 
-const EPSILON = 0.000000000001;
+const EPSILON = 0.000001;
 // const EPSILON = 0.01;
-const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
-const NORMALMATERIAL = new NormalMaterial();
 @serializable
 export class Triangle extends Hittable {
   public readonly v0: vec3;
@@ -40,6 +37,8 @@ export class Triangle extends Hittable {
 
   public readonly surfaceNormal: vec3;
   public readonly transform: Transform = new Transform();
+
+  public material: Material;
 
   public constructor(
     v0: vec3,
@@ -163,8 +162,7 @@ export class Triangle extends Hittable {
       vec3.add(outIntersectionPoint, rayOrigin, rayDirection);
       vec3.scale(outIntersectionPoint, outIntersectionPoint, t);
       // rec.p = [outIntersectionPoint[0], outIntersectionPoint[0], outIntersectionPoint[0]];
-      // rec.mat = REDMATERIAL;
-      rec.mat = NORMALMATERIAL;
+      rec.mat = this.material;
 
       //FIXME: replace when everything is gl-matrix vec3
       // rec.setFaceNormal(ray, [this.surfaceNormal[0], this.surfaceNormal[1], this.surfaceNormal[2]]);

@@ -1,8 +1,12 @@
 import { vec2, vec3 } from 'gl-matrix';
 import { GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
-import { Triangle } from './triangle';
-// import { TriangleMesh } from './trianglemesh';
+import { LambertianMaterial } from './material/lambertian';
+import { NormalMaterial } from './material/normalmaterial';
 import { HittableList } from './raytracer-cpu/hittablelist';
+import { Triangle } from './triangle';
+
+const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
+const NORMALMATERIAL = new NormalMaterial();
 
 export async function load(url: string): Promise<HittableList> {
   const triangleMeshArray: HittableList = new HittableList();
@@ -114,6 +118,9 @@ export async function load(url: string): Promise<HittableList> {
             uv2
           );
 
+          // TODO: material
+          triangle.material = REDMATERIAL;
+
           if (node.translation) {
             triangle.transform.translate(node.translation);
           }
@@ -128,8 +135,6 @@ export async function load(url: string): Promise<HittableList> {
       } else {
         // TODO: non indexed vertices
       }
-
-      // TODO: material
     }
     triangleMeshArray.add(triangleMesh);
   }

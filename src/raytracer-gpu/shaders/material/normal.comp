@@ -1,0 +1,22 @@
+#ifndef NORMAL_INC
+#define NORMAL_INC
+
+#extension GL_GOOGLE_include_directive : enable
+
+#include "../utils.comp"
+#include "../ray.comp"
+#include "./material_base.comp"
+
+#define NORMAL_CORRECTED
+
+bool normalScattered(const Material material, const Ray ray, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
+#ifdef NORMAL_CORRECTED
+  attenuation = normalize((rec.normal + 1.0) * 0.5);
+#else
+  attenuation = rec.normal;
+#endif
+
+  return true;
+}
+
+#endif  // NORMAL_INC

@@ -23,6 +23,7 @@ void setFaceNormal(inout HitRecord rec, const Ray r, const vec3 outwardNormal) {
 
 vec3 rayAt(const Ray ray, const float t) {
   return ray.origin + t * ray.direction;
+  // return ray.origin + ray.direction * t;
 }
 
 #endif  //RAY_INC

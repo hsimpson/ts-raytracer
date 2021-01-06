@@ -8,14 +8,15 @@
 #define HITTABLETYPE_XYRECT 2
 #define HITTABLETYPE_XZRECT 3
 #define HITTABLETYPE_YZRECT 4
-#define HITTABLETYPE_BOX 5
-#define HITTABLETYPE_CONSTANTMEDIUM 6
+// #define HITTABLETYPE_CONSTANTMEDIUM 5
+#define HITTABLETYPE_TRIANGLE 6
 
 #include "../ray.comp"
 #include "./hittable_base.comp"
 #include "./sphere.comp"
 #include "./movingsphere.comp"
 #include "./rect.comp"
+#include "./triangle.comp"
 
 bool hitPrimitive(const Primitive primitve, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
   uint primitiveType = primitve.primitiveType;
@@ -49,6 +50,9 @@ bool hitPrimitive(const Primitive primitve, const Ray ray, const float tMin, con
       break;
     case HITTABLETYPE_YZRECT:
       hitted = hitYZRect(primitve, transformedRay, tMin, tMax, rec);
+      break;
+    case HITTABLETYPE_TRIANGLE:
+      hitted = hitTriangle(primitve, transformedRay, tMin, tMax, rec);
       break;
   }
 
