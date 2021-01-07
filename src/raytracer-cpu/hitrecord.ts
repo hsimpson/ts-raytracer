@@ -1,6 +1,6 @@
+import { Material } from '../material';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
-import { Material } from '../material/material';
 import { Ray } from './ray';
 
 export class HitRecord {

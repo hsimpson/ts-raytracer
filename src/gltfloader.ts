@@ -1,7 +1,6 @@
 import { vec2, vec3 } from 'gl-matrix';
 import { GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
-import { LambertianMaterial } from './material/lambertian';
-import { NormalMaterial } from './material/normalmaterial';
+import { LambertianMaterial, NormalMaterial } from './material';
 import { HittableList } from './raytracer-cpu/hittablelist';
 import { Triangle } from './triangle';
 
@@ -119,7 +118,8 @@ export async function load(url: string): Promise<HittableList> {
           );
 
           // TODO: material
-          triangle.material = REDMATERIAL;
+          // triangle.material = REDMATERIAL;
+          triangle.material = NORMALMATERIAL;
 
           if (node.translation) {
             triangle.transform.translate(node.translation);

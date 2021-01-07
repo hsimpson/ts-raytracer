@@ -1,5 +1,5 @@
 import { vec2, vec3 } from 'gl-matrix';
-import { Material } from './material/material';
+import { Material } from './material';
 import { AABB } from './raytracer-cpu/aabb';
 import { HitRecord } from './raytracer-cpu/hitrecord';
 import { Hittable } from './raytracer-cpu/hittable';

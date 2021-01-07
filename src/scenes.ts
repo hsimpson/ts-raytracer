@@ -1,10 +1,13 @@
 import { CameraOptions } from './camera';
 import * as GLTFLoader from './gltfloader';
-import { DielectricMaterial } from './material/dielectric';
-import { DiffuseLight } from './material/diffuselight';
-import { LambertianMaterial } from './material/lambertian';
-import { Material } from './material/material';
-import { MetalMaterial } from './material/metal';
+import {
+  DielectricMaterial,
+  DiffuseLight,
+  LambertianMaterial,
+  Material,
+  MetalMaterial,
+  NormalMaterial,
+} from './material';
 import { XYRect, XZRect, YZRect } from './raytracer-cpu/aarect';
 import { Box } from './raytracer-cpu/box';
 import { BVHNode } from './raytracer-cpu/bvhnode';

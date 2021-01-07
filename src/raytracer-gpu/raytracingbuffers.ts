@@ -1,22 +1,23 @@
-import { mat4 } from 'gl-matrix';
+import { mat4, vec2, vec4 } from 'gl-matrix';
+import {
+  DielectricMaterial,
+  DiffuseLight,
+  LambertianMaterial,
+  Material,
+  MetalMaterial,
+  NormalMaterial,
+} from '../material';
 import { XYRect, XZRect, YZRect } from '../raytracer-cpu/aarect';
 import { Box } from '../raytracer-cpu/box';
-import { DielectricMaterial } from '../material/dielectric';
-import { DiffuseLight } from '../material/diffuselight';
 import { Hittable } from '../raytracer-cpu/hittable';
 import { HittableList } from '../raytracer-cpu/hittablelist';
-import { LambertianMaterial } from '../material/lambertian';
-import { Material } from '../material/material';
-import { MetalMaterial } from '../material/metal';
 import { MovingSphere } from '../raytracer-cpu/movingsphere';
 import { Sphere } from '../raytracer-cpu/sphere';
 import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor, Texture } from '../raytracer-cpu/texture';
+import { Triangle } from '../triangle';
 import { nextPowerOf2 } from '../util';
 import type { Vec3 } from '../vec3';
 import { WebGPUContext } from './webgpucontext';
-import { NormalMaterial } from '../material/normalmaterial';
-import { vec2, vec3, vec4 } from 'gl-matrix';
-import { Triangle } from '../triangle';
 
 enum WebGPUMaterialType {
   Lambertian = 0,
@@ -46,10 +47,10 @@ export enum WebGPUTextureType {
 }
 
 interface WebGPUTexture {
-  color: [...rgb: Vec3, a: number]; // TODO: use vec4
-  checkerOdd: [...rgb: Vec3, a: number]; // TODO: use vec4
-  checkerEven: [...rgb: Vec3, a: number]; // TODO: use vec4
-  uvOffset: [u: number, v: number]; // TODO use vec2
+  color: vec4;
+  checkerOdd: vec4;
+  checkerEven: vec4;
+  uvOffset: vec2;
   noiseScale: number;
   textureType: number;
   imageTextureIndex: number;
@@ -139,63 +140,34 @@ export class RaytracingBuffers {
 
   private addTexture(tex: Texture): number {
     const idx = this._gpuTextures.length;
-    let gpuTex: WebGPUTexture;
+    const gpuTex: WebGPUTexture = {
+      color: [1, 1, 1, 1],
+      checkerOdd: [1, 1, 1, 1],
+      checkerEven: [1, 1, 1, 1],
+      uvOffset: [1, 1],
+      noiseScale: 1,
+      textureType: WebGPUTextureType.Solid,
+      imageTextureIndex: -1,
+      pad_0: PADDING_VALUE,
+      pad_1: PADDING_VALUE,
+      pad_2: PADDING_VALUE,
+    };
 
     if (tex instanceof SolidColor) {
-      gpuTex = {
-        color: [...tex.color, 1],
-        checkerOdd: [1, 1, 1, 1],
-        checkerEven: [1, 1, 1, 1],
-        uvOffset: [1, 1],
-        noiseScale: 1,
-        textureType: WebGPUTextureType.Solid,
-        imageTextureIndex: -1,
-        pad_0: PADDING_VALUE,
-        pad_1: PADDING_VALUE,
-        pad_2: PADDING_VALUE,
-      };
+      gpuTex.color = [...tex.color, 1];
+      gpuTex.textureType = WebGPUTextureType.Solid;
     } else if (tex instanceof CheckerTexture) {
-      gpuTex = {
-        color: [1, 1, 1, 1],
-        checkerOdd: [...tex.odd, 1],
-        checkerEven: [...tex.even, 1],
-        uvOffset: [1, 1],
-        noiseScale: 1,
-        textureType: WebGPUTextureType.Checker,
-        imageTextureIndex: -1,
-        pad_0: PADDING_VALUE,
-        pad_1: PADDING_VALUE,
-        pad_2: PADDING_VALUE,
-      };
+      gpuTex.checkerOdd = [...tex.odd, 1];
+      gpuTex.checkerEven = [...tex.even, 1];
+      gpuTex.textureType = WebGPUTextureType.Checker;
     } else if (tex instanceof NoiseTexture) {
-      gpuTex = {
-        color: [1, 1, 1, 1],
-        checkerOdd: [1, 1, 1, 1],
-        checkerEven: [1, 1, 1, 1],
-        uvOffset: [1, 1],
-        noiseScale: tex.scale,
-        textureType: WebGPUTextureType.Noise,
-        imageTextureIndex: -1,
-        pad_0: PADDING_VALUE,
-        pad_1: PADDING_VALUE,
-        pad_2: PADDING_VALUE,
-      };
+      gpuTex.noiseScale = tex.scale;
+      gpuTex.textureType = WebGPUTextureType.Noise;
     } else if (tex instanceof ImageTexture) {
       this._textureSize = Math.max(this.getNextPowerOf2(tex.width, tex.height), this._textureSize);
-      gpuTex = {
-        color: [1, 1, 1, 1],
-        checkerOdd: [1, 1, 1, 1],
-        checkerEven: [1, 1, 1, 1],
-        uvOffset: [1, 1],
-        noiseScale: 1,
-        textureType: WebGPUTextureType.Image,
-        imageTextureIndex: this._imageTextures.length,
-        pad_0: PADDING_VALUE,
-        pad_1: PADDING_VALUE,
-        pad_2: PADDING_VALUE,
-
-        hasImageTexture: true,
-      };
+      gpuTex.textureType = WebGPUTextureType.Image;
+      gpuTex.imageTextureIndex = this._imageTextures.length;
+      gpuTex.hasImageTexture = true;
       this._imageTextures.push(tex);
     }
 
@@ -209,7 +181,8 @@ export class RaytracingBuffers {
     let gpuMat: WebGPUMaterial;
 
     const tex = mat.texture;
-    const textureIndex = mat.texture ? this.addTexture(tex) : -1;
+    // const textureIndex = mat.texture ? this.addTexture(tex) : -1;
+    const textureIndex = this.addTexture(mat.texture);
 
     if (mat instanceof LambertianMaterial) {
       gpuMat = {

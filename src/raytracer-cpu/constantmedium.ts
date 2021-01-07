@@ -1,3 +1,4 @@
+import { IsoTropic, Material } from '../material';
 import { serializable } from '../serializing';
 import { randomNumber } from '../util';
 import type { Vec3 } from '../vec3';
@@ -5,8 +6,6 @@ import * as Vector from '../vec3';
 import { AABB } from './aabb';
 import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
-import { IsoTropic } from '../material/isotropic';
-import { Material } from '../material/material';
 import { Ray } from './ray';
 import { Texture } from './texture';
 

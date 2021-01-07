@@ -1,6 +1,6 @@
+import { Material } from '../material';
 import { AABB } from './aabb';
 import { HitRecord } from './hitrecord';
-import { Material } from '../material/material';
 import { Ray } from './ray';
 import { Transform } from './transform';
 // import { logMatrix } from '../util';

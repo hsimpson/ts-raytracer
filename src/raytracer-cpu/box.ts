@@ -1,3 +1,5 @@
+import { vec3 } from 'gl-matrix';
+import { Material } from '../material';
 import { serializable } from '../serializing';
 import type { Vec3 } from '../vec3';
 import { AABB } from './aabb';
@@ -5,9 +7,7 @@ import { XYRect, XZRect, YZRect } from './aarect';
 import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
 import { HittableList } from './hittablelist';
-import { Material } from '../material/material';
 import { Ray } from './ray';
-import { vec3, mat4 } from 'gl-matrix';
 
 @serializable
 export class Box extends Hittable {

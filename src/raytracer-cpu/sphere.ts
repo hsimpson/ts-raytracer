@@ -1,3 +1,5 @@
+import { vec3 } from 'gl-matrix';
+import { Material } from '../material';
 import { serializable } from '../serializing';
 import { getSphereUV } from '../util';
 import type { Vec3 } from '../vec3';
@@ -5,9 +7,7 @@ import * as Vector from '../vec3';
 import { AABB } from './aabb';
 import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
-import { Material } from '../material/material';
 import { Ray } from './ray';
-import { vec3, mat4 } from 'gl-matrix';
 
 @serializable
 export class Sphere extends Hittable {

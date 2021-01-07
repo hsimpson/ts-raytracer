@@ -1,8 +1,11 @@
-import { DielectricMaterial } from '../material/dielectric';
-import { DiffuseLight } from '../material/diffuselight';
-import { IsoTropic } from '../material/isotropic';
-import { LambertianMaterial } from '../material/lambertian';
-import { MetalMaterial } from '../material/metal';
+import {
+  DielectricMaterial,
+  DiffuseLight,
+  IsoTropic,
+  LambertianMaterial,
+  MetalMaterial,
+  NormalMaterial,
+} from '../material';
 import { Triangle } from '../triangle';
 import { AABB } from './aabb';
 import { XYRect, XZRect, YZRect } from './aarect';
@@ -19,6 +22,10 @@ export const DeserializerMap = {
   lambertianMaterial: LambertianMaterial,
   metalMaterial: MetalMaterial,
   dielectricMaterial: DielectricMaterial,
+  normalMaterial: NormalMaterial,
+  isoTropic: IsoTropic,
+  diffuseLight: DiffuseLight,
+
   sphere: Sphere,
   movingSphere: MovingSphere,
   bvhNode: BVHNode,
@@ -28,12 +35,10 @@ export const DeserializerMap = {
   perlin: Perlin,
   noise: NoiseTexture,
   image: ImageTexture,
-  diffuseLight: DiffuseLight,
   xyRect: XYRect,
   xzRect: XZRect,
   yzRect: YZRect,
   box: Box,
   constantMedium: ConstantMedium,
-  isoTropic: IsoTropic,
   triangle: Triangle,
 };
