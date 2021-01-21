@@ -76,7 +76,7 @@ export class RaytracerCPU extends RaytracerBase {
 
     this._controllerWorker.onmessage = async (event) => this.onControllerMessage(event);
 
-    const { world, cameraOptions } = await getScene(this._rayTracerOptions.scene);
+    const { world, cameraOptions } = await getScene(this._rayTracerOptions.scene, true);
 
     const aspectRatio = this._rayTracerOptions.imageWidth / this._rayTracerOptions.imageHeight;
 

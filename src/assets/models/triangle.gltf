@@ -17,8 +17,8 @@
             "mesh" : 0,
             "name" : "Triangle",
             "rotation" : [
-                0.3826834559440613,
                 0,
+                0.3826834559440613,
                 0,
                 0.9238795042037964
             ]
@@ -27,16 +27,16 @@
     "materials" : [
         {
             "doubleSided" : true,
-            "name" : "Normal",
+            "name" : "Normal_corrected",
             "pbrMetallicRoughness" : {
                 "metallicFactor" : 0,
-                "roughnessFactor" : 0.5
+                "roughnessFactor" : 0.4000000059604645
             }
         }
     ],
     "meshes" : [
         {
-            "name" : "Solid.005",
+            "name" : "Triangle",
             "primitives" : [
                 {
                     "attributes" : {
@@ -53,53 +53,53 @@
         {
             "bufferView" : 0,
             "componentType" : 5126,
-            "count" : 6,
+            "count" : 3,
             "max" : [
-                0.8164962530136108,
-                1.3333337306976318,
-                0.9428090453147888
+                1,
+                1,
+                0
             ],
             "min" : [
-                -0.8164968490600586,
-                4.76837158203125e-07,
-                -0.4714050590991974
+                -1,
+                0,
+                0
             ],
             "type" : "VEC3"
         },
         {
             "bufferView" : 1,
             "componentType" : 5126,
-            "count" : 6,
+            "count" : 3,
             "type" : "VEC3"
         },
         {
             "bufferView" : 2,
             "componentType" : 5123,
-            "count" : 6,
+            "count" : 3,
             "type" : "SCALAR"
         }
     ],
     "bufferViews" : [
         {
             "buffer" : 0,
-            "byteLength" : 72,
+            "byteLength" : 36,
             "byteOffset" : 0
         },
         {
             "buffer" : 0,
-            "byteLength" : 72,
-            "byteOffset" : 72
+            "byteLength" : 36,
+            "byteOffset" : 36
         },
         {
             "buffer" : 0,
-            "byteLength" : 12,
-            "byteOffset" : 144
+            "byteLength" : 6,
+            "byteOffset" : 72
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 156,
-            "uri" : "data:application/octet-stream;base64,AAAAAK6qqj8AAACAAAAoNQAAADXvW3E/AAAoNQAAADXvW3E/5gVRPwAACDUBXPG+5gVRPwAACDUBXPG+8AVRvwAACDXdW/G+8QVRP6uqqj7dW/E+U2p5qAAAgL/zBLWy8QVRP6uqqj7dW/E+U2p5qAAAgL/zBLWy8QVRP6uqqj7dW/E+U2p5qAAAgL/zBLWyAAACAAQAAQAFAAMA"
+            "byteLength" : 80,
+            "uri" : "data:application/octet-stream;base64,AAAAAAAAgD8AAACAAACAPwAAAAAAAACAAACAvwAAAAAAAACAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAACAAEAAAA="
         }
     ]
 }

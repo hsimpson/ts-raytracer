@@ -1,26 +1,38 @@
-import { vec2, vec3 } from 'gl-matrix';
-import { GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
-import { LambertianMaterial, NormalMaterial } from './material';
+import { vec2, vec3, mat4, quat } from 'gl-matrix';
+import { GLTF, GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
+import { LambertianMaterial, Material, NormalMaterial } from './material';
 import { HittableList } from './raytracer-cpu/hittablelist';
 import { Triangle } from './triangle';
 
 const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
+const WHITEMATERIAL = new LambertianMaterial([0.73, 0.73, 0.73]);
 const NORMALMATERIAL = new NormalMaterial();
+NORMALMATERIAL.corrected = true;
 
 export async function load(url: string): Promise<HittableList> {
   const triangleMeshArray: HittableList = new HittableList();
 
   const response = await fetch(url);
-  const gltf = await response.json();
+  const gltf = (await response.json()) as GLTF;
 
   // decode buffers
   const buffers = await decodeBuffers(gltf.buffers);
 
-  // get 1st scene
-  const scene = gltf.scenes[0];
+  // get the default scene
+  const scene = gltf.scenes[gltf.scene];
 
-  const accessors: GLTFAccessor[] = gltf.accessors;
-  const bufferViews: GLTFBufferView[] = gltf.bufferViews;
+  const accessors = gltf.accessors;
+  const bufferViews = gltf.bufferViews;
+  const materials = gltf.materials;
+
+  const raytracingMaterial: Material[] = [];
+
+  // create materials
+  for (const material of materials) {
+    const baseColor = material.pbrMetallicRoughness.baseColorFactor;
+    const lamberMat = new LambertianMaterial([baseColor[0], baseColor[1], baseColor[2]]);
+    raytracingMaterial.push(lamberMat);
+  }
 
   // for each node
   for (const nodeIdx of scene.nodes) {
@@ -28,6 +40,26 @@ export async function load(url: string): Promise<HittableList> {
     const mesh: GLTFMesh = gltf.meshes[node.mesh];
 
     const triangleMesh = new HittableList();
+    triangleMesh.name = mesh.name;
+
+    let translation = vec3.create();
+    let rotation = quat.create();
+    let scale = vec3.create();
+    vec3.set(scale, 1, 1, 1);
+
+    if (node.translation) {
+      translation = node.translation;
+    }
+    if (node.rotation) {
+      rotation = node.rotation;
+    }
+
+    if (node.scale) {
+      scale = node.scale;
+    }
+
+    // const rot = vec3.create();
+    // const rad = quat.getAxisAngle(rot, rotation);
 
     for (const primitive of mesh.primitives) {
       const positionAccessor: GLTFAccessor = accessors[primitive.attributes.POSITION];
@@ -117,19 +149,24 @@ export async function load(url: string): Promise<HittableList> {
             uv2
           );
 
-          // TODO: material
-          // triangle.material = REDMATERIAL;
-          triangle.material = NORMALMATERIAL;
+          // // TODO: material
+          // triangle.material = WHITEMATERIAL;
+          // triangle.material = NORMALMATERIAL;
+          triangle.material = raytracingMaterial[primitive.material];
 
           if (node.translation) {
-            triangle.transform.translate(node.translation);
+            triangle.transform.translate(translation);
           }
           if (node.rotation) {
-            triangle.transform.rotateQuat(node.rotation);
+            triangle.transform.rotateQuat(rotation);
           }
+
+          // const m = mat4.create();
+          // mat4.fromRotationTranslationScale(m, rotation, translation, scale);
+
           // TODO scale
 
-          triangle.applyTransform();
+          // triangle.applyTransform();
           triangleMesh.add(triangle);
         }
       } else {

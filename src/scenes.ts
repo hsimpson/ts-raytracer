@@ -31,7 +31,7 @@ const defaultCameraOptions: CameraOptions = {
   fovY: 40,
 };
 
-function gpuTestScene(): { world: HittableList; cameraOptions: CameraOptions } {
+function gpuTestScene(useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
   // ground
@@ -60,14 +60,16 @@ function gpuTestScene(): { world: HittableList; cameraOptions: CameraOptions } {
   world.add(redSphere);
   world.add(greenSphere);
 
-  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [0, 0, 10], fovY: 10 };
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [0, 2, 10], fovY: 10 };
 
-  return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
-
-  // return { world, cameraOptions };
+  if (useBVH) {
+    return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
+  } else {
+    return { world, cameraOptions };
+  }
 }
 
-function randomScene(): { world: HittableList; cameraOptions: CameraOptions } {
+function randomScene(useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
   const groundMaterial = new LambertianMaterial([0.5, 0.5, 0.5]);
@@ -119,11 +121,14 @@ function randomScene(): { world: HittableList; cameraOptions: CameraOptions } {
 
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [13, 2, 3], fovY: 20 };
 
-  return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
-  // return { world, cameraOptions };
+  if (useBVH) {
+    return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
+  } else {
+    return { world, cameraOptions };
+  }
 }
 
-function twoCheckerSpheres(): { world: HittableList; cameraOptions: CameraOptions } {
+function twoCheckerSpheres(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
   const checkerTexture = new CheckerTexture([0.2, 0.3, 0.1], [0.9, 0.9, 0.9]);
@@ -138,7 +143,7 @@ function twoCheckerSpheres(): { world: HittableList; cameraOptions: CameraOption
   return { world, cameraOptions };
 }
 
-function twoNoiseSpheres(): { world: HittableList; cameraOptions: CameraOptions } {
+function twoNoiseSpheres(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
   const perlinTexture = new NoiseTexture(4);
@@ -153,7 +158,7 @@ function twoNoiseSpheres(): { world: HittableList; cameraOptions: CameraOptions 
   return { world, cameraOptions };
 }
 
-async function earthSphere(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+async function earthSphere(_useBVH: boolean): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
   const world = new HittableList();
 
   const earthTexture = new ImageTexture();
@@ -169,7 +174,7 @@ async function earthSphere(): Promise<{ world: HittableList; cameraOptions: Came
   return { world, cameraOptions };
 }
 
-function simpleLight(): { world: HittableList; cameraOptions: CameraOptions } {
+function simpleLight(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
   const perlinTexture = new NoiseTexture(4);
   const sphereMaterial = new LambertianMaterial();
@@ -193,7 +198,7 @@ function simpleLight(): { world: HittableList; cameraOptions: CameraOptions } {
   return { world, cameraOptions };
 }
 
-function cornellBox(): { world: HittableList; cameraOptions: CameraOptions } {
+function cornellBox(useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   // http://www.graphics.cornell.edu/online/box/data.html
   const world = new HittableList();
   const red = new LambertianMaterial([0.65, 0.05, 0.05]);
@@ -225,11 +230,14 @@ function cornellBox(): { world: HittableList; cameraOptions: CameraOptions } {
     background: [0, 0, 0],
   };
 
-  return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
-  // return { world, cameraOptions };
+  if (useBVH) {
+    return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
+  } else {
+    return { world, cameraOptions };
+  }
 }
 
-function cornellBoxSmoke(): { world: HittableList; cameraOptions: CameraOptions } {
+function cornellBoxSmoke(useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   // http://www.graphics.cornell.edu/online/box/data.html
   const world = new HittableList();
   const red = new LambertianMaterial([0.65, 0.05, 0.05]);
@@ -261,11 +269,14 @@ function cornellBoxSmoke(): { world: HittableList; cameraOptions: CameraOptions 
     background: [0, 0, 0],
   };
 
-  return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
-  return { world, cameraOptions };
+  if (useBVH) {
+    return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
+  } else {
+    return { world, cameraOptions };
+  }
 }
 
-async function finalScene(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+async function finalScene(useBVH: boolean): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
   const world = new HittableList();
   const boxes1 = new HittableList();
 
@@ -287,8 +298,11 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
     }
   }
 
-  //objects.add(boxes1);
-  world.add(BVHNode.createFromHitableList(boxes1, 0, 1));
+  if (useBVH) {
+    world.add(BVHNode.createFromHitableList(boxes1, 0, 1));
+  } else {
+    world.add(boxes1);
+  }
 
   const light = new DiffuseLight([7, 7, 7]);
   world.add(new XZRect(123, 423, 147, 412, 554, light));
@@ -325,15 +339,13 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
     boxes2.add(new Sphere(Vector.randomRange(0, 165), 10, white));
   }
 
-  // const transform = new Transformation(BVHNode.createFromHitableList(boxes2, 0, 1));
-  // transform.translate([-100, 270, 395]);
-  // transform.rotateEuler(0, 15, 0);
-  // world.add(transform);
-
   boxes2.transform.translate([-100, 270, 395]);
   boxes2.transform.rotateEuler(0, 15, 0);
-  // world.add(boxes2);
-  world.add(BVHNode.createFromHitableList(boxes2, 0, 1));
+  if (useBVH) {
+    world.add(BVHNode.createFromHitableList(boxes2, 0, 1));
+  } else {
+    world.add(boxes2);
+  }
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
@@ -342,11 +354,10 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
     background: [0, 0, 0],
   };
 
-  return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
-  // return { world, cameraOptions };
+  return { world, cameraOptions };
 }
 
-async function gltfScene(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+async function gltfScene(_useBVH: boolean): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
   // const world = await GLTFLoader.load('assets/models/cube.gltf');
   // const world = await GLTFLoader.load('assets/models/cube_transformed.gltf');
   // const world = await GLTFLoader.load('assets/models/uvsphere.gltf');
@@ -354,17 +365,21 @@ async function gltfScene(): Promise<{ world: HittableList; cameraOptions: Camera
   // const world = await GLTFLoader.load('assets/models/monkey.gltf');
   // const world = await GLTFLoader.load('assets/models/torus.gltf');
   // const world = await GLTFLoader.load('assets/models/grid.gltf');
-  const world = await GLTFLoader.load('assets/models/tetrahedron.gltf');
+  // const world = await GLTFLoader.load('assets/models/tetrahedron.gltf');
   // const world = await GLTFLoader.load('assets/models/triangle.gltf');
+  // const world = await GLTFLoader.load('assets/models/triangle_applied.gltf');
+  const world = await GLTFLoader.load('assets/models/scene.gltf');
 
-  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [0, 0, 12], fovY: 10 };
+  // const w = world.objects[0] as HittableList;
 
-  return {
-    world: new HittableList(BVHNode.createFromHitableList(world.objects[0] as HittableList, 0.0, 1.0)),
-    cameraOptions,
-  };
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [2, 1.5, 6], fovY: 20 };
 
-  // return { world: world.objects[0] as HittableList, cameraOptions };
+  // return {
+  //   world: new HittableList(BVHNode.createFromHitableList(world.objects[0] as HittableList, 0.0, 1.0)),
+  //   cameraOptions,
+  // };
+
+  return { world: world, cameraOptions };
 }
 
 const sceneCreators = [
@@ -380,7 +395,10 @@ const sceneCreators = [
   gltfScene,
 ];
 
-export async function getScene(sceneIndex: number): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
-  const { world, cameraOptions } = await sceneCreators[sceneIndex]();
+export async function getScene(
+  sceneIndex: number,
+  useBVH = false
+): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+  const { world, cameraOptions } = await sceneCreators[sceneIndex](false);
   return { world, cameraOptions };
 }

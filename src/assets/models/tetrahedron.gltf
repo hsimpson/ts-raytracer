@@ -15,7 +15,7 @@
     "nodes" : [
         {
             "mesh" : 0,
-            "name" : "Tetrahedron_applied",
+            "name" : "Tetrahedron",
             "rotation" : [
                 0.3826834559440613,
                 0,
@@ -36,7 +36,7 @@
     ],
     "meshes" : [
         {
-            "name" : "Solid.001",
+            "name" : "Solid",
             "primitives" : [
                 {
                     "attributes" : {
@@ -55,14 +55,14 @@
             "componentType" : 5126,
             "count" : 12,
             "max" : [
-                0.8164962530136108,
-                1.3333337306976318,
-                0.9428090453147888
+                0.9428090453147888,
+                1,
+                0.8164966106414795
             ],
             "min" : [
-                -0.8164968490600586,
-                4.76837158203125e-07,
-                -0.4714050590991974
+                -0.4714045226573944,
+                -0.3333333432674408,
+                -0.8164966106414795
             ],
             "type" : "VEC3"
         },
@@ -99,7 +99,7 @@
     "buffers" : [
         {
             "byteLength" : 312,
-            "uri" : "data:application/octet-stream;base64,AAAAAK6qqj8AAACAAAAAAK6qqj8AAACAAAAAAK6qqj8AAACAAAAoNQAAADXvW3E/AAAoNQAAADXvW3E/AAAoNQAAADXvW3E/5gVRPwAACDUBXPG+5gVRPwAACDUBXPG+5gVRPwAACDUBXPG+8AVRvwAACDXdW/G+8AVRvwAACDXdW/G+8AVRvwAACDXdW/G+5wVRv6yqqj4BXPE+4kYmtauqqj7wW3G/8QVRP6uqqj7dW/E+5wVRv6yqqj4BXPE+U2p5qAAAgL/zBLWy8QVRP6uqqj7dW/E+4kYmtauqqj7wW3G/U2p5qAAAgL/zBLWy8QVRP6uqqj7dW/E+5wVRv6yqqj4BXPE+4kYmtauqqj7wW3G/U2p5qAAAgL/zBLWyAgAFAAgAAQAGAAoAAAAJAAMABAALAAcA"
+            "uri" : "data:application/octet-stream;base64,AAAAAAAAgD8AAACAAAAAAAAAgD8AAACAAAAAAAAAgD8AAACA71txP6uqqr4AAACA71txP6uqqr4AAACA71txP6uqqr4AAACA71vxvquqqr7sBVG/71vxvquqqr7sBVG/71vxvquqqr7sBVG/71vxvquqqr7sBVE/71vxvquqqr7sBVE/71vxvquqqr7sBVE/7ltxv6qqqj4AAACA8FvxPqqqqj7sBVE/8FvxPquqqj7sBVG/AAAAAAAAgL8AAACA8FvxPqqqqj7sBVE/8FvxPquqqj7sBVG/7ltxv6qqqj4AAACAAAAAAAAAgL8AAACA8FvxPquqqj7sBVG/7ltxv6qqqj4AAACAAAAAAAAAgL8AAACA8FvxPqqqqj7sBVE/AgAFAAgAAAAGAAkAAQALAAQAAwAKAAcA"
         }
     ]
 }

@@ -130,7 +130,9 @@ export class RaytracingBuffers {
       const objectModelMatrix = object.transform.modelMatrix;
       mat4.multiply(objectModelMatrix, modelMatrix, objectModelMatrix);
 
-      if (object instanceof Box) {
+      if (object instanceof HittableList) {
+        this.traverseHittables(object, objectModelMatrix);
+      } else if (object instanceof Box) {
         this.traverseHittables(object.sides, objectModelMatrix);
       } else {
         this.addPrimitive(object, objectModelMatrix);
@@ -347,17 +349,17 @@ export class RaytracingBuffers {
         materialIndex,
       };
 
-      gpuPrimitive.v0 = [obj.v0[0], obj.v0[1], obj.v0[2], 0];
-      gpuPrimitive.v1 = [obj.v1[0], obj.v1[1], obj.v1[2], 0];
-      gpuPrimitive.v2 = [obj.v2[0], obj.v2[1], obj.v2[2], 0];
+      gpuPrimitive.v0 = [obj.v0[0], obj.v0[1], obj.v0[2], 1];
+      gpuPrimitive.v1 = [obj.v1[0], obj.v1[1], obj.v1[2], 1];
+      gpuPrimitive.v2 = [obj.v2[0], obj.v2[1], obj.v2[2], 1];
 
-      gpuPrimitive.n0 = [obj.n0[0], obj.n0[1], obj.n0[2], 0];
-      gpuPrimitive.n1 = [obj.n1[0], obj.n1[1], obj.n1[2], 0];
-      gpuPrimitive.n2 = [obj.n2[0], obj.n2[1], obj.n2[2], 0];
+      gpuPrimitive.n0 = [obj.n0[0], obj.n0[1], obj.n0[2], 1];
+      gpuPrimitive.n1 = [obj.n1[0], obj.n1[1], obj.n1[2], 1];
+      gpuPrimitive.n2 = [obj.n2[0], obj.n2[1], obj.n2[2], 1];
 
-      gpuPrimitive.uv0 = [obj.uv0[0], obj.uv0[1], obj.uv0[2], 0];
-      gpuPrimitive.uv1 = [obj.uv1[0], obj.uv1[1], obj.uv1[2], 0];
-      gpuPrimitive.uv2 = [obj.uv2[0], obj.uv2[1], obj.uv2[2], 0];
+      gpuPrimitive.uv0 = [obj.uv0[0], obj.uv0[1], 1, 1];
+      gpuPrimitive.uv1 = [obj.uv1[0], obj.uv1[1], 1, 1];
+      gpuPrimitive.uv2 = [obj.uv2[0], obj.uv2[1], 1, 1];
     }
 
     if (gpuPrimitive) {

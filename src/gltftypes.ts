@@ -1,7 +1,27 @@
 // see: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#objects
+
+type Num3 = [number, number, number];
+type Num4 = [number, number, number, number];
+
+export interface GLTF {
+  nodes: GLTFNode[];
+  buffers: GLTFBuffer[];
+  scene: number;
+  scenes: GLTFScene[];
+  accessors: GLTFAccessor[];
+  bufferViews: GLTFBufferView[];
+  meshes: GLTFMesh[];
+  materials: GLTFMaterial[];
+}
+
 export interface GLTFBuffer {
   byteLength: number;
   uri: string;
+}
+
+export interface GLTFScene {
+  name: string;
+  nodes: number[];
 }
 
 export enum GLTFComponentType {
@@ -27,8 +47,8 @@ export interface GLTFAccessor {
   bufferView: number;
   componentType: GLTFComponentType;
   count: number;
-  max: [number, number, number];
-  min: [number, number, number];
+  max: Num3;
+  min: Num3;
   type: GLTFAccessorType;
 }
 
@@ -41,8 +61,9 @@ export interface GLTFBufferView {
 export interface GLTFNode {
   mesh: number;
   name?: string;
-  rotation?: [number, number, number, number];
-  translation?: [number, number, number];
+  rotation?: Num4;
+  translation?: Num3;
+  scale?: Num3;
 }
 
 export interface GLTFMesh {
@@ -67,3 +88,13 @@ export type GLTFAttributeName =
   | 'WEIGHTS_0';
 
 export type GLTFAttribute = { [key in GLTFAttributeName]: number };
+
+export interface GLTFMaterial {
+  doubleSided: boolean;
+  name?: string;
+  pbrMetallicRoughness?: GLTFPBRMetallicRoughness;
+}
+
+export interface GLTFPBRMetallicRoughness {
+  baseColorFactor?: Num4;
+}
