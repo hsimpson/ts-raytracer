@@ -20,7 +20,7 @@ function avgVector3(vectors: vec3[]): vec3 {
 }
 
 const EPSILON = 0.000001;
-// const EPSILON = 0.01;
+// const kEpsilon = 1e-8;
 @serializable
 export class Triangle extends Hittable {
   public readonly v0: vec3;
@@ -39,6 +39,7 @@ export class Triangle extends Hittable {
   public readonly transform: Transform = new Transform();
 
   public material: Material;
+  private _frontFace = true;
 
   public constructor(
     v0: vec3,
@@ -93,12 +94,17 @@ export class Triangle extends Hittable {
   }
 
   public applyTransform(): void {
-    // vec3.transformMat4(this.v0, this.v0, this.transform.modelMatrix);
-    // vec3.transformMat4(this.v1, this.v1, this.transform.modelMatrix);
-    // vec3.transformMat4(this.v2, this.v2, this.transform.modelMatrix);
-    // vec3.transformMat4(this.n0, this.n0, this.transform.inverseTransposeModelMatrix);
-    // vec3.transformMat4(this.n1, this.n1, this.transform.inverseTransposeModelMatrix);
-    // vec3.transformMat4(this.n2, this.n2, this.transform.inverseTransposeModelMatrix);
+    vec3.transformMat4(this.v0, this.v0, this.transform.modelMatrix);
+    vec3.transformMat4(this.v1, this.v1, this.transform.modelMatrix);
+    vec3.transformMat4(this.v2, this.v2, this.transform.modelMatrix);
+
+    vec3.transformMat4(this.n0, this.n0, this.transform.normalMatrix);
+    vec3.transformMat4(this.n1, this.n1, this.transform.normalMatrix);
+    vec3.transformMat4(this.n2, this.n2, this.transform.normalMatrix);
+
+    vec3.normalize(this.n0, this.n0);
+    vec3.normalize(this.n1, this.n1);
+    vec3.normalize(this.n2, this.n2);
   }
 
   public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
@@ -106,80 +112,109 @@ export class Triangle extends Hittable {
 
     const edge1 = vec3.create();
     const edge2 = vec3.create();
-    const h = vec3.create();
-    const s = vec3.create();
-    const q = vec3.create();
 
-    const rayOrigin = vec3.create();
-    vec3.set(rayOrigin, transformedRay.origin[0], transformedRay.origin[1], transformedRay.origin[2]);
+    const pvec = vec3.create();
+    const tvec = vec3.create();
+    const qvec = vec3.create();
 
-    const rayDirection = vec3.create();
-    vec3.set(rayDirection, transformedRay.direction[0], transformedRay.direction[1], transformedRay.direction[2]);
+    let u, v, t;
 
-    vec3.subtract(edge1, this.v1, this.v0);
-    vec3.subtract(edge2, this.v2, this.v0);
-    vec3.cross(h, rayDirection, edge2);
-    const a = vec3.dot(edge1, h);
-    if (a > -EPSILON && a < EPSILON) {
-      return false; // ray is parallel to the triangle
-    }
+    /* find vectors for two edges sharing vert */
+    vec3.sub(edge1, this.v1, this.v0);
+    vec3.sub(edge2, this.v2, this.v0);
 
-    const f = 1.0 / a;
-    vec3.sub(s, rayOrigin, this.v0);
-    const u = f * vec3.dot(s, h);
+    /* begin calculating determinant - also used to calculate U parameter */
+    vec3.cross(pvec, transformedRay.direction, edge2);
 
-    if (u < 0.0 || u > 1.0) {
-      return false;
-    }
+    /*if determinant is near zero, ray lies in plane of triangle */
+    const det = vec3.dot(edge1, pvec);
 
-    vec3.cross(q, s, edge1);
-    const v = f * vec3.dot(rayDirection, q);
-
-    if (v < 0.0 || u + v > 1.0) {
-      return false;
-    }
-
-    // At this stage we can compute t to find out where the intersection point is on the line.
-    const t = f * vec3.dot(edge2, q);
-    if (t > EPSILON) {
-      //ray intersection
-      rec.t = t;
-      rec.p = transformedRay.at(t);
-
-      const w = 1.0 - u - v;
-      const n0 = vec3.create();
-      const n1 = vec3.create();
-      const n2 = vec3.create();
-      vec3.scale(n0, this.n0, w);
-      vec3.scale(n1, this.n1, u);
-      vec3.scale(n2, this.n2, v);
-      const normal = vec3.create();
-      vec3.add(normal, n0, n1);
-      vec3.add(normal, normal, n2);
-      vec3.normalize(normal, normal);
-
-      const outIntersectionPoint = vec3.create();
-      vec3.add(outIntersectionPoint, rayOrigin, rayDirection);
-      vec3.scale(outIntersectionPoint, outIntersectionPoint, t);
-      // rec.p = [outIntersectionPoint[0], outIntersectionPoint[0], outIntersectionPoint[0]];
-      rec.mat = this.material;
-
-      //FIXME: replace when everything is gl-matrix vec3
-      // rec.setFaceNormal(ray, [this.surfaceNormal[0], this.surfaceNormal[1], this.surfaceNormal[2]]);
-      rec.setFaceNormal(transformedRay, [normal[0], normal[1], normal[2]]);
-
-      // FIXME: this is only a hack, to avoid backfacing faces to show up
-      if (!rec.frontFace) {
+    if (this._frontFace) {
+      if (det < EPSILON) {
         return false;
       }
 
-      // TODO: UV
+      /* calculate distance from vert0 to ray origin */
+      vec3.subtract(tvec, transformedRay.origin, this.v0);
 
-      this.transform.transformRecord(transformedRay, rec);
-      return true;
+      /* calculate U parameter and test bounds */
+      u = vec3.dot(tvec, pvec);
+      if (u < 0.0 || u > det) {
+        return false;
+      }
+
+      /* prepare to test V parameter */
+      vec3.cross(qvec, tvec, edge1);
+
+      /* calculate V parameter and test bounds */
+      v = vec3.dot(transformedRay.direction, qvec);
+      if (v < 0.0 || u + v > det) {
+        return false;
+      }
+
+      /* calculate t, scale parameters, ray intersects triangle */
+      t = vec3.dot(edge2, qvec);
+      const invDet = 1.0 / det;
+
+      t *= invDet;
+      u *= invDet;
+      v *= invDet;
+    } else {
+      // non backface culling
+      if (det > -EPSILON && det < EPSILON) {
+        return false; // ray is parallel to the tri
+      }
+
+      const invDet = 1.0 / det;
+      /* calculate distance from vert0 to ray origin */
+      vec3.subtract(tvec, transformedRay.origin, this.v0);
+
+      /* calculate U parameter and test bounds */
+      u = vec3.dot(tvec, pvec) * invDet;
+      if (u < 0.0 || u > 1.0) {
+        return false;
+      }
+
+      /* prepare to test V parameter */
+      vec3.cross(qvec, tvec, edge1);
+      /* calculate V parameter and test bounds */
+      v = vec3.dot(transformedRay.direction, qvec) * invDet;
+      if (v < 0.0 || u + v > 1.0) {
+        return false;
+      }
+
+      /* calculate t, ray intersects triangle */
+      t = vec3.dot(edge2, qvec) * invDet;
     }
 
-    return false;
+    if (t < EPSILON) {
+      return false;
+    }
+
+    rec.u = u;
+    rec.v = v;
+    rec.t = t;
+
+    rec.p = transformedRay.at(t);
+    rec.mat = this.material;
+    const w = 1.0 - u - v;
+
+    const n0 = vec3.create();
+    const n1 = vec3.create();
+    const n2 = vec3.create();
+    vec3.scale(n0, this.n0, w);
+    vec3.scale(n1, this.n1, u);
+    vec3.scale(n2, this.n2, v);
+    const normal = vec3.create();
+    vec3.add(normal, n0, n1);
+    vec3.add(normal, normal, n2);
+    vec3.normalize(normal, normal);
+
+    rec.setFaceNormal(transformedRay, [normal[0], normal[1], normal[2]]);
+
+    this.transform.transformRecord(transformedRay, rec);
+
+    return true;
   }
 
   public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {

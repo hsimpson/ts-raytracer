@@ -372,7 +372,12 @@ async function gltfScene(_useBVH: boolean): Promise<{ world: HittableList; camer
 
   // const w = world.objects[0] as HittableList;
 
-  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [2, 1.5, 6], fovY: 20 };
+  const lookFrom: Vec3 = [2, 1.5, 6];
+  const lookAt: Vec3 = [0, 0, 0];
+  // const lookFrom = [0, 0, 0];
+  // const lookAt = [0, 0, -1];
+
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom, lookAt, fovY: 20 };
 
   // return {
   //   world: new HittableList(BVHNode.createFromHitableList(world.objects[0] as HittableList, 0.0, 1.0)),

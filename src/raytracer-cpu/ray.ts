@@ -48,6 +48,7 @@ export class Ray {
 
   public at(t: number): Vec3 {
     return Vector.addVec3(this._orig, Vector.multScalarVec3(this._dir, t));
+    // return Vector.addVec3(Vector.multScalarVec3(this._orig, 1 - t), Vector.multScalarVec3(this._dir, t));
   }
 }
 

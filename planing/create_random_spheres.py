@@ -149,9 +149,9 @@ def create_sphere(collection, name, position, radius, material):
 
 
 # get the collection "random_spheres"
-random_spheres_sollection = bpy.data.collections["random_spheres"]
+random_spheres_collection = bpy.data.collections["random_spheres"]
 
-clear(random_spheres_sollection)
+clear(random_spheres_collection)
 
 RANGE_VALUE = 11
 
@@ -177,7 +177,7 @@ for a in range(-RANGE_VALUE, RANGE_VALUE):
                     color=(albedo.x, albedo.y, albedo.z, 1.0))
 
                 create_sphere(
-                    collection=random_spheres_sollection,
+                    collection=random_spheres_collection,
                     name="awesome_lambertion_sphere",
                     position=center,
                     radius=0.2,
@@ -190,7 +190,7 @@ for a in range(-RANGE_VALUE, RANGE_VALUE):
                     color=(albedo.x, albedo.y, albedo.z, 1.0), roughness=random.uniform(0.0, 0.5))
 
                 create_sphere(
-                    collection=random_spheres_sollection,
+                    collection=random_spheres_collection,
                     name="awesome_metal_sphere",
                     position=center,
                     radius=0.2,
@@ -201,7 +201,7 @@ for a in range(-RANGE_VALUE, RANGE_VALUE):
                 dielectric = create_dielectric(index_of_refraction=1.5)
 
                 create_sphere(
-                    collection=random_spheres_sollection,
+                    collection=random_spheres_collection,
                     name="awesome_sphere",
                     position=center,
                     radius=0.2,
