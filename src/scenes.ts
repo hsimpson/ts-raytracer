@@ -357,7 +357,7 @@ async function finalScene(useBVH: boolean): Promise<{ world: HittableList; camer
   return { world, cameraOptions };
 }
 
-async function gltfScene(_useBVH: boolean): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+async function gltfScene(useBVH: boolean): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
   // const world = await GLTFLoader.load('assets/models/cube.gltf');
   // const world = await GLTFLoader.load('assets/models/cube_transformed.gltf');
   // const world = await GLTFLoader.load('assets/models/uvsphere.gltf');
@@ -379,12 +379,14 @@ async function gltfScene(_useBVH: boolean): Promise<{ world: HittableList; camer
 
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom, lookAt, fovY: 20 };
 
-  // return {
-  //   world: new HittableList(BVHNode.createFromHitableList(world.objects[0] as HittableList, 0.0, 1.0)),
-  //   cameraOptions,
-  // };
-
-  return { world: world, cameraOptions };
+  if (useBVH) {
+    return {
+      world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)),
+      cameraOptions,
+    };
+  } else {
+    return { world: world, cameraOptions };
+  }
 }
 
 const sceneCreators = [
@@ -404,6 +406,7 @@ export async function getScene(
   sceneIndex: number,
   useBVH = false
 ): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
-  const { world, cameraOptions } = await sceneCreators[sceneIndex](false);
+  const { world, cameraOptions } = await sceneCreators[sceneIndex](useBVH);
+  // const { world, cameraOptions } = await sceneCreators[sceneIndex](false);
   return { world, cameraOptions };
 }
