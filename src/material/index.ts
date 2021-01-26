@@ -4,4 +4,5 @@ export * from './isotropic';
 export * from './lambertian';
 export * from './material';
 export * from './metal';
-export * from './normalmaterial';
+export * from './normal';
+export * from './uv';

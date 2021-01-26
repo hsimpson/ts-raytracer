@@ -5,6 +5,7 @@ import {
   LambertianMaterial,
   MetalMaterial,
   NormalMaterial,
+  UVMaterial,
 } from '../material';
 import { Triangle } from '../triangle';
 import { AABB } from './aabb';
@@ -23,6 +24,7 @@ export const DeserializerMap = {
   metalMaterial: MetalMaterial,
   dielectricMaterial: DielectricMaterial,
   normalMaterial: NormalMaterial,
+  uvMaterial: UVMaterial,
   isoTropic: IsoTropic,
   diffuseLight: DiffuseLight,
 

@@ -7,6 +7,7 @@ import {
   Material,
   MetalMaterial,
   NormalMaterial,
+  UVMaterial,
 } from './material';
 import { XYRect, XZRect, YZRect } from './raytracer-cpu/aarect';
 import { Box } from './raytracer-cpu/box';
