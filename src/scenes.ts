@@ -132,7 +132,7 @@ function randomScene(useBVH: boolean): { world: HittableList; cameraOptions: Cam
 function twoCheckerSpheres(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
-  const checkerTexture = new CheckerTexture([0.2, 0.3, 0.1], [0.9, 0.9, 0.9]);
+  const checkerTexture = new CheckerTexture([0.2, 0.3, 0.1], [0.9, 0.9, 0.9], 40);
   const sphereMaterial = new LambertianMaterial();
   sphereMaterial.texture = checkerTexture;
 

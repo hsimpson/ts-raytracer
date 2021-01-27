@@ -51,7 +51,7 @@ interface WebGPUTexture {
   checkerOdd: vec4;
   checkerEven: vec4;
   uvOffset: vec2;
-  noiseScale: number;
+  scale: number;
   textureType: number;
   imageTextureIndex: number;
 
@@ -147,7 +147,7 @@ export class RaytracingBuffers {
       checkerOdd: [1, 1, 1, 1],
       checkerEven: [1, 1, 1, 1],
       uvOffset: [1, 1],
-      noiseScale: 1,
+      scale: 1,
       textureType: WebGPUTextureType.Solid,
       imageTextureIndex: -1,
       pad_0: PADDING_VALUE,
@@ -161,9 +161,10 @@ export class RaytracingBuffers {
     } else if (tex instanceof CheckerTexture) {
       gpuTex.checkerOdd = [...tex.odd, 1];
       gpuTex.checkerEven = [...tex.even, 1];
+      gpuTex.scale = tex.scale;
       gpuTex.textureType = WebGPUTextureType.Checker;
     } else if (tex instanceof NoiseTexture) {
-      gpuTex.noiseScale = tex.scale;
+      gpuTex.scale = tex.scale;
       gpuTex.textureType = WebGPUTextureType.Noise;
     } else if (tex instanceof ImageTexture) {
       this._textureSize = Math.max(this.getNextPowerOf2(tex.width, tex.height), this._textureSize);
@@ -408,7 +409,7 @@ export class RaytracingBuffers {
       bufferDataF32[offset++] = uOffset;
       bufferDataF32[offset++] = vOffset;
 
-      bufferDataF32[offset++] = texture.noiseScale;
+      bufferDataF32[offset++] = texture.scale;
 
       bufferDataU32[offset++] = texture.textureType;
       bufferDataU32[offset++] = texture.imageTextureIndex;

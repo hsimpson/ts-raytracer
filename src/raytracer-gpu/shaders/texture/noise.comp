@@ -79,7 +79,7 @@ float turb(vec3 p) {
 }
 
 vec3 noiseTextureValue(const Texture textureObj, const vec2 uv, const vec3 p) {
-  return vec3(1.0, 1.0, 1.0) * 0.5 * (1.0 + sin(textureObj.noiseScale * p.z + 10.0 * turb(p)));
+  return vec3(1.0, 1.0, 1.0) * 0.5 * (1.0 + sin(textureObj.scale * p.z + 10.0 * turb(p)));
 }
 
 #endif  //NOISE_INC
