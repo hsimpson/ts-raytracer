@@ -24,13 +24,15 @@ export class XYRect extends Hittable {
     this.material = material;
   }
 
-  public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const t = (this.k - r.origin[2]) / r.direction[2];
-    if (t < t_min || t > t_max) {
+  public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
+    const transformedRay = this.transform.transformRay(ray);
+
+    const t = (this.k - transformedRay.origin[2]) / transformedRay.direction[2];
+    if (t < tMin || t > tMax) {
       return false;
     }
-    const x = r.origin[0] + t * r.direction[0];
-    const y = r.origin[1] + t * r.direction[1];
+    const x = transformedRay.origin[0] + t * transformedRay.direction[0];
+    const y = transformedRay.origin[1] + t * transformedRay.direction[1];
     if (x < this.x0 || x > this.x1 || y < this.y0 || y > this.y1) {
       return false;
     }
@@ -39,9 +41,12 @@ export class XYRect extends Hittable {
     rec.t = t;
 
     const outwardNormal: Vec3 = [0, 0, 1];
-    rec.setFaceNormal(r, outwardNormal);
+    rec.setFaceNormal(transformedRay, outwardNormal);
     rec.mat = this.material;
-    rec.p = r.at(t);
+    rec.p = transformedRay.at(t);
+
+    this.transform.transformRecord(transformedRay, rec);
+
     return true;
   }
 
@@ -74,13 +79,15 @@ export class XZRect extends Hittable {
     this.material = material;
   }
 
-  public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const t = (this.k - r.origin[1]) / r.direction[1];
-    if (t < t_min || t > t_max) {
+  public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
+    const transformedRay = this.transform.transformRay(ray);
+
+    const t = (this.k - transformedRay.origin[1]) / transformedRay.direction[1];
+    if (t < tMin || t > tMax) {
       return false;
     }
-    const x = r.origin[0] + t * r.direction[0];
-    const z = r.origin[2] + t * r.direction[2];
+    const x = transformedRay.origin[0] + t * transformedRay.direction[0];
+    const z = transformedRay.origin[2] + t * transformedRay.direction[2];
     if (x < this.x0 || x > this.x1 || z < this.z0 || z > this.z1) {
       return false;
     }
@@ -89,9 +96,11 @@ export class XZRect extends Hittable {
     rec.t = t;
 
     const outwardNormal: Vec3 = [0, 1, 0];
-    rec.setFaceNormal(r, outwardNormal);
+    rec.setFaceNormal(transformedRay, outwardNormal);
     rec.mat = this.material;
-    rec.p = r.at(t);
+    rec.p = transformedRay.at(t);
+
+    this.transform.transformRecord(transformedRay, rec);
     return true;
   }
 
@@ -124,13 +133,15 @@ export class YZRect extends Hittable {
     this.material = material;
   }
 
-  public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const t = (this.k - r.origin[0]) / r.direction[0];
-    if (t < t_min || t > t_max) {
+  public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
+    const transformedRay = this.transform.transformRay(ray);
+
+    const t = (this.k - transformedRay.origin[0]) / transformedRay.direction[0];
+    if (t < tMin || t > tMax) {
       return false;
     }
-    const y = r.origin[1] + t * r.direction[1];
-    const z = r.origin[2] + t * r.direction[2];
+    const y = transformedRay.origin[1] + t * transformedRay.direction[1];
+    const z = transformedRay.origin[2] + t * transformedRay.direction[2];
     if (y < this.y0 || y > this.y1 || z < this.z0 || z > this.z1) {
       return false;
     }
@@ -139,9 +150,11 @@ export class YZRect extends Hittable {
     rec.t = t;
 
     const outwardNormal: Vec3 = [1, 0, 0];
-    rec.setFaceNormal(r, outwardNormal);
+    rec.setFaceNormal(transformedRay, outwardNormal);
     rec.mat = this.material;
-    rec.p = r.at(t);
+    rec.p = transformedRay.at(t);
+
+    this.transform.transformRecord(transformedRay, rec);
     return true;
   }
 
