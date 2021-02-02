@@ -26,7 +26,10 @@ Features:
     Environment Textures:
       ☐ HDR files
       ☐ Open EXR files
-    ☐ Add PBR Material (probably Disney Principled BSDF)
+    ☐ Add PBR Material (probably Disney Principled BRDF/BSDF)
+      https://google.github.io/filament/Filament.html
+      https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#appendix-b-brdf-implementation
+      https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
       https://academy.substance3d.com/courses/the-pbr-guide-part-1
       https://academy.substance3d.com/courses/the-pbr-guide-part-2
     ☐ Add denoising
@@ -44,7 +47,7 @@ Features:
       Environment Textures:
         ☐ HDR files
         ☐ Open EXR files
-      ☐ Add PBR Material (probably Disney Principled BSDF)
+      ☐ Add PBR Material (probably Disney Principled BRDF/BSDF)
       ☐ Add denoising
 
   Common:
