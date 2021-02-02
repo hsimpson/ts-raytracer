@@ -50,7 +50,7 @@ export class Sphere extends Hittable {
         rec.u = uv.u;
         rec.v = uv.v;
         rec.mat = this.material;
-        this.transform.transformRecord(transformedRay, rec);
+        this.transform.transformRecord(ray, rec);
         return true;
       }
       temp = (-half_b + root) / a;
@@ -63,7 +63,7 @@ export class Sphere extends Hittable {
         rec.u = uv.u;
         rec.v = uv.v;
         rec.mat = this.material;
-        this.transform.transformRecord(transformedRay, rec);
+        this.transform.transformRecord(ray, rec);
         return true;
       }
     }
@@ -72,7 +72,7 @@ export class Sphere extends Hittable {
 
   public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
     const transformedCenter: vec3 = [this._center[0], this._center[1], this._center[2]];
-    vec3.transformMat4(transformedCenter, transformedCenter, this.transform.modelMatrix);
+    vec3.transformMat4(transformedCenter, transformedCenter, this.transform.objectToWorld);
 
     const newOutputBox = new AABB(
       Vector.subVec3(transformedCenter, [this._radius, this._radius, this._radius]),
