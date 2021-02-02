@@ -1,6 +1,6 @@
 import { Camera } from '../camera';
 import { deserialize } from '../serializing/deserialize';
-import { randomNumber } from '../util';
+import { randomNumber, writeColor } from '../util';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
 import { DeserializerMap } from './deserializermap';
@@ -12,29 +12,6 @@ import { ComputeCommands, ComputeEndMessage, ComputeStartMessage, WorkerMessage 
 const map = DeserializerMap;
 const _controllerCtx: Worker = self as never;
 let _id: number;
-const gamma22Exponent = 1.0 / 2.2;
-
-const writeColor = (array: Uint8ClampedArray, offset: number, color: Vec3, spp: number): void => {
-  let [r, g, b] = color;
-
-  // Divide the color total by the number of samples
-  const scale = 1.0 / spp;
-
-  // gamma 2.0
-  // r = Math.sqrt(scale * r);
-  // g = Math.sqrt(scale * g);
-  // b = Math.sqrt(scale * b);
-
-  // gamma 2.2
-  r = Math.pow(scale * r, gamma22Exponent);
-  g = Math.pow(scale * g, gamma22Exponent);
-  b = Math.pow(scale * b, gamma22Exponent);
-
-  // Write the translated [0,255] value of each color component.
-  array[offset++] = r * 255;
-  array[offset++] = g * 255;
-  array[offset++] = b * 255;
-};
 
 function start(msg: ComputeStartMessage): void {
   _id = msg.data.workerId;

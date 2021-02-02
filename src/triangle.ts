@@ -94,9 +94,9 @@ export class Triangle extends Hittable {
   }
 
   public applyTransform(): void {
-    vec3.transformMat4(this.v0, this.v0, this.transform.modelMatrix);
-    vec3.transformMat4(this.v1, this.v1, this.transform.modelMatrix);
-    vec3.transformMat4(this.v2, this.v2, this.transform.modelMatrix);
+    vec3.transformMat4(this.v0, this.v0, this.transform.objectToWorld);
+    vec3.transformMat4(this.v1, this.v1, this.transform.objectToWorld);
+    vec3.transformMat4(this.v2, this.v2, this.transform.objectToWorld);
 
     vec3.transformMat4(this.n0, this.n0, this.transform.normalMatrix);
     vec3.transformMat4(this.n1, this.n1, this.transform.normalMatrix);
@@ -222,9 +222,9 @@ export class Triangle extends Hittable {
     const v1 = vec3.create();
     const v2 = vec3.create();
 
-    vec3.transformMat4(v0, this.v0, this.transform.modelMatrix);
-    vec3.transformMat4(v1, this.v1, this.transform.modelMatrix);
-    vec3.transformMat4(v2, this.v2, this.transform.modelMatrix);
+    vec3.transformMat4(v0, this.v0, this.transform.objectToWorld);
+    vec3.transformMat4(v1, this.v1, this.transform.objectToWorld);
+    vec3.transformMat4(v2, this.v2, this.transform.objectToWorld);
 
     const minX = Math.min(v0[0], v1[0], v2[0]) - EPSILON;
     const minY = Math.min(v0[1], v1[1], v2[1]) - EPSILON;

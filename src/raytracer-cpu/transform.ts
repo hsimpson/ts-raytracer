@@ -5,21 +5,21 @@ import { Ray } from './ray';
 
 @serializable
 export class Transform {
-  private _modelMatrix = mat4.create();
+  private _objectToWorldMatrix = mat4.create();
+  private _worldToObjectMatrix = mat4.create();
   private _rotationMatrix = mat4.create();
-  private _inverseModelMatrix = mat4.create();
   private _inverseRotationMatrix = mat4.create();
-  private _inverseTransposeModelMatrix = mat4.create();
+  private _normalMatrix = mat4.create();
   private _position = vec3.create();
   private _rotation = quat.create();
   private _isTransformed = false;
 
-  public get modelMatrix(): mat4 {
-    return this._modelMatrix;
+  public get objectToWorld(): mat4 {
+    return this._objectToWorldMatrix;
   }
 
-  public get inverseTransposeModelMatrix(): mat4 {
-    return this._inverseTransposeModelMatrix;
+  public get normalMatrix(): mat4 {
+    return this._normalMatrix;
   }
 
   public transformRay(ray: Ray): Ray {
@@ -28,7 +28,7 @@ export class Transform {
     }
     const movedOrigin = vec3.create();
     vec3.set(movedOrigin, ray.origin[0], ray.origin[1], ray.origin[2]);
-    vec3.transformMat4(movedOrigin, movedOrigin, this._inverseModelMatrix);
+    vec3.transformMat4(movedOrigin, movedOrigin, this._worldToObjectMatrix);
 
     const movedDirection = vec3.create();
     vec3.set(movedDirection, ray.direction[0], ray.direction[1], ray.direction[2]);
@@ -51,11 +51,12 @@ export class Transform {
     //FIXME: when replace vec3
     const movedP = vec3.create();
     vec3.set(movedP, rec.p[0], rec.p[1], rec.p[2]);
-    vec3.transformMat4(movedP, movedP, this._modelMatrix);
+    vec3.transformMat4(movedP, movedP, this._objectToWorldMatrix);
 
     const movedN = vec3.create();
     vec3.set(movedN, rec.normal[0], rec.normal[1], rec.normal[2]);
-    vec3.transformMat4(movedN, movedN, this._rotationMatrix);
+    vec3.transformMat4(movedN, movedN, this._normalMatrix);
+    vec3.normalize(movedN, movedN);
 
     rec.p = [movedP[0], movedP[1], movedP[2]];
     rec.setFaceNormal(ray, [movedN[0], movedN[1], movedN[2]]);
@@ -63,12 +64,12 @@ export class Transform {
 
   public translate(translation: vec3): void {
     vec3.add(this._position, this._position, translation);
-    this._updateModelMatrix();
+    this._updateMatrix();
   }
 
   public rotateQuat(rotation: quat): void {
     this._rotation = quat.multiply(this._rotation, this._rotation, rotation);
-    this._updateModelMatrix();
+    this._updateMatrix();
   }
 
   public rotateEuler(angleX: number, angelY: number, angleZ: number): void {
@@ -77,20 +78,20 @@ export class Transform {
     this.rotateQuat(tempQuat);
   }
 
-  private _updateModelMatrix(): void {
+  private _updateMatrix(): void {
     this._isTransformed = true;
     const translationMatrix = mat4.create();
 
     mat4.translate(translationMatrix, translationMatrix, this._position);
     mat4.fromQuat(this._rotationMatrix, this._rotation);
 
-    mat4.multiply(this._modelMatrix, translationMatrix, this._rotationMatrix);
+    mat4.multiply(this._objectToWorldMatrix, translationMatrix, this._rotationMatrix);
 
-    mat4.invert(this._inverseModelMatrix, this._modelMatrix);
+    mat4.invert(this._worldToObjectMatrix, this._objectToWorldMatrix);
     mat4.invert(this._inverseRotationMatrix, this._rotationMatrix);
 
-    mat4.transpose(this._inverseTransposeModelMatrix, this._modelMatrix);
-    mat4.invert(this._inverseTransposeModelMatrix, this._inverseTransposeModelMatrix);
+    mat4.transpose(this._normalMatrix, this._rotationMatrix);
+    mat4.invert(this._normalMatrix, this._normalMatrix);
 
     // logMatrix(this._modelMatrix);
   }

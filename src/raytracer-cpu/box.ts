@@ -50,8 +50,8 @@ export class Box extends Hittable {
     const transformedMin: vec3 = [this._boxMin[0], this._boxMin[1], this._boxMin[2]];
     const transformedMax: vec3 = [this._boxMax[0], this._boxMax[1], this._boxMax[2]];
 
-    vec3.transformMat4(transformedMin, transformedMin, this.transform.modelMatrix);
-    vec3.transformMat4(transformedMax, transformedMax, this.transform.modelMatrix);
+    vec3.transformMat4(transformedMin, transformedMin, this.transform.objectToWorld);
+    vec3.transformMat4(transformedMax, transformedMax, this.transform.objectToWorld);
 
     const newOutputBox = new AABB(transformedMin, transformedMax);
     newOutputBox.copyTo(outputBox);

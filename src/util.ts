@@ -1,6 +1,9 @@
 import { mat4 } from 'gl-matrix';
 import type { Vec3 } from './vec3';
 
+// gamma 2.2
+const GAMMA = 1.0 / 2.2;
+
 export function degreeToRadians(degrees: number): number {
   return (degrees * Math.PI) / 180;
 }
@@ -66,4 +69,26 @@ export function getSphereUV(p: Vec3): { u: number; v: number } {
   const u = 1 - (phi + Math.PI) / (2 * Math.PI);
   const v = (theta + Math.PI / 2) / Math.PI;
   return { u, v };
+}
+
+export function writeColor(array: Uint8ClampedArray, offset: number, color: Vec3, spp: number): void {
+  let [r, g, b] = color;
+
+  // Divide the color total by the number of samples
+  const scale = 1.0 / spp;
+
+  // gamma 2.0
+  // r = Math.sqrt(scale * r);
+  // g = Math.sqrt(scale * g);
+  // b = Math.sqrt(scale * b);
+
+  // gamma 2.2
+  r = Math.pow(scale * r, GAMMA);
+  g = Math.pow(scale * g, GAMMA);
+  b = Math.pow(scale * b, GAMMA);
+
+  // Write the translated [0,255] value of each color component.
+  array[offset++] = r * 255;
+  array[offset++] = g * 255;
+  array[offset++] = b * 255;
 }

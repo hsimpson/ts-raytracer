@@ -160,24 +160,6 @@ export function randomInUnitdisk(): Vec3 {
   }
 }
 
-export function writeColor(array: Uint8ClampedArray, offset: number, color: Vec3, samples_per_pixel: number): void {
-  let r = color[0];
-  let g = color[1];
-  let b = color[2];
-
-  // Divide the color total by the number of samples and gamma-correct for gamma=2.0.
-  const scale = 1.0 / samples_per_pixel;
-  r = Math.sqrt(scale * r);
-  g = Math.sqrt(scale * g);
-  b = Math.sqrt(scale * b);
-
-  // Write the translated [0,255] value of each color component.
-  array[offset++] = r * 255;
-  array[offset++] = g * 255;
-  array[offset++] = b * 255;
-  array[offset++] = 255;
-}
-
 /*
 function createRandomVecs(count: number): void {
   for (let i = 0; i < count; i++) {

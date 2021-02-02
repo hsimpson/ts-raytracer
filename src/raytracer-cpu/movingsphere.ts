@@ -112,8 +112,8 @@ export class MovingSphere extends Hittable {
     const transformedCenterT0: vec3 = [cT0[0], cT0[1], cT0[2]];
     const transformedCenterT1: vec3 = [cT1[0], cT1[1], cT1[2]];
 
-    vec3.transformMat4(transformedCenterT0, transformedCenterT0, this.transform.modelMatrix);
-    vec3.transformMat4(transformedCenterT1, transformedCenterT1, this.transform.modelMatrix);
+    vec3.transformMat4(transformedCenterT0, transformedCenterT0, this.transform.objectToWorld);
+    vec3.transformMat4(transformedCenterT1, transformedCenterT1, this.transform.objectToWorld);
 
     const box0 = new AABB(
       Vector.subVec3(transformedCenterT0, [this._radius, this._radius, this._radius]),
