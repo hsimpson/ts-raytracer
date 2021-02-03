@@ -44,13 +44,13 @@ export class CheckerTexture extends Texture {
   }
 
   public value(u: number, v: number, p: Vec3): Vec3 {
-    const x = this.modulo(u * (this._scale / 2)) < 0.5;
-    const y = this.modulo(v * (this._scale / 2)) < 0.5;
+    const x = this.modulo(u * this._scale) < 0.5;
+    const y = this.modulo(v * this._scale) < 0.5;
 
     if (x ? !y : y) {
-      return this._odd.value(u, v, p);
-    } else {
       return this._even.value(u, v, p);
+    } else {
+      return this._odd.value(u, v, p);
     }
   }
 
