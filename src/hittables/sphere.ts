@@ -1,11 +1,13 @@
-import Material from './material';
-import { HitRecord, Hittable } from './hittable';
-import Ray from './ray';
-import type { Vec3 } from '../vec3';
-import * as Vector from '../vec3';
-import { AABB } from './aabb';
+import { vec3 } from 'gl-matrix';
+import { Material } from '../material';
 import { serializable } from '../serializing';
 import { getSphereUV } from '../util';
+import type { Vec3 } from '../vec3';
+import * as Vector from '../vec3';
+import { AABB } from '../raytracer-cpu/aabb';
+import { HitRecord } from '../raytracer-cpu/hitrecord';
+import { Hittable } from './hittable';
+import { Ray } from '../raytracer-cpu/ray';
 
 @serializable
 export class Sphere extends Hittable {
@@ -28,7 +30,7 @@ export class Sphere extends Hittable {
   }
 
   public hit(ray: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const transformedRay = this._transformRay(ray);
+    const transformedRay = this.transform.transformRay(ray);
 
     const oc = Vector.subVec3(transformedRay.origin, this._center);
     const a = Vector.lengthSquared(transformedRay.direction);
@@ -48,7 +50,7 @@ export class Sphere extends Hittable {
         rec.u = uv.u;
         rec.v = uv.v;
         rec.mat = this.material;
-        this._transformRecord(transformedRay, rec);
+        this.transform.transformRecord(ray, rec);
         return true;
       }
       temp = (-half_b + root) / a;
@@ -61,7 +63,7 @@ export class Sphere extends Hittable {
         rec.u = uv.u;
         rec.v = uv.v;
         rec.mat = this.material;
-        this._transformRecord(transformedRay, rec);
+        this.transform.transformRecord(ray, rec);
         return true;
       }
     }
@@ -69,9 +71,12 @@ export class Sphere extends Hittable {
   }
 
   public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
+    const transformedCenter: vec3 = [this._center[0], this._center[1], this._center[2]];
+    vec3.transformMat4(transformedCenter, transformedCenter, this.transform.objectToWorld);
+
     const newOutputBox = new AABB(
-      Vector.subVec3(this._center, [this._radius, this._radius, this._radius]),
-      Vector.addVec3(this._center, [this._radius, this._radius, this._radius])
+      Vector.subVec3(transformedCenter, [this._radius, this._radius, this._radius]),
+      Vector.addVec3(transformedCenter, [this._radius, this._radius, this._radius])
     );
     newOutputBox.copyTo(outputBox);
     return true;

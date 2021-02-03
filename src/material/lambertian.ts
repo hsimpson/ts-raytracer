@@ -1,13 +1,13 @@
-import Material from './material';
-import { HitRecord } from './hittable';
-import Ray from './ray';
+import { serializable } from '../serializing';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
-import { serializable } from '../serializing';
-import { Texture, SolidColor } from './texture';
+import { HitRecord } from '../raytracer-cpu/hitrecord';
+import { Material } from './material';
+import { Ray } from '../raytracer-cpu/ray';
+import { SolidColor, Texture } from '../raytracer-cpu/texture';
 
 @serializable
-export default class LambertianMaterial extends Material {
+export class LambertianMaterial extends Material {
   private _albedo: Texture;
 
   public constructor(color?: Vec3) {
@@ -25,9 +25,9 @@ export default class LambertianMaterial extends Material {
     return this._albedo;
   }
 
-  public scatter(r_in: Ray, rec: HitRecord, attenuation: Vec3, scattered: Ray): boolean {
+  public scatter(ray: Ray, rec: HitRecord, attenuation: Vec3, scattered: Ray): boolean {
     const scatter_direction = Vector.addVec3(rec.normal, Vector.randomUnitVector());
-    new Ray(rec.p, scatter_direction, r_in.time).copyTo(scattered);
+    new Ray(rec.p, scatter_direction, ray.time).copyTo(scattered);
     const col = this._albedo.value(rec.u, rec.v, rec.p);
     Vector.copyTo(col, attenuation);
     return true;

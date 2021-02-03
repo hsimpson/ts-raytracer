@@ -1,12 +1,12 @@
 import { serializable } from '../serializing';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
-import { HitRecord } from './hittable';
-import Material from './material';
-import Ray from './ray';
+import { HitRecord } from '../raytracer-cpu/hitrecord';
+import { Material } from './material';
+import { Ray } from '../raytracer-cpu/ray';
 
 @serializable
-export default class MetalMaterial extends Material {
+export class MetalMaterial extends Material {
   private _baseColor: Vec3;
   private _roughness: number;
 

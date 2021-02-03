@@ -8,10 +8,12 @@
 #include "./hittable_base.comp"
 
 bool hitSphere(const Primitive sphere, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
+  Ray transformedRay = transformRay(ray, sphere.objectToWorld);
+
   vec3  center       = sphere.center0.xyz;
-  vec3  oc           = ray.origin - center;
-  float a            = lengthSquared(ray.direction);
-  float half_b       = dot(oc, ray.direction);
+  vec3  oc           = transformedRay.origin - center;
+  float a            = lengthSquared(transformedRay.direction);
+  float half_b       = dot(oc, transformedRay.direction);
   float c            = lengthSquared(oc) - sphere.radius * sphere.radius;
   float discriminant = half_b * half_b - a * c;
 
@@ -20,23 +22,25 @@ bool hitSphere(const Primitive sphere, const Ray ray, const float tMin, const fl
     float temp = (-half_b - root) / a;
     if (temp < tMax && temp > tMin) {
       rec.t               = temp;
-      rec.p               = rayAt(ray, rec.t);
+      rec.p               = rayAt(transformedRay, rec.t);
       vec3 outward_normal = (rec.p - center) / sphere.radius;
-      setFaceNormal(rec, ray, outward_normal);
+      setFaceNormal(rec, transformedRay, outward_normal);
       vec2 uv           = getSphereUV(outward_normal);
       rec.uv            = uv;
       rec.materialIndex = sphere.materialIndex;
+      transformRecord(rec, sphere.objectToWorld);
       return true;
     }
     temp = (-half_b + root) / a;
     if (temp < tMax && temp > tMin) {
       rec.t               = temp;
-      rec.p               = rayAt(ray, rec.t);
+      rec.p               = rayAt(transformedRay, rec.t);
       vec3 outward_normal = (rec.p - center) / sphere.radius;
-      setFaceNormal(rec, ray, outward_normal);
+      setFaceNormal(rec, transformedRay, outward_normal);
       vec2 uv           = getSphereUV(outward_normal);
       rec.uv            = uv;
       rec.materialIndex = sphere.materialIndex;
+      transformRecord(rec, sphere.objectToWorld);
       return true;
     }
   }

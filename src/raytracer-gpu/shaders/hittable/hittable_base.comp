@@ -4,16 +4,32 @@
 #extension GL_GOOGLE_include_directive : enable
 
 struct Primitive {
-  mat4 modelMatrix;
+  mat4 objectToWorld;
   vec4 bounds;
   vec4 center0;  // center0 xyz, time0 w
   vec4 center1;  // center1 xyz, time1 w
+
+  vec4 v0;  // triangle vertex normal
+  vec4 v1;  // triangle vertex normal
+  vec4 v2;  // triangle vertex normal
+
+  vec4 n0;  // triangle vertex normal
+  vec4 n1;  // triangle vertex normal
+  vec4 n2;  // triangle vertex normal
+
+  vec4 uv0;  // triangle vertex texture coordinate
+  vec4 uv1;  // triangle vertex texture coordinate
+  vec4 uv2;  // triangle vertex texture coordinate
 
   float radius;
   float k;
 
   uint primitiveType;
   uint materialIndex;
+
+  // padding
+  // float pad_0;
+  // float pad_1;
 };
 
 layout(std430, set = 0, binding = 4) buffer PrimitiveBuffer {

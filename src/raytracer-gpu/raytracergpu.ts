@@ -5,9 +5,9 @@ import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
 import { WebGPUBuffer } from './webgpubuffer';
-import WebGPUComputePipline from './webgpucomputepipeline';
+import { WebGPUComputePipline } from './webgpucomputepipeline';
 import { WebGPUContext } from './webgpucontext';
-import WebGPURenderPipeline from './webgpurenderpipeline';
+import { WebGPURenderPipeline } from './webgpurenderpipeline';
 // import { sleep } from '../util';
 
 const LOCAL_SIZE = 8;
@@ -50,7 +50,7 @@ export class RaytracerGPU extends RaytracerBase {
       size: textureSize,
       sampleCount: 1,
       format: 'bgra8unorm',
-      usage: GPUTextureUsage.OUTPUT_ATTACHMENT,
+      usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
     const colorTexture = WebGPUContext.device.createTexture(colorTextureDesc);
@@ -197,7 +197,7 @@ export class RaytracerGPU extends RaytracerBase {
     try {
       const adapter = await gpu.requestAdapter();
       const device = await adapter.requestDevice();
-      const queue = device.defaultQueue;
+      const queue = device.queue;
 
       WebGPUContext.createContext(device, queue);
 
@@ -207,7 +207,7 @@ export class RaytracerGPU extends RaytracerBase {
       const swapChainDesc: GPUSwapChainDescriptor = {
         device,
         format: 'bgra8unorm',
-        usage: GPUTextureUsage.OUTPUT_ATTACHMENT | GPUTextureUsage.COPY_SRC,
+        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
       };
       this._swapchain = context.configureSwapChain(swapChainDesc);
 

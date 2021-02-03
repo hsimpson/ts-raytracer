@@ -1,8 +1,8 @@
+import { Ray } from './raytracer-cpu/ray';
+import { serializable } from './serializing';
+import { degreeToRadians, randomNumberRange } from './util';
 import type { Vec3 } from './vec3';
 import * as Vector from './vec3';
-import Ray from './raytracer-cpu/ray';
-import { degreeToRadians, randomNumberRange } from './util';
-import { serializable } from './serializing';
 
 export interface CameraOptions {
   lookFrom: Vec3;

@@ -7,15 +7,22 @@
 
 // TODO: support other textures then SolidTexture
 
-vec3 checkerTextureValue(const Texture textureObj, const vec2 uv, const vec3 p) {
-  vec3  sine  = sin(p * 10.0);
-  float sines = sine.x * sine.y * sine.z;
+float modulo(float x) {
+  return x - floor(x);
+}
 
-  if (sines < 0.0) {
+vec3 checkerTextureValue(const Texture textureObj, const vec2 uv, const vec3 p) {
+  vec2 xy = uv * textureObj.scale;
+  bool x  = modulo(xy.x) < 0.5;
+  bool y  = modulo(xy.y) < 0.5;
+
+  // clang-format off
+  if (x ^^ y) {
     return textureObj.checkerOdd.rgb;
   } else {
     return textureObj.checkerEven.rgb;
   }
+  // clang-format on
 }
 
 #endif  //CHECKERTEXTURE_INC

@@ -1,8 +1,8 @@
+import { serializable } from '../serializing';
+import { clamp } from '../util';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
-import { serializable } from '../serializing';
-import Perlin from './perlin';
-import { clamp } from '../util';
+import { Perlin } from './perlin';
 
 export abstract class Texture {
   public abstract value(u: number, v: number, p: Vec3): Vec3;
@@ -30,19 +30,27 @@ export class SolidColor extends Texture {
 export class CheckerTexture extends Texture {
   private _odd: Texture;
   private _even: Texture;
+  private _scale: number;
 
-  public constructor(odd: Vec3, even: Vec3) {
+  public constructor(odd: Vec3, even: Vec3, scale?: number) {
     super();
     this._odd = new SolidColor(odd);
     this._even = new SolidColor(even);
+    this._scale = scale || 5;
+  }
+
+  private modulo(x: number): number {
+    return x - Math.floor(x);
   }
 
   public value(u: number, v: number, p: Vec3): Vec3 {
-    const sines = Math.sin(10 * p[0]) * Math.sin(10 * p[1]) * Math.sin(10 * p[2]);
-    if (sines < 0) {
-      return this._odd.value(u, v, p);
-    } else {
+    const x = this.modulo(u * this._scale) < 0.5;
+    const y = this.modulo(v * this._scale) < 0.5;
+
+    if (x ? !y : y) {
       return this._even.value(u, v, p);
+    } else {
+      return this._odd.value(u, v, p);
     }
   }
 
@@ -52,6 +60,10 @@ export class CheckerTexture extends Texture {
 
   public get even(): Vec3 {
     return (this._even as SolidColor).color;
+  }
+
+  public get scale(): number {
+    return this._scale;
   }
 }
 

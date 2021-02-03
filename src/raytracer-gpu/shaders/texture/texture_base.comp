@@ -8,7 +8,7 @@ struct Texture {
   vec4  checkerOdd;
   vec4  checkerEven;
   vec2  uvOffset;
-  float noiseScale;
+  float scale;
 
   uint textureType;
   uint imageTextureIndex;

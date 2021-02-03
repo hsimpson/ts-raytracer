@@ -1,14 +1,16 @@
+import { vec3 } from 'gl-matrix';
+import { Material } from '../material';
 import { serializable } from '../serializing';
 import type { Vec3 } from '../vec3';
-import { AABB } from './aabb';
+import { AABB } from '../raytracer-cpu/aabb';
 import { XYRect, XZRect, YZRect } from './aarect';
-import { HitRecord, Hittable } from './hittable';
+import { HitRecord } from '../raytracer-cpu/hitrecord';
+import { Hittable } from './hittable';
 import { HittableList } from './hittablelist';
-import Material from './material';
-import Ray from './ray';
+import { Ray } from '../raytracer-cpu/ray';
 
 @serializable
-export default class Box extends Hittable {
+export class Box extends Hittable {
   private _boxMin: Vec3;
   private _boxMax: Vec3;
   private _sides = new HittableList();
@@ -33,19 +35,25 @@ export default class Box extends Hittable {
   }
 
   public hit(ray: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const transformedRay = this._transformRay(ray);
+    const transformedRay = this.transform.transformRay(ray);
 
     if (!this._sides.hit(transformedRay, t_min, t_max, rec)) {
       return false;
     }
 
-    this._transformRecord(transformedRay, rec);
+    this.transform.transformRecord(transformedRay, rec);
 
     return true;
   }
 
   public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
-    const newOutputBox = new AABB(this._boxMin, this._boxMax);
+    const transformedMin: vec3 = [this._boxMin[0], this._boxMin[1], this._boxMin[2]];
+    const transformedMax: vec3 = [this._boxMax[0], this._boxMax[1], this._boxMax[2]];
+
+    vec3.transformMat4(transformedMin, transformedMin, this.transform.objectToWorld);
+    vec3.transformMat4(transformedMax, transformedMax, this.transform.objectToWorld);
+
+    const newOutputBox = new AABB(transformedMin, transformedMax);
     newOutputBox.copyTo(outputBox);
     return true;
   }

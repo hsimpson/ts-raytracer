@@ -3,7 +3,7 @@ import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
 import { serialize } from '../serializing';
-import { HittableList } from './hittablelist';
+import { HittableList } from '../hittables';
 import {
   ControllerCommands,
   ControllerEndMessage,
@@ -76,7 +76,7 @@ export class RaytracerCPU extends RaytracerBase {
 
     this._controllerWorker.onmessage = async (event) => this.onControllerMessage(event);
 
-    const { world, cameraOptions } = await getScene(this._rayTracerOptions.scene);
+    const { world, cameraOptions } = await getScene(this._rayTracerOptions.scene, true);
 
     const aspectRatio = this._rayTracerOptions.imageWidth / this._rayTracerOptions.imageHeight;
 

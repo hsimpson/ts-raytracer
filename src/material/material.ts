@@ -1,9 +1,9 @@
-import Ray from './ray';
 import type { Vec3 } from '../vec3';
-import { HitRecord } from './hittable';
-import type { Texture } from './texture';
+import { HitRecord } from '../raytracer-cpu/hitrecord';
+import { Ray } from '../raytracer-cpu/ray';
+import type { Texture } from '../raytracer-cpu/texture';
 
-export default abstract class Material {
+export abstract class Material {
   public emitted(_u: number, _v: number, _p: Vec3): Vec3 {
     return [0, 0, 0];
   }

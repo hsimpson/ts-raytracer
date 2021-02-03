@@ -1,7 +1,8 @@
 import { serializable } from '../serializing';
-import { AABB } from './aabb';
-import { HitRecord, Hittable } from './hittable';
-import Ray from './ray';
+import { AABB } from '../raytracer-cpu/aabb';
+import { HitRecord } from '../raytracer-cpu/hitrecord';
+import { Hittable } from './hittable';
+import { Ray } from '../raytracer-cpu/ray';
 
 @serializable
 export class HittableList extends Hittable {
@@ -18,29 +19,29 @@ export class HittableList extends Hittable {
     return this._objects;
   }
 
-  public clear(): void {
-    this._objects.length = 0;
-  }
+  // public clear(): void {
+  //   this._objects.length = 0;
+  // }
 
   public add(object: Hittable): void {
     this._objects.push(object);
   }
 
-  public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
-    const temp_rec = new HitRecord();
-    let hit_anything = false;
-    let closest_so_far = t_max;
+  public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
+    const tempRecord = new HitRecord();
+    let hitAnything = false;
+    let closestSoFar = tMax;
 
     for (const object of this._objects) {
-      if (object.hit(r, t_min, closest_so_far, temp_rec)) {
-        hit_anything = true;
-        closest_so_far = temp_rec.t;
+      if (object.hit(ray, tMin, closestSoFar, tempRecord)) {
+        hitAnything = true;
+        closestSoFar = tempRecord.t;
 
-        temp_rec.copyTo(rec);
+        tempRecord.copyTo(rec);
       }
     }
 
-    return hit_anything;
+    return hitAnything;
   }
 
   public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {

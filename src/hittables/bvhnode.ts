@@ -1,23 +1,24 @@
-import { HitRecord, Hittable } from './hittable';
-import { AABB } from './aabb';
-import { HittableList } from './hittablelist';
-import Ray from './ray';
-import { randomInt, sortArrayRange } from '../util';
 import { serializable } from '../serializing';
+import { randomInt, sortArrayRange } from '../util';
+import { AABB } from '../raytracer-cpu/aabb';
+import { HitRecord } from '../raytracer-cpu/hitrecord';
+import { Hittable } from './hittable';
+import { HittableList } from './hittablelist';
+import { Ray } from '../raytracer-cpu/ray';
 
-//let _id = 0;
+let _id = 0;
 
 @serializable
-export default class BVHNode extends Hittable {
+export class BVHNode extends Hittable {
   private box = new AABB();
   private left: Hittable;
   private right: Hittable;
-  //private id = _id;
+  public readonly id = _id;
 
   public constructor() {
     super();
     //console.log(`BVH-Node ${this.id}`);
-    //_id++;
+    _id++;
   }
 
   public static createFromHitableList(list: HittableList, time0: number, time1: number): BVHNode {
@@ -68,6 +69,13 @@ export default class BVHNode extends Hittable {
       console.error('No bounding box in bvh_node constructor.');
     }
     this.box = AABB.surroundingBox(boxLeft, boxRight);
+
+    const leftIsBVHNode = this.left instanceof BVHNode ? `BVHNode-${this.left.id}` : '';
+    const rightIsBVHNode = this.right instanceof BVHNode ? `BVHNode-${this.right.id}` : '';
+
+    console.log(`BVHNode-${this.id}: ${this.box.logBox()}`);
+    console.log(`  Left(${leftIsBVHNode}): ${boxLeft.logBox()}`);
+    console.log(`  Right(${rightIsBVHNode}): ${boxRight.logBox()}`);
   }
 
   // public hit(r: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
@@ -84,16 +92,15 @@ export default class BVHNode extends Hittable {
   //   return hitLeft || hitRight;
   // }
 
-  public hit(r: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
-    if (this.box.hit(r, tMin, tMax)) {
-      if (this.left.hit(r, tMin, tMax, rec)) {
-        this.right.hit(r, tMin, rec.t, rec);
-        return true;
-      } else {
-        return this.right.hit(r, tMin, tMax, rec);
-      }
+  public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
+    if (!this.box.hit(ray, tMin, tMax)) {
+      return false;
     }
-    return false;
+
+    const leftHit = this.left.hit(ray, tMin, tMax, rec);
+    const rightHit = this.right.hit(ray, tMin, leftHit ? rec.t : tMax, rec);
+
+    return leftHit || rightHit;
   }
 
   public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {

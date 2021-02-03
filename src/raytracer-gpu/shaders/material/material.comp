@@ -8,6 +8,7 @@
 #define MATERIALTYPE_DIELECTRIC 2
 #define MATERIALTYPE_ISOTROPIC 3
 #define MATERIALTYPE_DIFFUSELIGHT 4
+#define MATERIALTYPE_NORMAL 5
 
 #include "../utils.comp"
 #include "../ray.comp"
@@ -17,6 +18,7 @@
 #include "./metal.comp"
 #include "./dielectric.comp"
 #include "./diffuselight.comp"
+#include "./normal.comp"
 
 bool materialScatter(const Ray ray, const HitRecord rec, out vec3 attenuation, out Ray scattered) {
   uint materialIndex = rec.materialIndex;
@@ -33,6 +35,9 @@ bool materialScatter(const Ray ray, const HitRecord rec, out vec3 attenuation, o
       break;
     case MATERIALTYPE_DIELECTRIC:
       return dielectricScatter(material, ray, rec, attenuation, scattered);
+      break;
+    case MATERIALTYPE_NORMAL:
+      return normalScattered(material, ray, rec, attenuation, scattered);
       break;
   }
 

@@ -1,12 +1,12 @@
 import { WebGPUContext } from './webgpucontext';
-import WebGPUObjectBase from './webgpuobjectbase';
+import { WebGPUObjectBase } from './webgpuobjectbase';
 
 interface IUniformParams {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
-export default abstract class WebGPUPipelineBase extends WebGPUObjectBase {
+export abstract class WebGPUPipelineBase extends WebGPUObjectBase {
   protected _initialized = false;
   protected _pipeline: GPURenderPipeline | GPUComputePipeline;
   protected _bindGroupLayout: GPUBindGroupLayout;

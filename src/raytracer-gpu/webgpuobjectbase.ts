@@ -1,4 +1,4 @@
-export default abstract class WebGPUObjectBase {
+export abstract class WebGPUObjectBase {
   private _name = '';
 
   public set name(name: string) {

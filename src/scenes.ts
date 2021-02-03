@@ -1,17 +1,18 @@
 import { CameraOptions } from './camera';
-import { XYRect, XZRect, YZRect } from './raytracer-cpu/aarect';
-import Box from './raytracer-cpu/box';
-import BVHNode from './raytracer-cpu/bvhnode';
-import { ConstantMedium } from './raytracer-cpu/constantmedium';
-import DielectricMaterial from './raytracer-cpu/dielectric';
-import DiffuseLight from './raytracer-cpu/diffuselight';
-import { Hittable } from './raytracer-cpu/hittable';
-import { HittableList } from './raytracer-cpu/hittablelist';
-import LambertianMaterial from './raytracer-cpu/lambertian';
-import Material from './raytracer-cpu/material';
-import MetalMaterial from './raytracer-cpu/metal';
-import MovingSphere from './raytracer-cpu/movingsphere';
-import { Sphere } from './raytracer-cpu/sphere';
+import * as GLTFLoader from './gltfloader';
+import {
+  Box,
+  BVHNode,
+  ConstantMedium,
+  Hittable,
+  HittableList,
+  MovingSphere,
+  Sphere,
+  XYRect,
+  XZRect,
+  YZRect,
+} from './hittables';
+import { DielectricMaterial, DiffuseLight, LambertianMaterial, Material, MetalMaterial } from './material';
 import { CheckerTexture, ImageTexture, NoiseTexture } from './raytracer-cpu/texture';
 import { randomNumber, randomNumberRange } from './util';
 import type { Vec3 } from './vec3';
@@ -27,7 +28,7 @@ const defaultCameraOptions: CameraOptions = {
   fovY: 40,
 };
 
-function gpuTestScene(): { world: HittableList; cameraOptions: CameraOptions } {
+function gpuTestScene(useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
   // ground
@@ -47,21 +48,25 @@ function gpuTestScene(): { world: HittableList; cameraOptions: CameraOptions } {
 
   const redSphere = new Sphere([0, 0, 0], 0.4, red);
   redSphere.name = 'redSphere';
-  redSphere.translate([-0.4, 0.4, 0]);
+  redSphere.transform.translate([-0.4, 0.4, 0]);
 
   const greenSphere = new Sphere([0, 0, 0], 0.4, green);
   greenSphere.name = 'greenSphere';
-  greenSphere.translate([0.6, 0.4, 1]);
+  greenSphere.transform.translate([0.6, 0.4, 1]);
 
   world.add(redSphere);
   world.add(greenSphere);
 
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [0, 2, 10], fovY: 10 };
 
-  return { world, cameraOptions };
+  if (useBVH) {
+    return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
+  } else {
+    return { world, cameraOptions };
+  }
 }
 
-function randomScene(): { world: HittableList; cameraOptions: CameraOptions } {
+function randomScene(useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
   const groundMaterial = new LambertianMaterial([0.5, 0.5, 0.5]);
@@ -111,17 +116,19 @@ function randomScene(): { world: HittableList; cameraOptions: CameraOptions } {
   world.add(new Sphere([-4, 1, 0], 1, material2));
   world.add(new Sphere([4, 1, 0], 1, material3));
 
-  // return new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0));
-
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [13, 2, 3], fovY: 20 };
 
-  return { world, cameraOptions };
+  if (useBVH) {
+    return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
+  } else {
+    return { world, cameraOptions };
+  }
 }
 
-function twoCheckerSpheres(): { world: HittableList; cameraOptions: CameraOptions } {
+function twoCheckerSpheres(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
-  const checkerTexture = new CheckerTexture([0.2, 0.3, 0.1], [0.9, 0.9, 0.9]);
+  const checkerTexture = new CheckerTexture([0.2, 0.3, 0.1], [0.9, 0.9, 0.9], 40);
   const sphereMaterial = new LambertianMaterial();
   sphereMaterial.texture = checkerTexture;
 
@@ -133,7 +140,7 @@ function twoCheckerSpheres(): { world: HittableList; cameraOptions: CameraOption
   return { world, cameraOptions };
 }
 
-function twoNoiseSpheres(): { world: HittableList; cameraOptions: CameraOptions } {
+function twoNoiseSpheres(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
   const perlinTexture = new NoiseTexture(4);
@@ -148,7 +155,7 @@ function twoNoiseSpheres(): { world: HittableList; cameraOptions: CameraOptions 
   return { world, cameraOptions };
 }
 
-async function earthSphere(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+async function earthSphere(_useBVH: boolean): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
   const world = new HittableList();
 
   const earthTexture = new ImageTexture();
@@ -164,7 +171,7 @@ async function earthSphere(): Promise<{ world: HittableList; cameraOptions: Came
   return { world, cameraOptions };
 }
 
-function simpleLight(): { world: HittableList; cameraOptions: CameraOptions } {
+function simpleLight(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
   const perlinTexture = new NoiseTexture(4);
   const sphereMaterial = new LambertianMaterial();
@@ -188,7 +195,7 @@ function simpleLight(): { world: HittableList; cameraOptions: CameraOptions } {
   return { world, cameraOptions };
 }
 
-function cornellBox(): { world: HittableList; cameraOptions: CameraOptions } {
+function cornellBox(useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   // http://www.graphics.cornell.edu/online/box/data.html
   const world = new HittableList();
   const red = new LambertianMaterial([0.65, 0.05, 0.05]);
@@ -204,13 +211,13 @@ function cornellBox(): { world: HittableList; cameraOptions: CameraOptions } {
   world.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
 
   const box1: Hittable = new Box([0, 0, 0], [165, 330, 165], white);
-  box1.translate([265, 0, 295]);
-  box1.rotateEuler(0.0, 15.0, 0.0);
+  box1.transform.translate([265, 0, 295]);
+  box1.transform.rotateEuler(0.0, 15.0, 0.0);
   world.add(box1);
 
   const box2: Hittable = new Box([0, 0, 0], [165, 165, 165], white);
-  box2.translate([130, 0, 65]);
-  box2.rotateEuler(0.0, -18.0, 0.0);
+  box2.transform.translate([130, 0, 65]);
+  box2.transform.rotateEuler(0.0, -18.0, 0.0);
   world.add(box2);
 
   const cameraOptions: CameraOptions = {
@@ -220,10 +227,14 @@ function cornellBox(): { world: HittableList; cameraOptions: CameraOptions } {
     background: [0, 0, 0],
   };
 
-  return { world, cameraOptions };
+  if (useBVH) {
+    return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
+  } else {
+    return { world, cameraOptions };
+  }
 }
 
-function cornellBoxSmoke(): { world: HittableList; cameraOptions: CameraOptions } {
+function cornellBoxSmoke(useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   // http://www.graphics.cornell.edu/online/box/data.html
   const world = new HittableList();
   const red = new LambertianMaterial([0.65, 0.05, 0.05]);
@@ -239,13 +250,13 @@ function cornellBoxSmoke(): { world: HittableList; cameraOptions: CameraOptions 
   world.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
 
   const box1 = new Box([0, 0, 0], [165, 330, 165], white);
-  box1.translate([265, 0, 295]);
-  box1.rotateEuler(0.0, 15.0, 0.0);
+  box1.transform.translate([265, 0, 295]);
+  box1.transform.rotateEuler(0.0, 15.0, 0.0);
   world.add(new ConstantMedium(box1, 0.01, [0, 0, 0]));
 
   const box2 = new Box([0, 0, 0], [165, 165, 165], white);
-  box2.translate([130, 0, 65]);
-  box2.rotateEuler(0.0, -18.0, 0.0);
+  box2.transform.translate([130, 0, 65]);
+  box2.transform.rotateEuler(0.0, -18.0, 0.0);
   world.add(new ConstantMedium(box2, 0.01, [1, 1, 1]));
 
   const cameraOptions: CameraOptions = {
@@ -255,10 +266,14 @@ function cornellBoxSmoke(): { world: HittableList; cameraOptions: CameraOptions 
     background: [0, 0, 0],
   };
 
-  return { world, cameraOptions };
+  if (useBVH) {
+    return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
+  } else {
+    return { world, cameraOptions };
+  }
 }
 
-async function finalScene(): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+async function finalScene(useBVH: boolean): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
   const world = new HittableList();
   const boxes1 = new HittableList();
 
@@ -280,8 +295,11 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
     }
   }
 
-  //objects.add(boxes1);
-  world.add(BVHNode.createFromHitableList(boxes1, 0, 1));
+  if (useBVH) {
+    world.add(BVHNode.createFromHitableList(boxes1, 0, 1));
+  } else {
+    world.add(boxes1);
+  }
 
   const light = new DiffuseLight([7, 7, 7]);
   world.add(new XZRect(123, 423, 147, 412, 554, light));
@@ -318,14 +336,13 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
     boxes2.add(new Sphere(Vector.randomRange(0, 165), 10, white));
   }
 
-  // const transform = new Transformation(BVHNode.createFromHitableList(boxes2, 0, 1));
-  // transform.translate([-100, 270, 395]);
-  // transform.rotateEuler(0, 15, 0);
-  // world.add(transform);
-
-  boxes2.translate([-100, 270, 395]);
-  boxes2.rotateEuler(0, 15, 0);
-  world.add(boxes2);
+  boxes2.transform.translate([-100, 270, 395]);
+  boxes2.transform.rotateEuler(0, 15, 0);
+  if (useBVH) {
+    world.add(BVHNode.createFromHitableList(boxes2, 0, 1));
+  } else {
+    world.add(boxes2);
+  }
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
@@ -333,7 +350,40 @@ async function finalScene(): Promise<{ world: HittableList; cameraOptions: Camer
     lookAt: [278, 278, 0],
     background: [0, 0, 0],
   };
+
   return { world, cameraOptions };
+}
+
+async function gltfScene(useBVH: boolean): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+  // const world = await GLTFLoader.load('assets/models/cube.gltf');
+  // const world = await GLTFLoader.load('assets/models/cube_transformed.gltf');
+  // const world = await GLTFLoader.load('assets/models/uvsphere.gltf');
+  // const world = await GLTFLoader.load('assets/models/uvsphere_smooth.gltf');
+  // const world = await GLTFLoader.load('assets/models/monkey.gltf');
+  // const world = await GLTFLoader.load('assets/models/torus.gltf');
+  // const world = await GLTFLoader.load('assets/models/grid.gltf');
+  // const world = await GLTFLoader.load('assets/models/tetrahedron.gltf');
+  // const world = await GLTFLoader.load('assets/models/triangle.gltf');
+  // const world = await GLTFLoader.load('assets/models/triangle_applied.gltf');
+  const world = await GLTFLoader.load('assets/models/scene.gltf');
+
+  // const w = world.objects[0] as HittableList;
+
+  const lookFrom: Vec3 = [2, 1.5, 6];
+  const lookAt: Vec3 = [0, 0, 0];
+  // const lookFrom = [0, 0, 0];
+  // const lookAt = [0, 0, -1];
+
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom, lookAt, fovY: 20 };
+
+  if (useBVH) {
+    return {
+      world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)),
+      cameraOptions,
+    };
+  } else {
+    return { world: world, cameraOptions };
+  }
 }
 
 const sceneCreators = [
@@ -346,9 +396,14 @@ const sceneCreators = [
   cornellBox,
   cornellBoxSmoke,
   finalScene,
+  gltfScene,
 ];
 
-export async function getScene(sceneIndex: number): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
-  const { world, cameraOptions } = await sceneCreators[sceneIndex]();
+export async function getScene(
+  sceneIndex: number,
+  useBVH = false
+): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+  // const { world, cameraOptions } = await sceneCreators[sceneIndex](useBVH);
+  const { world, cameraOptions } = await sceneCreators[sceneIndex](false);
   return { world, cameraOptions };
 }

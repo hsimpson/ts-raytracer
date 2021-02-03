@@ -1,0 +1,87 @@
+{
+    "asset" : {
+        "generator" : "Khronos glTF Blender I/O v1.4.40",
+        "version" : "2.0"
+    },
+    "scene" : 0,
+    "scenes" : [
+        {
+            "name" : "Scene",
+            "nodes" : [
+                0
+            ]
+        }
+    ],
+    "nodes" : [
+        {
+            "mesh" : 0,
+            "name" : "Torus"
+        }
+    ],
+    "materials" : [
+        {
+            "doubleSided" : true,
+            "name" : "Normal_corrected",
+            "pbrMetallicRoughness" : {
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.4000000059604645
+            }
+        }
+    ],
+    "meshes" : [
+        {
+            "name" : "Torus",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0
+                    },
+                    "indices" : 1,
+                    "material" : 0
+                }
+            ]
+        }
+    ],
+    "accessors" : [
+        {
+            "bufferView" : 0,
+            "componentType" : 5126,
+            "count" : 24,
+            "max" : [
+                0.8838834762573242,
+                1.0825319290161133,
+                0.8838834762573242
+            ],
+            "min" : [
+                -0.8838834762573242,
+                -1.0825319290161133,
+                -0.8838834762573242
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 1,
+            "componentType" : 5123,
+            "count" : 144,
+            "type" : "SCALAR"
+        }
+    ],
+    "bufferViews" : [
+        {
+            "buffer" : 0,
+            "byteLength" : 288,
+            "byteOffset" : 0
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 288,
+            "byteOffset" : 288
+        }
+    ],
+    "buffers" : [
+        {
+            "byteLength" : 576,
+            "uri" : "data:application/octet-stream;base64,MEZiPwAAAAAwRmK/MEZiPwAAAAC2wwe/tsMHPwAAAAC2wwe/tsMHPwAAAAAwRmK/LkbiPmeQij8uRuK+tsMHP9izXT/xBDW+tsOHPuJGJj+2w4e+8QQ1PtizXT+2wwe/LEbivmiQij8sRuI+6wQ1vtmzXT+0wwc/s8OHvuNGJj+zw4c+tMMHv9mzXT/rBDU+MEZiv3qs6jMwRmI/tsMHvy69uzMwRmI/tsMHv+LNjDO2wwc/MEZivy69uzO2wwc/LEbivmiQir8sRuI+6wQ1vtmzXb+0wwc/s8OHvuNGJr+zw4c+tMMHv9mzXb/rBDU+LkbiPmeQir8uRuK+tsMHP9izXb/xBDW+tsOHPuJGJr+2w4e+8QQ1PtizXb+2wwe/AAAEAAUAAAAFAAEAAQAFAAYAAQAGAAIAAgAGAAcAAgAHAAMAAwAHAAQAAwAEAAAABAAIAAkABAAJAAUABQAJAAoABQAKAAYABgAKAAsABgALAAcABwALAAgABwAIAAQACAAMAA0ACAANAAkACQANAA4ACQAOAAoACgAOAA8ACgAPAAsACwAPAAwACwAMAAgADAAQABEADAARAA0ADQARABIADQASAA4ADgASABMADgATAA8ADwATABAADwAQAAwAEAAUABUAEAAVABEAEQAVABYAEQAWABIAEgAWABcAEgAXABMAEwAXABQAEwAUABAAFAAAAAEAFAABABUAFQABAAIAFQACABYAFgACAAMAFgADABcAFwADAAAAFwAAABQA"
+        }
+    ]
+}
