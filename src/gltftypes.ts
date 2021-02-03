@@ -97,4 +97,6 @@ export interface GLTFMaterial {
 
 export interface GLTFPBRMetallicRoughness {
   baseColorFactor?: Num4;
+  metallicFactor?: number;
+  roughnessFactor?: number;
 }

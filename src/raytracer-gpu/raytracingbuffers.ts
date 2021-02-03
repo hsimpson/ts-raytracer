@@ -7,6 +7,7 @@ import {
   Material,
   MetalMaterial,
   NormalMaterial,
+  PBRMaterial,
 } from '../material';
 import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor, Texture } from '../raytracer-cpu/texture';
 import { nextPowerOf2 } from '../util';
@@ -20,6 +21,7 @@ enum WebGPUMaterialType {
   IsoTropic = 3,
   DiffuseLight = 4,
   Normal = 5,
+  PBR = 6,
 }
 
 export enum WebGPUPrimitiveType {
@@ -175,52 +177,34 @@ export class RaytracingBuffers {
 
   private addMaterial(mat: Material): number {
     const idx = this._gpuMaterials.length;
-    let gpuMat: WebGPUMaterial;
 
     const tex = mat.texture;
     // const textureIndex = mat.texture ? this.addTexture(tex) : -1;
     const textureIndex = this.addTexture(mat.texture);
 
+    const gpuMat: WebGPUMaterial = {
+      baseColor: [1, 1, 1, 1],
+      roughness: 0,
+      indexOfRefraction: 1,
+      materialType: WebGPUMaterialType.Lambertian,
+      textureIndex: textureIndex,
+    };
+
     if (mat instanceof LambertianMaterial) {
-      gpuMat = {
-        baseColor: [1, 1, 1, 1],
-        roughness: 0,
-        indexOfRefraction: 1,
-        materialType: WebGPUMaterialType.Lambertian,
-        textureIndex,
-      };
+      gpuMat.materialType = WebGPUMaterialType.Lambertian;
     } else if (mat instanceof MetalMaterial) {
-      gpuMat = {
-        baseColor: [...mat.baseColor, 1],
-        roughness: mat.roughness,
-        indexOfRefraction: 1,
-        materialType: WebGPUMaterialType.Metal,
-        textureIndex,
-      };
+      gpuMat.baseColor = [...mat.baseColor, 1];
+      gpuMat.roughness = mat.roughness;
+      gpuMat.materialType = WebGPUMaterialType.Metal;
     } else if (mat instanceof DielectricMaterial) {
-      gpuMat = {
-        baseColor: [1, 1, 1, 1],
-        roughness: 0,
-        indexOfRefraction: mat.indexOfRefraction,
-        materialType: WebGPUMaterialType.Dielectric,
-        textureIndex,
-      };
+      gpuMat.indexOfRefraction = mat.indexOfRefraction;
+      gpuMat.materialType = WebGPUMaterialType.Dielectric;
     } else if (mat instanceof DiffuseLight) {
-      gpuMat = {
-        baseColor: [1, 1, 1, 1],
-        roughness: 0,
-        indexOfRefraction: 1,
-        materialType: WebGPUMaterialType.DiffuseLight,
-        textureIndex,
-      };
+      gpuMat.materialType = WebGPUMaterialType.DiffuseLight;
     } else if (mat instanceof NormalMaterial) {
-      gpuMat = {
-        baseColor: [1, 1, 1, 1],
-        roughness: 0,
-        indexOfRefraction: 1,
-        materialType: WebGPUMaterialType.Normal,
-        textureIndex,
-      };
+      gpuMat.materialType = WebGPUMaterialType.Normal;
+    } else if (mat instanceof PBRMaterial) {
+      gpuMat.materialType = WebGPUMaterialType.PBR;
     }
 
     this._gpuMaterials.push(gpuMat);

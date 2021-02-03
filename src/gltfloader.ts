@@ -1,11 +1,10 @@
 import { vec2, vec3, mat4, quat } from 'gl-matrix';
 import { GLTF, GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
-import { LambertianMaterial, Material, NormalMaterial } from './material';
+import { LambertianMaterial, Material, NormalMaterial, PBRMaterial } from './material';
 import { HittableList, Triangle } from './hittables';
-import { Triangle } from './triangle';
 
-const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
-const WHITEMATERIAL = new LambertianMaterial([0.73, 0.73, 0.73]);
+// const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
+// const WHITEMATERIAL = new LambertianMaterial([0.73, 0.73, 0.73]);
 const NORMALMATERIAL = new NormalMaterial();
 NORMALMATERIAL.corrected = true;
 
@@ -29,9 +28,21 @@ export async function load(url: string): Promise<HittableList> {
 
   // create materials
   for (const material of materials) {
-    const baseColor = material.pbrMetallicRoughness.baseColorFactor;
-    const lamberMat = new LambertianMaterial([baseColor[0], baseColor[1], baseColor[2]]);
-    raytracingMaterial.push(lamberMat);
+    const baseColorFactor = material.pbrMetallicRoughness.baseColorFactor;
+
+    const metallicFactor = material.pbrMetallicRoughness.metallicFactor ?? 1;
+    const roughnessFactor = material.pbrMetallicRoughness.roughnessFactor ?? 1;
+    const pbrMat = new PBRMaterial(
+      [baseColorFactor[0], baseColorFactor[1], baseColorFactor[2]],
+      metallicFactor,
+      roughnessFactor
+    );
+    raytracingMaterial.push(pbrMat);
+
+    // const lamberMat = new LambertianMaterial([baseColorFactor[0], baseColorFactor[1], baseColorFactor[2]]);
+    // raytracingMaterial.push(lamberMat);
+
+    // raytracingMaterial.push(NORMALMATERIAL);
   }
 
   // for each node
@@ -149,10 +160,8 @@ export async function load(url: string): Promise<HittableList> {
             uv2
           );
 
-          // // TODO: material
-          // triangle.material = WHITEMATERIAL;
-          // triangle.material = NORMALMATERIAL;
           triangle.material = raytracingMaterial[primitive.material];
+          triangle.doubleSided = materials[primitive.material].doubleSided ?? false;
 
           if (node.translation) {
             triangle.transform.translate(translation);

@@ -66,6 +66,41 @@ function gpuTestScene(useBVH: boolean): { world: HittableList; cameraOptions: Ca
   }
 }
 
+function pbrTestScene(useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
+  const world = new HittableList();
+
+  // floor
+  const checkerTexture = new CheckerTexture([0.8, 0.8, 0.8], [0.2, 0.2, 0.2], 20);
+  const floorMaterial = new LambertianMaterial();
+  floorMaterial.texture = checkerTexture;
+  const floor = new XZRect(0, 10, 0, 10, 0, floorMaterial);
+  floor.transform.translate([-5, 0, -5]);
+  world.add(floor);
+
+  // const metallic = 1.0;
+  // const roughness = 0.5;
+  // const sphereMaterial = new PBRMaterial([0.5, 0.05, 0.05], metallic, roughness);
+  const sphereMaterial = new LambertianMaterial([0.5, 0.05, 0.05]);
+  const pbrSphere = new Sphere([0, 0, 0], 0.25, sphereMaterial);
+  // const pbrSphere = new Sphere([0, 0.25, 0], 0.25, sphereMaterial);
+  pbrSphere.transform.translate([0, 0.25, 0]);
+
+  world.add(pbrSphere);
+
+  const lookFrom: Vec3 = [0, 1.5, 3];
+  const lookAt: Vec3 = [0, 0.25, 0];
+  // const background: Vec3 = [0, 0, 0];
+  const background: Vec3 = [0.7, 0.8, 1.0];
+
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom, lookAt, fovY: 20, background };
+
+  if (useBVH) {
+    return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
+  } else {
+    return { world, cameraOptions };
+  }
+}
+
 function randomScene(useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
 
@@ -366,11 +401,24 @@ async function gltfScene(useBVH: boolean): Promise<{ world: HittableList; camera
   // const world = await GLTFLoader.load('assets/models/triangle.gltf');
   // const world = await GLTFLoader.load('assets/models/triangle_applied.gltf');
   const world = await GLTFLoader.load('assets/models/scene.gltf');
+  // const world = await GLTFLoader.load('assets/models/pbr_scene.gltf');
 
-  // const w = world.objects[0] as HittableList;
+  const checkerTexture = new CheckerTexture([0.8, 0.8, 0.8], [0.2, 0.2, 0.2], 20);
+  const floorMaterial = new LambertianMaterial();
+  // const floorMaterial = new LambertianMaterial([0.4, 0.4, 0.4]);
+  floorMaterial.texture = checkerTexture;
+
+  const floor = new XZRect(0, 10, 0, 10, 0, floorMaterial);
+  floor.transform.translate([-5, 0, -5]);
+
+  // world.add(floor);
 
   const lookFrom: Vec3 = [2, 1.5, 6];
   const lookAt: Vec3 = [0, 0, 0];
+
+  // const lookFrom: Vec3 = [0, 1.5, 3];
+  // const lookAt: Vec3 = [0, 0.25, 0];
+
   // const lookFrom = [0, 0, 0];
   // const lookAt = [0, 0, -1];
 
@@ -388,7 +436,8 @@ async function gltfScene(useBVH: boolean): Promise<{ world: HittableList; camera
 
 const sceneCreators = [
   // gpuTestScene,
-  randomScene,
+  pbrTestScene,
+  // randomScene,
   twoCheckerSpheres,
   twoNoiseSpheres,
   earthSphere,

@@ -5,4 +5,5 @@ export * from './lambertian';
 export * from './material';
 export * from './metal';
 export * from './normal';
+export * from './pbr';
 export * from './uv';
