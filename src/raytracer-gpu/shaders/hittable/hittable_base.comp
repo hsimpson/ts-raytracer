@@ -4,7 +4,7 @@
 #extension GL_GOOGLE_include_directive : enable
 
 struct Primitive {
-  mat4 modelMatrix;
+  mat4 objectToWorld;
   vec4 bounds;
   vec4 center0;  // center0 xyz, time0 w
   vec4 center1;  // center1 xyz, time1 w

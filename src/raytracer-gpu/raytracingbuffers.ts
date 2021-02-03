@@ -66,7 +66,7 @@ interface WebGPUMaterial {
 }
 
 interface WebGPUPrimitive {
-  modelMatrix: mat4;
+  objectToWorld: mat4;
   bounds: vec4;
   center0: vec4;
   center1: vec4;
@@ -119,17 +119,17 @@ export class RaytracingBuffers {
     return this._imageTextures.length > 0;
   }
 
-  private traverseHittables(list: HittableList, modelMatrix: mat4): void {
+  private traverseHittables(list: HittableList, objectToWorld: mat4): void {
     for (const object of list.objects) {
-      const objectModelMatrix = object.transform.objectToWorld;
-      mat4.multiply(objectModelMatrix, modelMatrix, objectModelMatrix);
+      const currentObjectToWorld = object.transform.objectToWorld;
+      mat4.multiply(currentObjectToWorld, objectToWorld, currentObjectToWorld);
 
       if (object instanceof HittableList) {
-        this.traverseHittables(object, objectModelMatrix);
+        this.traverseHittables(object, currentObjectToWorld);
       } else if (object instanceof Box) {
-        this.traverseHittables(object.sides, objectModelMatrix);
+        this.traverseHittables(object.sides, currentObjectToWorld);
       } else {
-        this.addPrimitive(object, objectModelMatrix);
+        this.addPrimitive(object, currentObjectToWorld);
       }
     }
   }
@@ -228,7 +228,7 @@ export class RaytracingBuffers {
     return idx;
   }
 
-  private addPrimitive(obj: Hittable, modelMatrix: mat4): number {
+  private addPrimitive(obj: Hittable, objectToWorld: mat4): number {
     const idx = this._gpuPrimitives.length;
     let gpuPrimitive: WebGPUPrimitive;
 
@@ -262,7 +262,7 @@ export class RaytracingBuffers {
 
     if (obj instanceof Sphere) {
       gpuPrimitive = {
-        modelMatrix,
+        objectToWorld: objectToWorld,
         center0: [...obj.center, 0],
         center1: [0, 0, 0, 1],
         radius: obj.radius,
@@ -277,7 +277,7 @@ export class RaytracingBuffers {
       };
     } else if (obj instanceof MovingSphere) {
       gpuPrimitive = {
-        modelMatrix,
+        objectToWorld: objectToWorld,
         center0: [...obj.center0, obj.time0],
         center1: [...obj.center1, obj.time1],
         radius: obj.radius,
@@ -292,7 +292,7 @@ export class RaytracingBuffers {
       };
     } else if (obj instanceof XYRect) {
       gpuPrimitive = {
-        modelMatrix,
+        objectToWorld: objectToWorld,
         bounds: [obj.x0, obj.x1, obj.y0, obj.y1],
         k: obj.k,
 
@@ -306,7 +306,7 @@ export class RaytracingBuffers {
       };
     } else if (obj instanceof XZRect) {
       gpuPrimitive = {
-        modelMatrix,
+        objectToWorld: objectToWorld,
         bounds: [obj.x0, obj.x1, obj.z0, obj.z1],
         k: obj.k,
 
@@ -320,7 +320,7 @@ export class RaytracingBuffers {
       };
     } else if (obj instanceof YZRect) {
       gpuPrimitive = {
-        modelMatrix,
+        objectToWorld: objectToWorld,
         bounds: [obj.y0, obj.y1, obj.z0, obj.z1],
         k: obj.k,
 
@@ -334,7 +334,7 @@ export class RaytracingBuffers {
       };
     } else if (obj instanceof Triangle) {
       gpuPrimitive = {
-        modelMatrix,
+        objectToWorld: objectToWorld,
 
         ...triangleDummy,
         ...rectDummy,
@@ -564,22 +564,22 @@ export class RaytracingBuffers {
 
     let offset = 0;
     for (const primitiv of this._gpuPrimitives) {
-      bufferDataF32[offset++] = primitiv.modelMatrix[0];
-      bufferDataF32[offset++] = primitiv.modelMatrix[1];
-      bufferDataF32[offset++] = primitiv.modelMatrix[2];
-      bufferDataF32[offset++] = primitiv.modelMatrix[3];
-      bufferDataF32[offset++] = primitiv.modelMatrix[4];
-      bufferDataF32[offset++] = primitiv.modelMatrix[5];
-      bufferDataF32[offset++] = primitiv.modelMatrix[6];
-      bufferDataF32[offset++] = primitiv.modelMatrix[7];
-      bufferDataF32[offset++] = primitiv.modelMatrix[8];
-      bufferDataF32[offset++] = primitiv.modelMatrix[9];
-      bufferDataF32[offset++] = primitiv.modelMatrix[10];
-      bufferDataF32[offset++] = primitiv.modelMatrix[11];
-      bufferDataF32[offset++] = primitiv.modelMatrix[12];
-      bufferDataF32[offset++] = primitiv.modelMatrix[13];
-      bufferDataF32[offset++] = primitiv.modelMatrix[14];
-      bufferDataF32[offset++] = primitiv.modelMatrix[15];
+      bufferDataF32[offset++] = primitiv.objectToWorld[0];
+      bufferDataF32[offset++] = primitiv.objectToWorld[1];
+      bufferDataF32[offset++] = primitiv.objectToWorld[2];
+      bufferDataF32[offset++] = primitiv.objectToWorld[3];
+      bufferDataF32[offset++] = primitiv.objectToWorld[4];
+      bufferDataF32[offset++] = primitiv.objectToWorld[5];
+      bufferDataF32[offset++] = primitiv.objectToWorld[6];
+      bufferDataF32[offset++] = primitiv.objectToWorld[7];
+      bufferDataF32[offset++] = primitiv.objectToWorld[8];
+      bufferDataF32[offset++] = primitiv.objectToWorld[9];
+      bufferDataF32[offset++] = primitiv.objectToWorld[10];
+      bufferDataF32[offset++] = primitiv.objectToWorld[11];
+      bufferDataF32[offset++] = primitiv.objectToWorld[12];
+      bufferDataF32[offset++] = primitiv.objectToWorld[13];
+      bufferDataF32[offset++] = primitiv.objectToWorld[14];
+      bufferDataF32[offset++] = primitiv.objectToWorld[15];
 
       bufferDataF32[offset++] = primitiv.bounds[0];
       bufferDataF32[offset++] = primitiv.bounds[1];

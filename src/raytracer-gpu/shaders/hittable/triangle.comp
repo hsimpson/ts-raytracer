@@ -110,6 +110,7 @@ bool hitTriangle(const Primitive tri, const Ray ray, const float tMin, const flo
   n2 *= v;
 
   // mat3 normalMatrix = transpose(inverse(mat3(tri.modelMatrix)));
+  // mat3 normalMatrix = transpose(inverse(mat3(tri.objectToWorld)));
 
   // n0 = normalize(normalMatrix * n0);
   // n1 = normalize(normalMatrix * n1);

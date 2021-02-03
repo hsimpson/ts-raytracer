@@ -22,13 +22,13 @@ bool hitPrimitive(const Primitive primitve, const Ray ray, const float tMin, con
   uint primitiveType = primitve.primitiveType;
 
   mat4 rotationMatrix = mat4(
-      primitve.modelMatrix[0],
-      primitve.modelMatrix[1],
-      primitve.modelMatrix[2],
+      primitve.objectToWorld[0],
+      primitve.objectToWorld[1],
+      primitve.objectToWorld[2],
       vec4(0.0, 0.0, 0.0, 1.0));
 
   Ray transformedRay = Ray(
-      (inverse(primitve.modelMatrix) * vec4(ray.origin, 1.0)).xyz,
+      (inverse(primitve.objectToWorld) * vec4(ray.origin, 1.0)).xyz,
       (inverse(rotationMatrix) * vec4(ray.direction, 1.0)).xyz,
       // ray.direction,
       ray.time);
