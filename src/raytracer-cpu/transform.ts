@@ -26,13 +26,12 @@ export class Transform {
     if (!this._isTransformed) {
       return ray;
     }
-    const movedOrigin = vec3.create();
-    vec3.set(movedOrigin, ray.origin[0], ray.origin[1], ray.origin[2]);
+    const movedOrigin = vec3.fromValues(ray.origin[0], ray.origin[1], ray.origin[2]);
     vec3.transformMat4(movedOrigin, movedOrigin, this._worldToObjectMatrix);
 
-    const movedDirection = vec3.create();
-    vec3.set(movedDirection, ray.direction[0], ray.direction[1], ray.direction[2]);
+    const movedDirection = vec3.fromValues(ray.direction[0], ray.direction[1], ray.direction[2]);
     vec3.transformMat4(movedDirection, movedDirection, this._inverseRotationMatrix);
+    // vec3.transformMat4(movedDirection, movedDirection, this._worldToObjectMatrix);
 
     //FIXME: when replace vec3
     return new Ray(
@@ -49,12 +48,10 @@ export class Transform {
     }
 
     //FIXME: when replace vec3
-    const movedP = vec3.create();
-    vec3.set(movedP, rec.p[0], rec.p[1], rec.p[2]);
+    const movedP = vec3.fromValues(rec.p[0], rec.p[1], rec.p[2]);
     vec3.transformMat4(movedP, movedP, this._objectToWorldMatrix);
 
-    const movedN = vec3.create();
-    vec3.set(movedN, rec.normal[0], rec.normal[1], rec.normal[2]);
+    const movedN = vec3.fromValues(rec.normal[0], rec.normal[1], rec.normal[2]);
     vec3.transformMat4(movedN, movedN, this._normalMatrix);
     vec3.normalize(movedN, movedN);
 

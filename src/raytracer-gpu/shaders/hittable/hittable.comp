@@ -21,45 +21,27 @@
 bool hitPrimitive(const Primitive primitve, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
   uint primitiveType = primitve.primitiveType;
 
-  mat4 rotationMatrix = mat4(
-      primitve.objectToWorld[0],
-      primitve.objectToWorld[1],
-      primitve.objectToWorld[2],
-      vec4(0.0, 0.0, 0.0, 1.0));
-
-  Ray transformedRay = Ray(
-      (inverse(primitve.objectToWorld) * vec4(ray.origin, 1.0)).xyz,
-      (inverse(rotationMatrix) * vec4(ray.direction, 1.0)).xyz,
-      // ray.direction,
-      ray.time);
-
   bool hitted;
 
   switch (primitiveType) {
     case HITTABLETYPE_SPHERE:
-      hitted = hitSphere(primitve, transformedRay, tMin, tMax, rec);
+      hitted = hitSphere(primitve, ray, tMin, tMax, rec);
       break;
     case HITTABLETYPE_MOVINGSPHERE:
-      hitted = hitMovingSphere(primitve, transformedRay, tMin, tMax, rec);
+      hitted = hitMovingSphere(primitve, ray, tMin, tMax, rec);
       break;
     case HITTABLETYPE_XYRECT:
-      hitted = hitXYRect(primitve, transformedRay, tMin, tMax, rec);
+      hitted = hitXYRect(primitve, ray, tMin, tMax, rec);
       break;
     case HITTABLETYPE_XZRECT:
-      hitted = hitXZRect(primitve, transformedRay, tMin, tMax, rec);
+      hitted = hitXZRect(primitve, ray, tMin, tMax, rec);
       break;
     case HITTABLETYPE_YZRECT:
-      hitted = hitYZRect(primitve, transformedRay, tMin, tMax, rec);
+      hitted = hitYZRect(primitve, ray, tMin, tMax, rec);
       break;
     case HITTABLETYPE_TRIANGLE:
-      hitted = hitTriangle(primitve, transformedRay, tMin, tMax, rec);
+      hitted = hitTriangle(primitve, ray, tMin, tMax, rec);
       break;
-  }
-
-  if (hitted) {
-    rec.p             = (primitve.modelMatrix * vec4(rec.p, 1.0)).xyz;
-    vec3 transformedN = (rotationMatrix * vec4(rec.normal, 1.0)).xyz;
-    setFaceNormal(rec, transformedRay, transformedN);
   }
 
   return hitted;

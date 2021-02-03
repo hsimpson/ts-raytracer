@@ -21,9 +21,11 @@ vec3 center(const Primitive sphere, const float time) {
 }
 
 bool hitMovingSphere(const Primitive sphere, const Ray ray, const float tMin, const float tMax, inout HitRecord rec) {
-  vec3  oc           = ray.origin - center(sphere, ray.time);
-  float a            = lengthSquared(ray.direction);
-  float half_b       = dot(oc, ray.direction);
+  Ray transformedRay = transformRay(ray, sphere.objectToWorld);
+
+  vec3  oc           = transformedRay.origin - center(sphere, transformedRay.time);
+  float a            = lengthSquared(transformedRay.direction);
+  float half_b       = dot(oc, transformedRay.direction);
   float c            = lengthSquared(oc) - sphere.radius * sphere.radius;
   float discriminant = half_b * half_b - a * c;
 
@@ -32,23 +34,25 @@ bool hitMovingSphere(const Primitive sphere, const Ray ray, const float tMin, co
     float temp = (-half_b - root) / a;
     if (temp < tMax && temp > tMin) {
       rec.t               = temp;
-      rec.p               = rayAt(ray, rec.t);
-      vec3 outward_normal = (rec.p - center(sphere, ray.time)) / sphere.radius;
-      setFaceNormal(rec, ray, outward_normal);
+      rec.p               = rayAt(transformedRay, rec.t);
+      vec3 outward_normal = (rec.p - center(sphere, transformedRay.time)) / sphere.radius;
+      setFaceNormal(rec, transformedRay, outward_normal);
       vec2 uv           = getSphereUV(outward_normal);
       rec.uv            = uv;
       rec.materialIndex = sphere.materialIndex;
+      transformRecord(rec, sphere.objectToWorld);
       return true;
     }
     temp = (-half_b + root) / a;
     if (temp < tMax && temp > tMin) {
       rec.t               = temp;
-      rec.p               = rayAt(ray, rec.t);
-      vec3 outward_normal = (rec.p - center(sphere, ray.time)) / sphere.radius;
-      setFaceNormal(rec, ray, outward_normal);
+      rec.p               = rayAt(transformedRay, rec.t);
+      vec3 outward_normal = (rec.p - center(sphere, transformedRay.time)) / sphere.radius;
+      setFaceNormal(rec, transformedRay, outward_normal);
       vec2 uv           = getSphereUV(outward_normal);
       rec.uv            = uv;
       rec.materialIndex = sphere.materialIndex;
+      transformRecord(rec, sphere.objectToWorld);
       return true;
     }
   }
