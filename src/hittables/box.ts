@@ -2,12 +2,12 @@ import { vec3 } from 'gl-matrix';
 import { Material } from '../material';
 import { serializable } from '../serializing';
 import type { Vec3 } from '../vec3';
-import { AABB } from './aabb';
+import { AABB } from '../raytracer-cpu/aabb';
 import { XYRect, XZRect, YZRect } from './aarect';
-import { HitRecord } from './hitrecord';
+import { HitRecord } from '../raytracer-cpu/hitrecord';
 import { Hittable } from './hittable';
 import { HittableList } from './hittablelist';
-import { Ray } from './ray';
+import { Ray } from '../raytracer-cpu/ray';
 
 @serializable
 export class Box extends Hittable {

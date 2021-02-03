@@ -1,3 +1,4 @@
+import { Box, BVHNode, ConstantMedium, MovingSphere, Sphere, Triangle, XYRect, XZRect, YZRect } from '../hittables';
 import {
   DielectricMaterial,
   DiffuseLight,
@@ -7,15 +8,8 @@ import {
   NormalMaterial,
   UVMaterial,
 } from '../material';
-import { Triangle } from '../triangle';
 import { AABB } from './aabb';
-import { XYRect, XZRect, YZRect } from './aarect';
-import { Box } from './box';
-import { BVHNode } from './bvhnode';
-import { ConstantMedium } from './constantmedium';
-import { MovingSphere } from './movingsphere';
 import { Perlin } from './perlin';
-import { Sphere } from './sphere';
 import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor } from './texture';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -1,5 +1,5 @@
 import { Camera } from '../camera';
-import { HittableList } from '../raytracer-cpu/hittablelist';
+import { HittableList } from '../hittables';
 import type { Vec3 } from '../vec3';
 import { RaytracingBuffers } from './raytracingbuffers';
 import { WebGPUBuffer } from './webgpubuffer';

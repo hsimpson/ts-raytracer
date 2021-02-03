@@ -4,7 +4,7 @@ import { randomNumber, writeColor } from '../util';
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
 import { DeserializerMap } from './deserializermap';
-import { HittableList } from './hittablelist';
+import { HittableList } from '../hittables';
 import { rayColor } from './ray';
 import { ComputeCommands, ComputeEndMessage, ComputeStartMessage, WorkerMessage } from './workerinterfaces';
 

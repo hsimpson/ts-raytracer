@@ -1,7 +1,7 @@
 import type { Vec3 } from '../vec3';
 import * as Vector from '../vec3';
 import { HitRecord } from './hitrecord';
-import { Hittable } from './hittable';
+import { Hittable } from '../hittables';
 
 export class Ray {
   private _orig: Vec3;

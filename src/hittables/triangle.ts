@@ -1,11 +1,11 @@
 import { vec2, vec3 } from 'gl-matrix';
-import { Material } from './material';
-import { AABB } from './raytracer-cpu/aabb';
-import { HitRecord } from './raytracer-cpu/hitrecord';
-import { Hittable } from './raytracer-cpu/hittable';
-import { Ray } from './raytracer-cpu/ray';
-import { Transform } from './raytracer-cpu/transform';
-import { serializable } from './serializing';
+import { Material } from '../material';
+import { AABB } from '../raytracer-cpu/aabb';
+import { HitRecord } from '../raytracer-cpu/hitrecord';
+import { Hittable } from './hittable';
+import { Ray } from '../raytracer-cpu/ray';
+import { Transform } from '../raytracer-cpu/transform';
+import { serializable } from '../serializing';
 
 function avgVector3(vectors: vec3[]): vec3 {
   let x = 0,
@@ -39,7 +39,7 @@ export class Triangle extends Hittable {
   public readonly transform: Transform = new Transform();
 
   public material: Material;
-  private _frontFace = true;
+  public doubleSided = false;
 
   public constructor(
     v0: vec3,
@@ -129,7 +129,7 @@ export class Triangle extends Hittable {
     /*if determinant is near zero, ray lies in plane of triangle */
     const det = vec3.dot(edge1, pvec);
 
-    if (this._frontFace) {
+    if (this.doubleSided) {
       if (det < EPSILON) {
         return false;
       }

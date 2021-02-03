@@ -1,7 +1,7 @@
 import { vec2, vec3, mat4, quat } from 'gl-matrix';
 import { GLTF, GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
 import { LambertianMaterial, Material, NormalMaterial } from './material';
-import { HittableList } from './raytracer-cpu/hittablelist';
+import { HittableList, Triangle } from './hittables';
 import { Triangle } from './triangle';
 
 const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);

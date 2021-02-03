@@ -3,7 +3,7 @@ import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
 import { serialize } from '../serializing';
-import { HittableList } from './hittablelist';
+import { HittableList } from '../hittables';
 import {
   ControllerCommands,
   ControllerEndMessage,

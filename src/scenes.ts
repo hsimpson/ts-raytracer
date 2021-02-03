@@ -1,22 +1,18 @@
 import { CameraOptions } from './camera';
 import * as GLTFLoader from './gltfloader';
 import {
-  DielectricMaterial,
-  DiffuseLight,
-  LambertianMaterial,
-  Material,
-  MetalMaterial,
-  NormalMaterial,
-  UVMaterial,
-} from './material';
-import { XYRect, XZRect, YZRect } from './raytracer-cpu/aarect';
-import { Box } from './raytracer-cpu/box';
-import { BVHNode } from './raytracer-cpu/bvhnode';
-import { ConstantMedium } from './raytracer-cpu/constantmedium';
-import { Hittable } from './raytracer-cpu/hittable';
-import { HittableList } from './raytracer-cpu/hittablelist';
-import { MovingSphere } from './raytracer-cpu/movingsphere';
-import { Sphere } from './raytracer-cpu/sphere';
+  Box,
+  BVHNode,
+  ConstantMedium,
+  Hittable,
+  HittableList,
+  MovingSphere,
+  Sphere,
+  XYRect,
+  XZRect,
+  YZRect,
+} from './hittables';
+import { DielectricMaterial, DiffuseLight, LambertianMaterial, Material, MetalMaterial } from './material';
 import { CheckerTexture, ImageTexture, NoiseTexture } from './raytracer-cpu/texture';
 import { randomNumber, randomNumberRange } from './util';
 import type { Vec3 } from './vec3';

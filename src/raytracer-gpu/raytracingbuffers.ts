@@ -1,4 +1,5 @@
 import { mat4, vec2, vec4 } from 'gl-matrix';
+import { Box, Hittable, HittableList, MovingSphere, Sphere, Triangle, XYRect, XZRect, YZRect } from '../hittables';
 import {
   DielectricMaterial,
   DiffuseLight,
@@ -7,14 +8,7 @@ import {
   MetalMaterial,
   NormalMaterial,
 } from '../material';
-import { XYRect, XZRect, YZRect } from '../raytracer-cpu/aarect';
-import { Box } from '../raytracer-cpu/box';
-import { Hittable } from '../raytracer-cpu/hittable';
-import { HittableList } from '../raytracer-cpu/hittablelist';
-import { MovingSphere } from '../raytracer-cpu/movingsphere';
-import { Sphere } from '../raytracer-cpu/sphere';
 import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor, Texture } from '../raytracer-cpu/texture';
-import { Triangle } from '../triangle';
 import { nextPowerOf2 } from '../util';
 import type { Vec3 } from '../vec3';
 import { WebGPUContext } from './webgpucontext';
@@ -127,7 +121,7 @@ export class RaytracingBuffers {
 
   private traverseHittables(list: HittableList, modelMatrix: mat4): void {
     for (const object of list.objects) {
-      const objectModelMatrix = object.transform.modelMatrix;
+      const objectModelMatrix = object.transform.objectToWorld;
       mat4.multiply(objectModelMatrix, modelMatrix, objectModelMatrix);
 
       if (object instanceof HittableList) {

@@ -2,7 +2,7 @@ import ComputeWorker from 'worker-loader!./compute.worker';
 import { Camera } from '../camera';
 import { deserialize, serialize } from '../serializing';
 import { DeserializerMap } from './deserializermap';
-import { HittableList } from './hittablelist';
+import { HittableList } from '../hittables';
 import {
   ComputeCommands,
   ComputeEndMessage,
