@@ -1,13 +1,12 @@
+import { vec3 } from 'gl-matrix';
 import { IsoTropic, Material } from '../material';
-import { serializable } from '../serializing';
-import { randomNumber } from '../util';
-import type { Vec3 } from '../vec3';
-import * as Vector from '../vec3';
 import { AABB } from '../raytracer-cpu/aabb';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Hittable } from './hittable';
 import { Ray } from '../raytracer-cpu/ray';
 import { Texture } from '../raytracer-cpu/texture';
+import { serializable } from '../serializing';
+import { randomNumber } from '../util';
+import { Hittable } from './hittable';
 
 @serializable
 export class ConstantMedium extends Hittable {
@@ -15,7 +14,7 @@ export class ConstantMedium extends Hittable {
   private _phaseFunction: Material;
   private _negInvDensity: number;
 
-  public constructor(boundary: Hittable, density: number, material: Vec3 | Texture) {
+  public constructor(boundary: Hittable, density: number, material: vec3 | Texture) {
     super();
     this._boundary = boundary;
     this._negInvDensity = -1 / density;
@@ -57,7 +56,7 @@ export class ConstantMedium extends Hittable {
       rec1.t = 0;
     }
 
-    const rayLength = Vector.length(r.direction);
+    const rayLength = vec3.length(r.direction);
     const distanceInsideBoundary = (rec2.t - rec1.t) * rayLength;
     const hitDistance = this._negInvDensity * Math.log(randomNumber());
 

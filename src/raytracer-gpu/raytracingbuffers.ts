@@ -10,7 +10,6 @@ import {
 } from '../material';
 import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor, Texture } from '../raytracer-cpu/texture';
 import { nextPowerOf2 } from '../util';
-import type { Vec3 } from '../vec3';
 import { WebGPUContext } from './webgpucontext';
 
 enum WebGPUMaterialType {
@@ -58,7 +57,7 @@ interface WebGPUTexture {
   hasImageTexture?: boolean;
 }
 interface WebGPUMaterial {
-  baseColor: [...rgb: Vec3, a: number]; // TODO: use vec4
+  baseColor: vec4;
   roughness: number;
   indexOfRefraction: number;
   materialType: WebGPUMaterialType;
@@ -150,11 +149,11 @@ export class RaytracingBuffers {
     };
 
     if (tex instanceof SolidColor) {
-      gpuTex.color = [...tex.color, 1];
+      gpuTex.color = vec4.fromValues(tex.color[0], tex.color[1], tex.color[2], 1);
       gpuTex.textureType = WebGPUTextureType.Solid;
     } else if (tex instanceof CheckerTexture) {
-      gpuTex.checkerOdd = [...tex.odd, 1];
-      gpuTex.checkerEven = [...tex.even, 1];
+      gpuTex.checkerOdd = vec4.fromValues(tex.odd[0], tex.odd[1], tex.odd[2], 1);
+      gpuTex.checkerEven = vec4.fromValues(tex.even[0], tex.even[1], tex.even[2], 1);
       gpuTex.scale = tex.scale;
       gpuTex.textureType = WebGPUTextureType.Checker;
     } else if (tex instanceof NoiseTexture) {
@@ -191,7 +190,7 @@ export class RaytracingBuffers {
       };
     } else if (mat instanceof MetalMaterial) {
       gpuMat = {
-        baseColor: [...mat.baseColor, 1],
+        baseColor: vec4.fromValues(mat.baseColor[0], mat.baseColor[1], mat.baseColor[2], 1),
         roughness: mat.roughness,
         indexOfRefraction: 1,
         materialType: WebGPUMaterialType.Metal,
@@ -263,7 +262,7 @@ export class RaytracingBuffers {
     if (obj instanceof Sphere) {
       gpuPrimitive = {
         objectToWorld: objectToWorld,
-        center0: [...obj.center, 0],
+        center0: vec4.fromValues(obj.center[0], obj.center[1], obj.center[2], 0),
         center1: [0, 0, 0, 1],
         radius: obj.radius,
 
@@ -278,8 +277,8 @@ export class RaytracingBuffers {
     } else if (obj instanceof MovingSphere) {
       gpuPrimitive = {
         objectToWorld: objectToWorld,
-        center0: [...obj.center0, obj.time0],
-        center1: [...obj.center1, obj.time1],
+        center0: vec4.fromValues(obj.center0[0], obj.center0[1], obj.center0[2], obj.time0),
+        center1: vec4.fromValues(obj.center1[0], obj.center1[1], obj.center1[2], obj.time1),
         radius: obj.radius,
 
         ...rectDummy,

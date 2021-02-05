@@ -1,105 +1,90 @@
 {
-    "asset" : {
-        "generator" : "Khronos glTF Blender I/O v1.4.40",
-        "version" : "2.0"
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v1.4.40",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [0]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "Tetrahedron_applied"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "green",
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [0.35154321789741516, 0.8000000715255737, 0.35529372096061707, 1],
+        "metallicFactor": 0,
+        "roughnessFactor": 0
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "Solid.001",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1
+          },
+          "indices": 2,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 12,
+      "max": [0.8568961024284363, 0.7665863037109375, -4.27744197845459],
+      "min": [-0.666175127029419, -0.8299344778060913, -5.7735185623168945],
+      "type": "vec3"
     },
-    "scene" : 0,
-    "scenes" : [
-        {
-            "name" : "Scene",
-            "nodes" : [
-                0
-            ]
-        }
-    ],
-    "nodes" : [
-        {
-            "mesh" : 0,
-            "name" : "Tetrahedron_applied"
-        }
-    ],
-    "materials" : [
-        {
-            "doubleSided" : true,
-            "name" : "green",
-            "pbrMetallicRoughness" : {
-                "baseColorFactor" : [
-                    0.35154321789741516,
-                    0.8000000715255737,
-                    0.35529372096061707,
-                    1
-                ],
-                "metallicFactor" : 0,
-                "roughnessFactor" : 0
-            }
-        }
-    ],
-    "meshes" : [
-        {
-            "name" : "Solid.001",
-            "primitives" : [
-                {
-                    "attributes" : {
-                        "POSITION" : 0,
-                        "NORMAL" : 1
-                    },
-                    "indices" : 2,
-                    "material" : 0
-                }
-            ]
-        }
-    ],
-    "accessors" : [
-        {
-            "bufferView" : 0,
-            "componentType" : 5126,
-            "count" : 12,
-            "max" : [
-                0.8568961024284363,
-                0.7665863037109375,
-                -4.27744197845459
-            ],
-            "min" : [
-                -0.666175127029419,
-                -0.8299344778060913,
-                -5.7735185623168945
-            ],
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 1,
-            "componentType" : 5126,
-            "count" : 12,
-            "type" : "VEC3"
-        },
-        {
-            "bufferView" : 2,
-            "componentType" : 5123,
-            "count" : 12,
-            "type" : "SCALAR"
-        }
-    ],
-    "bufferViews" : [
-        {
-            "buffer" : 0,
-            "byteLength" : 144,
-            "byteOffset" : 0
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 144,
-            "byteOffset" : 144
-        },
-        {
-            "buffer" : 0,
-            "byteLength" : 24,
-            "byteOffset" : 288
-        }
-    ],
-    "buffers" : [
-        {
-            "byteLength" : 312,
-            "uri" : "data:application/octet-stream;base64,scymvpZ2VL8uS7DAscymvpZ2VL8uS7DAscymvpZ2VL8uS7DAi11bP0h9hz6qwLjAi11bP0h9hz6qwLjAi11bP0h9hz6qwLjAcsFnPrSItj3O4IjAcsFnPrSItj3O4IjAcsFnPrSItj3O4IjAdIoqvwA/RD9G5K7AdIoqvwA/RD9G5K7AdIoqvwA/RD9G5K7ARYZVv3GiRL53YwQ/XWRQvpNhh7xpm3q/u2EwP/ioMb9lAVY+XWRQvpNhh7xpm3q/QXuyPqAMZz8wb4E+u2EwP/ioMb9lAVY+RYZVv3GiRL53YwQ/QXuyPqAMZz8wb4E+u2EwP/ioMb9lAVY+RYZVv3GiRL53YwQ/XWRQvpNhh7xpm3q/QXuyPqAMZz8wb4E+AgAFAAgAAAAGAAkAAQAKAAMABAALAAcA"
-        }
-    ]
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 12,
+      "type": "vec3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5123,
+      "count": 12,
+      "type": "SCALAR"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 144,
+      "byteOffset": 0
+    },
+    {
+      "buffer": 0,
+      "byteLength": 144,
+      "byteOffset": 144
+    },
+    {
+      "buffer": 0,
+      "byteLength": 24,
+      "byteOffset": 288
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 312,
+      "uri": "data:application/octet-stream;base64,scymvpZ2VL8uS7DAscymvpZ2VL8uS7DAscymvpZ2VL8uS7DAi11bP0h9hz6qwLjAi11bP0h9hz6qwLjAi11bP0h9hz6qwLjAcsFnPrSItj3O4IjAcsFnPrSItj3O4IjAcsFnPrSItj3O4IjAdIoqvwA/RD9G5K7AdIoqvwA/RD9G5K7AdIoqvwA/RD9G5K7ARYZVv3GiRL53YwQ/XWRQvpNhh7xpm3q/u2EwP/ioMb9lAVY+XWRQvpNhh7xpm3q/QXuyPqAMZz8wb4E+u2EwP/ioMb9lAVY+RYZVv3GiRL53YwQ/QXuyPqAMZz8wb4E+u2EwP/ioMb9lAVY+RYZVv3GiRL53YwQ/XWRQvpNhh7xpm3q/QXuyPqAMZz8wb4E+AgAFAAgAAAAGAAkAAQAKAAMABAALAAcA"
+    }
+  ]
 }

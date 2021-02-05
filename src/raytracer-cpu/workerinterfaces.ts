@@ -1,5 +1,5 @@
 import { JsonObject } from '../serializing';
-import type { Vec3 } from '../vec3';
+import { vec3 } from 'gl-matrix';
 
 export enum ControllerCommands {
   START,
@@ -31,7 +31,7 @@ export interface ControllerStartMessage extends WorkerMessage {
     sceneIdx: number;
     world: JsonObject;
     camera: JsonObject;
-    background: Vec3;
+    background: vec3;
   };
 }
 
@@ -46,7 +46,7 @@ export interface ComputeStartMessage extends WorkerMessage {
     workerId: number;
     camera: JsonObject;
     world: JsonObject;
-    background: Vec3;
+    background: vec3;
     imageWidth: number;
     imageHeight: number;
     scanlineCount: number;

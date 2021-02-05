@@ -1,14 +1,13 @@
-import type { Vec3 } from '../vec3';
-import * as Vector from '../vec3';
-import { HitRecord } from './hitrecord';
+import { vec3 } from 'gl-matrix';
 import { Hittable } from '../hittables';
+import { HitRecord } from './hitrecord';
 
 export class Ray {
-  private _orig: Vec3;
-  private _dir: Vec3;
+  private _orig: vec3;
+  private _dir: vec3;
   private _time: number;
 
-  public constructor(origin?: Vec3, direction?: Vec3, time = 0.0) {
+  public constructor(origin?: vec3, direction?: vec3, time = 0.0) {
     if (origin) {
       this._orig = origin;
     }
@@ -26,19 +25,19 @@ export class Ray {
     dest._time = this._time;
   }
 
-  public get origin(): Vec3 {
+  public get origin(): vec3 {
     return this._orig;
   }
 
-  public set origin(origin: Vec3) {
+  public set origin(origin: vec3) {
     this._orig = origin;
   }
 
-  public get direction(): Vec3 {
+  public get direction(): vec3 {
     return this._dir;
   }
 
-  public set direction(direction: Vec3) {
+  public set direction(direction: vec3) {
     this._dir = direction;
   }
 
@@ -46,18 +45,13 @@ export class Ray {
     return this._time;
   }
 
-  public at(t: number): Vec3 {
-    return Vector.addVec3(this._orig, Vector.multScalarVec3(this._dir, t));
-    // return Vector.addVec3(Vector.multScalarVec3(this._orig, 1 - t), Vector.multScalarVec3(this._dir, t));
+  public at(t: number): vec3 {
+    return vec3.add(vec3.create(), this._orig, vec3.scale(vec3.create(), this._dir, t));
+    // return vec3.addvec3(vec3.multScalarvec3(this._orig, 1 - t), vec3.multScalarvec3(this._dir, t));
   }
 }
 
-// const testTriangles: Triangle[] = [
-//   new Triangle([-1, -1, 0], [-1, 1, -1], [1, 1, 0]),
-//   new Triangle([1, 1, 0], [1, -1, -1], [-1, -1, 0]),
-// ];
-
-export function rayColor(ray: Ray, background: Vec3, world: Hittable, depth: number): Vec3 {
+export function rayColor(ray: Ray, background: vec3, world: Hittable, depth: number): vec3 {
   const rec = new HitRecord();
   // If we've exceeded the ray bounce limit, no more light is gathered.
   if (depth <= 0) {
@@ -70,21 +64,24 @@ export function rayColor(ray: Ray, background: Vec3, world: Hittable, depth: num
   }
 
   const scattered = new Ray();
-  const attenuation: Vec3 = [0, 0, 0];
+  const attenuation: vec3 = [0, 0, 0];
   const emitted = rec.mat.emitted(rec.u, rec.v, rec.p);
 
   if (!rec.mat.scatter(ray, rec, attenuation, scattered)) {
     return emitted;
   }
 
-  return Vector.addVec3(emitted, Vector.multVec3(attenuation, rayColor(scattered, background, world, depth - 1)));
+  //emitted + attenuation * ray_color(scattered, background, world, depth-1);
+  const attMultBounce = vec3.multiply(vec3.create(), attenuation, rayColor(scattered, background, world, depth - 1));
+
+  return vec3.add(vec3.create(), emitted, attMultBounce);
 
   /*
-  const unit_direction = Vec3.unitVector(r.direction);
+  const unit_direction = vec3.unitVector(r.direction);
   const t = 0.5 * (unit_direction.y + 1);
-  const color1 = Vec3.multScalarVec3(new Vec3(1, 1, 1), 1 - t);
-  const color2 = Vec3.multScalarVec3(new Vec3(0.5, 0.7, 1.0), t);
+  const color1 = vec3.multScalarvec3(new vec3(1, 1, 1), 1 - t);
+  const color2 = vec3.multScalarvec3(new vec3(0.5, 0.7, 1.0), t);
 
-  return Vec3.addVec3(color1, color2);
+  return vec3.addvec3(color1, color2);
   */
 }

@@ -1,21 +1,20 @@
 import { vec3 } from 'gl-matrix';
 import { Material } from '../material';
-import { serializable } from '../serializing';
-import type { Vec3 } from '../vec3';
 import { AABB } from '../raytracer-cpu/aabb';
-import { XYRect, XZRect, YZRect } from './aarect';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
+import { Ray } from '../raytracer-cpu/ray';
+import { serializable } from '../serializing';
+import { XYRect, XZRect, YZRect } from './aarect';
 import { Hittable } from './hittable';
 import { HittableList } from './hittablelist';
-import { Ray } from '../raytracer-cpu/ray';
 
 @serializable
 export class Box extends Hittable {
-  private _boxMin: Vec3;
-  private _boxMax: Vec3;
+  private _boxMin: vec3;
+  private _boxMax: vec3;
   private _sides = new HittableList();
 
-  public constructor(p0: Vec3, p1: Vec3, mat: Material) {
+  public constructor(p0: vec3, p1: vec3, mat: Material) {
     super();
     this._boxMin = p0;
     this._boxMax = p1;

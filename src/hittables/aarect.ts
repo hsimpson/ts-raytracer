@@ -1,10 +1,10 @@
+import { vec3 } from 'gl-matrix';
 import { Material } from '../material';
-import { serializable } from '../serializing';
-import type { Vec3 } from '../vec3';
 import { AABB } from '../raytracer-cpu/aabb';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Hittable } from './hittable';
 import { Ray } from '../raytracer-cpu/ray';
+import { serializable } from '../serializing';
+import { Hittable } from './hittable';
 
 @serializable
 export class XYRect extends Hittable {
@@ -40,7 +40,7 @@ export class XYRect extends Hittable {
     rec.v = (y - this.y0) / (this.y1 - this.y0);
     rec.t = t;
 
-    const outwardNormal: Vec3 = [0, 0, 1];
+    const outwardNormal: vec3 = [0, 0, 1];
     rec.setFaceNormal(transformedRay, outwardNormal);
     rec.mat = this.material;
     rec.p = transformedRay.at(t);
@@ -95,7 +95,7 @@ export class XZRect extends Hittable {
     rec.v = (z - this.z0) / (this.z1 - this.z0);
     rec.t = t;
 
-    const outwardNormal: Vec3 = [0, 1, 0];
+    const outwardNormal: vec3 = [0, 1, 0];
     rec.setFaceNormal(transformedRay, outwardNormal);
     rec.mat = this.material;
     rec.p = transformedRay.at(t);
@@ -149,7 +149,7 @@ export class YZRect extends Hittable {
     rec.v = (z - this.z0) / (this.z1 - this.z0);
     rec.t = t;
 
-    const outwardNormal: Vec3 = [1, 0, 0];
+    const outwardNormal: vec3 = [1, 0, 0];
     rec.setFaceNormal(transformedRay, outwardNormal);
     rec.mat = this.material;
     rec.p = transformedRay.at(t);

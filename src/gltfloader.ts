@@ -1,11 +1,10 @@
-import { vec2, vec3, mat4, quat } from 'gl-matrix';
+import { quat, vec2, vec3 } from 'gl-matrix';
 import { GLTF, GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
-import { LambertianMaterial, Material, NormalMaterial } from './material';
 import { HittableList, Triangle } from './hittables';
-import { Triangle } from './triangle';
+import { LambertianMaterial, Material, NormalMaterial } from './material';
 
-const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
-const WHITEMATERIAL = new LambertianMaterial([0.73, 0.73, 0.73]);
+// const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
+// const WHITEMATERIAL = new LambertianMaterial([0.73, 0.73, 0.73]);
 const NORMALMATERIAL = new NormalMaterial();
 NORMALMATERIAL.corrected = true;
 

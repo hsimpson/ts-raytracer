@@ -50,13 +50,13 @@
       "count": 24,
       "max": [1, 1, 1],
       "min": [-1, -1, -1],
-      "type": "VEC3"
+      "type": "vec3"
     },
     {
       "bufferView": 1,
       "componentType": 5126,
       "count": 24,
-      "type": "VEC3"
+      "type": "vec3"
     },
     {
       "bufferView": 2,

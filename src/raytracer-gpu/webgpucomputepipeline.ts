@@ -1,13 +1,13 @@
 import { Camera } from '../camera';
 import { HittableList } from '../hittables';
-import type { Vec3 } from '../vec3';
+import { vec3 } from 'gl-matrix';
 import { RaytracingBuffers } from './raytracingbuffers';
 import { WebGPUBuffer } from './webgpubuffer';
 import { WebGPUContext } from './webgpucontext';
 import { WebGPUPipelineBase } from './webgpupipelinebase';
 
 interface ComputeUniformParams {
-  background: Vec3;
+  background: vec3;
   width: number;
   height: number;
   currentSample: number;

@@ -1,28 +1,27 @@
 import { serializable } from '../serializing';
-import type { Vec3 } from '../vec3';
-import * as Vector from '../vec3';
+import { vec3 } from 'gl-matrix';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
 import { Material } from './material';
 import { Ray } from '../raytracer-cpu/ray';
+import { randomUnitVector } from '../util';
 
 @serializable
 export class NormalMaterial extends Material {
   public corrected = false;
 
-  public scatter(ray: Ray, rec: HitRecord, attenuation: Vec3, scattered: Ray): boolean {
-    const scatter_direction = Vector.addVec3(rec.normal, Vector.randomUnitVector());
+  public scatter(ray: Ray, rec: HitRecord, attenuation: vec3, scattered: Ray): boolean {
+    const scatter_direction = vec3.add(vec3.create(), rec.normal, randomUnitVector());
     new Ray(rec.p, scatter_direction, ray.time).copyTo(scattered);
 
-    let col: Vec3;
-    col = rec.normal;
+    const col = rec.normal;
 
     if (this.corrected) {
-      col = Vector.addScalar(col, 1);
-      col = Vector.multScalarVec3(col, 0.5);
-      col = Vector.unitVector(col);
+      vec3.add(col, col, vec3.fromValues(1, 1, 1));
+      vec3.scale(col, col, 0.5);
+      vec3.normalize(col, col);
     }
 
-    Vector.copyTo(col, attenuation);
+    vec3.copy(attenuation, col);
     return true;
   }
 }

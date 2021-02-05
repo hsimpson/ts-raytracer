@@ -1,27 +1,26 @@
+import { vec3 } from 'gl-matrix';
 import { serializable } from '../serializing';
 import { clamp } from '../util';
-import type { Vec3 } from '../vec3';
-import * as Vector from '../vec3';
 import { Perlin } from './perlin';
 
 export abstract class Texture {
-  public abstract value(u: number, v: number, p: Vec3): Vec3;
+  public abstract value(u: number, v: number, p: vec3): vec3;
 }
 
 @serializable
 export class SolidColor extends Texture {
-  private _color: Vec3;
+  private _color: vec3;
 
-  public constructor(color: Vec3) {
+  public constructor(color: vec3) {
     super();
     this._color = color;
   }
 
-  public value(_u: number, _v: number, _p: Vec3): Vec3 {
+  public value(_u: number, _v: number, _p: vec3): vec3 {
     return this._color;
   }
 
-  public get color(): Vec3 {
+  public get color(): vec3 {
     return this._color;
   }
 }
@@ -32,7 +31,7 @@ export class CheckerTexture extends Texture {
   private _even: Texture;
   private _scale: number;
 
-  public constructor(odd: Vec3, even: Vec3, scale?: number) {
+  public constructor(odd: vec3, even: vec3, scale?: number) {
     super();
     this._odd = new SolidColor(odd);
     this._even = new SolidColor(even);
@@ -43,7 +42,7 @@ export class CheckerTexture extends Texture {
     return x - Math.floor(x);
   }
 
-  public value(u: number, v: number, p: Vec3): Vec3 {
+  public value(u: number, v: number, p: vec3): vec3 {
     const x = this.modulo(u * this._scale) < 0.5;
     const y = this.modulo(v * this._scale) < 0.5;
 
@@ -54,11 +53,11 @@ export class CheckerTexture extends Texture {
     }
   }
 
-  public get odd(): Vec3 {
+  public get odd(): vec3 {
     return (this._odd as SolidColor).color;
   }
 
-  public get even(): Vec3 {
+  public get even(): vec3 {
     return (this._even as SolidColor).color;
   }
 
@@ -81,16 +80,17 @@ export class NoiseTexture extends Texture {
     return this._scale;
   }
 
-  public value(u: number, v: number, p: Vec3): Vec3 {
-    // return Vec3.multScalarVec3(
-    //   Vec3.multScalarVec3(new Vec3(1, 1, 1), 0.5),
-    //   1.0 + this._noise.noise(Vec3.multScalarVec3(p, this._scale))
+  public value(u: number, v: number, p: vec3): vec3 {
+    // return vec3.multScalarvec3(
+    //   vec3.multScalarvec3(new vec3(1, 1, 1), 0.5),
+    //   1.0 + this._noise.noise(vec3.multScalarvec3(p, this._scale))
     // );
 
-    //return Vec3.multScalarVec3(new Vec3(1, 1, 1), this._noise.turb(Vec3.multScalarVec3(p, this._scale)));
+    //return vec3.multScalarvec3(new vec3(1, 1, 1), this._noise.turb(vec3.multScalarvec3(p, this._scale)));
 
-    return Vector.multScalarVec3(
-      Vector.multScalarVec3([1, 1, 1], 0.5),
+    return vec3.scale(
+      vec3.create(),
+      vec3.scale(vec3.create(), vec3.fromValues(1, 1, 1), 0.5),
       1.0 + Math.sin(this._scale * p[2] + 10 * this._noise.turb(p))
     );
   }
@@ -130,7 +130,7 @@ export class ImageTexture extends Texture {
     this._bytesPerScanLine = ImageTexture.BytesPerPixel * this._width;
   }
 
-  public value(u: number, v: number, _p: Vec3): Vec3 {
+  public value(u: number, v: number, _p: vec3): vec3 {
     // If we have no texture data, then return solid cyan as a debugging aid.
     if (!this._data || this._data.length === 0) {
       return [0, 1, 1];

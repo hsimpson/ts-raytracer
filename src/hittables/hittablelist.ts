@@ -1,8 +1,8 @@
-import { serializable } from '../serializing';
 import { AABB } from '../raytracer-cpu/aabb';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Hittable } from './hittable';
 import { Ray } from '../raytracer-cpu/ray';
+import { serializable } from '../serializing';
+import { Hittable } from './hittable';
 
 @serializable
 export class HittableList extends Hittable {

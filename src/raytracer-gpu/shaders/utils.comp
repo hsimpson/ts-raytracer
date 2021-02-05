@@ -44,11 +44,11 @@ float random(float min, float max) {
   return min + (max - min) * random();
 }
 
-vec3 randomVec3() {
+vec3 randomvec3() {
   return vec3(random(), random(), random());
 }
 
-vec3 randomVec3(float min, float max) {
+vec3 randomvec3(float min, float max) {
   return vec3(random(min, max), random(min, max), random(min, max));
 }
 
@@ -60,7 +60,7 @@ vec3 randomInUnitSphere() {
   bool notInSphere = true;
   vec3 p;
   while (notInSphere) {
-    p = randomVec3(-1.0, 1.0);
+    p = randomvec3(-1.0, 1.0);
     if (lengthSquared(p) < 1.0)
       notInSphere = false;
   }
