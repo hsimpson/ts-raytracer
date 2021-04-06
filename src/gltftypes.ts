@@ -1,7 +1,6 @@
 // see: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#objects
 
 import type { quat, vec3, vec4 } from 'gl-matrix';
-type Num4 = [number, number, number, number];
 
 export interface GLTF {
   nodes: GLTFNode[];

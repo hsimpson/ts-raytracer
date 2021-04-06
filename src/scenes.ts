@@ -170,7 +170,7 @@ async function earthSphere(_useBVH: boolean): Promise<{ world: HittableList; cam
   return { world, cameraOptions };
 }
 
-function simpleLight(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
+function areaLight(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
   const perlinTexture = new NoiseTexture(4);
   const sphereMaterial = new LambertianMaterial();
@@ -391,7 +391,7 @@ const sceneCreators = [
   twoCheckerSpheres,
   twoNoiseSpheres,
   earthSphere,
-  simpleLight,
+  areaLight,
   cornellBox,
   cornellBoxSmoke,
   finalScene,
