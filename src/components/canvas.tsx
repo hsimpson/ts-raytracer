@@ -81,13 +81,15 @@ const Canvas = (): React.ReactElement => {
           className={cpuCanvasClasses}
           ref={canvasCPURef}
           width={raytracerState.imageWidth}
-          height={raytracerState.imageHeight}></canvas>
+          height={raytracerState.imageHeight}
+        />
         <canvas
           id="canvas-gpu"
           className={gpuCanvasClasses}
           ref={canvasGPURef}
           width={raytracerState.imageWidth}
-          height={raytracerState.imageHeight}></canvas>
+          height={raytracerState.imageHeight}
+        />
       </div>
     </div>
   );

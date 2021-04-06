@@ -5,8 +5,10 @@ import Canvas from './canvas';
 const App = (): React.ReactElement => {
   return (
     <React.Fragment>
-      <Gui></Gui>
-      <Canvas></Canvas>
+      <div className="">
+        <Gui />
+        <Canvas />
+      </div>
     </React.Fragment>
   );
 };

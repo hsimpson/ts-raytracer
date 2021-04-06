@@ -19,7 +19,7 @@ const CheckBox = (props: CheckBoxProps): React.ReactElement => {
   }
   return (
     <div className={classes}>
-      <input type="checkbox" disabled={props.disabled} checked={props.checked} onChange={onInputChange}></input>
+      <input type="checkbox" disabled={props.disabled} checked={props.checked} onChange={onInputChange} />
       <span>{props.label}</span>
     </div>
   );
