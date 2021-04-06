@@ -43,7 +43,7 @@ export class RaytracerGPU extends RaytracerBase {
     const textureSize: GPUExtent3D = {
       width: this._rayTracerOptions.imageWidth,
       height: this._rayTracerOptions.imageHeight,
-      depth: 1,
+      depthOrArrayLayers: 1,
     };
 
     const colorTextureDesc: GPUTextureDescriptor = {

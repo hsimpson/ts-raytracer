@@ -442,7 +442,7 @@ export class RaytracingBuffers {
     const imageSize = {
       width: 2,
       height: 2,
-      depth: 1,
+      depthOrArrayLayers: 1,
     };
 
     if (this._imageTextures.length) {
