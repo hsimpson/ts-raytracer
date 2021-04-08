@@ -8,9 +8,8 @@ import {
   NormalMaterial,
   UVMaterial,
 } from '../material';
+import { CheckerTexture, ImageTexture, NoiseTexture, Perlin, SolidColor } from '../textures';
 import { AABB } from './aabb';
-import { Perlin } from './perlin';
-import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor } from './texture';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const DeserializerMap = {

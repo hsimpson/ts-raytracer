@@ -8,7 +8,7 @@ import {
   MetalMaterial,
   NormalMaterial,
 } from '../material';
-import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor, Texture } from '../raytracer-cpu/texture';
+import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor, Texture } from '../textures';
 import { nextPowerOf2 } from '../util';
 import { WebGPUContext } from './webgpucontext';
 

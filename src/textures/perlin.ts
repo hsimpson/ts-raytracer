@@ -1,6 +1,6 @@
+import { vec3 } from 'gl-matrix';
 import { serializable } from '../serializing';
 import { randomInt, randomRange } from '../util';
-import { vec3 } from 'gl-matrix';
 
 @serializable
 export class Perlin {

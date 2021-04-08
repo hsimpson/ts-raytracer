@@ -1,8 +1,8 @@
 import { vec3 } from 'gl-matrix';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
 import { Ray } from '../raytracer-cpu/ray';
-import { SolidColor, Texture } from '../raytracer-cpu/texture';
 import { serializable } from '../serializing';
+import { SolidColor, Texture } from '../textures';
 import { Material } from './material';
 
 @serializable

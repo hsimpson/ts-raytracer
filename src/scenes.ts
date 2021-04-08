@@ -14,7 +14,7 @@ import {
   YZRect,
 } from './hittables';
 import { DielectricMaterial, DiffuseLight, LambertianMaterial, Material, MetalMaterial } from './material';
-import { CheckerTexture, ImageTexture, NoiseTexture } from './raytracer-cpu/texture';
+import { CheckerTexture, ImageTexture, NoiseTexture } from './textures';
 import { random, randomNumber, randomNumberRange, randomRange } from './util';
 
 const defaultCameraOptions: CameraOptions = {

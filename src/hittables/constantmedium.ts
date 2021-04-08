@@ -3,8 +3,8 @@ import { IsoTropic, Material } from '../material';
 import { AABB } from '../raytracer-cpu/aabb';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
 import { Ray } from '../raytracer-cpu/ray';
-import { Texture } from '../raytracer-cpu/texture';
 import { serializable } from '../serializing';
+import { Texture } from '../textures';
 import { randomNumber } from '../util';
 import { Hittable } from './hittable';
 
