@@ -17,12 +17,12 @@ export class HitRecord {
   }
 
   public copyTo(dest: HitRecord): void {
-    dest.p = this.p;
-    dest.normal = this.normal;
+    dest.p = vec3.copy(vec3.create(), this.p);
+    dest.normal = vec3.copy(vec3.create(), this.normal);
     dest.t = this.t;
     dest.u = this.u;
     dest.v = this.v;
     dest.frontFace = this.frontFace;
-    dest.mat = this.mat;
+    dest.mat = this.mat; // FIXME deep copy;
   }
 }

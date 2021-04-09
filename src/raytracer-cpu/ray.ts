@@ -20,8 +20,8 @@ export class Ray {
   }
 
   public copyTo(dest: Ray): void {
-    dest._orig = this._orig;
-    dest._dir = this._dir;
+    dest._orig = vec3.copy(vec3.create(), this._orig);
+    dest._dir = vec3.copy(vec3.create(), this._dir);
     dest._time = this._time;
   }
 
@@ -72,9 +72,14 @@ export function rayColor(ray: Ray, background: vec3, world: Hittable, depth: num
   }
 
   //emitted + attenuation * ray_color(scattered, background, world, depth-1);
-  const attMultBounce = vec3.multiply(vec3.create(), attenuation, rayColor(scattered, background, world, depth - 1));
 
-  return vec3.add(vec3.create(), emitted, attMultBounce);
+  return vec3.add(
+    vec3.create(),
+    emitted,
+    vec3.multiply(vec3.create(), attenuation, rayColor(scattered, background, world, depth - 1))
+  );
+
+  // return Vector.addVec3(emitted, Vector.multVec3(attenuation, rayColor(scattered, background, world, depth - 1)));
 
   /*
   const unit_direction = vec3.unitVector(r.direction);
@@ -85,3 +90,30 @@ export function rayColor(ray: Ray, background: vec3, world: Hittable, depth: num
   return vec3.addvec3(color1, color2);
   */
 }
+
+// export function rayColor(ray: Ray, background: vec3, world: Hittable, depth: number): vec3 {
+//   const rec = new HitRecord();
+
+//   const color: vec3 = [1.0, 1.0, 1.0];
+
+//   for (let i = 0; i < depth; i++) {
+//     if (world.hit(ray, 0.001, Number.POSITIVE_INFINITY, rec)) {
+//       const newRay = new Ray();
+//       const attenuation = vec3.create();
+//       const emitted = rec.mat.emitted(rec.u, rec.v, rec.p);
+//       const wasScattered = rec.mat.scatter(ray, rec, attenuation, newRay);
+//       ray = newRay;
+//       if (wasScattered) {
+//         vec3.multiply(color, color, vec3.add(vec3.create(), emitted, attenuation));
+//       } else {
+//         vec3.multiply(color, color, emitted);
+//         break;
+//       }
+//     } else {
+//       vec3.multiply(color, color, background);
+//       break;
+//     }
+//   }
+
+//   return color;
+// }

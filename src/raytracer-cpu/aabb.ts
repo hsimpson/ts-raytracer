@@ -23,10 +23,10 @@ export class AABB {
   }
 
   public copyTo(dest: AABB): void {
-    dest._min = this._min;
-    dest._max = this._max;
-    dest._size = this._size;
-    dest._center = this._center;
+    dest._min = vec3.copy(vec3.create(), this._min);
+    dest._max = vec3.copy(vec3.create(), this._max);
+    dest._size = vec3.copy(vec3.create(), this._size);
+    dest._center = vec3.copy(vec3.create(), this._center);
   }
 
   public logBox(): string {
