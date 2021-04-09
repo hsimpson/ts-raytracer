@@ -1,5 +1,6 @@
 import { commonConfig } from './webpack.common';
 import { merge } from 'webpack-merge';
+import webpack from 'webpack';
 
 const devConfig = merge(commonConfig, {
   mode: 'development',
@@ -9,7 +10,8 @@ const devConfig = merge(commonConfig, {
   devServer: {
     contentBase: './dist',
     open: false,
+    port: 8080,
   },
-});
+} as webpack.Configuration);
 
 export default devConfig;

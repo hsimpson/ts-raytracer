@@ -1,27 +1,27 @@
-import { serializable } from '../serializing';
-import type { Vec3 } from '../vec3';
-import * as Vector from '../vec3';
+import { vec3 } from 'gl-matrix';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Material } from './material';
 import { Ray } from '../raytracer-cpu/ray';
-import { SolidColor, Texture } from '../raytracer-cpu/texture';
+import { serializable } from '../serializing';
+import { SolidColor, Texture } from '../textures';
+import { randomInUnitSphere } from '../util';
+import { Material } from './material';
 
 @serializable
 export class IsoTropic extends Material {
   private _albedo: Texture;
 
-  public constructor(albedo: Vec3 | Texture) {
+  public constructor(albedo: vec3 | Texture) {
     super();
-    if (Vector.isVec3(albedo)) {
-      this._albedo = new SolidColor(albedo);
-    } else {
+    if (albedo instanceof Texture) {
       this._albedo = albedo;
+    } else {
+      this._albedo = new SolidColor(albedo);
     }
   }
 
-  public scatter(r_in: Ray, rec: HitRecord, attenuation: Vec3, scattered: Ray): boolean {
-    new Ray(rec.p, Vector.randomInUnitSphere(), r_in.time).copyTo(scattered);
-    Vector.copyTo(this._albedo.value(rec.u, rec.v, rec.p), attenuation);
+  public scatter(r_in: Ray, rec: HitRecord, attenuation: vec3, scattered: Ray): boolean {
+    new Ray(rec.p, randomInUnitSphere(), r_in.time).copyTo(scattered);
+    vec3.copy(attenuation, this._albedo.value(rec.u, rec.v, rec.p));
     return true;
   }
 }

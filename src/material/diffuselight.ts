@@ -1,15 +1,15 @@
-import { serializable } from '../serializing';
-import type { Vec3 } from '../vec3';
+import { vec3 } from 'gl-matrix';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Material } from './material';
 import { Ray } from '../raytracer-cpu/ray';
-import { SolidColor, Texture } from '../raytracer-cpu/texture';
+import { serializable } from '../serializing';
+import { SolidColor, Texture } from '../textures';
+import { Material } from './material';
 
 @serializable
 export class DiffuseLight extends Material {
   private _emit: Texture;
 
-  public constructor(color?: Vec3) {
+  public constructor(color?: vec3) {
     super();
     if (color) {
       this._emit = new SolidColor(color);
@@ -20,11 +20,11 @@ export class DiffuseLight extends Material {
     return this._emit;
   }
 
-  public scatter(_r_in: Ray, _rec: HitRecord, _attenuation: Vec3, _scattered: Ray): boolean {
+  public scatter(_r_in: Ray, _rec: HitRecord, _attenuation: vec3, _scattered: Ray): boolean {
     return false;
   }
 
-  public emitted(u: number, v: number, p: Vec3): Vec3 {
+  public emitted(u: number, v: number, p: vec3): vec3 {
     return this._emit.value(u, v, p);
   }
 }

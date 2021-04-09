@@ -1,27 +1,25 @@
 import { vec3 } from 'gl-matrix';
 import { Material } from '../material';
-import { serializable } from '../serializing';
-import { getSphereUV } from '../util';
-import type { Vec3 } from '../vec3';
-import * as Vector from '../vec3';
 import { AABB } from '../raytracer-cpu/aabb';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Hittable } from './hittable';
 import { Ray } from '../raytracer-cpu/ray';
+import { serializable } from '../serializing';
+import { getSphereUV, lengthSquared } from '../util';
+import { Hittable } from './hittable';
 
 @serializable
 export class Sphere extends Hittable {
-  private _center: Vec3;
+  private _center: vec3;
   private _radius: number;
 
-  public constructor(center: Vec3, radius: number, mat: Material) {
+  public constructor(center: vec3, radius: number, mat: Material) {
     super();
     this._center = center;
     this._radius = radius;
     this.material = mat;
   }
 
-  public get center(): Vec3 {
+  public get center(): vec3 {
     return this._center;
   }
 
@@ -29,24 +27,28 @@ export class Sphere extends Hittable {
     return this._radius;
   }
 
-  public hit(ray: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
+  public hit(ray: Ray, tMain: number, tMax: number, rec: HitRecord): boolean {
     const transformedRay = this.transform.transformRay(ray);
 
-    const oc = Vector.subVec3(transformedRay.origin, this._center);
-    const a = Vector.lengthSquared(transformedRay.direction);
-    const half_b = Vector.dot(oc, transformedRay.direction);
-    const c = Vector.lengthSquared(oc) - this._radius * this._radius;
+    const oc = vec3.subtract(vec3.create(), transformedRay.origin, this._center);
+    const a = lengthSquared(transformedRay.direction);
+    const half_b = vec3.dot(oc, transformedRay.direction);
+    const c = lengthSquared(oc) - this._radius * this._radius;
     const discriminat = half_b * half_b - a * c;
 
     if (discriminat > 0) {
       const root = Math.sqrt(discriminat);
       let temp = (-half_b - root) / a;
-      if (temp < t_max && temp > t_min) {
+      if (temp < tMax && temp > tMain) {
         rec.t = temp;
         rec.p = transformedRay.at(rec.t);
-        const outward_normal = Vector.divScalarVec(Vector.subVec3(rec.p, this._center), this._radius);
+        const outward_normal = vec3.create();
+
+        const pMinusCenter = vec3.subtract(vec3.create(), rec.p, this._center);
+        vec3.scale(outward_normal, pMinusCenter, 1.0 / this._radius);
         rec.setFaceNormal(transformedRay, outward_normal);
-        const uv = getSphereUV(Vector.divScalarVec(Vector.subVec3(rec.p, this._center), this._radius));
+
+        const uv = getSphereUV(outward_normal);
         rec.u = uv.u;
         rec.v = uv.v;
         rec.mat = this.material;
@@ -54,12 +56,16 @@ export class Sphere extends Hittable {
         return true;
       }
       temp = (-half_b + root) / a;
-      if (temp < t_max && temp > t_min) {
+      if (temp < tMax && temp > tMain) {
         rec.t = temp;
         rec.p = transformedRay.at(rec.t);
-        const outward_normal = Vector.divScalarVec(Vector.subVec3(rec.p, this._center), this._radius);
+        const outward_normal = vec3.create();
+
+        const pMinusCenter = vec3.subtract(vec3.create(), rec.p, this._center);
+        vec3.scale(outward_normal, pMinusCenter, 1.0 / this._radius);
         rec.setFaceNormal(transformedRay, outward_normal);
-        const uv = getSphereUV(Vector.divScalarVec(Vector.subVec3(rec.p, this._center), this._radius));
+
+        const uv = getSphereUV(outward_normal);
         rec.u = uv.u;
         rec.v = uv.v;
         rec.mat = this.material;
@@ -71,12 +77,12 @@ export class Sphere extends Hittable {
   }
 
   public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
-    const transformedCenter: vec3 = [this._center[0], this._center[1], this._center[2]];
-    vec3.transformMat4(transformedCenter, transformedCenter, this.transform.objectToWorld);
+    const transformedCenter = vec3.transformMat4(vec3.create(), this._center, this.transform.objectToWorld);
 
+    const r = vec3.fromValues(this._radius, this._radius, this._radius);
     const newOutputBox = new AABB(
-      Vector.subVec3(transformedCenter, [this._radius, this._radius, this._radius]),
-      Vector.addVec3(transformedCenter, [this._radius, this._radius, this._radius])
+      vec3.sub(vec3.create(), transformedCenter, r),
+      vec3.add(vec3.create(), transformedCenter, r)
     );
     newOutputBox.copyTo(outputBox);
     return true;

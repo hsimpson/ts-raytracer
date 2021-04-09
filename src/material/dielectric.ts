@@ -1,10 +1,9 @@
-import { serializable } from '../serializing';
-import { randomNumber } from '../util';
-import type { Vec3 } from '../vec3';
-import * as Vector from '../vec3';
+import { vec3 } from 'gl-matrix';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Material } from './material';
 import { Ray } from '../raytracer-cpu/ray';
+import { serializable } from '../serializing';
+import { randomNumber, reflect, refract } from '../util';
+import { Material } from './material';
 
 @serializable
 export class DielectricMaterial extends Material {
@@ -25,29 +24,29 @@ export class DielectricMaterial extends Material {
     return r0 + (1 - r0) * Math.pow(1 - cosine, 5);
   }
 
-  public scatter(r_in: Ray, rec: HitRecord, attenuation: Vec3, scattered: Ray): boolean {
-    Vector.set(attenuation, 1.0, 1.0, 1.0);
+  public scatter(ray: Ray, rec: HitRecord, attenuation: vec3, scattered: Ray): boolean {
+    vec3.set(attenuation, 1.0, 1.0, 1.0);
     const etai_over_etat = rec.frontFace ? 1 / this._indexOfRefraction : this._indexOfRefraction;
 
-    const unit_direction = Vector.unitVector(r_in.direction);
+    const unit_direction = vec3.normalize(vec3.create(), ray.direction);
 
-    const cos_theta = Math.min(Vector.dot(Vector.negate(unit_direction), rec.normal), 1);
+    const cos_theta = Math.min(vec3.dot(vec3.negate(vec3.create(), unit_direction), rec.normal), 1);
     const sin_theta = Math.sqrt(1 - cos_theta * cos_theta);
     if (etai_over_etat * sin_theta > 1) {
-      const reflected = Vector.reflect(unit_direction, rec.normal);
-      new Ray(rec.p, reflected, r_in.time).copyTo(scattered);
+      const reflected = reflect(unit_direction, rec.normal);
+      new Ray(rec.p, reflected, ray.time).copyTo(scattered);
       return true;
     }
 
     const reflect_prob = this.schlick(cos_theta, etai_over_etat);
     if (randomNumber() < reflect_prob) {
-      const reflected = Vector.reflect(unit_direction, rec.normal);
-      new Ray(rec.p, reflected, r_in.time).copyTo(scattered);
+      const reflected = reflect(unit_direction, rec.normal);
+      new Ray(rec.p, reflected, ray.time).copyTo(scattered);
       return true;
     }
 
-    const refracted = Vector.refract(unit_direction, rec.normal, etai_over_etat);
-    new Ray(rec.p, refracted, r_in.time).copyTo(scattered);
+    const refracted = refract(unit_direction, rec.normal, etai_over_etat);
+    new Ray(rec.p, refracted, ray.time).copyTo(scattered);
     return true;
   }
 }

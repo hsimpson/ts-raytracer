@@ -45,25 +45,29 @@ const Gui = (): React.ReactElement => {
         size={5}
         min={1}
         value={raytracerState.imageWidth}
-        onValueChange={(imageWidth) => setRaytracerState({ ...raytracerState, imageWidth })}></NumberInput>
+        onValueChange={(imageWidth) => setRaytracerState({ ...raytracerState, imageWidth })}
+      />
       <NumberInput
         label="Image height:"
         size={5}
         min={1}
         value={raytracerState.imageHeight}
-        onValueChange={(imageHeight) => setRaytracerState({ ...raytracerState, imageHeight })}></NumberInput>
+        onValueChange={(imageHeight) => setRaytracerState({ ...raytracerState, imageHeight })}
+      />
       <NumberInput
         label="Samples per pixel:"
         size={5}
         min={1}
         value={raytracerState.samplesPerPixel}
-        onValueChange={(samplesPerPixel) => setRaytracerState({ ...raytracerState, samplesPerPixel })}></NumberInput>
+        onValueChange={(samplesPerPixel) => setRaytracerState({ ...raytracerState, samplesPerPixel })}
+      />
       <NumberInput
         label="Max bounces:"
         size={5}
         min={1}
         value={raytracerState.maxBounces}
-        onValueChange={(maxBounces) => setRaytracerState({ ...raytracerState, maxBounces })}></NumberInput>
+        onValueChange={(maxBounces) => setRaytracerState({ ...raytracerState, maxBounces })}
+      />
       {raytracerState.webGPUenabled === false ? (
         <NumberInput
           label="Num of CPU workers:"
@@ -71,7 +75,8 @@ const Gui = (): React.ReactElement => {
           min={1}
           max={navigator.hardwareConcurrency}
           value={raytracerState.numOfWorkers}
-          onValueChange={(numOfWorkers) => setRaytracerState({ ...raytracerState, numOfWorkers })}></NumberInput>
+          onValueChange={(numOfWorkers) => setRaytracerState({ ...raytracerState, numOfWorkers })}
+        />
       ) : (
         ''
       )}
@@ -79,24 +84,28 @@ const Gui = (): React.ReactElement => {
         label="WebGPU-compute"
         checked={raytracerState.webGPUenabled}
         disabled={!raytracerState.webGPUavailable}
-        onValueChange={(webGPUenabled) => setRaytracerState({ ...raytracerState, webGPUenabled })}></CheckBox>
+        onValueChange={(webGPUenabled) => setRaytracerState({ ...raytracerState, webGPUenabled })}
+      />
       <DropDown
         label="Scene:"
         items={sceneConfig}
         default={raytracerState.scene}
-        onValueChange={(scene) => setRaytracerState({ ...raytracerState, scene })}></DropDown>
+        onValueChange={(scene) => setRaytracerState({ ...raytracerState, scene })}
+      />
 
       <CheckBox
         label="Download"
         checked={raytracerState.download}
         disabled={false}
-        onValueChange={(download) => setRaytracerState({ ...raytracerState, download })}></CheckBox>
+        onValueChange={(download) => setRaytracerState({ ...raytracerState, download })}
+      />
 
       <CheckBox
         label="Add stats to download"
         checked={raytracerState.addStatsToImage}
         disabled={!raytracerState.download}
-        onValueChange={(addStatsToImage) => setRaytracerState({ ...raytracerState, addStatsToImage })}></CheckBox>
+        onValueChange={(addStatsToImage) => setRaytracerState({ ...raytracerState, addStatsToImage })}
+      />
 
       <button className="resetButton" onClick={onResetClicked}>
         Reset to default

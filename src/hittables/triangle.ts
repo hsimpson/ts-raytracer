@@ -2,10 +2,10 @@ import { vec2, vec3 } from 'gl-matrix';
 import { Material } from '../material';
 import { AABB } from '../raytracer-cpu/aabb';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Hittable } from './hittable';
 import { Ray } from '../raytracer-cpu/ray';
 import { Transform } from '../raytracer-cpu/transform';
 import { serializable } from '../serializing';
+import { Hittable } from './hittable';
 
 function avgVector3(vectors: vec3[]): vec3 {
   let x = 0,
@@ -19,8 +19,7 @@ function avgVector3(vectors: vec3[]): vec3 {
   return [x / vectors.length, y / vectors.length, z / vectors.length];
 }
 
-const EPSILON = 0.000001;
-// const kEpsilon = 1e-8;
+const EPSILON = 1e-8;
 @serializable
 export class Triangle extends Hittable {
   public readonly v0: vec3;
@@ -107,35 +106,139 @@ export class Triangle extends Hittable {
     vec3.normalize(this.n2, this.n2);
   }
 
+  // public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
+  //   const transformedRay = this.transform.transformRay(ray);
+
+  //   const edge1 = vec3.create();
+  //   const edge2 = vec3.create();
+
+  //   const pvec = vec3.create();
+  //   const tvec = vec3.create();
+  //   const qvec = vec3.create();
+
+  //   let u, v, t;
+
+  //   /* find vectors for two edges sharing vert */
+  //   vec3.sub(edge1, this.v1, this.v0);
+  //   vec3.sub(edge2, this.v2, this.v0);
+
+  //   /* begin calculating determinant - also used to calculate U parameter */
+  //   vec3.cross(pvec, transformedRay.direction, edge2);
+
+  //   /*if determinant is near zero, ray lies in plane of triangle */
+  //   const det = vec3.dot(edge1, pvec);
+
+  //   if (this.doubleSided) {
+  //     if (det < EPSILON) {
+  //       return false;
+  //     }
+
+  //     /* calculate distance from vert0 to ray origin */
+  //     vec3.subtract(tvec, transformedRay.origin, this.v0);
+
+  //     /* calculate U parameter and test bounds */
+  //     u = vec3.dot(tvec, pvec);
+  //     if (u < 0.0 || u > det) {
+  //       return false;
+  //     }
+
+  //     /* prepare to test V parameter */
+  //     vec3.cross(qvec, tvec, edge1);
+
+  //     /* calculate V parameter and test bounds */
+  //     v = vec3.dot(transformedRay.direction, qvec);
+  //     if (v < 0.0 || u + v > det) {
+  //       return false;
+  //     }
+
+  //     /* calculate t, scale parameters, ray intersects triangle */
+  //     t = vec3.dot(edge2, qvec);
+  //     const invDet = 1.0 / det;
+
+  //     t *= invDet;
+  //     u *= invDet;
+  //     v *= invDet;
+  //   } else {
+  //     // non backface culling
+  //     if (det > -EPSILON && det < EPSILON) {
+  //       return false; // ray is parallel to the tri
+  //     }
+
+  //     const invDet = 1.0 / det;
+  //     /* calculate distance from vert0 to ray origin */
+  //     vec3.subtract(tvec, transformedRay.origin, this.v0);
+
+  //     /* calculate U parameter and test bounds */
+  //     u = vec3.dot(tvec, pvec) * invDet;
+  //     if (u < 0.0 || u > 1.0) {
+  //       return false;
+  //     }
+
+  //     /* prepare to test V parameter */
+  //     vec3.cross(qvec, tvec, edge1);
+  //     /* calculate V parameter and test bounds */
+  //     v = vec3.dot(transformedRay.direction, qvec) * invDet;
+  //     if (v < 0.0 || u + v > 1.0) {
+  //       return false;
+  //     }
+
+  //     /* calculate t, ray intersects triangle */
+  //     t = vec3.dot(edge2, qvec) * invDet;
+  //   }
+
+  //   if (t < EPSILON) {
+  //     return false;
+  //   }
+
+  //   rec.u = u;
+  //   rec.v = v;
+  //   rec.t = t;
+
+  //   rec.p = transformedRay.at(t);
+  //   rec.mat = this.material;
+  //   const w = 1.0 - u - v;
+
+  //   const n0 = vec3.create();
+  //   const n1 = vec3.create();
+  //   const n2 = vec3.create();
+  //   vec3.scale(n0, this.n0, w);
+  //   vec3.scale(n1, this.n1, u);
+  //   vec3.scale(n2, this.n2, v);
+  //   const normal = vec3.create();
+  //   vec3.add(normal, n0, n1);
+  //   vec3.add(normal, normal, n2);
+  //   vec3.normalize(normal, normal);
+
+  //   rec.setFaceNormal(transformedRay, [normal[0], normal[1], normal[2]]);
+
+  //   this.transform.transformRecord(transformedRay, rec);
+
+  //   return true;
+  // }
+
+  /* from https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf */
   public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
     const transformedRay = this.transform.transformRay(ray);
 
-    const edge1 = vec3.create();
-    const edge2 = vec3.create();
-
-    const pvec = vec3.create();
-    const tvec = vec3.create();
-    const qvec = vec3.create();
-
-    let u, v, t;
-
     /* find vectors for two edges sharing vert */
-    vec3.sub(edge1, this.v1, this.v0);
-    vec3.sub(edge2, this.v2, this.v0);
+    const edge1 = vec3.subtract(vec3.create(), this.v1, this.v0);
+    const edge2 = vec3.subtract(vec3.create(), this.v2, this.v0);
 
     /* begin calculating determinant - also used to calculate U parameter */
-    vec3.cross(pvec, transformedRay.direction, edge2);
+    const pvec = vec3.cross(vec3.create(), transformedRay.direction, edge2);
 
     /*if determinant is near zero, ray lies in plane of triangle */
     const det = vec3.dot(edge1, pvec);
 
-    if (this.doubleSided) {
+    let t, u, v;
+
+    if (!this.doubleSided) {
       if (det < EPSILON) {
         return false;
       }
 
       /* calculate distance from vert0 to ray origin */
-      vec3.subtract(tvec, transformedRay.origin, this.v0);
+      const tvec = vec3.subtract(vec3.create(), transformedRay.origin, this.v0);
 
       /* calculate U parameter and test bounds */
       u = vec3.dot(tvec, pvec);
@@ -144,7 +247,7 @@ export class Triangle extends Hittable {
       }
 
       /* prepare to test V parameter */
-      vec3.cross(qvec, tvec, edge1);
+      const qvec = vec3.cross(vec3.create(), tvec, edge1);
 
       /* calculate V parameter and test bounds */
       v = vec3.dot(transformedRay.direction, qvec);
@@ -160,14 +263,14 @@ export class Triangle extends Hittable {
       u *= invDet;
       v *= invDet;
     } else {
-      // non backface culling
       if (det > -EPSILON && det < EPSILON) {
         return false; // ray is parallel to the tri
       }
 
       const invDet = 1.0 / det;
+
       /* calculate distance from vert0 to ray origin */
-      vec3.subtract(tvec, transformedRay.origin, this.v0);
+      const tvec = vec3.subtract(vec3.create(), transformedRay.origin, this.v0);
 
       /* calculate U parameter and test bounds */
       u = vec3.dot(tvec, pvec) * invDet;
@@ -176,7 +279,8 @@ export class Triangle extends Hittable {
       }
 
       /* prepare to test V parameter */
-      vec3.cross(qvec, tvec, edge1);
+      const qvec = vec3.cross(vec3.create(), tvec, edge1);
+
       /* calculate V parameter and test bounds */
       v = vec3.dot(transformedRay.direction, qvec) * invDet;
       if (v < 0.0 || u + v > 1.0) {
@@ -184,35 +288,26 @@ export class Triangle extends Hittable {
       }
 
       /* calculate t, ray intersects triangle */
-      t = vec3.dot(edge2, qvec) * invDet;
+      t = vec3.dot(edge2, qvec);
     }
 
     if (t < EPSILON) {
       return false;
     }
 
-    rec.u = u;
-    rec.v = v;
     rec.t = t;
-
     rec.p = transformedRay.at(t);
     rec.mat = this.material;
+
     const w = 1.0 - u - v;
 
-    const n0 = vec3.create();
-    const n1 = vec3.create();
-    const n2 = vec3.create();
-    vec3.scale(n0, this.n0, w);
-    vec3.scale(n1, this.n1, u);
-    vec3.scale(n2, this.n2, v);
-    const normal = vec3.create();
-    vec3.add(normal, n0, n1);
-    vec3.add(normal, normal, n2);
-    vec3.normalize(normal, normal);
+    const n0 = vec3.scale(vec3.create(), this.n0, w);
+    const n1 = vec3.scale(vec3.create(), this.n1, u);
+    const n2 = vec3.scale(vec3.create(), this.n2, v);
 
-    rec.setFaceNormal(transformedRay, [normal[0], normal[1], normal[2]]);
-
-    this.transform.transformRecord(transformedRay, rec);
+    const outwardNormal = vec3.normalize(vec3.create(), vec3.add(vec3.create(), vec3.add(vec3.create(), n0, n1), n2));
+    rec.normal = outwardNormal;
+    rec.frontFace = true;
 
     return true;
   }

@@ -1,14 +1,13 @@
 import { Ray } from './raytracer-cpu/ray';
 import { serializable } from './serializing';
-import { degreeToRadians, randomNumberRange } from './util';
-import type { Vec3 } from './vec3';
-import * as Vector from './vec3';
+import { degreeToRadians, randomNumberRange, randomInUnitdisk } from './util';
+import { vec3 } from 'gl-matrix';
 
 export interface CameraOptions {
-  lookFrom: Vec3;
-  lookAt: Vec3;
-  vUp: Vec3;
-  background: Vec3;
+  lookFrom: vec3;
+  lookAt: vec3;
+  vUp: vec3;
+  background: vec3;
   fovY: number;
   aperture: number;
   focusDist: number;
@@ -16,13 +15,13 @@ export interface CameraOptions {
 
 @serializable
 export class Camera {
-  private lookFrom: Vec3;
-  private lowerLeftCorner: Vec3;
-  private horizontal: Vec3;
-  private vertical: Vec3;
-  private u: Vec3;
-  private v: Vec3;
-  private w: Vec3;
+  private lookFrom: vec3;
+  private lowerLeftCorner = vec3.create();
+  private horizontal = vec3.create();
+  private vertical = vec3.create();
+  private u = vec3.create();
+  private v = vec3.create();
+  private w = vec3.create();
   private lenseRadius: number;
   private time0: number;
   private time1: number;
@@ -32,9 +31,9 @@ export class Camera {
   }
 
   public init(
-    lookFrom: Vec3,
-    lookAt: Vec3,
-    vUp: Vec3,
+    lookFrom: vec3,
+    lookAt: vec3,
+    vUp: vec3,
     fovY: number,
     aspectRatio: number,
     aperture: number,
@@ -47,21 +46,22 @@ export class Camera {
     const viewport_height = 2 * h;
     const viewport_width = aspectRatio * viewport_height;
 
-    this.w = Vector.unitVector(Vector.subVec3(lookFrom, lookAt));
-    this.u = Vector.unitVector(Vector.cross(vUp, this.w));
-    this.v = Vector.cross(this.w, this.u);
+    vec3.normalize(this.w, vec3.subtract(vec3.create(), lookFrom, lookAt));
+    vec3.normalize(this.u, vec3.cross(vec3.create(), vUp, this.w));
+    vec3.cross(this.v, this.w, this.u);
 
     this.lookFrom = lookFrom;
-    this.horizontal = Vector.multScalarVec3(this.u, focusDist * viewport_width);
-    this.vertical = Vector.multScalarVec3(this.v, focusDist * viewport_height);
+    vec3.scale(this.horizontal, this.u, focusDist * viewport_width);
+    vec3.scale(this.vertical, this.v, focusDist * viewport_height);
 
-    const half_horizontal = Vector.divScalarVec(this.horizontal, 2);
-    const half_vertical = Vector.divScalarVec(this.vertical, 2);
+    const half_horizontal = vec3.scale(vec3.create(), this.horizontal, 0.5);
+    const half_vertical = vec3.scale(vec3.create(), this.vertical, 0.5);
 
-    const focusW = Vector.multScalarVec3(this.w, focusDist);
+    const focusW = vec3.scale(vec3.create(), this.w, focusDist);
 
-    this.lowerLeftCorner = Vector.subVec3(
-      Vector.subVec3(Vector.subVec3(this.lookFrom, half_horizontal), half_vertical),
+    vec3.subtract(
+      this.lowerLeftCorner,
+      vec3.subtract(vec3.create(), vec3.subtract(vec3.create(), this.lookFrom, half_horizontal), half_vertical),
       focusW
     );
 
@@ -71,19 +71,24 @@ export class Camera {
   }
 
   public getRay(s: number, t: number): Ray {
-    const rd = Vector.multScalarVec3(Vector.randomInUnitdisk(), this.lenseRadius);
+    const rd = vec3.scale(vec3.create(), randomInUnitdisk(), this.lenseRadius);
 
-    const vecU = Vector.multScalarVec3(this.u, rd[0]);
-    const vecV = Vector.multScalarVec3(this.v, rd[1]);
-    const offset = Vector.addVec3(vecU, vecV);
+    const vecU = vec3.scale(vec3.create(), this.u, rd[0]);
+    const vecV = vec3.scale(vec3.create(), this.v, rd[1]);
+    const offset = vec3.add(vec3.create(), vecU, vecV);
 
-    const sHor = Vector.multScalarVec3(this.horizontal, s);
-    const tVer = Vector.multScalarVec3(this.vertical, t);
+    const sHor = vec3.scale(vec3.create(), this.horizontal, s);
+    const tVer = vec3.scale(vec3.create(), this.vertical, t);
 
     return new Ray(
-      Vector.addVec3(this.lookFrom, offset),
-      Vector.subVec3(
-        Vector.subVec3(Vector.addVec3(Vector.addVec3(this.lowerLeftCorner, sHor), tVer), this.lookFrom),
+      vec3.add(vec3.create(), this.lookFrom, offset),
+      vec3.sub(
+        vec3.create(),
+        vec3.sub(
+          vec3.create(),
+          vec3.add(vec3.create(), vec3.add(vec3.create(), this.lowerLeftCorner, sHor), tVer),
+          this.lookFrom
+        ),
         offset
       ),
       randomNumberRange(this.time0, this.time1)

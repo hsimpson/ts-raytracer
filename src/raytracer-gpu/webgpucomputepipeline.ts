@@ -1,13 +1,13 @@
 import { Camera } from '../camera';
 import { HittableList } from '../hittables';
-import type { Vec3 } from '../vec3';
+import { vec3 } from 'gl-matrix';
 import { RaytracingBuffers } from './raytracingbuffers';
 import { WebGPUBuffer } from './webgpubuffer';
 import { WebGPUContext } from './webgpucontext';
 import { WebGPUPipelineBase } from './webgpupipelinebase';
 
 interface ComputeUniformParams {
-  background: Vec3;
+  background: vec3;
   width: number;
   height: number;
   currentSample: number;
@@ -88,37 +88,51 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
         {
           binding: Bindings.ComputeParams,
           visibility: GPUShaderStage.COMPUTE,
-          type: 'uniform-buffer',
+          buffer: {
+            type: 'uniform',
+          },
         },
         {
           binding: Bindings.Camera,
           visibility: GPUShaderStage.COMPUTE,
-          type: 'uniform-buffer',
+          buffer: {
+            type: 'uniform',
+          },
         },
         {
           binding: Bindings.PixelBuffer,
           visibility: GPUShaderStage.COMPUTE,
-          type: 'storage-buffer',
+          buffer: {
+            type: 'storage',
+          },
         },
         {
           binding: Bindings.AccumulationBuffer,
           visibility: GPUShaderStage.COMPUTE,
-          type: 'storage-buffer',
+          buffer: {
+            type: 'storage',
+          },
         },
         {
           binding: Bindings.Primitives,
           visibility: GPUShaderStage.COMPUTE,
-          type: 'storage-buffer',
+          buffer: {
+            type: 'storage',
+          },
         },
         {
           binding: Bindings.Materials,
           visibility: GPUShaderStage.COMPUTE,
-          type: 'storage-buffer',
+          buffer: {
+            type: 'storage',
+          },
         },
         {
           binding: Bindings.Textures,
           visibility: GPUShaderStage.COMPUTE,
-          type: 'storage-buffer',
+          buffer: {
+            type: 'storage',
+          },
         },
       ],
     };
@@ -129,12 +143,16 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
       {
         binding: Bindings.Sampler,
         visibility: GPUShaderStage.COMPUTE,
-        type: 'sampler',
+        sampler: {
+          type: 'filtering',
+        },
       },
       {
         binding: Bindings.ImageTexture,
         visibility: GPUShaderStage.COMPUTE,
-        type: 'sampled-texture',
+        texture: {
+          sampleType: 'float',
+        },
       },
     ];
     // }
@@ -246,7 +264,7 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
       bindGroupLayouts: [this._bindGroupLayout],
     });
 
-    const computeStage: GPUProgrammableStageDescriptor = {
+    const computeStage: GPUProgrammableStage = {
       module: await this.loadShader(this._options.computeShaderUrl),
       entryPoint: 'main',
     };

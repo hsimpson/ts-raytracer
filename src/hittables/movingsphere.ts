@@ -1,23 +1,21 @@
 import { vec3 } from 'gl-matrix';
 import { Material } from '../material';
-import { serializable } from '../serializing';
-import { getSphereUV } from '../util';
-import type { Vec3 } from '../vec3';
-import * as Vector from '../vec3';
 import { AABB } from '../raytracer-cpu/aabb';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Hittable } from './hittable';
 import { Ray } from '../raytracer-cpu/ray';
+import { serializable } from '../serializing';
+import { getSphereUV, lengthSquared } from '../util';
+import { Hittable } from './hittable';
 
 @serializable
 export class MovingSphere extends Hittable {
-  private _center0: Vec3;
-  private _center1: Vec3;
+  private _center0: vec3;
+  private _center1: vec3;
   private _time0: number;
   private _time1: number;
   private _radius: number;
 
-  public constructor(center0: Vec3, center1: Vec3, t0: number, t1: number, radius: number, mat: Material) {
+  public constructor(center0: vec3, center1: vec3, t0: number, t1: number, radius: number, mat: Material) {
     super();
     this._center0 = center0;
     this._center1 = center1;
@@ -27,11 +25,11 @@ export class MovingSphere extends Hittable {
     this.material = mat;
   }
 
-  public get center0(): Vec3 {
+  public get center0(): vec3 {
     return this._center0;
   }
 
-  public get center1(): Vec3 {
+  public get center1(): vec3 {
     return this._center1;
   }
 
@@ -47,29 +45,29 @@ export class MovingSphere extends Hittable {
     return this._time1;
   }
 
-  public hit(ray: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
+  public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
     const transformedRay = this.transform.transformRay(ray);
 
-    const oc = Vector.subVec3(transformedRay.origin, this.center(transformedRay.time));
-    const a = Vector.lengthSquared(transformedRay.direction);
-    const half_b = Vector.dot(oc, transformedRay.direction);
-    const c = Vector.lengthSquared(oc) - this._radius * this._radius;
+    const oc = vec3.subtract(vec3.create(), transformedRay.origin, this.center(transformedRay.time));
+
+    const a = lengthSquared(transformedRay.direction);
+    const half_b = vec3.dot(oc, transformedRay.direction);
+    const c = lengthSquared(oc) - this._radius * this._radius;
     const discriminat = half_b * half_b - a * c;
 
     if (discriminat > 0) {
       const root = Math.sqrt(discriminat);
       let temp = (-half_b - root) / a;
-      if (temp < t_max && temp > t_min) {
+      if (temp < tMax && temp > tMin) {
         rec.t = temp;
         rec.p = transformedRay.at(rec.t);
-        const outward_normal = Vector.divScalarVec(
-          Vector.subVec3(rec.p, this.center(transformedRay.time)),
-          this._radius
-        );
+        const outward_normal = vec3.create();
+
+        const pMinusCenter = vec3.subtract(vec3.create(), rec.p, this.center(transformedRay.time));
+        vec3.scale(outward_normal, pMinusCenter, 1.0 / this._radius);
         rec.setFaceNormal(transformedRay, outward_normal);
-        const uv = getSphereUV(
-          Vector.divScalarVec(Vector.subVec3(rec.p, this.center(transformedRay.time)), this._radius)
-        );
+
+        const uv = getSphereUV(outward_normal);
         rec.u = uv.u;
         rec.v = uv.v;
         rec.mat = this.material;
@@ -77,17 +75,16 @@ export class MovingSphere extends Hittable {
         return true;
       }
       temp = (-half_b + root) / a;
-      if (temp < t_max && temp > t_min) {
+      if (temp < tMax && temp > tMin) {
         rec.t = temp;
         rec.p = transformedRay.at(rec.t);
-        const outward_normal = Vector.divScalarVec(
-          Vector.subVec3(rec.p, this.center(transformedRay.time)),
-          this._radius
-        );
+        const outward_normal = vec3.create();
+
+        const pMinusCenter = vec3.subtract(vec3.create(), rec.p, this.center(transformedRay.time));
+        vec3.scale(outward_normal, pMinusCenter, 1.0 / this._radius);
         rec.setFaceNormal(transformedRay, outward_normal);
-        const uv = getSphereUV(
-          Vector.divScalarVec(Vector.subVec3(rec.p, this.center(transformedRay.time)), this._radius)
-        );
+
+        const uv = getSphereUV(outward_normal);
         rec.u = uv.u;
         rec.v = uv.v;
         rec.mat = this.material;
@@ -98,31 +95,27 @@ export class MovingSphere extends Hittable {
     return false;
   }
 
-  public center(time: number): Vec3 {
+  public center(time: number): vec3 {
     const timeDiff = (time - this._time0) / (this._time1 - this._time0);
-    const centerDiff = Vector.subVec3(this._center1, this._center0);
+    const centerDiff = vec3.subtract(vec3.create(), this._center1, this._center0);
 
-    return Vector.addVec3(this._center0, Vector.multScalarVec3(centerDiff, timeDiff));
+    const centerDiffT = vec3.scale(vec3.create(), centerDiff, timeDiff);
+    return vec3.add(vec3.create(), this._center0, centerDiffT);
   }
 
   public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
-    const cT0 = this.center(t0);
-    const cT1 = this.center(t0);
+    const transformedCenterT0 = vec3.transformMat4(vec3.create(), this.center(t0), this.transform.objectToWorld);
+    const transformedCenterT1 = vec3.transformMat4(vec3.create(), this.center(t1), this.transform.objectToWorld);
 
-    const transformedCenterT0: vec3 = [cT0[0], cT0[1], cT0[2]];
-    const transformedCenterT1: vec3 = [cT1[0], cT1[1], cT1[2]];
-
-    vec3.transformMat4(transformedCenterT0, transformedCenterT0, this.transform.objectToWorld);
-    vec3.transformMat4(transformedCenterT1, transformedCenterT1, this.transform.objectToWorld);
-
+    const r = vec3.fromValues(this._radius, this._radius, this._radius);
     const box0 = new AABB(
-      Vector.subVec3(transformedCenterT0, [this._radius, this._radius, this._radius]),
-      Vector.addVec3(transformedCenterT0, [this._radius, this._radius, this._radius])
+      vec3.sub(vec3.create(), transformedCenterT0, r),
+      vec3.add(vec3.create(), transformedCenterT0, r)
     );
 
     const box1 = new AABB(
-      Vector.subVec3(transformedCenterT1, [this._radius, this._radius, this._radius]),
-      Vector.addVec3(transformedCenterT1, [this._radius, this._radius, this._radius])
+      vec3.sub(vec3.create(), transformedCenterT1, r),
+      vec3.add(vec3.create(), transformedCenterT1, r)
     );
 
     const newOutputBox = AABB.surroundingBox(box0, box1);

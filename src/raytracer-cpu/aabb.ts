@@ -1,15 +1,15 @@
 import { serializable } from '../serializing';
-import type { Vec3 } from '../vec3';
+import { vec3 } from 'gl-matrix';
 import { Ray } from './ray';
 
 @serializable
 export class AABB {
-  private _min: Vec3;
-  private _max: Vec3;
-  private _size: Vec3;
-  private _center: Vec3;
+  private _min: vec3;
+  private _max: vec3;
+  private _size: vec3;
+  private _center: vec3;
 
-  public constructor(min?: Vec3, max?: Vec3) {
+  public constructor(min?: vec3, max?: vec3) {
     this._min = min ?? [0, 0, 0];
     this._max = max ?? [0, 0, 0];
 
@@ -23,21 +23,21 @@ export class AABB {
   }
 
   public copyTo(dest: AABB): void {
-    dest._min = this._min;
-    dest._max = this._max;
-    dest._size = this._size;
-    dest._center = this._center;
+    dest._min = vec3.copy(vec3.create(), this._min);
+    dest._max = vec3.copy(vec3.create(), this._max);
+    dest._size = vec3.copy(vec3.create(), this._size);
+    dest._center = vec3.copy(vec3.create(), this._center);
   }
 
   public logBox(): string {
     return `center: ${this._center.toString()} | size: ${this._size.toString()}`;
   }
 
-  public get min(): Vec3 {
+  public get min(): vec3 {
     return this._min;
   }
 
-  public get max(): Vec3 {
+  public get max(): vec3 {
     return this._max;
   }
 
@@ -81,13 +81,13 @@ export class AABB {
   // }
 
   public static surroundingBox(box0: AABB, box1: AABB): AABB {
-    const small: Vec3 = [
+    const small: vec3 = [
       Math.min(box0.min[0], box1.min[0]),
       Math.min(box0.min[1], box1.min[1]),
       Math.min(box0.min[2], box1.min[2]),
     ];
 
-    const big: Vec3 = [
+    const big: vec3 = [
       Math.max(box0.max[0], box1.max[0]),
       Math.max(box0.max[1], box1.max[1]),
       Math.max(box0.max[2], box1.max[2]),

@@ -10,14 +10,13 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
-    "prettier",
-    "prettier/@typescript-eslint"
+    "prettier"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": "./tsconfig.json"
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["@typescript-eslint", "react"],
   "rules": {
     "@typescript-eslint/explicit-function-return-type": [
       "warn",
@@ -59,6 +58,13 @@
     "no-unused-vars": "off",
     "no-warning-comments": "warn",
     "quotes": ["error", "single"],
+    "react/self-closing-comp": [
+      "error",
+      {
+        "component": true,
+        "html": true
+      }
+    ],
     "semi": ["error", "always"]
   },
   "settings": {

@@ -3,8 +3,18 @@ import { atom } from 'recoil';
 export const RaytracerProperties = atom({
   key: 'raytracerProperties',
   default: {
-    imageWidth: 640,
-    imageHeight: 360,
+    // imageWidth: 1280,
+    // imageHeight: 720,
+
+    imageWidth: 1024,
+    imageHeight: 576,
+
+    // imageWidth: 640,
+    // imageHeight: 360,
+
+    // imageWidth: 128,
+    // imageHeight: 72,
+
     samplesPerPixel: 20,
     maxBounces: 12,
     numOfWorkers: navigator.hardwareConcurrency,
@@ -14,6 +24,8 @@ export const RaytracerProperties = atom({
     download: false,
     addStatsToImage: false,
     scene: 0,
+    // scene: 4,
+    // scene: 8,
   },
 });
 

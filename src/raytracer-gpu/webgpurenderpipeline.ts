@@ -60,12 +60,16 @@ export class WebGPURenderPipeline extends WebGPUPipelineBase {
         {
           binding: 0,
           visibility: GPUShaderStage.FRAGMENT,
-          type: 'uniform-buffer',
+          buffer: {
+            type: 'uniform',
+          },
         },
         {
           binding: 1,
           visibility: GPUShaderStage.FRAGMENT,
-          type: 'storage-buffer',
+          buffer: {
+            type: 'storage',
+          },
         },
       ],
     });
@@ -102,63 +106,63 @@ export class WebGPURenderPipeline extends WebGPUPipelineBase {
       bindGroupLayouts: [this._bindGroupLayout],
     });
 
-    const vertexStage: GPUProgrammableStageDescriptor = {
-      module: await this.loadShader(this._options.vertexShaderUrl),
-      entryPoint: 'main',
-    };
-
-    const fragmentStage: GPUProgrammableStageDescriptor = {
-      module: await this.loadShader(this._options.fragmentShaderUrl),
-      entryPoint: 'main',
-    };
-
-    const colorState: GPUColorStateDescriptor = {
-      format: 'bgra8unorm',
-      alphaBlend: {
-        srcFactor: 'src-alpha',
-        dstFactor: 'one-minus-src-alpha',
-        operation: 'add',
-      },
-      colorBlend: {
-        srcFactor: 'src-alpha',
-        dstFactor: 'one-minus-src-alpha',
-        operation: 'add',
-      },
-      writeMask: GPUColorWrite.ALL,
-    };
-
-    const rasterizationState: GPURasterizationStateDescriptor = {
+    const primitiveState: GPUPrimitiveState = {
+      topology: 'triangle-list',
+      // stripIndexFormat: // TODO
       frontFace: 'cw',
       cullMode: 'none',
     };
 
-    const vertexAttributes: GPUVertexAttributeDescriptor[] = [
-      {
-        shaderLocation: 0,
-        offset: 0,
-        format: 'float3',
-      },
-    ];
-
-    const vertexBufferDesc: GPUVertexBufferLayoutDescriptor = {
-      attributes: vertexAttributes,
+    const vertexBufferDesc: GPUVertexBufferLayout = {
+      attributes: [
+        {
+          shaderLocation: 0,
+          offset: 0,
+          format: 'float32x3',
+        },
+      ],
       arrayStride: _attributeElementCount * Float32Array.BYTES_PER_ELEMENT,
       stepMode: 'vertex',
     };
 
-    const vertexState: GPUVertexStateDescriptor = {
-      vertexBuffers: [vertexBufferDesc],
+    const vertexState: GPUVertexState = {
+      module: await this.loadShader(this._options.vertexShaderUrl),
+      entryPoint: 'main',
+      buffers: [vertexBufferDesc],
     };
 
-    const pipelineDesc: GPURenderPipelineDescriptor = {
+    const colorState: GPUColorTargetState = {
+      format: 'bgra8unorm',
+      blend: {
+        color: {
+          srcFactor: 'src-alpha',
+          dstFactor: 'one-minus-src-alpha',
+          operation: 'add',
+        },
+        alpha: {
+          srcFactor: 'src-alpha',
+          dstFactor: 'one-minus-src-alpha',
+          operation: 'add',
+        },
+      },
+      writeMask: GPUColorWrite.ALL,
+    };
+
+    const fragmentState: GPUFragmentState = {
+      module: await this.loadShader(this._options.fragmentShaderUrl),
+      entryPoint: 'main',
+      targets: [colorState],
+    };
+
+    const pipelineDesc: GPURenderPipelineDescriptorNew = {
       layout,
-      vertexStage,
-      fragmentStage,
-      primitiveTopology: 'triangle-list',
-      colorStates: [colorState],
-      rasterizationState,
-      vertexState,
-      sampleCount: 1,
+      vertex: vertexState,
+      primitive: primitiveState,
+      fragment: fragmentState,
+
+      multisample: {
+        count: 1,
+      },
     };
 
     this._pipeline = WebGPUContext.device.createRenderPipeline(pipelineDesc);

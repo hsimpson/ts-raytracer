@@ -1,7 +1,6 @@
 // see: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#objects
 
-type Num3 = [number, number, number];
-type Num4 = [number, number, number, number];
+import type { quat, vec3, vec4 } from 'gl-matrix';
 
 export interface GLTF {
   nodes: GLTFNode[];
@@ -47,8 +46,8 @@ export interface GLTFAccessor {
   bufferView: number;
   componentType: GLTFComponentType;
   count: number;
-  max: Num3;
-  min: Num3;
+  max: vec3;
+  min: vec3;
   type: GLTFAccessorType;
 }
 
@@ -61,9 +60,9 @@ export interface GLTFBufferView {
 export interface GLTFNode {
   mesh: number;
   name?: string;
-  rotation?: Num4;
-  translation?: Num3;
-  scale?: Num3;
+  rotation?: quat;
+  translation?: vec3;
+  scale?: vec3;
 }
 
 export interface GLTFMesh {
@@ -96,5 +95,5 @@ export interface GLTFMaterial {
 }
 
 export interface GLTFPBRMetallicRoughness {
-  baseColorFactor?: Num4;
+  baseColorFactor?: vec4;
 }

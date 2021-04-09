@@ -1,8 +1,7 @@
 import { Camera } from '../camera';
 import { deserialize } from '../serializing/deserialize';
 import { randomNumber, writeColor } from '../util';
-import type { Vec3 } from '../vec3';
-import * as Vector from '../vec3';
+import { vec3 } from 'gl-matrix';
 import { DeserializerMap } from './deserializermap';
 import { HittableList } from '../hittables';
 import { rayColor } from './ray';
@@ -42,7 +41,7 @@ function start(msg: ComputeStartMessage): void {
   for (let j = startLine; j >= endLine; j--) {
     console.log(`worker[${_id}] scanlines remaining ${linesToCalc--}`);
     for (let i = 0; i < imageWidth; i++) {
-      let pixelColor: Vec3 = [0, 0, 0];
+      const pixelColor = vec3.create();
 
       for (let s = 0; s < spp; s++) {
         // const rnd = sampleOffsets[s];
@@ -52,7 +51,7 @@ function start(msg: ComputeStartMessage): void {
         // const v = (j + rnd) / (imageHeight - 1);
 
         const r = camera.getRay(u, v);
-        pixelColor = Vector.addVec3(pixelColor, rayColor(r, background, world, maxBounces));
+        vec3.add(pixelColor, pixelColor, rayColor(r, background, world, maxBounces));
       }
 
       writeColor(dataArray, offset, pixelColor, spp);

@@ -1,3 +1,4 @@
+import { vec3 } from 'gl-matrix';
 import { CameraOptions } from './camera';
 import * as GLTFLoader from './gltfloader';
 import {
@@ -13,10 +14,8 @@ import {
   YZRect,
 } from './hittables';
 import { DielectricMaterial, DiffuseLight, LambertianMaterial, Material, MetalMaterial } from './material';
-import { CheckerTexture, ImageTexture, NoiseTexture } from './raytracer-cpu/texture';
-import { randomNumber, randomNumberRange } from './util';
-import type { Vec3 } from './vec3';
-import * as Vector from './vec3';
+import { CheckerTexture, ImageTexture, NoiseTexture } from './textures';
+import { random, randomNumber, randomNumberRange, randomRange } from './util';
 
 const defaultCameraOptions: CameraOptions = {
   lookFrom: [0, 0, 5],
@@ -70,7 +69,7 @@ function randomScene(useBVH: boolean): { world: HittableList; cameraOptions: Cam
   const world = new HittableList();
 
   const groundMaterial = new LambertianMaterial([0.5, 0.5, 0.5]);
-  // const checkerTexture = new CheckerTexture(new Vec3(0.2, 0.3, 0.1), new Vec3(0.9, 0.9, 0.9));
+  // const checkerTexture = new CheckerTexture(new vec3(0.2, 0.3, 0.1), new vec3(0.9, 0.9, 0.9));
   // const groundMaterial = new LambertianMaterial();
   // groundMaterial.texture = checkerTexture;
 
@@ -81,21 +80,21 @@ function randomScene(useBVH: boolean): { world: HittableList; cameraOptions: Cam
     for (let b = -count; b < count; b++) {
       //console.log(`${i++}`);
       const chooseMat = randomNumber();
-      const center: Vec3 = [a + 0.9 * randomNumber(), 0.2, b + 0.9 * randomNumber()];
+      const center: vec3 = [a + 0.9 * randomNumber(), 0.2, b + 0.9 * randomNumber()];
 
-      if (Vector.length(Vector.subVec3(center, [4, 0.2, 0])) > 0.9) {
+      if (vec3.length(vec3.sub(vec3.create(), center, [4, 0.2, 0])) > 0.9) {
         let sphereMaterial: Material;
 
         if (chooseMat < 0.8) {
           // diffuse aka lambertian
-          const albedo = Vector.multVec3(Vector.random(), Vector.random());
+          const albedo = vec3.multiply(vec3.create(), random(), random());
           sphereMaterial = new LambertianMaterial(albedo);
-          const center2 = Vector.addVec3(center, [0, randomNumberRange(0, 1.0), 0]);
+          const center2 = vec3.add(vec3.create(), center, [0, randomNumberRange(0, 1.0), 0]);
           world.add(new MovingSphere(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
           // world.add(new Sphere(center, 0.2, sphereMaterial));
         } else if (chooseMat < 0.95) {
           // metal
-          const albedo = Vector.randomRange(0.5, 1);
+          const albedo = randomRange(0.5, 1);
           const roughness = randomNumberRange(0, 0.5);
           sphereMaterial = new MetalMaterial(albedo, roughness);
           world.add(new Sphere(center, 0.2, sphereMaterial));
@@ -171,7 +170,7 @@ async function earthSphere(_useBVH: boolean): Promise<{ world: HittableList; cam
   return { world, cameraOptions };
 }
 
-function simpleLight(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
+function areaLight(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
   const world = new HittableList();
   const perlinTexture = new NoiseTexture(4);
   const sphereMaterial = new LambertianMaterial();
@@ -304,8 +303,8 @@ async function finalScene(useBVH: boolean): Promise<{ world: HittableList; camer
   const light = new DiffuseLight([7, 7, 7]);
   world.add(new XZRect(123, 423, 147, 412, 554, light));
 
-  const center1: Vec3 = [400, 400, 200];
-  const center2 = Vector.addVec3(center1, [30, 0, 0]);
+  const center1: vec3 = [400, 400, 200];
+  const center2 = vec3.add(vec3.create(), center1, [30, 0, 0]);
   const movingSphereMaterial = new LambertianMaterial([0.7, 0.3, 0.1]);
   world.add(new MovingSphere(center1, center2, 0, 1, 50, movingSphereMaterial));
 
@@ -333,7 +332,7 @@ async function finalScene(useBVH: boolean): Promise<{ world: HittableList; camer
   const boxes2 = new HittableList();
   const white = new LambertianMaterial([0.73, 0.73, 0.73]);
   for (let j = 0; j < 1000; j++) {
-    boxes2.add(new Sphere(Vector.randomRange(0, 165), 10, white));
+    boxes2.add(new Sphere(randomRange(0, 165), 10, white));
   }
 
   boxes2.transform.translate([-100, 270, 395]);
@@ -369,8 +368,8 @@ async function gltfScene(useBVH: boolean): Promise<{ world: HittableList; camera
 
   // const w = world.objects[0] as HittableList;
 
-  const lookFrom: Vec3 = [2, 1.5, 6];
-  const lookAt: Vec3 = [0, 0, 0];
+  const lookFrom: vec3 = [2, 1.5, 6];
+  const lookAt: vec3 = [0, 0, 0];
   // const lookFrom = [0, 0, 0];
   // const lookAt = [0, 0, -1];
 
@@ -392,7 +391,7 @@ const sceneCreators = [
   twoCheckerSpheres,
   twoNoiseSpheres,
   earthSphere,
-  simpleLight,
+  areaLight,
   cornellBox,
   cornellBoxSmoke,
   finalScene,
@@ -403,7 +402,7 @@ export async function getScene(
   sceneIndex: number,
   useBVH = false
 ): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
-  // const { world, cameraOptions } = await sceneCreators[sceneIndex](useBVH);
-  const { world, cameraOptions } = await sceneCreators[sceneIndex](false);
+  const { world, cameraOptions } = await sceneCreators[sceneIndex](useBVH);
+  // const { world, cameraOptions } = await sceneCreators[sceneIndex](false);
   return { world, cameraOptions };
 }
