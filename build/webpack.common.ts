@@ -52,11 +52,11 @@ const commonConfig: webpack.Configuration = {
       patterns: [
         {
           from: './src/assets/textures/**/*',
-          to: 'assets/textures/[name].[ext]',
+          to: 'assets/textures/[name][ext]',
         },
         {
           from: './src/assets/models/**/*',
-          to: 'assets/models/[name].[ext]',
+          to: 'assets/models/[name][ext]',
         },
       ],
     }),
