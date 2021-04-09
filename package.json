@@ -60,6 +60,7 @@
     "gl-matrix": "^3.3.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "recoil": "0.2.0"
+    "recoil": "0.2.0",
+    "simplex-noise": "^2.4.0"
   }
 }
