@@ -402,7 +402,7 @@ export async function getScene(
   sceneIndex: number,
   useBVH = false
 ): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
-  // const { world, cameraOptions } = await sceneCreators[sceneIndex](useBVH);
-  const { world, cameraOptions } = await sceneCreators[sceneIndex](false);
+  const { world, cameraOptions } = await sceneCreators[sceneIndex](useBVH);
+  // const { world, cameraOptions } = await sceneCreators[sceneIndex](false);
   return { world, cameraOptions };
 }
