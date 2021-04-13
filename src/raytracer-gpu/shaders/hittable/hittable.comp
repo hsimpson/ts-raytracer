@@ -54,9 +54,11 @@ bool hittableListHit(const Ray ray, const float tMin, const float tMax, inout Hi
 
   for (int i = 0; i < primitives.length(); i++) {
     if (hitPrimitive(primitives[i], ray, tMin, closestSoFar, tempRec)) {
-      hitAnything  = true;
-      closestSoFar = tempRec.t;
-      rec          = tempRec;
+      if (tempRec.t <= closestSoFar) {
+        hitAnything  = true;
+        closestSoFar = tempRec.t;
+        rec          = tempRec;
+      }
     }
   }
 

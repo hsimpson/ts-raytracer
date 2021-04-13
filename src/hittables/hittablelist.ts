@@ -34,10 +34,12 @@ export class HittableList extends Hittable {
 
     for (const object of this._objects) {
       if (object.hit(ray, tMin, closestSoFar, tempRecord)) {
-        hitAnything = true;
-        closestSoFar = tempRecord.t;
+        if (tempRecord.t <= closestSoFar) {
+          hitAnything = true;
+          closestSoFar = tempRecord.t;
 
-        tempRecord.copyTo(rec);
+          tempRecord.copyTo(rec);
+        }
       }
     }
 
