@@ -3,12 +3,16 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import SpirVCompilerPlugin from './spirvcompilerplugin';
 import WatchExternalFilesPlugin from 'webpack-watch-files-plugin';
+import path from 'path';
 
 const commonConfig: webpack.Configuration = {
   entry: './src/index.tsx',
 
   resolve: {
     extensions: ['.ts', '.tsx', '.jsx', '.js'],
+    fallback: {
+      path: require.resolve('path-browserify'),
+    },
   },
 
   module: {
@@ -55,8 +59,9 @@ const commonConfig: webpack.Configuration = {
           to: 'assets/textures/[name][ext]',
         },
         {
-          from: './src/assets/models/**/*',
-          to: 'assets/models/[name][ext]',
+          from: '**/*',
+          context: path.resolve('src', 'assets', 'models'),
+          to: 'assets/models/[path][name][ext]',
         },
       ],
     }),

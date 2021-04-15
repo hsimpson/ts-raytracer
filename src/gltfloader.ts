@@ -2,6 +2,8 @@ import { quat, vec2, vec3 } from 'gl-matrix';
 import { GLTF, GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
 import { HittableList, Triangle } from './hittables';
 import { LambertianMaterial, Material, NormalMaterial } from './material';
+import { isDataUrl, isAbsoluteUrl } from './url';
+import path from 'path';
 
 // const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
 // const WHITEMATERIAL = new LambertianMaterial([0.73, 0.73, 0.73]);
@@ -15,7 +17,7 @@ export async function load(url: string): Promise<HittableList> {
   const gltf = (await response.json()) as GLTF;
 
   // decode buffers
-  const buffers = await decodeBuffers(gltf.buffers);
+  const buffers = await decodeBuffers(gltf.buffers, path.dirname(url));
 
   // get the default scene
   const scene = gltf.scenes[gltf.scene];
@@ -39,7 +41,7 @@ export async function load(url: string): Promise<HittableList> {
     const mesh: GLTFMesh = gltf.meshes[node.mesh];
 
     const triangleMesh = new HittableList();
-    triangleMesh.name = mesh.name;
+    triangleMesh.name = mesh.name ?? 'unknown';
 
     let translation = vec3.create();
     let rotation = quat.create();
@@ -178,11 +180,18 @@ export async function load(url: string): Promise<HittableList> {
   return triangleMeshArray;
 }
 
-async function decodeBuffers(buffers: GLTFBuffer[]): Promise<ArrayBuffer[]> {
+async function decodeBuffers(buffers: GLTFBuffer[], dirname: string): Promise<ArrayBuffer[]> {
   const arrayBuffers: ArrayBuffer[] = [];
 
   for (const buffer of buffers) {
-    const response = await fetch(buffer.uri);
+    let url = buffer.uri;
+
+    // check if it is relative
+    if (!isAbsoluteUrl(url) && !isDataUrl(url)) {
+      url = path.join(dirname, url);
+    }
+
+    const response = await fetch(url);
     arrayBuffers.push(await response.arrayBuffer());
   }
 
