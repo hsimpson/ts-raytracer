@@ -18,7 +18,7 @@ export class RaytracerGPU extends RaytracerBase {
   private _initialized = false;
 
   private _colorTextureView: GPUTextureView;
-  private _colorAttachment: GPURenderPassColorAttachmentDescriptor;
+  private _colorAttachment: GPURenderPassColorAttachmentOld;
   private _swapchain: GPUSwapChain;
 
   public constructor(rayTracerGPUOptions: RayTracerGPUOptions) {
