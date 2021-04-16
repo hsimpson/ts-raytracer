@@ -4,6 +4,7 @@ import { vec3 } from 'gl-matrix';
 export enum ControllerCommands {
   START,
   STOP,
+  UPDATE,
   END,
 }
 
@@ -32,10 +33,17 @@ export interface ControllerStartMessage extends WorkerMessage {
     world: JsonObject;
     camera: JsonObject;
     background: vec3;
+    tileSize: number;
   };
 }
 
 export interface ControllerEndMessage extends WorkerMessage {
+  data: {
+    imageArray: Uint8ClampedArray;
+  };
+}
+
+export interface ControllerUpdateMessage extends WorkerMessage {
   data: {
     imageArray: Uint8ClampedArray;
   };
@@ -49,10 +57,12 @@ export interface ComputeStartMessage extends WorkerMessage {
     background: vec3;
     imageWidth: number;
     imageHeight: number;
-    scanlineCount: number;
-    startLine: number;
     samplesPerPixel: number;
     maxBounces: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
   };
 }
 
@@ -60,8 +70,10 @@ export interface ComputeEndMessage extends WorkerMessage {
   data: {
     workerId: number;
     pixelArray: Uint8ClampedArray;
-    scanlineCount: number;
-    startLine: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
   };
 }
 

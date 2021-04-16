@@ -80,6 +80,14 @@ const Gui = (): React.ReactElement => {
       ) : (
         ''
       )}
+      <NumberInput
+        label="Tile size (px):"
+        size={5}
+        min={8}
+        max={512}
+        value={raytracerState.tileSize}
+        onValueChange={(tileSize) => setRaytracerState({ ...raytracerState, tileSize })}
+      />
       <CheckBox
         label="WebGPU-compute"
         checked={raytracerState.webGPUenabled}

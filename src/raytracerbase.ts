@@ -9,6 +9,7 @@ export interface RayTracerBaseOptions {
   scene: number;
   download: boolean;
   addStatsToImage: boolean;
+  tileSize: number;
 }
 
 export abstract class RaytracerBase {
@@ -116,5 +117,9 @@ export abstract class RaytracerBase {
 
   public set addStatsToImage(addStatsToImage: boolean) {
     this._rayTracerOptions.addStatsToImage = addStatsToImage;
+  }
+
+  public set tileSize(tileSize: number) {
+    this._rayTracerOptions.tileSize = tileSize;
   }
 }
