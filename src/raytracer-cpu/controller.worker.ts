@@ -1,8 +1,9 @@
 import ComputeWorker from 'worker-loader!./compute.worker';
 import { Camera } from '../camera';
-import { deserialize, serialize } from '../serializing';
-import { DeserializerMap } from './deserializermap';
 import { HittableList } from '../hittables';
+import { deserialize, serialize } from '../serializing';
+import { ComputeTile, createComputeTiles } from '../tiles';
+import { DeserializerMap } from './deserializermap';
 import {
   ComputeCommands,
   ComputeEndMessage,
@@ -14,71 +15,47 @@ import {
   WorkerMessage,
 } from './workerinterfaces';
 
-interface WorkerTile {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const map = DeserializerMap;
 
 const _controllerCtx: Worker = self as never;
-let _array: Uint8ClampedArray;
-let _imageWidth: number;
-let _imageHeight: number;
-let _samplesPerPixel: number;
-let _maxBounces: number;
-let _tileSize: number;
 const _computeWorkers: Map<number, ComputeWorker> = new Map<number, ComputeWorker>();
-const _workerTiles: WorkerTile[] = [];
+let _pixelArray: Uint8ClampedArray;
 
 const start = (msg: ControllerStartMessage): void => {
-  _imageWidth = msg.data.imageWidth;
-  _imageHeight = msg.data.imageHeight;
-  _samplesPerPixel = msg.data.samplesPerPixel;
-  _maxBounces = msg.data.maxBounces;
-  _tileSize = msg.data.tileSize;
+  const imageWidth = msg.data.imageWidth;
+  const imageHeight = msg.data.imageHeight;
+  const samplesPerPixel = msg.data.samplesPerPixel;
+  const maxBounces = msg.data.maxBounces;
+  const tileSize = msg.data.tileSize;
+  const computeTiles: ComputeTile[] = createComputeTiles(imageWidth, imageHeight, tileSize);
 
-  _array = new Uint8ClampedArray(_imageWidth * _imageHeight * 3);
+  _pixelArray = new Uint8ClampedArray(imageWidth * imageHeight * 3);
 
   const world = deserialize(HittableList, msg.data.world);
   const camera = deserialize(Camera, msg.data.camera);
-
-  // create the workerPositions
-  for (let y = 0; y < _imageHeight; y += _tileSize) {
-    for (let x = 0; x < _imageWidth; x += _tileSize) {
-      _workerTiles.push({
-        x,
-        y,
-        width: x + _tileSize < _imageWidth ? _tileSize : _imageWidth - x,
-        height: y + _tileSize < _imageHeight ? _tileSize : _imageHeight - y,
-      });
-    }
-  }
 
   const workerIsDone = (msg: ComputeEndMessage): void => {
     const workerArray = msg.data.pixelArray;
 
     let dataOffset = 0;
-    let imageOffset = (msg.data.y * _imageWidth + msg.data.x) * 3;
+    let imageOffset = (msg.data.y * imageWidth + msg.data.x) * 3;
     // let imageOffset = (_imageHeight - (msg.data.y + 1)) * _imageWidth * 3;
     // let imageOffset = _imageHeight - (msg.data.y*)
 
     for (let j = 0; j < msg.data.height; j++) {
       for (let i = 0; i < msg.data.width; i++) {
-        _array[imageOffset++] = workerArray[dataOffset++];
-        _array[imageOffset++] = workerArray[dataOffset++];
-        _array[imageOffset++] = workerArray[dataOffset++];
+        _pixelArray[imageOffset++] = workerArray[dataOffset++];
+        _pixelArray[imageOffset++] = workerArray[dataOffset++];
+        _pixelArray[imageOffset++] = workerArray[dataOffset++];
       }
-      imageOffset += (_imageWidth - msg.data.width) * 3;
+      imageOffset += (imageWidth - msg.data.width) * 3;
     }
 
     const controllerUpdateMessage: ControllerUpdateMessage = {
       cmd: ControllerCommands.UPDATE,
       data: {
-        imageArray: _array,
+        imageArray: _pixelArray,
       },
     };
     _controllerCtx.postMessage(controllerUpdateMessage);
@@ -92,7 +69,7 @@ const start = (msg: ControllerStartMessage): void => {
         const endMsg = workerMsg as ComputeEndMessage;
         workerIsDone(endMsg);
 
-        if (_workerTiles.length) {
+        if (computeTiles.length) {
           startComputeWorker(endMsg.data.workerId);
         } else {
           stopWorker(endMsg.data.workerId); // no more tiles to render
@@ -107,7 +84,7 @@ const start = (msg: ControllerStartMessage): void => {
 
   const startComputeWorker = (workerId: number): void => {
     const worker = _computeWorkers.get(workerId);
-    const tile = _workerTiles.shift();
+    const tile = computeTiles.shift();
 
     const computeStartMessage: ComputeStartMessage = {
       cmd: ComputeCommands.START,
@@ -116,10 +93,10 @@ const start = (msg: ControllerStartMessage): void => {
         camera: serialize(Camera, camera),
         world: serialize(HittableList, world),
         background: msg.data.background,
-        imageWidth: _imageWidth,
-        imageHeight: _imageHeight,
-        samplesPerPixel: _samplesPerPixel,
-        maxBounces: _maxBounces,
+        imageWidth: imageWidth,
+        imageHeight: imageHeight,
+        samplesPerPixel: samplesPerPixel,
+        maxBounces: maxBounces,
         ...tile,
       },
     };
@@ -134,7 +111,7 @@ const start = (msg: ControllerStartMessage): void => {
 
     startComputeWorker(workerId);
 
-    if (_workerTiles.length === 0) {
+    if (computeTiles.length === 0) {
       break;
     }
   }
@@ -148,7 +125,7 @@ const stopWorker = (id: number): void => {
     const controllerEndMessage: ControllerEndMessage = {
       cmd: ControllerCommands.END,
       data: {
-        imageArray: _array,
+        imageArray: _pixelArray,
       },
     };
     _controllerCtx.postMessage(controllerEndMessage);
@@ -167,7 +144,7 @@ const stop = (): void => {
   const controllerEndMessage: ControllerEndMessage = {
     cmd: ControllerCommands.END,
     data: {
-      imageArray: _array,
+      imageArray: _pixelArray,
     },
   };
   _controllerCtx.postMessage(controllerEndMessage);
