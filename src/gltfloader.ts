@@ -152,8 +152,8 @@ export async function load(url: string): Promise<HittableList> {
 
           // // TODO: material
           // triangle.material = WHITEMATERIAL;
-          // triangle.material = NORMALMATERIAL;
-          triangle.material = raytracingMaterial[primitive.material];
+          triangle.material = NORMALMATERIAL;
+          // triangle.material = raytracingMaterial[primitive.material];
 
           if (node.translation) {
             triangle.transform.translate(translation);

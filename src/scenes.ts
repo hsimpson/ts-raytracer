@@ -369,8 +369,11 @@ async function gltfScene(useBVH: boolean): Promise<{ world: HittableList; camera
 
   // const w = world.objects[0] as HittableList;
 
-  const lookFrom: vec3 = [7, 2, 0];
-  const lookAt: vec3 = [10.8, 0.3, -1.2];
+  // sponza
+  const lookFrom: vec3 = [-10, 1.63, -0.28];
+  const lookAt: vec3 = [9, 1.45, -0.28];
+
+  // others
   // const lookFrom: vec3 = [2, 1.5, 6];
   // const lookAt: vec3 = [0, 0, 0];
 
