@@ -93,10 +93,10 @@ void main() {
   Ray   r          = cameraGetRay(u, v);
   vec3  pixelColor = rayColor(r, params.background, bounces);
 
-  const uint pixelIndex                     = index.y * uint(params.width) + index.x;
-  const vec3 accumulatedColor               = accumulationBuffer.pixels[pixelIndex].rgb + pixelColor;
-  pixelColor                                = accumulatedColor * (1.0 / params.currentSample);
-  accumulationBuffer.pixels[pixelIndex].rgb = accumulatedColor;
+  const uint pixelIndex                 = index.y * uint(params.width) + index.x;
+  const vec3 accumulatedColor           = accumulationBuffer.pixels[pixelIndex].rgb + pixelColor;
+  pixelColor                            = accumulatedColor * (1.0 / params.currentSample);
+  accumulationBuffer.pixels[pixelIndex] = vec4(accumulatedColor, 1.0);
 
   // gamma correction 2.0
   // pixelColor = sqrt(pixelColor);

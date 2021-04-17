@@ -59,7 +59,7 @@ export class RaytracerGPU extends RaytracerBase {
 
     this._colorAttachment = {
       attachment: null,
-      loadValue: { r: 0, g: 0, b: 0, a: 1 },
+      loadValue: { r: 0, g: 0, b: 0, a: 0 },
       storeOp: 'store',
     };
 
@@ -204,9 +204,7 @@ export class RaytracerGPU extends RaytracerBase {
 
       WebGPUContext.createContext(device, queue);
 
-      const context: GPUCanvasContext = (this._rayTracerOptions.canvas.getContext(
-        'gpupresent'
-      ) as unknown) as GPUCanvasContext;
+      const context: GPUCanvasContext = this._rayTracerOptions.canvas.getContext('gpupresent');
       const swapChainDesc: GPUSwapChainDescriptor = {
         device,
         format: 'bgra8unorm',
