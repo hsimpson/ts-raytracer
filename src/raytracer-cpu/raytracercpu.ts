@@ -9,6 +9,7 @@ import {
   ControllerEndMessage,
   ControllerStartMessage,
   ControllerStopMessage,
+  ControllerUpdateMessage,
   WorkerMessage,
 } from './workerinterfaces';
 
@@ -26,22 +27,30 @@ export class RaytracerCPU extends RaytracerBase {
     this._controllerWorker = new ControllerWorker();
   }
 
-  private async onControllerFinshed(msg: ControllerEndMessage): Promise<void> {
-    this._isRunning = false;
+  private updateImage(imageArray: Uint8ClampedArray): void {
     const imageData = this._context2D.createImageData(
       this._rayTracerOptions.imageWidth,
       this._rayTracerOptions.imageHeight
     );
 
     let j = 0;
-    for (let i = 0; i < imageData.data.length; ) {
-      imageData.data[i++] = msg.data.imageArray[j++];
-      imageData.data[i++] = msg.data.imageArray[j++];
-      imageData.data[i++] = msg.data.imageArray[j++];
-      imageData.data[i++] = 255;
-    }
+    // for (let y = 0; y < this._rayTracerOptions.imageHeight; y++) {
+    for (let y = this._rayTracerOptions.imageHeight - 1; y >= 0; y--) {
+      for (let x = 0; x < this._rayTracerOptions.imageWidth; x++) {
+        const imageIndex = (y * this._rayTracerOptions.imageWidth + x) * 4;
+        // const arrayIndex = (y * this._rayTracerOptions.imageWidth + x) * 3;
 
+        imageData.data[imageIndex] = imageArray[j++];
+        imageData.data[imageIndex + 1] = imageArray[j++];
+        imageData.data[imageIndex + 2] = imageArray[j++];
+        imageData.data[imageIndex + 3] = imageArray[j++];
+      }
+    }
     this._context2D.putImageData(imageData, 0, 0);
+  }
+
+  private async onControllerFinshed(): Promise<void> {
+    this._isRunning = false;
 
     const duration = performance.now() - this._startTime;
     const cores = (this._rayTracerOptions as RayTracerCPUOptions).numOfWorkers;
@@ -60,9 +69,11 @@ export class RaytracerCPU extends RaytracerBase {
     const msg = event.data as WorkerMessage;
     switch (msg.cmd as ControllerCommands) {
       case ControllerCommands.END:
-        await this.onControllerFinshed(msg as ControllerEndMessage);
+        await this.onControllerFinshed();
         break;
-
+      case ControllerCommands.UPDATE:
+        this.updateImage((msg as ControllerUpdateMessage).data.imageArray);
+        break;
       default:
         break;
     }
@@ -105,6 +116,7 @@ export class RaytracerCPU extends RaytracerBase {
         world: serialize(HittableList, world),
         camera: serialize(Camera, camera),
         background: cameraOptions.background,
+        tileSize: this._rayTracerOptions.tileSize,
       },
     };
 

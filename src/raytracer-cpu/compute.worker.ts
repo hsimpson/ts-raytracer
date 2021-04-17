@@ -10,43 +10,36 @@ import { ComputeCommands, ComputeEndMessage, ComputeStartMessage, WorkerMessage 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const map = DeserializerMap;
 const _controllerCtx: Worker = self as never;
-let _id: number;
+// let _id: number;
 
 function start(msg: ComputeStartMessage): void {
-  _id = msg.data.workerId;
+  const workerId = msg.data.workerId;
+  const x = msg.data.x;
+  const y = msg.data.y;
+  const width = msg.data.width;
+  const height = msg.data.height;
+
+  console.log(`worker[${workerId}]: start(x:${x}, y:${y}, w:${width}, h:${height})`);
   const camera = deserialize(Camera, msg.data.camera);
   const world = deserialize(HittableList, msg.data.world);
   const background = msg.data.background;
   const imageWidth = msg.data.imageWidth;
   const imageHeight = msg.data.imageHeight;
-  const scanlineCount = msg.data.scanlineCount;
-  const startLine = msg.data.startLine;
   const spp = msg.data.samplesPerPixel;
   const maxBounces = msg.data.maxBounces;
 
-  console.log(`worker[${_id}] startLine: ${startLine}`);
-  console.log(`worker[${_id}] linecount: ${scanlineCount}`);
-
-  const dataArray = new Uint8ClampedArray(imageWidth * scanlineCount * 3);
+  const dataArray = new Uint8ClampedArray(width * height * 4);
 
   let offset = 0;
-  const endLine = startLine + 1 - scanlineCount;
-  let linesToCalc = scanlineCount;
 
-  // const sampleOffsets = [];
-  // for (let sample = 0; sample < spp; sample++) {
-  //   sampleOffsets.push(randomNumber());
-  // }
-
-  for (let j = startLine; j >= endLine; j--) {
-    console.log(`worker[${_id}] scanlines remaining ${linesToCalc--}`);
-    for (let i = 0; i < imageWidth; i++) {
+  for (let j = 0; j < height; j++) {
+    for (let i = 0; i < width; i++) {
       const pixelColor = vec3.create();
 
       for (let s = 0; s < spp; s++) {
         // const rnd = sampleOffsets[s];
-        const u = (i + randomNumber()) / (imageWidth - 1);
-        const v = (j + randomNumber()) / (imageHeight - 1);
+        const u = (i + x + randomNumber()) / (imageWidth - 1);
+        const v = (j + y + randomNumber()) / (imageHeight - 1);
         // const u = (i + rnd) / (imageWidth - 1);
         // const v = (j + rnd) / (imageHeight - 1);
 
@@ -55,19 +48,22 @@ function start(msg: ComputeStartMessage): void {
       }
 
       writeColor(dataArray, offset, pixelColor, spp);
-      offset += 3;
+      offset += 4;
     }
   }
-
   const computeEndMessage: ComputeEndMessage = {
     cmd: ComputeCommands.END,
     data: {
-      workerId: _id,
+      workerId: workerId,
       pixelArray: dataArray,
-      startLine,
-      scanlineCount,
+      x,
+      y,
+      width,
+      height,
     },
   };
+
+  console.log(`worker[${msg.data.workerId}]: finish`);
   _controllerCtx.postMessage(computeEndMessage);
 }
 

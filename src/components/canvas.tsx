@@ -26,6 +26,7 @@ const Canvas = (): React.ReactElement => {
       scene: raytracerState.scene,
       download: raytracerState.download,
       addStatsToImage: raytracerState.addStatsToImage,
+      tileSize: raytracerState.tileSize,
     };
 
     // create CPU raytracer
@@ -57,6 +58,7 @@ const Canvas = (): React.ReactElement => {
     raytracer.scene = raytracerState.scene;
     raytracer.download = raytracerState.download;
     raytracer.addStatsToImage = raytracerState.addStatsToImage;
+    raytracer.tileSize = raytracerState.tileSize;
 
     if (raytracerRunningState.isRunning && !raytracer.isRunning) {
       void raytracer.start(onRayTracerDone);
