@@ -43,7 +43,7 @@ export class RaytracerCPU extends RaytracerBase {
         imageData.data[imageIndex] = imageArray[j++];
         imageData.data[imageIndex + 1] = imageArray[j++];
         imageData.data[imageIndex + 2] = imageArray[j++];
-        imageData.data[imageIndex + 3] = 255;
+        imageData.data[imageIndex + 3] = imageArray[j++];
       }
     }
     this._context2D.putImageData(imageData, 0, 0);

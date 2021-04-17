@@ -30,7 +30,7 @@ const start = (msg: ControllerStartMessage): void => {
   const tileSize = msg.data.tileSize;
   const computeTiles: ComputeTile[] = createComputeTiles(imageWidth, imageHeight, tileSize);
 
-  _pixelArray = new Uint8ClampedArray(imageWidth * imageHeight * 3);
+  _pixelArray = new Uint8ClampedArray(imageWidth * imageHeight * 4);
 
   const world = deserialize(HittableList, msg.data.world);
   const camera = deserialize(Camera, msg.data.camera);
@@ -39,7 +39,7 @@ const start = (msg: ControllerStartMessage): void => {
     const workerArray = msg.data.pixelArray;
 
     let dataOffset = 0;
-    let imageOffset = (msg.data.y * imageWidth + msg.data.x) * 3;
+    let imageOffset = (msg.data.y * imageWidth + msg.data.x) * 4;
     // let imageOffset = (_imageHeight - (msg.data.y + 1)) * _imageWidth * 3;
     // let imageOffset = _imageHeight - (msg.data.y*)
 
@@ -48,8 +48,9 @@ const start = (msg: ControllerStartMessage): void => {
         _pixelArray[imageOffset++] = workerArray[dataOffset++];
         _pixelArray[imageOffset++] = workerArray[dataOffset++];
         _pixelArray[imageOffset++] = workerArray[dataOffset++];
+        _pixelArray[imageOffset++] = workerArray[dataOffset++];
       }
-      imageOffset += (imageWidth - msg.data.width) * 3;
+      imageOffset += (imageWidth - msg.data.width) * 4;
     }
 
     const controllerUpdateMessage: ControllerUpdateMessage = {

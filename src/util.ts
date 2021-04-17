@@ -90,6 +90,7 @@ export function writeColor(array: Uint8ClampedArray, offset: number, color: vec3
   array[offset++] = r * 255;
   array[offset++] = g * 255;
   array[offset++] = b * 255;
+  array[offset++] = 255;
 }
 
 export function lengthSquared(v: vec3): number {

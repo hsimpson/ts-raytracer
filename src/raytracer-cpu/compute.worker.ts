@@ -28,7 +28,7 @@ function start(msg: ComputeStartMessage): void {
   const spp = msg.data.samplesPerPixel;
   const maxBounces = msg.data.maxBounces;
 
-  const dataArray = new Uint8ClampedArray(width * height * 3);
+  const dataArray = new Uint8ClampedArray(width * height * 4);
 
   let offset = 0;
 
@@ -48,7 +48,7 @@ function start(msg: ComputeStartMessage): void {
       }
 
       writeColor(dataArray, offset, pixelColor, spp);
-      offset += 3;
+      offset += 4;
     }
   }
   const computeEndMessage: ComputeEndMessage = {
