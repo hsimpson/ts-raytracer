@@ -1,4 +1,15 @@
-import { Box, BVHNode, ConstantMedium, MovingSphere, Sphere, Triangle, XYRect, XZRect, YZRect } from '../hittables';
+import {
+  AABB,
+  Box,
+  BVHNode,
+  ConstantMedium,
+  MovingSphere,
+  Sphere,
+  Triangle,
+  XYRect,
+  XZRect,
+  YZRect,
+} from '../hittables';
 import {
   DielectricMaterial,
   DiffuseLight,
@@ -9,7 +20,6 @@ import {
   UVMaterial,
 } from '../material';
 import { CheckerTexture, ImageTexture, NoiseTexture, Perlin, SolidColor } from '../textures';
-import { AABB } from './aabb';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const DeserializerMap = {

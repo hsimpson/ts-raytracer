@@ -1,10 +1,10 @@
 import { vec2, vec3 } from 'gl-matrix';
 import { Material } from '../material';
-import { AABB } from '../raytracer-cpu/aabb';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
 import { Ray } from '../raytracer-cpu/ray';
 import { Transform } from '../raytracer-cpu/transform';
 import { serializable } from '../serializing';
+import { AABB } from './aabb';
 import { Hittable } from './hittable';
 
 function avgVector3(vectors: vec3[]): vec3 {

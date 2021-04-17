@@ -1,8 +1,8 @@
 import { Material } from '../material';
-import { AABB } from '../raytracer-cpu/aabb';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
 import { Ray } from '../raytracer-cpu/ray';
 import { Transform } from '../raytracer-cpu/transform';
+import { AABB } from './aabb';
 // import { logMatrix } from '../util';
 
 export abstract class Hittable {

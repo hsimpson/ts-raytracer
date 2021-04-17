@@ -1,6 +1,6 @@
 import { serializable } from '../serializing';
 import { vec3 } from 'gl-matrix';
-import { Ray } from './ray';
+import { Ray } from '../raytracer-cpu/ray';
 
 @serializable
 export class AABB {

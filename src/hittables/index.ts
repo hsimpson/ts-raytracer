@@ -1,3 +1,4 @@
+export * from './aabb';
 export * from './aarect';
 export * from './box';
 export * from './bvhnode';

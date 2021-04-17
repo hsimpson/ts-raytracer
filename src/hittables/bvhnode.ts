@@ -1,10 +1,10 @@
+import { HitRecord } from '../raytracer-cpu/hitrecord';
+import { Ray } from '../raytracer-cpu/ray';
 import { serializable } from '../serializing';
 import { randomInt, sortArrayRange } from '../util';
-import { AABB } from '../raytracer-cpu/aabb';
-import { HitRecord } from '../raytracer-cpu/hitrecord';
+import { AABB } from './aabb';
 import { Hittable } from './hittable';
 import { HittableList } from './hittablelist';
-import { Ray } from '../raytracer-cpu/ray';
 
 let _id = 0;
 
