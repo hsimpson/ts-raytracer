@@ -3,7 +3,11 @@ import { atom } from 'recoil';
 export const RaytracerProperties = atom({
   key: 'raytracerProperties',
   default: {
-    // UHD
+    // 8K UHD
+    // imageWidth: 7680,
+    // imageHeight: 4320,
+
+    // 4k UHD
     // imageWidth: 3840,
     // imageHeight: 2160,
 
@@ -11,16 +15,16 @@ export const RaytracerProperties = atom({
     // imageWidth: 2560,
     // imageHeight: 1440,
 
-    // Full HD
+    // 1080p Full HD
     // imageWidth: 1920,
     // imageHeight: 1080,
 
-    // HD
-    // imageWidth: 1280,
-    // imageHeight: 720,
+    // 720p HD ready
+    imageWidth: 1280,
+    imageHeight: 720,
 
-    imageWidth: 1024,
-    imageHeight: 576,
+    // imageWidth: 1024,
+    // imageHeight: 576,
 
     // imageWidth: 640,
     // imageHeight: 360,
@@ -42,7 +46,7 @@ export const RaytracerProperties = atom({
     scene: 0,
     // scene: 4,
     // scene: 8,
-    tileSize: 32,
+    tileSize: 64,
   },
 });
 

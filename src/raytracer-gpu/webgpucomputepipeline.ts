@@ -5,14 +5,19 @@ import { RaytracingBuffers } from './raytracingbuffers';
 import { WebGPUBuffer } from './webgpubuffer';
 import { WebGPUContext } from './webgpucontext';
 import { WebGPUPipelineBase } from './webgpupipelinebase';
+import { ComputeTile } from '../tiles';
 
 interface ComputeUniformParams {
   background: vec3;
-  width: number;
-  height: number;
+  tileOffsetX: number;
+  tileOffsetY: number;
+  imageWidth: number;
+  imageHeight: number;
   currentSample: number;
   maxBounces: number;
-  randomSeed: number;
+  padding_0: number;
+  padding_1: number;
+  padding_2: number;
 }
 
 interface WebGPUComputePiplineOptions {
@@ -52,7 +57,7 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
   public constructor(options: WebGPUComputePiplineOptions) {
     super();
     this._options = options;
-    this._options.uniformParams.randomSeed = Math.random();
+    // this._options.uniformParams.randomSeed = Math.random();
     this._options.uniformParams.currentSample = 0;
 
     this._raytracingBuffers = new RaytracingBuffers(this._options.world);
@@ -65,7 +70,10 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
     this._initialized = true;
 
     const pixelBufferSize =
-      this._options.uniformParams.width * this._options.uniformParams.height * 4 * Float32Array.BYTES_PER_ELEMENT;
+      this._options.uniformParams.imageWidth *
+      this._options.uniformParams.imageHeight *
+      4 *
+      Float32Array.BYTES_PER_ELEMENT;
 
     //COPY_SRC is needed because the pixel buffer is read after each compute call
     this._pixelBuffer.create(pixelBufferSize, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
@@ -168,10 +176,11 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
     this._texturesBuffer.createWithArrayMapped(this._raytracingBuffers.textureBuffer(), GPUBufferUsage.STORAGE);
   }
 
-  public updateUniformBuffer(): void {
+  public updateUniformBuffer(sample: number, tile: ComputeTile): void {
     if (this._initialized) {
-      this._options.uniformParams.randomSeed = Math.random();
-      this._options.uniformParams.currentSample++;
+      this._options.uniformParams.currentSample = sample;
+      this._options.uniformParams.tileOffsetX = tile.x;
+      this._options.uniformParams.tileOffsetY = tile.y;
       const uniformArray = this.getParamsArray(this._options.uniformParams);
       WebGPUContext.queue.writeBuffer(this._computeParamsUniformBuffer.gpuBuffer, 0, uniformArray.buffer);
     }

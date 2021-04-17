@@ -17,11 +17,15 @@ layout(local_size_x = LOCAL_SIZE, local_size_y = LOCAL_SIZE) in;
 
 layout(set = 0, binding = 0) uniform ComputeParams {
   vec3  background;
+  float tileOffsetX;
+  float tileOffsetY;
   float width;
   float height;
   float currentSample;
   float maxBounces;
-  float randomSeed;
+  float padding_0;
+  float padding_1;
+  float padding_2;
 }
 params;
 
@@ -67,7 +71,10 @@ vec3 rayColor(Ray ray, vec3 background, uint depth) {
 }
 
 void main() {
-  uvec3 index = gl_GlobalInvocationID;
+  // uvec3 index = gl_GlobalInvocationID;
+  uvec2 index = gl_GlobalInvocationID.xy;
+  index.x += uint(params.tileOffsetX);
+  index.y += uint(params.tileOffsetY);
 
   // float j = params.height - (floor(float(index.x) / params.width));
   // float i = mod(float(index.y), params.width);
@@ -75,7 +82,7 @@ void main() {
   float j = params.height - index.y;
 
   //initSeed(index * 1099087573U);
-  initSeed(index.x * index.y * uint(floor(params.randomSeed * 1000000000U)));
+  initSeed(index.x * index.y * uint(params.currentSample * 100000U));
 
   const uint bounces = uint(params.maxBounces);
 
