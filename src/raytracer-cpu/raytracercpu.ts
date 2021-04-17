@@ -35,7 +35,7 @@ export class RaytracerCPU extends RaytracerBase {
 
     let j = 0;
     // for (let y = 0; y < this._rayTracerOptions.imageHeight; y++) {
-    for (let y = this._rayTracerOptions.imageHeight; y >= 0; y--) {
+    for (let y = this._rayTracerOptions.imageHeight - 1; y >= 0; y--) {
       for (let x = 0; x < this._rayTracerOptions.imageWidth; x++) {
         const imageIndex = (y * this._rayTracerOptions.imageWidth + x) * 4;
         // const arrayIndex = (y * this._rayTracerOptions.imageWidth + x) * 3;
