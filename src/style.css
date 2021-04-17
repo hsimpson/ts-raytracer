@@ -67,6 +67,7 @@ body {
   max-height: 100%;
   border: 2px solid red;
   display: none;
+  background: repeating-conic-gradient(#525252 0% 25%, #cfcfcf 0% 50%) 50% / 16px 16px;
 }
 
 .canvas.enabled {
