@@ -143,6 +143,13 @@ export class RaytracerGPU extends RaytracerBase {
         };
 
         window.requestAnimationFrame(frame);
+
+        // for (const tile of computeTiles) {
+        //   for (let sample = 0; sample < this._rayTracerOptions.samplesPerPixel; sample++) {
+        //     this.compute2(computePipeline, renderPipeline, sample, tile);
+        //   }
+        // }
+        // resolve();
       });
     };
 
