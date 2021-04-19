@@ -1,4 +1,4 @@
-import { quat, vec2, vec3 } from 'gl-matrix';
+import { quat, vec2, vec3, vec4 } from 'gl-matrix';
 import { GLTF, GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
 import { HittableList, Triangle } from './hittables';
 import { LambertianMaterial, Material, NormalMaterial } from './material';
@@ -30,7 +30,10 @@ export async function load(url: string): Promise<HittableList> {
 
   // create materials
   for (const material of materials) {
-    const baseColor = material.pbrMetallicRoughness.baseColorFactor;
+    let baseColor = material.pbrMetallicRoughness.baseColorFactor;
+    if (!baseColor) {
+      baseColor = vec4.fromValues(0.5, 0.5, 0.5, 1.0);
+    }
     const lamberMat = new LambertianMaterial([baseColor[0], baseColor[1], baseColor[2]]);
     raytracingMaterial.push(lamberMat);
   }
