@@ -280,7 +280,7 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
 
     const pipelineDesc: GPUComputePipelineDescriptor = {
       layout,
-      computeStage,
+      compute: computeStage,
     };
 
     this._pipeline = WebGPUContext.device.createComputePipeline(pipelineDesc);

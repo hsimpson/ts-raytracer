@@ -19,7 +19,7 @@ export class RaytracerGPU extends RaytracerBase {
   private _initialized = false;
 
   private _colorTextureView: GPUTextureView;
-  private _colorAttachment: GPURenderPassColorAttachmentOld;
+  private _colorAttachment: GPURenderPassColorAttachmentNew;
   private _swapchain: GPUSwapChain;
 
   public constructor(rayTracerGPUOptions: RayTracerGPUOptions) {
@@ -58,7 +58,7 @@ export class RaytracerGPU extends RaytracerBase {
     this._colorTextureView = colorTexture.createView();
 
     this._colorAttachment = {
-      attachment: null,
+      view: null,
       loadValue: { r: 0, g: 0, b: 0, a: 0 },
       storeOp: 'store',
     };
@@ -281,7 +281,7 @@ export class RaytracerGPU extends RaytracerBase {
     // render pass
     {
       // renderPipeLine.updateUniformBuffer(sample);
-      this._colorAttachment.attachment = this._swapchain.getCurrentTexture().createView();
+      this._colorAttachment.view = this._swapchain.getCurrentTexture().createView();
       const renderPassDesc: GPURenderPassDescriptor = {
         colorAttachments: [this._colorAttachment],
         //depthStencilAttachment: this._depthAttachment,
