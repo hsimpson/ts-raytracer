@@ -7,6 +7,7 @@ import { Hittable } from './hittable';
 import { HittableList } from './hittablelist';
 
 let _id = 0;
+let _level = 0;
 
 @serializable
 export class BVHNode extends Hittable {
@@ -14,16 +15,41 @@ export class BVHNode extends Hittable {
   private left: Hittable;
   private right: Hittable;
   public readonly id = _id;
+  public level: number;
 
   public constructor() {
     super();
-    //console.log(`BVH-Node ${this.id}`);
+    // console.log(`BVH-Node ${this.id}`);
     _id++;
   }
 
   public static createFromHitableList(list: HittableList, time0: number, time1: number): BVHNode {
+    _id = 0;
+    _level = 0;
+    console.log('BVH starting...');
+    const startTime = window.performance.now();
     const node = new BVHNode();
-    node.init(list.objects, 0, list.objects.length, time0, time1);
+    node.level = _level;
+
+    const flatList = new HittableList();
+    const fillFlatList = (list: HittableList): void => {
+      for (const object of list.objects) {
+        if (object instanceof HittableList) {
+          fillFlatList(object);
+        } else {
+          flatList.add(object);
+        }
+      }
+    };
+    fillFlatList(list);
+    console.log(`BVH objects: ${flatList.objects.length}`);
+
+    // node.init(list.objects, 0, list.objects.length, time0, time1);
+    node.init(flatList.objects, 0, flatList.objects.length, time0, time1);
+
+    console.log(`BVH finish: ${window.performance.now() - startTime}`);
+    console.log(`BVH nodes: ${_id}`);
+    console.log(`BVH levels: ${_level}`);
     return node;
   }
 
@@ -58,8 +84,11 @@ export class BVHNode extends Hittable {
     } else {
       sortArrayRange(objects, start, end, comparator);
       const mid = start + Math.floor(objectSpan / 2);
+      const nextLevel = ++_level;
       this.left = BVHNode.createFromObjects(objects, start, mid, time0, time1);
       this.right = BVHNode.createFromObjects(objects, mid, end, time0, time1);
+      (this.left as BVHNode).level = nextLevel;
+      (this.right as BVHNode).level = nextLevel;
     }
 
     const boxLeft = new AABB();
@@ -70,12 +99,12 @@ export class BVHNode extends Hittable {
     }
     this.box = AABB.surroundingBox(boxLeft, boxRight);
 
-    const leftIsBVHNode = this.left instanceof BVHNode ? `BVHNode-${this.left.id}` : '';
-    const rightIsBVHNode = this.right instanceof BVHNode ? `BVHNode-${this.right.id}` : '';
+    // const leftIsBVHNode = this.left instanceof BVHNode ? `BVHNode-${this.left.id}` : '';
+    // const rightIsBVHNode = this.right instanceof BVHNode ? `BVHNode-${this.right.id}` : '';
 
-    console.log(`BVHNode-${this.id}: ${this.box.logBox()}`);
-    console.log(`  Left(${leftIsBVHNode}): ${boxLeft.logBox()}`);
-    console.log(`  Right(${rightIsBVHNode}): ${boxRight.logBox()}`);
+    // console.log(`BVHNode-${this.id}: ${this.box.logBox()}`);
+    // console.log(`  Left(${leftIsBVHNode}): ${boxLeft.logBox()}`);
+    // console.log(`  Right(${rightIsBVHNode}): ${boxRight.logBox()}`);
   }
 
   // public hit(r: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {

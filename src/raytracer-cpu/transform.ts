@@ -22,6 +22,10 @@ export class Transform {
     return this._normalMatrix;
   }
 
+  public get isTransformed(): boolean {
+    return this._isTransformed;
+  }
+
   public transformRay(ray: Ray): Ray {
     if (!this._isTransformed) {
       return ray;
@@ -74,6 +78,14 @@ export class Transform {
     tempQuat = quat.fromEuler(tempQuat, angleX, angelY, angleZ);
     this.rotateQuat(tempQuat);
   }
+
+  // public transformVec3(v: vec3): vec3 {
+  //   if(!this._isTransformed) {
+  //     return v;
+  //   }
+
+  //   return vec3.transformMat4(vec3.create(), v, this._objectToWorldMatrix);
+  // }
 
   private _updateMatrix(): void {
     this._isTransformed = true;

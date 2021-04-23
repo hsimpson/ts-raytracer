@@ -6,32 +6,32 @@ import { Ray } from '../raytracer-cpu/ray';
 export class AABB {
   private _min: vec3;
   private _max: vec3;
-  private _size: vec3;
-  private _center: vec3;
+  // private _size: vec3;
+  // private _center: vec3;
 
   public constructor(min?: vec3, max?: vec3) {
     this._min = min ?? [0, 0, 0];
     this._max = max ?? [0, 0, 0];
 
-    this._size = [this._max[0] - this._min[0], this._max[1] - this._min[1], this._max[2] - this._min[2]];
+    // this._size = [this._max[0] - this._min[0], this._max[1] - this._min[1], this._max[2] - this._min[2]];
 
-    this._center = [
-      this._min[0] + this._size[0] / 2,
-      this._min[1] + this._size[1] / 2,
-      this._min[2] + this._size[2] / 2,
-    ];
+    // this._center = [
+    //   this._min[0] + this._size[0] / 2,
+    //   this._min[1] + this._size[1] / 2,
+    //   this._min[2] + this._size[2] / 2,
+    // ];
   }
 
   public copyTo(dest: AABB): void {
     dest._min = vec3.copy(vec3.create(), this._min);
     dest._max = vec3.copy(vec3.create(), this._max);
-    dest._size = vec3.copy(vec3.create(), this._size);
-    dest._center = vec3.copy(vec3.create(), this._center);
+    // dest._size = vec3.copy(vec3.create(), this._size);
+    // dest._center = vec3.copy(vec3.create(), this._center);
   }
 
-  public logBox(): string {
-    return `center: ${this._center.toString()} | size: ${this._size.toString()}`;
-  }
+  // public logBox(): string {
+  //   return `center: ${this._center.toString()} | size: ${this._size.toString()}`;
+  // }
 
   public get min(): vec3 {
     return this._min;

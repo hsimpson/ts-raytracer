@@ -106,116 +106,6 @@ export class Triangle extends Hittable {
     vec3.normalize(this.n2, this.n2);
   }
 
-  // public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
-  //   const transformedRay = this.transform.transformRay(ray);
-
-  //   const edge1 = vec3.create();
-  //   const edge2 = vec3.create();
-
-  //   const pvec = vec3.create();
-  //   const tvec = vec3.create();
-  //   const qvec = vec3.create();
-
-  //   let u, v, t;
-
-  //   /* find vectors for two edges sharing vert */
-  //   vec3.sub(edge1, this.v1, this.v0);
-  //   vec3.sub(edge2, this.v2, this.v0);
-
-  //   /* begin calculating determinant - also used to calculate U parameter */
-  //   vec3.cross(pvec, transformedRay.direction, edge2);
-
-  //   /*if determinant is near zero, ray lies in plane of triangle */
-  //   const det = vec3.dot(edge1, pvec);
-
-  //   if (this.doubleSided) {
-  //     if (det < EPSILON) {
-  //       return false;
-  //     }
-
-  //     /* calculate distance from vert0 to ray origin */
-  //     vec3.subtract(tvec, transformedRay.origin, this.v0);
-
-  //     /* calculate U parameter and test bounds */
-  //     u = vec3.dot(tvec, pvec);
-  //     if (u < 0.0 || u > det) {
-  //       return false;
-  //     }
-
-  //     /* prepare to test V parameter */
-  //     vec3.cross(qvec, tvec, edge1);
-
-  //     /* calculate V parameter and test bounds */
-  //     v = vec3.dot(transformedRay.direction, qvec);
-  //     if (v < 0.0 || u + v > det) {
-  //       return false;
-  //     }
-
-  //     /* calculate t, scale parameters, ray intersects triangle */
-  //     t = vec3.dot(edge2, qvec);
-  //     const invDet = 1.0 / det;
-
-  //     t *= invDet;
-  //     u *= invDet;
-  //     v *= invDet;
-  //   } else {
-  //     // non backface culling
-  //     if (det > -EPSILON && det < EPSILON) {
-  //       return false; // ray is parallel to the tri
-  //     }
-
-  //     const invDet = 1.0 / det;
-  //     /* calculate distance from vert0 to ray origin */
-  //     vec3.subtract(tvec, transformedRay.origin, this.v0);
-
-  //     /* calculate U parameter and test bounds */
-  //     u = vec3.dot(tvec, pvec) * invDet;
-  //     if (u < 0.0 || u > 1.0) {
-  //       return false;
-  //     }
-
-  //     /* prepare to test V parameter */
-  //     vec3.cross(qvec, tvec, edge1);
-  //     /* calculate V parameter and test bounds */
-  //     v = vec3.dot(transformedRay.direction, qvec) * invDet;
-  //     if (v < 0.0 || u + v > 1.0) {
-  //       return false;
-  //     }
-
-  //     /* calculate t, ray intersects triangle */
-  //     t = vec3.dot(edge2, qvec) * invDet;
-  //   }
-
-  //   if (t < EPSILON) {
-  //     return false;
-  //   }
-
-  //   rec.u = u;
-  //   rec.v = v;
-  //   rec.t = t;
-
-  //   rec.p = transformedRay.at(t);
-  //   rec.mat = this.material;
-  //   const w = 1.0 - u - v;
-
-  //   const n0 = vec3.create();
-  //   const n1 = vec3.create();
-  //   const n2 = vec3.create();
-  //   vec3.scale(n0, this.n0, w);
-  //   vec3.scale(n1, this.n1, u);
-  //   vec3.scale(n2, this.n2, v);
-  //   const normal = vec3.create();
-  //   vec3.add(normal, n0, n1);
-  //   vec3.add(normal, normal, n2);
-  //   vec3.normalize(normal, normal);
-
-  //   rec.setFaceNormal(transformedRay, [normal[0], normal[1], normal[2]]);
-
-  //   this.transform.transformRecord(transformedRay, rec);
-
-  //   return true;
-  // }
-
   /* from https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf */
   public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
     const transformedRay = this.transform.transformRay(ray);
@@ -312,22 +202,28 @@ export class Triangle extends Hittable {
     return true;
   }
 
-  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
-    const v0 = vec3.create();
-    const v1 = vec3.create();
-    const v2 = vec3.create();
+  public boundingBox(_t0: number, _t1: number, outputBox: AABB): boolean {
+    let v0: vec3;
+    let v1: vec3;
+    let v2: vec3;
 
-    vec3.transformMat4(v0, this.v0, this.transform.objectToWorld);
-    vec3.transformMat4(v1, this.v1, this.transform.objectToWorld);
-    vec3.transformMat4(v2, this.v2, this.transform.objectToWorld);
+    if (this.transform.isTransformed) {
+      v0 = vec3.transformMat4(vec3.create(), this.v0, this.transform.objectToWorld);
+      v1 = vec3.transformMat4(vec3.create(), this.v1, this.transform.objectToWorld);
+      v2 = vec3.transformMat4(vec3.create(), this.v2, this.transform.objectToWorld);
+    } else {
+      v0 = this.v0;
+      v1 = this.v1;
+      v2 = this.v2;
+    }
 
-    const minX = Math.min(v0[0], v1[0], v2[0]) - EPSILON;
-    const minY = Math.min(v0[1], v1[1], v2[1]) - EPSILON;
-    const minZ = Math.min(v0[2], v1[2], v2[2]) - EPSILON;
+    const minX = Math.min(v0[0], v1[0], v2[0]); /* - EPSILON*/
+    const minY = Math.min(v0[1], v1[1], v2[1]); /* - EPSILON*/
+    const minZ = Math.min(v0[2], v1[2], v2[2]); /* - EPSILON*/
 
-    const maxX = Math.max(v0[0], v1[0], v2[0]) + EPSILON;
-    const maxY = Math.max(v0[1], v1[1], v2[1]) + EPSILON;
-    const maxZ = Math.max(v0[2], v1[2], v2[2]) + EPSILON;
+    const maxX = Math.max(v0[0], v1[0], v2[0]); /* + EPSILON*/
+    const maxY = Math.max(v0[1], v1[1], v2[1]); /* + EPSILON*/
+    const maxZ = Math.max(v0[2], v1[2], v2[2]); /* + EPSILON*/
 
     const newOutputBox = new AABB([minX, minY, minZ], [maxX, maxY, maxZ]);
     newOutputBox.copyTo(outputBox);

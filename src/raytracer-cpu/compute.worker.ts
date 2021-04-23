@@ -19,7 +19,7 @@ function start(msg: ComputeStartMessage): void {
   const width = msg.data.width;
   const height = msg.data.height;
 
-  console.log(`worker[${workerId}]: start(x:${x}, y:${y}, w:${width}, h:${height})`);
+  // console.log(`worker[${workerId}]: start(x:${x}, y:${y}, w:${width}, h:${height})`);
   const camera = deserialize(Camera, msg.data.camera);
   const world = deserialize(HittableList, msg.data.world);
   const background = msg.data.background;
@@ -63,7 +63,7 @@ function start(msg: ComputeStartMessage): void {
     },
   };
 
-  console.log(`worker[${msg.data.workerId}]: finish`);
+  // console.log(`worker[${msg.data.workerId}]: finish`);
   _controllerCtx.postMessage(computeEndMessage);
 }
 

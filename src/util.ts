@@ -31,11 +31,7 @@ export function randomInt(min: number, max: number): number {
 }
 
 export function sortArrayRange<T>(array: T[], start: number, end: number, compareFn: (a: T, b: T) => number): void {
-  array = [].concat(
-    ...array.slice(0, start),
-    ...array.slice(start, start + end).sort(compareFn),
-    ...array.slice(start + end, array.length)
-  );
+  array = [].concat(...array.slice(0, start), ...array.slice(start, end).sort(compareFn), ...array.slice(end));
 }
 
 export async function sleep(ms: number): Promise<void> {
