@@ -26,6 +26,9 @@ export const RaytracerProperties = atom({
     // imageWidth: 1024,
     // imageHeight: 576,
 
+    // imageWidth: 512,
+    // imageHeight: 512,
+
     // imageWidth: 640,
     // imageHeight: 360,
 
@@ -41,8 +44,8 @@ export const RaytracerProperties = atom({
     // numOfWorkers: 1,
     webGPUavailable: false,
     webGPUenabled: false,
-    download: false,
-    addStatsToImage: false,
+    download: true,
+    addStatsToImage: true,
     scene: 0,
     // scene: 4,
     // scene: 8,
