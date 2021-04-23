@@ -40,9 +40,9 @@ export abstract class RaytracerBase {
   }
 
   protected getStats(duration: number): string {
-    const stats = `spp: ${this._rayTracerOptions.samplesPerPixel}, max-bounces: ${
+    const stats = `spp: ${this._rayTracerOptions.samplesPerPixel}, bounces: ${
       this._rayTracerOptions.maxBounces
-    }, rendertime: ${RaytracerBase.msToTimeString(duration)}`;
+    }, tilesize: ${this._rayTracerOptions.tileSize}px, time: ${RaytracerBase.msToTimeString(duration)}`;
     console.log(stats);
     return stats;
   }
