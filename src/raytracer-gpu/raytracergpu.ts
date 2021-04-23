@@ -4,7 +4,7 @@
 import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
-import { createComputeTiles, ComputeTile } from '../tiles';
+import { ComputeTile, createComputeTiles } from '../tiles';
 import { WebGPUBuffer } from './webgpubuffer';
 import { WebGPUComputePipline } from './webgpucomputepipeline';
 import { WebGPUContext } from './webgpucontext';
@@ -122,34 +122,33 @@ export class RaytracerGPU extends RaytracerBase {
           this._rayTracerOptions.tileSize
         );
 
-        let sample = 1;
-        let tile = computeTiles.shift();
-
+        const frequency = 50;
+        let sample = 0;
+        let tile: ComputeTile;
         const frame = (): void => {
-          this.compute2(computePipeline, renderPipeline, sample, tile);
-          if (sample < this._rayTracerOptions.samplesPerPixel) {
-            sample++;
-            // await sleep(25);
+          const frameStartTime = window.performance.now();
+          let duration = 0;
+          do {
+            if (sample === 0) {
+              tile = computeTiles.shift();
+            }
+            this.computePass(computePipeline, sample, tile);
+            if (sample < this._rayTracerOptions.samplesPerPixel - 1) {
+              sample++;
+            } else {
+              sample = 0;
+            }
+            duration += window.performance.now() - frameStartTime;
+          } while (computeTiles.length && duration < frequency);
+          this.renderPass(renderPipeline);
+
+          if (computeTiles.length || sample < this._rayTracerOptions.samplesPerPixel - 1) {
             window.requestAnimationFrame(frame);
           } else {
-            if (computeTiles.length > 0) {
-              sample = 1;
-              tile = computeTiles.shift();
-              window.requestAnimationFrame(frame);
-            } else {
-              resolve();
-            }
+            resolve();
           }
         };
-
         window.requestAnimationFrame(frame);
-
-        // for (const tile of computeTiles) {
-        //   for (let sample = 0; sample < this._rayTracerOptions.samplesPerPixel; sample++) {
-        //     this.compute2(computePipeline, renderPipeline, sample, tile);
-        //   }
-        // }
-        // resolve();
       });
     };
 
@@ -218,82 +217,35 @@ export class RaytracerGPU extends RaytracerBase {
     }
   }
 
-  /*
-  private async compute(computePipeline: WebGPUComputePipline, copyBuffer = false): Promise<Float32Array> {
+  private computePass(computePipeline: WebGPUComputePipline, sample: number, tile: ComputeTile): void {
     const commandEncoder = WebGPUContext.device.createCommandEncoder();
 
-    // compute pass
-    {
-      const passEncoder = commandEncoder.beginComputePass();
-      passEncoder.setPipeline(computePipeline.gpuPipeline);
-      passEncoder.setBindGroup(0, computePipeline.bindGroup);
-      passEncoder.dispatch(this._imageWidth / LOCAL_SIZE, this._imageHeight / LOCAL_SIZE, 1);
-      passEncoder.endPass();
+    computePipeline.updateUniformBuffer(sample, tile);
+    const passEncoder = commandEncoder.beginComputePass();
+    passEncoder.setPipeline(computePipeline.gpuPipeline);
+    passEncoder.setBindGroup(0, computePipeline.bindGroup);
+    passEncoder.dispatch(tile.width / LOCAL_SIZE, tile.height / LOCAL_SIZE, 1);
+    passEncoder.endPass();
 
-      computePipeline.updateUniformBuffer();
-    }
-
-    if (copyBuffer) {
-      // FIXME: probably reuse buffer (maybe performance increase)
-      const gpuReadBuffer = new WebGPUBuffer();
-      gpuReadBuffer.create(
-        this._imageWidth * this._imageHeight * 4 * 4,
-        GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
-      );
-
-      commandEncoder.copyBufferToBuffer(
-        computePipeline.pixelBuffer.gpuBuffer,
-        0,
-        gpuReadBuffer.gpuBuffer,
-        0,
-        this._imageWidth * this._imageHeight * 4 * 4
-      );
-      WebGPUContext.queue.submit([commandEncoder.finish()]);
-      const arrayBuffer = await gpuReadBuffer.mapRead();
-
-      return new Float32Array(arrayBuffer);
-    } else {
-      WebGPUContext.queue.submit([commandEncoder.finish()]);
-    }
-    return new Float32Array(this._imageWidth * this._imageHeight * 4 * 4);
+    WebGPUContext.queue.submit([commandEncoder.finish()]);
   }
-  */
 
-  // unused at the moment
-  private compute2(
-    computePipeline: WebGPUComputePipline,
-    renderPipeLine: WebGPURenderPipeline,
-    sample: number,
-    tile: ComputeTile
-  ): void {
+  private renderPass(renderPipeLine: WebGPURenderPipeline): void {
     const commandEncoder = WebGPUContext.device.createCommandEncoder();
 
-    // compute pass
-    {
-      computePipeline.updateUniformBuffer(sample, tile);
-      const passEncoder = commandEncoder.beginComputePass();
-      passEncoder.setPipeline(computePipeline.gpuPipeline);
-      passEncoder.setBindGroup(0, computePipeline.bindGroup);
-      passEncoder.dispatch(tile.width / LOCAL_SIZE, tile.height / LOCAL_SIZE, 1);
-      passEncoder.endPass();
-    }
+    // renderPipeLine.updateUniformBuffer(sample);
+    this._colorAttachment.view = this._swapchain.getCurrentTexture().createView();
+    const renderPassDesc: GPURenderPassDescriptor = {
+      colorAttachments: [this._colorAttachment],
+      //depthStencilAttachment: this._depthAttachment,
+    };
 
-    // render pass
-    {
-      // renderPipeLine.updateUniformBuffer(sample);
-      this._colorAttachment.view = this._swapchain.getCurrentTexture().createView();
-      const renderPassDesc: GPURenderPassDescriptor = {
-        colorAttachments: [this._colorAttachment],
-        //depthStencilAttachment: this._depthAttachment,
-      };
-
-      const passEncoder = commandEncoder.beginRenderPass(renderPassDesc);
-      passEncoder.setPipeline(renderPipeLine.gpuPipeline);
-      passEncoder.setBindGroup(0, renderPipeLine.bindGroup);
-      passEncoder.setVertexBuffer(0, renderPipeLine.vertexPostionBuffer);
-      passEncoder.draw(6, 1, 0, 0);
-      passEncoder.endPass();
-    }
+    const passEncoder = commandEncoder.beginRenderPass(renderPassDesc);
+    passEncoder.setPipeline(renderPipeLine.gpuPipeline);
+    passEncoder.setBindGroup(0, renderPipeLine.bindGroup);
+    passEncoder.setVertexBuffer(0, renderPipeLine.vertexPostionBuffer);
+    passEncoder.draw(6, 1, 0, 0);
+    passEncoder.endPass();
 
     WebGPUContext.queue.submit([commandEncoder.finish()]);
   }
