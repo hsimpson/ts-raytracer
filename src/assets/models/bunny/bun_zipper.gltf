@@ -18,6 +18,16 @@
             "name" : "bun_zipper"
         }
     ],
+    "materials" : [
+        {
+            "doubleSided" : true,
+            "name" : "Normal_corrected",
+            "pbrMetallicRoughness" : {
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.4000000059604645
+            }
+        }
+    ],
     "meshes" : [
         {
             "name" : "bun_zipper.001",
@@ -27,7 +37,8 @@
                         "POSITION" : 0,
                         "NORMAL" : 1
                     },
-                    "indices" : 2
+                    "indices" : 2,
+                    "material" : 0
                 }
             ]
         }
