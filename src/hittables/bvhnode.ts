@@ -80,7 +80,7 @@ export class BVHNode extends Hittable {
         this.right = objects[start];
       }
     } else {
-      sortArrayRange(objects, start, end, comparator);
+      // sortArrayRange(objects, start, end, comparator);
       const mid = start + Math.floor(objectSpan / 2);
       const nextLevel = ++_level;
       this.left = BVHNode.createFromObjects(objects, start, mid, time0, time1);
