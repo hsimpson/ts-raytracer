@@ -45,15 +45,10 @@ export class Box extends Hittable {
     return true;
   }
 
-  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
-    const transformedMin: vec3 = [this._boxMin[0], this._boxMin[1], this._boxMin[2]];
-    const transformedMax: vec3 = [this._boxMax[0], this._boxMax[1], this._boxMax[2]];
+  public boundingBox(_t0: number, _t1: number): AABB {
+    const transformedMin = vec3.transformMat4(vec3.create(), this._boxMin, this.transform.objectToWorld);
+    const transformedMax = vec3.transformMat4(vec3.create(), this._boxMax, this.transform.objectToWorld);
 
-    vec3.transformMat4(transformedMin, transformedMin, this.transform.objectToWorld);
-    vec3.transformMat4(transformedMax, transformedMax, this.transform.objectToWorld);
-
-    const newOutputBox = new AABB(transformedMin, transformedMax);
-    newOutputBox.copyTo(outputBox);
-    return true;
+    return new AABB(transformedMin, transformedMax);
   }
 }

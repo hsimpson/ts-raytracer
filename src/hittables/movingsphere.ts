@@ -103,7 +103,7 @@ export class MovingSphere extends Hittable {
     return vec3.add(vec3.create(), this._center0, centerDiffT);
   }
 
-  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
+  public boundingBox(t0: number, t1: number): AABB {
     const transformedCenterT0 = vec3.transformMat4(vec3.create(), this.center(t0), this.transform.objectToWorld);
     const transformedCenterT1 = vec3.transformMat4(vec3.create(), this.center(t1), this.transform.objectToWorld);
 
@@ -118,9 +118,6 @@ export class MovingSphere extends Hittable {
       vec3.add(vec3.create(), transformedCenterT1, r)
     );
 
-    const newOutputBox = AABB.surroundingBox(box0, box1);
-    newOutputBox.copyTo(outputBox);
-
-    return true;
+    return AABB.surroundingBox(box0, box1);
   }
 }

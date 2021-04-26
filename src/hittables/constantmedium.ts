@@ -81,7 +81,7 @@ export class ConstantMedium extends Hittable {
     return true;
   }
 
-  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
-    return this._boundary.boundingBox(t0, t1, outputBox);
+  public boundingBox(t0: number, t1: number): AABB {
+    return this._boundary.boundingBox(t0, t1);
   }
 }

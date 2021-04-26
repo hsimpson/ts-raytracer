@@ -13,6 +13,7 @@ export class XYRect extends Hittable {
   public y0: number;
   public y1: number;
   public k: number;
+  private bbox: AABB;
 
   public constructor(x0: number, x1: number, y0: number, y1: number, k: number, material: Material) {
     super();
@@ -22,6 +23,7 @@ export class XYRect extends Hittable {
     this.y1 = y1;
     this.k = k;
     this.material = material;
+    this.bbox = new AABB([this.x0, this.y0, this.k - 0.0001], [this.x1, this.y1, this.k + 0.0001]);
   }
 
   public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
@@ -50,14 +52,11 @@ export class XYRect extends Hittable {
     return true;
   }
 
-  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
+  public boundingBox(_t0: number, _t1: number): AABB {
     // The bounding box must have non-zero width in each dimension, so pad the Z
     // dimension a small amount.
 
-    const newOutputBox = new AABB([this.x0, this.y0, this.k - 0.0001], [this.x1, this.y1, this.k + 0.0001]);
-    newOutputBox.copyTo(outputBox);
-
-    return true;
+    return this.bbox;
   }
 }
 
@@ -68,6 +67,7 @@ export class XZRect extends Hittable {
   public z0: number;
   public z1: number;
   public k: number;
+  private bbox: AABB;
 
   public constructor(x0: number, x1: number, z0: number, z1: number, k: number, material: Material) {
     super();
@@ -77,6 +77,7 @@ export class XZRect extends Hittable {
     this.z1 = z1;
     this.k = k;
     this.material = material;
+    this.bbox = new AABB([this.x0, this.k - 0.0001, this.z0], [this.x1, this.k + 0.0001, this.z1]);
   }
 
   public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
@@ -104,14 +105,11 @@ export class XZRect extends Hittable {
     return true;
   }
 
-  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
-    // The bounding box must have non-zero width in each dimension, so pad the Z
+  public boundingBox(_t0: number, _t1: number): AABB {
+    // The bounding box must have non-zero width in each dimension, so pad the Y
     // dimension a small amount.
 
-    const newOutputBox = new AABB([this.x0, this.k - 0.0001, this.z0], [this.x1, this.k + 0.0001, this.z1]);
-    newOutputBox.copyTo(outputBox);
-
-    return true;
+    return this.bbox;
   }
 }
 
@@ -122,6 +120,7 @@ export class YZRect extends Hittable {
   public z0: number;
   public z1: number;
   public k: number;
+  private bbox: AABB;
 
   public constructor(y0: number, y1: number, z0: number, z1: number, k: number, material: Material) {
     super();
@@ -131,6 +130,7 @@ export class YZRect extends Hittable {
     this.z1 = z1;
     this.k = k;
     this.material = material;
+    this.bbox = new AABB([this.k - 0.0001, this.y0, this.z0], [this.k + 0.0001, this.y1, this.z1]);
   }
 
   public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
@@ -158,13 +158,10 @@ export class YZRect extends Hittable {
     return true;
   }
 
-  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
-    // The bounding box must have non-zero width in each dimension, so pad the Z
+  public boundingBox(_t0: number, _t1: number): AABB {
+    // The bounding box must have non-zero width in each dimension, so pad the X
     // dimension a small amount.
 
-    const newOutputBox = new AABB([this.k - 0.0001, this.y0, this.z0], [this.k + 0.0001, this.y1, this.z1]);
-    newOutputBox.copyTo(outputBox);
-
-    return true;
+    return this.bbox;
   }
 }

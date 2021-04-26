@@ -7,7 +7,7 @@ import { AABB } from './aabb';
 
 export abstract class Hittable {
   public abstract hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean;
-  public abstract boundingBox(t0: number, t1: number, outputBox: AABB): boolean;
+  public abstract boundingBox(t0: number, t1: number): AABB;
   public material: Material;
   public name = '';
   public readonly transform: Transform = new Transform();

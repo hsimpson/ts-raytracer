@@ -202,7 +202,7 @@ export class Triangle extends Hittable {
     return true;
   }
 
-  public boundingBox(_t0: number, _t1: number, outputBox: AABB): boolean {
+  public boundingBox(_t0: number, _t1: number): AABB {
     let v0: vec3;
     let v1: vec3;
     let v2: vec3;
@@ -217,18 +217,14 @@ export class Triangle extends Hittable {
       v2 = this.v2;
     }
 
-    const minX = Math.min(v0[0], v1[0], v2[0]); /* - EPSILON*/
-    const minY = Math.min(v0[1], v1[1], v2[1]); /* - EPSILON*/
-    const minZ = Math.min(v0[2], v1[2], v2[2]); /* - EPSILON*/
+    const minX = Math.min(v0[0], v1[0], v2[0]) - EPSILON;
+    const minY = Math.min(v0[1], v1[1], v2[1]) - EPSILON;
+    const minZ = Math.min(v0[2], v1[2], v2[2]) - EPSILON;
 
-    const maxX = Math.max(v0[0], v1[0], v2[0]); /* + EPSILON*/
-    const maxY = Math.max(v0[1], v1[1], v2[1]); /* + EPSILON*/
-    const maxZ = Math.max(v0[2], v1[2], v2[2]); /* + EPSILON*/
+    const maxX = Math.max(v0[0], v1[0], v2[0]) + EPSILON;
+    const maxY = Math.max(v0[1], v1[1], v2[1]) + EPSILON;
+    const maxZ = Math.max(v0[2], v1[2], v2[2]) + EPSILON;
 
-    const newOutputBox = new AABB([minX, minY, minZ], [maxX, maxY, maxZ]);
-    newOutputBox.copyTo(outputBox);
-
-    // console.log('Triangle box');
-    return true;
+    return new AABB([minX, minY, minZ], [maxX, maxY, maxZ]);
   }
 }

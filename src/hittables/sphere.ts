@@ -76,15 +76,10 @@ export class Sphere extends Hittable {
     return false;
   }
 
-  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
+  public boundingBox(_t0: number, _t1: number): AABB {
     const transformedCenter = vec3.transformMat4(vec3.create(), this._center, this.transform.objectToWorld);
 
     const r = vec3.fromValues(this._radius, this._radius, this._radius);
-    const newOutputBox = new AABB(
-      vec3.sub(vec3.create(), transformedCenter, r),
-      vec3.add(vec3.create(), transformedCenter, r)
-    );
-    newOutputBox.copyTo(outputBox);
-    return true;
+    return new AABB(vec3.sub(vec3.create(), transformedCenter, r), vec3.add(vec3.create(), transformedCenter, r));
   }
 }

@@ -11,7 +11,7 @@ let _level = 0;
 
 @serializable
 export class BVHNode extends Hittable {
-  private box = new AABB();
+  private bbox = new AABB();
   private left: Hittable;
   private right: Hittable;
   public readonly id = _id;
@@ -19,7 +19,6 @@ export class BVHNode extends Hittable {
 
   public constructor() {
     super();
-    // console.log(`BVH-Node ${this.id}`);
     _id++;
   }
 
@@ -44,10 +43,9 @@ export class BVHNode extends Hittable {
     fillFlatList(list);
     console.log(`BVH objects: ${flatList.objects.length}`);
 
-    // node.init(list.objects, 0, list.objects.length, time0, time1);
     node.init(flatList.objects, 0, flatList.objects.length, time0, time1);
 
-    console.log(`BVH finish: ${window.performance.now() - startTime}`);
+    console.log(`BVH finish: ${(window.performance.now() - startTime).toFixed(2)}`);
     console.log(`BVH nodes: ${_id}`);
     console.log(`BVH levels: ${_level}`);
     return node;
@@ -91,13 +89,10 @@ export class BVHNode extends Hittable {
       (this.right as BVHNode).level = nextLevel;
     }
 
-    const boxLeft = new AABB();
-    const boxRight = new AABB();
+    const boxLeft = this.left.boundingBox(time0, time1);
+    const boxRight = this.right.boundingBox(time0, time1);
 
-    if (!this.left.boundingBox(time0, time1, boxLeft) || !this.right.boundingBox(time0, time1, boxRight)) {
-      console.error('No bounding box in bvh_node constructor.');
-    }
-    this.box = AABB.surroundingBox(boxLeft, boxRight);
+    this.bbox = AABB.surroundingBox(boxLeft, boxRight);
 
     // const leftIsBVHNode = this.left instanceof BVHNode ? `BVHNode-${this.left.id}` : '';
     // const rightIsBVHNode = this.right instanceof BVHNode ? `BVHNode-${this.right.id}` : '';
@@ -122,7 +117,7 @@ export class BVHNode extends Hittable {
   // }
 
   public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
-    if (!this.box.hit(ray, tMin, tMax)) {
+    if (!this.bbox.hit(ray, tMin, tMax)) {
       return false;
     }
 
@@ -132,19 +127,14 @@ export class BVHNode extends Hittable {
     return leftHit || rightHit;
   }
 
-  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
-    this.box.copyTo(outputBox);
-    return true;
+  public boundingBox(_t0: number, _t1: number): AABB {
+    return this.bbox;
   }
 }
 
 function boxCompare(a: Hittable, b: Hittable, axis: number): number {
-  const boxA = new AABB();
-  const boxB = new AABB();
-
-  if (!a.boundingBox(0, 0, boxA) || !b.boundingBox(0, 0, boxB)) {
-    console.error('No bounding box in bvh_node constructor.');
-  }
+  const boxA = a.boundingBox(0, 0);
+  const boxB = b.boundingBox(0, 0);
 
   return boxA.min[axis] < boxB.min[axis] ? -1 : 1;
 }

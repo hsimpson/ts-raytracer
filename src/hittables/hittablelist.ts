@@ -46,24 +46,11 @@ export class HittableList extends Hittable {
     return hitAnything;
   }
 
-  public boundingBox(t0: number, t1: number, outputBox: AABB): boolean {
-    if (this._objects.length === 0) {
-      return false;
-    }
-    const tempBox: AABB = new AABB();
-    let firstBox = true;
+  public boundingBox(t0: number, t1: number): AABB {
+    let bbox: AABB = new AABB();
     for (const object of this._objects) {
-      if (!object.boundingBox(t0, t1, tempBox)) {
-        return false;
-      }
-
-      if (firstBox) {
-        tempBox.copyTo(outputBox);
-      } else {
-        AABB.surroundingBox(outputBox, tempBox).copyTo(outputBox);
-      }
-      firstBox = false;
+      bbox = AABB.surroundingBox(bbox, object.boundingBox(t0, t1));
     }
-    return true;
+    return bbox;
   }
 }
