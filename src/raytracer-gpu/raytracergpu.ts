@@ -123,20 +123,20 @@ export class RaytracerGPU extends RaytracerBase {
         );
 
         const frequency = 50;
-        let sample = 0;
+        let sample = 1;
         let tile: ComputeTile;
         const frame = (): void => {
           const frameStartTime = window.performance.now();
           let duration = 0;
           do {
-            if (sample === 0) {
+            if (sample === 1) {
               tile = computeTiles.shift();
             }
             this.computePass(computePipeline, sample, tile);
-            if (sample < this._rayTracerOptions.samplesPerPixel - 1) {
+            if (sample < this._rayTracerOptions.samplesPerPixel) {
               sample++;
             } else {
-              sample = 0;
+              sample = 1;
             }
             duration += window.performance.now() - frameStartTime;
           } while (computeTiles.length && duration < frequency);
