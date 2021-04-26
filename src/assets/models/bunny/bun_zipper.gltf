@@ -1,0 +1,88 @@
+{
+    "asset" : {
+        "generator" : "Khronos glTF Blender I/O v1.5.17",
+        "version" : "2.0"
+    },
+    "scene" : 0,
+    "scenes" : [
+        {
+            "name" : "Scene",
+            "nodes" : [
+                0
+            ]
+        }
+    ],
+    "nodes" : [
+        {
+            "mesh" : 0,
+            "name" : "bun_zipper"
+        }
+    ],
+    "meshes" : [
+        {
+            "name" : "bun_zipper.001",
+            "primitives" : [
+                {
+                    "attributes" : {
+                        "POSITION" : 0,
+                        "NORMAL" : 1
+                    },
+                    "indices" : 2
+                }
+            ]
+        }
+    ],
+    "accessors" : [
+        {
+            "bufferView" : 0,
+            "componentType" : 5126,
+            "count" : 34834,
+            "max" : [
+                0.6100910305976868,
+                1.0501823425292969,
+                0.5879970192909241
+            ],
+            "min" : [
+                -0.9468989968299866,
+                -0.49315378069877625,
+                -0.6187359690666199
+            ],
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 1,
+            "componentType" : 5126,
+            "count" : 34834,
+            "type" : "VEC3"
+        },
+        {
+            "bufferView" : 2,
+            "componentType" : 5123,
+            "count" : 208353,
+            "type" : "SCALAR"
+        }
+    ],
+    "bufferViews" : [
+        {
+            "buffer" : 0,
+            "byteLength" : 418008,
+            "byteOffset" : 0
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 418008,
+            "byteOffset" : 418008
+        },
+        {
+            "buffer" : 0,
+            "byteLength" : 416706,
+            "byteOffset" : 836016
+        }
+    ],
+    "buffers" : [
+        {
+            "byteLength" : 1252724,
+            "uri" : "bun_zipper.bin"
+        }
+    ]
+}
