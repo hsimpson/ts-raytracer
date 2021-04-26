@@ -365,7 +365,8 @@ async function gltfScene(useBVH: boolean): Promise<{ world: HittableList; camera
   // const world = await GLTFLoader.load('assets/models/triangle.gltf');
   // const world = await GLTFLoader.load('assets/models/triangle_applied.gltf');
   // const world = await GLTFLoader.load('assets/models/scene.gltf');
-  const world = await GLTFLoader.load('assets/models/bunny/bunny.gltf');
+  // const world = await GLTFLoader.load('assets/models/bunny/bunny.gltf');
+  const world = await GLTFLoader.load('assets/models/bunny/bun_zipper_res2.gltf');
 
   // const w = world.objects[0] as HittableList;
 
