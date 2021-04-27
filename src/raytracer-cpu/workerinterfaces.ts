@@ -9,6 +9,8 @@ export enum ControllerCommands {
 }
 
 export enum ComputeCommands {
+  INIT,
+  READY,
   START,
   END,
 }
@@ -49,7 +51,7 @@ export interface ControllerUpdateMessage extends WorkerMessage {
   };
 }
 
-export interface ComputeStartMessage extends WorkerMessage {
+export interface ComputeInitMessage extends WorkerMessage {
   data: {
     workerId: number;
     camera: JsonObject;
@@ -59,6 +61,11 @@ export interface ComputeStartMessage extends WorkerMessage {
     imageHeight: number;
     samplesPerPixel: number;
     maxBounces: number;
+  };
+}
+
+export interface ComputeStartMessage extends WorkerMessage {
+  data: {
     x: number;
     y: number;
     width: number;
@@ -74,6 +81,13 @@ export interface ComputeEndMessage extends WorkerMessage {
     y: number;
     width: number;
     height: number;
+  };
+}
+
+// empty message
+export interface ComputeReadyMessage extends WorkerMessage {
+  data: {
+    workerId: number;
   };
 }
 

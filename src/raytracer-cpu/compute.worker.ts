@@ -5,28 +5,54 @@ import { vec3 } from 'gl-matrix';
 import { DeserializerMap } from './deserializermap';
 import { HittableList } from '../hittables';
 import { rayColor } from './ray';
-import { ComputeCommands, ComputeEndMessage, ComputeStartMessage, WorkerMessage } from './workerinterfaces';
+import {
+  ComputeCommands,
+  ComputeEndMessage,
+  ComputeInitMessage,
+  ComputeReadyMessage,
+  ComputeStartMessage,
+  WorkerMessage,
+} from './workerinterfaces';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const map = DeserializerMap;
-const _controllerCtx: Worker = self as never;
-// let _id: number;
+const controllerCtx: Worker = self as never;
+
+let workerId: number;
+let camera: Camera;
+let world: HittableList;
+let background: vec3;
+let imageWidth: number;
+let imageHeight: number;
+let samplesPerPixel: number;
+let maxBounces: number;
+
+function init(msg: ComputeInitMessage): void {
+  workerId = msg.data.workerId;
+  camera = deserialize(Camera, msg.data.camera);
+  world = deserialize(HittableList, msg.data.world);
+  background = msg.data.background;
+  imageWidth = msg.data.imageWidth;
+  imageHeight = msg.data.imageHeight;
+  samplesPerPixel = msg.data.samplesPerPixel;
+  maxBounces = msg.data.maxBounces;
+
+  const computeReadyMessage: ComputeReadyMessage = {
+    cmd: ComputeCommands.READY,
+    data: {
+      workerId,
+    },
+  };
+  controllerCtx.postMessage(computeReadyMessage);
+}
 
 function start(msg: ComputeStartMessage): void {
-  const workerId = msg.data.workerId;
   const x = msg.data.x;
   const y = msg.data.y;
   const width = msg.data.width;
   const height = msg.data.height;
 
   // console.log(`worker[${workerId}]: start(x:${x}, y:${y}, w:${width}, h:${height})`);
-  const camera = deserialize(Camera, msg.data.camera);
-  const world = deserialize(HittableList, msg.data.world);
-  const background = msg.data.background;
-  const imageWidth = msg.data.imageWidth;
-  const imageHeight = msg.data.imageHeight;
-  const spp = msg.data.samplesPerPixel;
-  const maxBounces = msg.data.maxBounces;
 
   const dataArray = new Uint8ClampedArray(width * height * 4);
 
@@ -36,7 +62,7 @@ function start(msg: ComputeStartMessage): void {
     for (let i = 0; i < width; i++) {
       const pixelColor = vec3.create();
 
-      for (let s = 0; s < spp; s++) {
+      for (let s = 0; s < samplesPerPixel; s++) {
         // const rnd = sampleOffsets[s];
         const u = (i + x + randomNumber()) / (imageWidth - 1);
         const v = (j + y + randomNumber()) / (imageHeight - 1);
@@ -47,7 +73,7 @@ function start(msg: ComputeStartMessage): void {
         vec3.add(pixelColor, pixelColor, rayColor(r, background, world, maxBounces));
       }
 
-      writeColor(dataArray, offset, pixelColor, spp);
+      writeColor(dataArray, offset, pixelColor, samplesPerPixel);
       offset += 4;
     }
   }
@@ -64,14 +90,17 @@ function start(msg: ComputeStartMessage): void {
   };
 
   // console.log(`worker[${msg.data.workerId}]: finish`);
-  _controllerCtx.postMessage(computeEndMessage);
+  controllerCtx.postMessage(computeEndMessage);
 }
 
 // Respond to message from parent thread
-_controllerCtx.addEventListener('message', (event) => {
+controllerCtx.addEventListener('message', (event) => {
   const msg = event.data as WorkerMessage;
 
   switch (msg.cmd) {
+    case ComputeCommands.INIT:
+      init(msg as ComputeInitMessage);
+      break;
     case ComputeCommands.START:
       start(msg as ComputeStartMessage);
       break;

@@ -7,6 +7,8 @@ import { DeserializerMap } from './deserializermap';
 import {
   ComputeCommands,
   ComputeEndMessage,
+  ComputeInitMessage,
+  ComputeReadyMessage,
   ComputeStartMessage,
   ControllerCommands,
   ControllerEndMessage,
@@ -66,6 +68,11 @@ const start = (msg: ControllerStartMessage): void => {
     const workerMsg = event.data as WorkerMessage;
 
     switch (workerMsg.cmd as ComputeCommands) {
+      case ComputeCommands.READY: {
+        const readyMsg = workerMsg as ComputeReadyMessage;
+        startComputeWorker(readyMsg.data.workerId);
+        break;
+      }
       case ComputeCommands.END: {
         const endMsg = workerMsg as ComputeEndMessage;
         workerIsDone(endMsg);
@@ -83,12 +90,10 @@ const start = (msg: ControllerStartMessage): void => {
     }
   };
 
-  const startComputeWorker = (workerId: number): void => {
+  const initComputeWorker = (workerId: number): void => {
     const worker = _computeWorkers.get(workerId);
-    const tile = computeTiles.shift();
-
-    const computeStartMessage: ComputeStartMessage = {
-      cmd: ComputeCommands.START,
+    const computeInitMessage: ComputeInitMessage = {
+      cmd: ComputeCommands.INIT,
       data: {
         workerId,
         camera: serialize(Camera, camera),
@@ -98,23 +103,34 @@ const start = (msg: ControllerStartMessage): void => {
         imageHeight: imageHeight,
         samplesPerPixel: samplesPerPixel,
         maxBounces: maxBounces,
+      },
+    };
+    worker.postMessage(computeInitMessage);
+  };
+
+  const startComputeWorker = (workerId: number): void => {
+    const worker = _computeWorkers.get(workerId);
+    const tile = computeTiles.shift();
+
+    const computeStartMessage: ComputeStartMessage = {
+      cmd: ComputeCommands.START,
+      data: {
         ...tile,
       },
     };
     worker.postMessage(computeStartMessage);
   };
 
-  // starting all workers
-  for (let workerId = 0; workerId < msg.data.computeWorkers; workerId++) {
+  // create and init all workers
+  let workerId = 0;
+  while (workerId < msg.data.computeWorkers && workerId < computeTiles.length) {
     const computeWorker = new ComputeWorker();
     computeWorker.onmessage = onMessageFromComputeWorker;
     _computeWorkers.set(workerId, computeWorker);
 
-    startComputeWorker(workerId);
+    initComputeWorker(workerId);
 
-    if (computeTiles.length === 0) {
-      break;
-    }
+    workerId++;
   }
 };
 
