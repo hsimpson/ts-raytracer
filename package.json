@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rimraf dist && webpack --config ./build/webpack.prod.ts",
     "dev": "webpack serve --config ./build/webpack.dev.ts",
-    "deploy": "npm run build && gh-pages -d dist",
+    "deploy": "yarn run build && gh-pages -d dist",
     "lint": "eslint ./src/ --ext .ts,.tsx"
   },
   "repository": {
