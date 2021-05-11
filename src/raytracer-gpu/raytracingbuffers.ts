@@ -10,6 +10,7 @@ import {
 } from '../material';
 import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor, Texture } from '../textures';
 import { nextPowerOf2 } from '../util';
+import { World } from '../world';
 import { WebGPUContext } from './webgpucontext';
 
 enum WebGPUMaterialType {
@@ -94,14 +95,14 @@ interface WebGPUPrimitive {
 
 const PADDING_VALUE = -99;
 
-function log(message: string, bufferData: ArrayBuffer): void {
-  const bytes = new Uint8Array(bufferData);
-  let byteString = '';
-  bytes.forEach((value) => {
-    byteString += value.toString(16).padStart(2, '0') + '';
-  });
-  console.log(message, byteString);
-}
+// function log(message: string, bufferData: ArrayBuffer): void {
+//   const bytes = new Uint8Array(bufferData);
+//   let byteString = '';
+//   bytes.forEach((value) => {
+//     byteString += value.toString(16).padStart(2, '0') + '';
+//   });
+//   console.log(message, byteString);
+// }
 
 export class RaytracingBuffers {
   private _gpuMaterials: WebGPUMaterial[] = [];
@@ -110,8 +111,8 @@ export class RaytracingBuffers {
   private _textureSize = 2;
   private _imageTextures: ImageTexture[] = [];
 
-  public constructor(world: HittableList) {
-    this.traverseHittables(world, mat4.create());
+  public constructor(world: World) {
+    this.traverseHittables(world.objects, mat4.create());
   }
 
   public get hasImageTextures(): boolean {

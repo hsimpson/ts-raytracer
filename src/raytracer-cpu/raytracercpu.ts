@@ -3,10 +3,9 @@ import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
 import { serialize } from '../serializing';
-import { HittableList } from '../hittables';
+import { World } from '../world';
 import {
   ControllerCommands,
-  ControllerEndMessage,
   ControllerStartMessage,
   ControllerStopMessage,
   ControllerUpdateMessage,
@@ -113,7 +112,7 @@ export class RaytracerCPU extends RaytracerBase {
         maxBounces: this._rayTracerOptions.maxBounces,
         computeWorkers: (this._rayTracerOptions as RayTracerCPUOptions).numOfWorkers,
         sceneIdx: this._rayTracerOptions.scene,
-        world: serialize(HittableList, world),
+        world: serialize(World, world),
         camera: serialize(Camera, camera),
         background: cameraOptions.background,
         tileSize: this._rayTracerOptions.tileSize,

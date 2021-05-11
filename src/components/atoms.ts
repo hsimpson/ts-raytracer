@@ -20,8 +20,8 @@ export const RaytracerProperties = atom({
     // imageHeight: 1080,
 
     // 720p HD ready
-    imageWidth: 1280,
-    imageHeight: 720,
+    // imageWidth: 1280,
+    // imageHeight: 720,
 
     // imageWidth: 1024,
     // imageHeight: 576,
@@ -29,8 +29,8 @@ export const RaytracerProperties = atom({
     // imageWidth: 512,
     // imageHeight: 512,
 
-    // imageWidth: 640,
-    // imageHeight: 360,
+    imageWidth: 640,
+    imageHeight: 360,
 
     // imageWidth: 256,
     // imageHeight: 144,
@@ -38,15 +38,15 @@ export const RaytracerProperties = atom({
     // imageWidth: 128,
     // imageHeight: 72,
 
-    samplesPerPixel: 20,
-    maxBounces: 12,
+    samplesPerPixel: 5,
+    maxBounces: 5,
     numOfWorkers: navigator.hardwareConcurrency,
     // numOfWorkers: 1,
     webGPUavailable: false,
     webGPUenabled: false,
-    download: true,
-    addStatsToImage: true,
-    scene: 0,
+    download: false,
+    addStatsToImage: false,
+    scene: 9,
     // scene: 4,
     // scene: 8,
     tileSize: 64,

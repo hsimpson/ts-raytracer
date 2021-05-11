@@ -1,11 +1,11 @@
-import { Camera } from '../camera';
-import { HittableList } from '../hittables';
 import { vec3 } from 'gl-matrix';
+import { Camera } from '../camera';
+import { ComputeTile } from '../tiles';
+import { World } from '../world';
 import { RaytracingBuffers } from './raytracingbuffers';
 import { WebGPUBuffer } from './webgpubuffer';
 import { WebGPUContext } from './webgpucontext';
 import { WebGPUPipelineBase } from './webgpupipelinebase';
-import { ComputeTile } from '../tiles';
 
 interface ComputeUniformParams {
   background: vec3;
@@ -24,7 +24,7 @@ interface WebGPUComputePiplineOptions {
   computeShaderUrl: string;
   uniformParams: ComputeUniformParams;
   camera: Camera;
-  world: HittableList;
+  world: World;
 }
 
 const enum Bindings {

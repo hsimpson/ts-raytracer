@@ -1,21 +1,12 @@
 import { vec3 } from 'gl-matrix';
 import { CameraOptions } from './camera';
 import * as GLTFLoader from './gltfloader';
-import {
-  Box,
-  BVHNode,
-  ConstantMedium,
-  Hittable,
-  HittableList,
-  MovingSphere,
-  Sphere,
-  XYRect,
-  XZRect,
-  YZRect,
-} from './hittables';
+import { Box, ConstantMedium, Hittable, MovingSphere, Sphere, XYRect, XZRect, YZRect } from './hittables';
+import { PointLight } from './lights';
 import { DielectricMaterial, DiffuseLight, LambertianMaterial, Material, MetalMaterial } from './material';
 import { CheckerTexture, ImageTexture, NoiseTexture } from './textures';
 import { random, randomNumber, randomNumberRange, randomRange } from './util';
+import { World } from './world';
 
 const defaultCameraOptions: CameraOptions = {
   lookFrom: [0, 0, 5],
@@ -27,8 +18,8 @@ const defaultCameraOptions: CameraOptions = {
   fovY: 40,
 };
 
-function gpuTestScene(useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
-  const world = new HittableList();
+function gpuTestScene(useBVH: boolean): { world: World; cameraOptions: CameraOptions } {
+  const world = new World();
 
   // ground
   const red = new LambertianMaterial([0.65, 0.05, 0.05]);
@@ -40,7 +31,7 @@ function gpuTestScene(useBVH: boolean): { world: HittableList; cameraOptions: Ca
 
   const groundSphere = new Sphere([0, -1000, 0], 1000, groundMaterial);
   groundSphere.name = 'groundSphere';
-  world.add(groundSphere);
+  world.addObject(groundSphere);
 
   // const metal1 = new MetalMaterial([0.7, 0.6, 0.5], 0.1);
   // const dielectric1 = new DielectricMaterial(1.5);
@@ -53,27 +44,27 @@ function gpuTestScene(useBVH: boolean): { world: HittableList; cameraOptions: Ca
   greenSphere.name = 'greenSphere';
   greenSphere.transform.translate([0.6, 0.4, 1]);
 
-  world.add(redSphere);
-  world.add(greenSphere);
+  world.addObject(redSphere);
+  world.addObject(greenSphere);
 
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [0, 2, 10], fovY: 10 };
 
   if (useBVH) {
-    return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
-  } else {
-    return { world, cameraOptions };
+    world.createBVH();
   }
+
+  return { world, cameraOptions };
 }
 
-function randomScene(useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
-  const world = new HittableList();
+function randomScene(useBVH: boolean): { world: World; cameraOptions: CameraOptions } {
+  const world = new World();
 
   const groundMaterial = new LambertianMaterial([0.5, 0.5, 0.5]);
   // const checkerTexture = new CheckerTexture(new vec3(0.2, 0.3, 0.1), new vec3(0.9, 0.9, 0.9));
   // const groundMaterial = new LambertianMaterial();
   // groundMaterial.texture = checkerTexture;
 
-  world.add(new Sphere([0, -1000, 0], 1000, groundMaterial));
+  world.addObject(new Sphere([0, -1000, 0], 1000, groundMaterial));
   // let i = 1;
   const count = 8;
   for (let a = -count; a < count; a++) {
@@ -90,18 +81,18 @@ function randomScene(useBVH: boolean): { world: HittableList; cameraOptions: Cam
           const albedo = vec3.multiply(vec3.create(), random(), random());
           sphereMaterial = new LambertianMaterial(albedo);
           const center2 = vec3.add(vec3.create(), center, [0, randomNumberRange(0, 1.0), 0]);
-          world.add(new MovingSphere(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
+          world.addObject(new MovingSphere(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
           // world.add(new Sphere(center, 0.2, sphereMaterial));
         } else if (chooseMat < 0.95) {
           // metal
           const albedo = randomRange(0.5, 1);
           const roughness = randomNumberRange(0, 0.5);
           sphereMaterial = new MetalMaterial(albedo, roughness);
-          world.add(new Sphere(center, 0.2, sphereMaterial));
+          world.addObject(new Sphere(center, 0.2, sphereMaterial));
         } else {
           // glass
           sphereMaterial = new DielectricMaterial(1.5);
-          world.add(new Sphere(center, 0.2, sphereMaterial));
+          world.addObject(new Sphere(center, 0.2, sphereMaterial));
         }
       }
     }
@@ -111,51 +102,51 @@ function randomScene(useBVH: boolean): { world: HittableList; cameraOptions: Cam
   const material2 = new LambertianMaterial([0.4, 0.2, 0.1]);
   const material3 = new MetalMaterial([0.7, 0.6, 0.5], 0.0);
 
-  world.add(new Sphere([1, 1, 0], 1, material1));
-  world.add(new Sphere([-4, 1, 0], 1, material2));
-  world.add(new Sphere([4, 1, 0], 1, material3));
+  world.addObject(new Sphere([1, 1, 0], 1, material1));
+  world.addObject(new Sphere([-4, 1, 0], 1, material2));
+  world.addObject(new Sphere([4, 1, 0], 1, material3));
 
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [13, 2, 3], fovY: 20 };
 
   if (useBVH) {
-    return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
-  } else {
-    return { world, cameraOptions };
+    world.createBVH();
   }
+
+  return { world, cameraOptions };
 }
 
-function twoCheckerSpheres(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
-  const world = new HittableList();
+function twoCheckerSpheres(_useBVH: boolean): { world: World; cameraOptions: CameraOptions } {
+  const world = new World();
 
   const checkerTexture = new CheckerTexture([0.2, 0.3, 0.1], [0.9, 0.9, 0.9], 40);
   const sphereMaterial = new LambertianMaterial();
   sphereMaterial.texture = checkerTexture;
 
-  world.add(new Sphere([0, -10, 0], 10, sphereMaterial));
-  world.add(new Sphere([0, 10, 0], 10, sphereMaterial));
+  world.addObject(new Sphere([0, -10, 0], 10, sphereMaterial));
+  world.addObject(new Sphere([0, 10, 0], 10, sphereMaterial));
 
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [13, 2, 3], fovY: 20 };
 
   return { world, cameraOptions };
 }
 
-function twoNoiseSpheres(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
-  const world = new HittableList();
+function twoNoiseSpheres(_useBVH: boolean): { world: World; cameraOptions: CameraOptions } {
+  const world = new World();
 
   const perlinTexture = new NoiseTexture(4);
   const sphereMaterial = new LambertianMaterial();
   sphereMaterial.texture = perlinTexture;
 
-  world.add(new Sphere([0, -1000, 0], 1000, sphereMaterial));
-  world.add(new Sphere([0, 2, 0], 2, sphereMaterial));
+  world.addObject(new Sphere([0, -1000, 0], 1000, sphereMaterial));
+  world.addObject(new Sphere([0, 2, 0], 2, sphereMaterial));
 
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [13, 2, 3], fovY: 20 };
 
   return { world, cameraOptions };
 }
 
-async function earthSphere(_useBVH: boolean): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
-  const world = new HittableList();
+async function earthSphere(_useBVH: boolean): Promise<{ world: World; cameraOptions: CameraOptions }> {
+  const world = new World();
 
   const earthTexture = new ImageTexture();
   await earthTexture.load('assets/textures/earthmap.jpg');
@@ -163,25 +154,25 @@ async function earthSphere(_useBVH: boolean): Promise<{ world: HittableList; cam
   const sphereMaterial = new LambertianMaterial();
   sphereMaterial.texture = earthTexture;
 
-  world.add(new Sphere([0, 0, 0], 2, sphereMaterial));
+  world.addObject(new Sphere([0, 0, 0], 2, sphereMaterial));
 
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [13, 2, 3], fovY: 20 };
 
   return { world, cameraOptions };
 }
 
-function areaLight(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
-  const world = new HittableList();
+function areaLight(_useBVH: boolean): { world: World; cameraOptions: CameraOptions } {
+  const world = new World();
   const perlinTexture = new NoiseTexture(4);
   const sphereMaterial = new LambertianMaterial();
   sphereMaterial.texture = perlinTexture;
 
-  world.add(new Sphere([0, -1000, 0], 1000, sphereMaterial));
-  world.add(new Sphere([0, 2, 0], 2, sphereMaterial));
+  world.addObject(new Sphere([0, -1000, 0], 1000, sphereMaterial));
+  world.addObject(new Sphere([0, 2, 0], 2, sphereMaterial));
 
   const diffuseLight = new DiffuseLight([4, 4, 4]);
-  world.add(new XYRect(3, 5, 1, 3, -2, diffuseLight));
-  world.add(new Sphere([0, 7, 0], 2, diffuseLight));
+  world.addObject(new XYRect(3, 5, 1, 3, -2, diffuseLight));
+  world.addObject(new Sphere([0, 7, 0], 2, diffuseLight));
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
@@ -194,30 +185,30 @@ function areaLight(_useBVH: boolean): { world: HittableList; cameraOptions: Came
   return { world, cameraOptions };
 }
 
-function cornellBox(useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
+function cornellBox(useBVH: boolean): { world: World; cameraOptions: CameraOptions } {
   // http://www.graphics.cornell.edu/online/box/data.html
-  const world = new HittableList();
+  const world = new World();
   const red = new LambertianMaterial([0.65, 0.05, 0.05]);
   const white = new LambertianMaterial([0.73, 0.73, 0.73]);
   const green = new LambertianMaterial([0.12, 0.45, 0.15]);
   const light = new DiffuseLight([15, 15, 15]);
 
-  world.add(new YZRect(0, 555, 0, 555, 555, red)); // left wall
-  world.add(new YZRect(0, 555, 0, 555, 0, green)); // right wall
-  world.add(new XZRect(213, 343, 227, 332, 554, light)); // light
-  world.add(new XZRect(0, 555, 0, 555, 0, white)); // floor
-  world.add(new XZRect(0, 555, 0, 555, 555, white)); // ceiling
-  world.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
+  world.addObject(new YZRect(0, 555, 0, 555, 555, red)); // left wall
+  world.addObject(new YZRect(0, 555, 0, 555, 0, green)); // right wall
+  world.addObject(new XZRect(213, 343, 227, 332, 554, light)); // light
+  world.addObject(new XZRect(0, 555, 0, 555, 0, white)); // floor
+  world.addObject(new XZRect(0, 555, 0, 555, 555, white)); // ceiling
+  world.addObject(new XYRect(0, 555, 0, 555, 555, white)); // back wall
 
   const box1: Hittable = new Box([0, 0, 0], [165, 330, 165], white);
   box1.transform.translate([265, 0, 295]);
   box1.transform.rotateEuler(0.0, 15.0, 0.0);
-  world.add(box1);
+  world.addObject(box1);
 
   const box2: Hittable = new Box([0, 0, 0], [165, 165, 165], white);
   box2.transform.translate([130, 0, 65]);
   box2.transform.rotateEuler(0.0, -18.0, 0.0);
-  world.add(box2);
+  world.addObject(box2);
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
@@ -227,36 +218,36 @@ function cornellBox(useBVH: boolean): { world: HittableList; cameraOptions: Came
   };
 
   if (useBVH) {
-    return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
-  } else {
-    return { world, cameraOptions };
+    world.createBVH();
   }
+
+  return { world, cameraOptions };
 }
 
-function cornellBoxSmoke(useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
+function cornellBoxSmoke(useBVH: boolean): { world: World; cameraOptions: CameraOptions } {
   // http://www.graphics.cornell.edu/online/box/data.html
-  const world = new HittableList();
+  const world = new World();
   const red = new LambertianMaterial([0.65, 0.05, 0.05]);
   const white = new LambertianMaterial([0.73, 0.73, 0.73]);
   const green = new LambertianMaterial([0.12, 0.45, 0.15]);
   const light = new DiffuseLight([15, 15, 15]);
 
-  world.add(new YZRect(0, 555, 0, 555, 555, red)); // left wall
-  world.add(new YZRect(0, 555, 0, 555, 0, green)); // right wall
-  world.add(new XZRect(213, 343, 227, 332, 554, light)); // light
-  world.add(new XZRect(0, 555, 0, 555, 0, white)); // floor
-  world.add(new XZRect(0, 555, 0, 555, 555, white)); // ceiling
-  world.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
+  world.addObject(new YZRect(0, 555, 0, 555, 555, red)); // left wall
+  world.addObject(new YZRect(0, 555, 0, 555, 0, green)); // right wall
+  world.addObject(new XZRect(213, 343, 227, 332, 554, light)); // light
+  world.addObject(new XZRect(0, 555, 0, 555, 0, white)); // floor
+  world.addObject(new XZRect(0, 555, 0, 555, 555, white)); // ceiling
+  world.addObject(new XYRect(0, 555, 0, 555, 555, white)); // back wall
 
   const box1 = new Box([0, 0, 0], [165, 330, 165], white);
   box1.transform.translate([265, 0, 295]);
   box1.transform.rotateEuler(0.0, 15.0, 0.0);
-  world.add(new ConstantMedium(box1, 0.01, [0, 0, 0]));
+  world.addObject(new ConstantMedium(box1, 0.01, [0, 0, 0]));
 
   const box2 = new Box([0, 0, 0], [165, 165, 165], white);
   box2.transform.translate([130, 0, 65]);
   box2.transform.rotateEuler(0.0, -18.0, 0.0);
-  world.add(new ConstantMedium(box2, 0.01, [1, 1, 1]));
+  world.addObject(new ConstantMedium(box2, 0.01, [1, 1, 1]));
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
@@ -266,82 +257,83 @@ function cornellBoxSmoke(useBVH: boolean): { world: HittableList; cameraOptions:
   };
 
   if (useBVH) {
-    return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
-  } else {
-    return { world, cameraOptions };
+    world.createBVH();
   }
+
+  return { world, cameraOptions };
 }
 
-async function finalScene(useBVH: boolean): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
-  const world = new HittableList();
-  const boxes1 = new HittableList();
+async function finalScene(useBVH: boolean): Promise<{ world: World; cameraOptions: CameraOptions }> {
+  const world = new World();
+  // const boxes1 = new HittableList();
 
-  const ground = new LambertianMaterial([0.48, 0.83, 0.53]);
+  // const ground = new LambertianMaterial([0.48, 0.83, 0.53]);
 
-  const boxesPerSide = 20;
-  const w = 100.0;
-  const y0 = 0.0;
+  // const boxesPerSide = 20;
+  // const w = 100.0;
+  // const y0 = 0.0;
 
-  for (let i = 0; i < boxesPerSide; i++) {
-    for (let j = 0; j < boxesPerSide; j++) {
-      const x0 = -1000.0 + i * w;
-      const z0 = -1000.0 + j * w;
-      const x1 = x0 + w;
-      const y1 = randomNumberRange(1, 101);
-      const z1 = z0 + w;
+  // for (let i = 0; i < boxesPerSide; i++) {
+  //   for (let j = 0; j < boxesPerSide; j++) {
+  //     const x0 = -1000.0 + i * w;
+  //     const z0 = -1000.0 + j * w;
+  //     const x1 = x0 + w;
+  //     const y1 = randomNumberRange(1, 101);
+  //     const z1 = z0 + w;
 
-      boxes1.add(new Box([x0, y0, z0], [x1, y1, z1], ground));
-    }
-  }
+  //     boxes1.add(new Box([x0, y0, z0], [x1, y1, z1], ground));
+  //   }
+  // }
 
-  if (useBVH) {
-    world.add(BVHNode.createFromHitableList(boxes1, 0, 1));
-  } else {
-    world.add(boxes1);
-  }
+  // if (useBVH) {
+  //   world.add(BVHNode.createFromHitableList(boxes1, 0, 1));
+  // } else {
+  //   world.add(boxes1);
+  // }
 
-  const light = new DiffuseLight([7, 7, 7]);
-  world.add(new XZRect(123, 423, 147, 412, 554, light));
+  // const light = new DiffuseLight([7, 7, 7]);
+  // world.add(new XZRect(123, 423, 147, 412, 554, light));
 
-  const center1: vec3 = [400, 400, 200];
-  const center2 = vec3.add(vec3.create(), center1, [30, 0, 0]);
-  const movingSphereMaterial = new LambertianMaterial([0.7, 0.3, 0.1]);
-  world.add(new MovingSphere(center1, center2, 0, 1, 50, movingSphereMaterial));
+  // const center1: vec3 = [400, 400, 200];
+  // const center2 = vec3.add(vec3.create(), center1, [30, 0, 0]);
+  // const movingSphereMaterial = new LambertianMaterial([0.7, 0.3, 0.1]);
+  // world.add(new MovingSphere(center1, center2, 0, 1, 50, movingSphereMaterial));
 
-  world.add(new Sphere([260, 150, 45], 50, new DielectricMaterial(1.5)));
-  world.add(new Sphere([0, 150, 145], 50, new MetalMaterial([0.8, 0.8, 0.9], 10.0)));
+  // world.add(new Sphere([260, 150, 45], 50, new DielectricMaterial(1.5)));
+  // world.add(new Sphere([0, 150, 145], 50, new MetalMaterial([0.8, 0.8, 0.9], 10.0)));
 
-  const boundary1 = new Sphere([360, 150, 145], 70, new DielectricMaterial(1.5));
-  world.add(boundary1);
-  world.add(new ConstantMedium(boundary1, 0.2, [0.2, 0.4, 0.9]));
-  const boundary2 = new Sphere([0, 0, 0], 5000, new DielectricMaterial(1.5));
-  world.add(new ConstantMedium(boundary2, 0.0001, [1, 1, 1]));
+  // const boundary1 = new Sphere([360, 150, 145], 70, new DielectricMaterial(1.5));
+  // world.add(boundary1);
+  // world.add(new ConstantMedium(boundary1, 0.2, [0.2, 0.4, 0.9]));
+  // const boundary2 = new Sphere([0, 0, 0], 5000, new DielectricMaterial(1.5));
+  // world.add(new ConstantMedium(boundary2, 0.0001, [1, 1, 1]));
 
   const earthTexture = new ImageTexture();
   await earthTexture.load('assets/textures/earthmap.jpg');
 
-  const earthMaterial = new LambertianMaterial();
-  earthMaterial.texture = earthTexture;
-  world.add(new Sphere([400, 200, 400], 100, earthMaterial));
+  // const earthMaterial = new LambertianMaterial();
+  // earthMaterial.texture = earthTexture;
+  // world.add(new Sphere([400, 200, 400], 100, earthMaterial));
 
-  const perlinTexture = new NoiseTexture(0.1);
-  const perlinMaterial = new LambertianMaterial();
-  perlinMaterial.texture = perlinTexture;
-  world.add(new Sphere([220, 280, 300], 80, perlinMaterial));
+  // const perlinTexture = new NoiseTexture(0.1);
+  // const perlinMaterial = new LambertianMaterial();
+  // perlinMaterial.texture = perlinTexture;
+  // world.add(new Sphere([220, 280, 300], 80, perlinMaterial));
 
-  const boxes2 = new HittableList();
-  const white = new LambertianMaterial([0.73, 0.73, 0.73]);
-  for (let j = 0; j < 1000; j++) {
-    boxes2.add(new Sphere(randomRange(0, 165), 10, white));
-  }
+  // const boxes2 = new HittableList();
+  // const white = new LambertianMaterial([0.73, 0.73, 0.73]);
+  // for (let j = 0; j < 1000; j++) {
+  //   boxes2.add(new Sphere(randomRange(0, 165), 10, white));
+  // }
 
-  boxes2.transform.translate([-100, 270, 395]);
-  boxes2.transform.rotateEuler(0, 15, 0);
-  if (useBVH) {
-    world.add(BVHNode.createFromHitableList(boxes2, 0, 1));
-  } else {
-    world.add(boxes2);
-  }
+  // boxes2.transform.translate([-100, 270, 395]);
+  // boxes2.transform.rotateEuler(0, 15, 0);
+
+  // if (useBVH) {
+  //   world.add(BVHNode.createFromHitableList(boxes2, 0, 1));
+  // } else {
+  //   world.add(boxes2);
+  // }
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
@@ -350,10 +342,14 @@ async function finalScene(useBVH: boolean): Promise<{ world: HittableList; camer
     background: [0, 0, 0],
   };
 
+  if (useBVH) {
+    world.createBVH();
+  }
+
   return { world, cameraOptions };
 }
 
-async function gltfScene(useBVH: boolean): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+async function gltfScene(useBVH: boolean): Promise<{ world: World; cameraOptions: CameraOptions }> {
   // const world = await GLTFLoader.load('assets/models/cube.gltf');
   // const world = await GLTFLoader.load('assets/models/cube_transformed.gltf');
   // const world = await GLTFLoader.load('assets/models/uvsphere.gltf');
@@ -376,13 +372,58 @@ async function gltfScene(useBVH: boolean): Promise<{ world: HittableList; camera
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom, lookAt, fovY: 20 };
 
   if (useBVH) {
-    return {
-      world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)),
-      cameraOptions,
-    };
-  } else {
-    return { world: world, cameraOptions };
+    world.createBVH();
   }
+
+  return { world, cameraOptions };
+}
+
+function lightScene(useBVH: boolean): { world: World; cameraOptions: CameraOptions } {
+  const world = new World();
+
+  // floor
+  const checkerTexture = new CheckerTexture([0.8, 0.8, 0.8], [0.2, 0.2, 0.2], 20);
+  const floorMaterial = new LambertianMaterial();
+  floorMaterial.texture = checkerTexture;
+  const floor = new XZRect(0, 10, 0, 10, 0, floorMaterial);
+  floor.transform.translate([-5, 0, -5]);
+  world.addObject(floor);
+
+  const red = new LambertianMaterial([0.65, 0.05, 0.05]);
+  const green = new LambertianMaterial([0.12, 0.45, 0.15]);
+
+  const redSphere = new Sphere([0, 0, 0], 0.4, red);
+  redSphere.name = 'redSphere';
+  redSphere.transform.translate([-0.4, 0.4, 0]);
+
+  const greenSphere = new Sphere([0, 0, 0], 0.4, green);
+  greenSphere.name = 'greenSphere';
+  greenSphere.transform.translate([0.6, 0.4, 1]);
+
+  world.addObject(redSphere);
+  world.addObject(greenSphere);
+
+  // light
+  // const lightColor:vec3 = [0.1, 0.2, 0.6];
+  const lightColor: vec3 = [1, 1, 1];
+
+  const light = new PointLight([-5, 5, 2], lightColor, 10);
+  world.addLight(light);
+
+  const background: vec3 = [0.7, 0.8, 1.0];
+  // const background: vec3 = [0.0, 0.0, 0.0];
+  // const background: vec3 = [0.5, 0.5, 0.5];
+
+  const lookFrom: vec3 = [0, 2, 10];
+  const lookAt: vec3 = [0, 1, 0];
+
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, background, lookFrom, lookAt, fovY: 15 };
+
+  // if (useBVH) {
+  //   world.createBVH();
+  // }
+
+  return { world, cameraOptions };
 }
 
 const sceneCreators = [
@@ -396,12 +437,13 @@ const sceneCreators = [
   cornellBoxSmoke,
   finalScene,
   gltfScene,
+  lightScene,
 ];
 
 export async function getScene(
   sceneIndex: number,
   useBVH = false
-): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+): Promise<{ world: World; cameraOptions: CameraOptions }> {
   const { world, cameraOptions } = await sceneCreators[sceneIndex](useBVH);
   // const { world, cameraOptions } = await sceneCreators[sceneIndex](false);
   return { world, cameraOptions };

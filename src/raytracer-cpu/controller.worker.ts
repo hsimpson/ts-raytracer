@@ -1,8 +1,8 @@
 import ComputeWorker from 'worker-loader!./compute.worker';
 import { Camera } from '../camera';
-import { HittableList } from '../hittables';
 import { deserialize, serialize } from '../serializing';
 import { ComputeTile, createComputeTiles } from '../tiles';
+import { World } from '../world';
 import { DeserializerMap } from './deserializermap';
 import {
   ComputeCommands,
@@ -34,7 +34,7 @@ const start = (msg: ControllerStartMessage): void => {
 
   _pixelArray = new Uint8ClampedArray(imageWidth * imageHeight * 4);
 
-  const world = deserialize(HittableList, msg.data.world);
+  const world = deserialize(World, msg.data.world);
   const camera = deserialize(Camera, msg.data.camera);
 
   const workerIsDone = (msg: ComputeEndMessage): void => {
@@ -97,7 +97,7 @@ const start = (msg: ControllerStartMessage): void => {
       data: {
         workerId,
         camera: serialize(Camera, camera),
-        world: serialize(HittableList, world),
+        world: serialize(World, world),
         background: msg.data.background,
         imageWidth: imageWidth,
         imageHeight: imageHeight,

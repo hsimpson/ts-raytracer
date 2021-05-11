@@ -1,9 +1,9 @@
+import { vec3 } from 'gl-matrix';
 import { Camera } from '../camera';
 import { deserialize } from '../serializing/deserialize';
 import { randomNumber, writeColor } from '../util';
-import { vec3 } from 'gl-matrix';
+import { World } from '../world';
 import { DeserializerMap } from './deserializermap';
-import { HittableList } from '../hittables';
 import { rayColor } from './ray';
 import {
   ComputeCommands,
@@ -11,7 +11,7 @@ import {
   ComputeInitMessage,
   ComputeReadyMessage,
   ComputeStartMessage,
-  WorkerMessage,
+  WorkerMessage
 } from './workerinterfaces';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -20,7 +20,7 @@ const controllerCtx: Worker = self as never;
 
 let workerId: number;
 let camera: Camera;
-let world: HittableList;
+let world: World;
 let background: vec3;
 let imageWidth: number;
 let imageHeight: number;
@@ -30,7 +30,7 @@ let maxBounces: number;
 function init(msg: ComputeInitMessage): void {
   workerId = msg.data.workerId;
   camera = deserialize(Camera, msg.data.camera);
-  world = deserialize(HittableList, msg.data.world);
+  world = deserialize(World, msg.data.world);
   background = msg.data.background;
   imageWidth = msg.data.imageWidth;
   imageHeight = msg.data.imageHeight;

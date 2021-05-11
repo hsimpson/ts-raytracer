@@ -4,14 +4,15 @@ import { HittableList, Triangle } from './hittables';
 import { LambertianMaterial, Material, NormalMaterial } from './material';
 import { isDataUrl, isAbsoluteUrl } from './url';
 import path from 'path';
+import { World } from './world';
 
 // const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
 // const WHITEMATERIAL = new LambertianMaterial([0.73, 0.73, 0.73]);
 const NORMALMATERIAL = new NormalMaterial();
 NORMALMATERIAL.corrected = true;
 
-export async function load(url: string): Promise<HittableList> {
-  const triangleMeshArray: HittableList = new HittableList();
+export async function load(url: string): Promise<World> {
+  const triangleMeshArray: World = new World();
 
   const response = await fetch(url);
   const gltf = (await response.json()) as GLTF;
@@ -177,7 +178,7 @@ export async function load(url: string): Promise<HittableList> {
         // TODO: non indexed vertices
       }
     }
-    triangleMeshArray.add(triangleMesh);
+    triangleMeshArray.addObject(triangleMesh);
   }
 
   return triangleMeshArray;

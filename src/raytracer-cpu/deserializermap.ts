@@ -20,6 +20,8 @@ import {
   UVMaterial,
 } from '../material';
 import { CheckerTexture, ImageTexture, NoiseTexture, Perlin, SolidColor } from '../textures';
+import { PointLight } from '../lights';
+import { World } from '../world';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const DeserializerMap = {
@@ -46,4 +48,8 @@ export const DeserializerMap = {
   box: Box,
   constantMedium: ConstantMedium,
   triangle: Triangle,
+
+  pointlight: PointLight,
+
+  world: World,
 };
