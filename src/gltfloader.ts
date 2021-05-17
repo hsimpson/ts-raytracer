@@ -1,7 +1,7 @@
 import { quat, vec2, vec3, vec4 } from 'gl-matrix';
 import { GLTF, GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
 import { HittableList, Triangle } from './hittables';
-import { LambertianMaterial, Material, NormalMaterial } from './material';
+import { DiffuseLight, LambertianMaterial, Material, NormalMaterial } from './material';
 import { isDataUrl, isAbsoluteUrl } from './url';
 import path from 'path';
 
@@ -34,8 +34,16 @@ export async function load(url: string): Promise<HittableList> {
     if (!baseColor) {
       baseColor = vec4.fromValues(0.5, 0.5, 0.5, 1.0);
     }
-    const lamberMat = new LambertianMaterial([baseColor[0], baseColor[1], baseColor[2]]);
-    raytracingMaterial.push(lamberMat);
+
+    let mat: Material;
+    if (material.emissiveFactor) {
+      const emissiveColor = vec4.scale(vec4.create(), baseColor, 50);
+      mat = new DiffuseLight(vec3.fromValues(emissiveColor[0], emissiveColor[1], emissiveColor[2]));
+    } else {
+      mat = new LambertianMaterial([baseColor[0], baseColor[1], baseColor[2]]);
+    }
+
+    raytracingMaterial.push(mat);
   }
 
   // for each node

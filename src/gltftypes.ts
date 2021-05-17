@@ -92,6 +92,7 @@ export interface GLTFMaterial {
   doubleSided: boolean;
   name?: string;
   pbrMetallicRoughness?: GLTFPBRMetallicRoughness;
+  emissiveFactor?: vec3;
 }
 
 export interface GLTFPBRMetallicRoughness {

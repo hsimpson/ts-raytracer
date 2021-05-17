@@ -364,16 +364,26 @@ async function gltfScene(useBVH: boolean): Promise<{ world: HittableList; camera
   // const world = await GLTFLoader.load('assets/models/tetrahedron.gltf');
   // const world = await GLTFLoader.load('assets/models/triangle.gltf');
   // const world = await GLTFLoader.load('assets/models/triangle_applied.gltf');
-  const world = await GLTFLoader.load('assets/models/scene.gltf');
+  // const world = await GLTFLoader.load('assets/models/scene.gltf');
+  const world = await GLTFLoader.load('assets/models/mesh_light.gltf');
 
   // const w = world.objects[0] as HittableList;
 
-  const lookFrom: vec3 = [2, 1.5, 6];
-  const lookAt: vec3 = [0, 0, 0];
-  // const lookFrom = [0, 0, 0];
-  // const lookAt = [0, 0, -1];
+  // const lookFrom: vec3 = [2, 1.5, 6];
+  // const lookAt: vec3 = [0, 0, 0];
+  // const lookFrom: vec3 = [0, 0, 0];
+  // const lookAt: vec3 = [0, 0, -1];
 
-  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom, lookAt, fovY: 20 };
+  const lookFrom: vec3 = [0, 0.8, 1.9];
+  const lookAt: vec3 = [0, 0.8, -1];
+
+  const fovY = 71.74995067;
+  // const fovY = 20;
+
+  const background: vec3 = [0, 0, 0];
+  // const background: vec3 = [0.7, 0.8, 1.0];
+
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom, lookAt, fovY, background };
 
   if (useBVH) {
     return {
