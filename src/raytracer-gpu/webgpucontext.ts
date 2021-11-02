@@ -1,28 +1,12 @@
-// export class WebGPUContext {
-//   private _device: GPUDevice;
-//   private _queue: GPUQueue;
-
-//   public constructor(device: GPUDevice, queue: GPUQueue) {
-//     this._device = device;
-//     this._queue = queue;
-//   }
-
-//   public get device(): GPUDevice {
-//     return this._device;
-//   }
-
-//   public get queue(): GPUQueue {
-//     return this._queue;
-//   }
-// }
-
 export class WebGPUContext {
   private static _device: GPUDevice;
   private static _queue: GPUQueue;
+  private static _context: GPUCanvasContext;
 
-  public static createContext(device: GPUDevice, queue: GPUQueue): void {
+  public static createContext(device: GPUDevice, queue: GPUQueue, context: GPUCanvasContext): void {
     WebGPUContext._device = device;
     WebGPUContext._queue = queue;
+    WebGPUContext._context = context;
   }
 
   public static get device(): GPUDevice {
@@ -31,5 +15,9 @@ export class WebGPUContext {
 
   public static get queue(): GPUQueue {
     return WebGPUContext._queue;
+  }
+
+  public static get context(): GPUCanvasContext {
+    return WebGPUContext._context;
   }
 }

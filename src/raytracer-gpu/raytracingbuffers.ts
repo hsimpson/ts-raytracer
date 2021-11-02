@@ -464,7 +464,7 @@ export class RaytracingBuffers {
       // sampleCount: 1,
       // dimension: '2d',
       format: 'rgba8unorm', // rgba8unorm-srgb ???
-      usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.SAMPLED,
+      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
     });
 
     /*
@@ -493,7 +493,7 @@ export class RaytracingBuffers {
     }*/
       ();
 
-    WebGPUContext.queue.copyImageBitmapToTexture({ imageBitmap }, { texture }, imageSize);
+    WebGPUContext.queue.copyExternalImageToTexture({ source: imageBitmap }, { texture }, imageSize);
 
     /*
     const textureCopyBuffer = new WebGPUBuffer();
