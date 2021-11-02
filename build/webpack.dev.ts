@@ -1,6 +1,7 @@
 import { commonConfig } from './webpack.common';
 import { merge } from 'webpack-merge';
 import webpack from 'webpack';
+import path from 'path';
 
 const devConfig = merge(commonConfig, {
   mode: 'development',
@@ -8,9 +9,12 @@ const devConfig = merge(commonConfig, {
   // devtool: 'inline-source-map',
   watch: true,
   devServer: {
-    contentBase: './dist',
+    static: {
+      // directory: path.join(__dirname, 'public'),
+      directory: './dist',
+    },
     open: false,
-    port: 8080,
+    port: 8081,
   },
 } as webpack.Configuration);
 

@@ -1,6 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/triple-slash-reference
-/// <reference path="../../node_modules/@webgpu/types/dist/index.d.ts" />
-
 import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
@@ -18,9 +15,9 @@ export type RayTracerGPUOptions = RayTracerBaseOptions;
 export class RaytracerGPU extends RaytracerBase {
   private _initialized = false;
 
-  private _colorTextureView: GPUTextureView;
-  private _colorAttachment: GPURenderPassColorAttachmentNew;
-  private _swapchain: GPUSwapChain;
+  private _presentationFormat: GPUTextureFormat;
+  private _renderTarget: GPUTexture;
+  private _renderTargetView: GPUTextureView;
 
   public constructor(rayTracerGPUOptions: RayTracerGPUOptions) {
     super();
@@ -55,13 +52,7 @@ export class RaytracerGPU extends RaytracerBase {
     };
 
     const colorTexture = WebGPUContext.device.createTexture(colorTextureDesc);
-    this._colorTextureView = colorTexture.createView();
-
-    this._colorAttachment = {
-      view: null,
-      loadValue: { r: 0, g: 0, b: 0, a: 0 },
-      storeOp: 'store',
-    };
+    this._renderTargetView = colorTexture.createView();
 
     const aspectRatio = this._rayTracerOptions.imageWidth / this._rayTracerOptions.imageHeight;
 
@@ -201,15 +192,16 @@ export class RaytracerGPU extends RaytracerBase {
       const device = await adapter.requestDevice();
       const queue = device.queue;
 
-      WebGPUContext.createContext(device, queue);
+      const context: GPUCanvasContext = this._rayTracerOptions.canvas.getContext('webgpu');
+      this._presentationFormat = context.getPreferredFormat(adapter);
+      WebGPUContext.createContext(device, queue, context);
 
-      const context: GPUCanvasContext = this._rayTracerOptions.canvas.getContext('gpupresent');
-      const swapChainDesc: GPUSwapChainDescriptor = {
+      const canvasConfigure: GPUCanvasConfiguration = {
         device,
-        format: 'bgra8unorm',
+        format: this._presentationFormat,
         usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
       };
-      this._swapchain = context.configureSwapChain(swapChainDesc);
+      context.configure(canvasConfigure);
 
       this._initialized = true;
     } catch (error: unknown) {
@@ -234,10 +226,14 @@ export class RaytracerGPU extends RaytracerBase {
     const commandEncoder = WebGPUContext.device.createCommandEncoder();
 
     // renderPipeLine.updateUniformBuffer(sample);
-    this._colorAttachment.view = this._swapchain.getCurrentTexture().createView();
+    const colorAttachment: GPURenderPassColorAttachment = {
+      view: WebGPUContext.context.getCurrentTexture().createView(),
+      loadValue: { r: 0, g: 0, b: 0, a: 0 },
+      storeOp: 'store',
+    };
+
     const renderPassDesc: GPURenderPassDescriptor = {
-      colorAttachments: [this._colorAttachment],
-      //depthStencilAttachment: this._depthAttachment,
+      colorAttachments: [colorAttachment],
     };
 
     const passEncoder = commandEncoder.beginRenderPass(renderPassDesc);

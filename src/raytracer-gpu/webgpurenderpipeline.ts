@@ -154,7 +154,7 @@ export class WebGPURenderPipeline extends WebGPUPipelineBase {
       targets: [colorState],
     };
 
-    const pipelineDesc: GPURenderPipelineDescriptorNew = {
+    const pipelineDesc: GPURenderPipelineDescriptor = {
       layout,
       vertex: vertexState,
       primitive: primitiveState,

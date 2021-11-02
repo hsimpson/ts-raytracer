@@ -5,9 +5,15 @@ import fs from 'fs';
 
 const PLUGIN_NAME = 'spirvcompiler-webpack-plugin';
 
+export enum SpirvCompiler {
+  glslc,
+  glslangValidator,
+}
+
 interface SpirVCompilerPluginOptions {
-  compilerOptions: string;
+  // compilerOptions: string;
   inputFiles: string[];
+  compiler: SpirvCompiler;
   // watchDirs: string[];
 }
 
@@ -57,18 +63,24 @@ export default class SpirVCompilerPlugin /*extends webpack.Plugin*/ {
         }
 
         for (const inputFile of this.options.inputFiles) {
+          const fileName = path.basename(inputFile);
+          const outputFile = path.join(outputDir, `${fileName}.spv`);
           // console.log(`+++ inputfile: ${inputFile}`);
           // console.log(`+++ outputFile: ${outputFile}`);
 
-          const fileName = path.basename(inputFile);
-          const outputFile = path.join(outputDir, `${fileName}.spv`);
+          let cmd = '';
+          let args = [];
+          switch (this.options.compiler) {
+            case SpirvCompiler.glslc:
+              cmd = 'glslc'; // glslc.exe on windows
+              args.push([inputFile, '-o', outputFile]);
+              break;
+            case SpirvCompiler.glslangValidator:
+              cmd = 'glslangValidator'; // glslangValidator.exe on windows
+              args.push(['-V', '-o', outputFile, inputFile]);
+              break;
+          }
 
-          const cmd = 'glslc'; // glslc.exe on windows
-          //console.log(`cmd: ${cmd}`);
-
-          // TODO: error handling from stderr
-          // spawn.execSync(cmd);
-          const args = [inputFile, this.options.compilerOptions, outputFile];
           promises.push(this.callCompiler(compilation, cmd, args));
         }
 
