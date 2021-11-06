@@ -1,8 +1,6 @@
 import webpack from 'webpack';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
-import SpirVCompilerPlugin, { SpirvCompiler } from './spirvcompilerplugin';
-import WatchExternalFilesPlugin from 'webpack-watch-files-plugin';
 import path from 'path';
 
 const commonConfig: webpack.Configuration = {
@@ -37,22 +35,7 @@ const commonConfig: webpack.Configuration = {
     new HtmlWebpackPlugin({
       template: './src/index.html',
     }),
-    new SpirVCompilerPlugin({
-      compiler: SpirvCompiler.glslangValidator,
-      // compilerOptions: '-o',
-      inputFiles: [
-        './src/raytracer-gpu/shaders/raytracer.comp',
-        './src/raytracer-gpu/shaders/renderer.vert',
-        './src/raytracer-gpu/shaders/renderer.frag',
-      ],
-    }),
-    new WatchExternalFilesPlugin({
-      files: [
-        './src/raytracer-gpu/shaders/**/*.comp',
-        './src/raytracer-gpu/shaders/*.vert',
-        './src/raytracer-gpu/shaders/*.frag',
-      ],
-    }),
+
     new CopyWebpackPlugin({
       patterns: [
         {
@@ -69,7 +52,7 @@ const commonConfig: webpack.Configuration = {
           to: '[name][ext]',
         },
       ],
-    }),
+    }) as any,
   ],
 };
 

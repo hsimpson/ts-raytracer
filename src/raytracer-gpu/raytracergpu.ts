@@ -72,7 +72,7 @@ export class RaytracerGPU extends RaytracerBase {
     );
 
     const computePipeline = new WebGPUComputePipline({
-      computeShaderUrl: 'raytracer.comp.spv',
+      computeShaderUrl: 'raytracer.comp.wgsl',
       uniformParams: {
         background: cameraOptions.background,
         tileOffsetX: 0,
