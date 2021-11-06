@@ -64,6 +64,10 @@ const commonConfig: webpack.Configuration = {
           context: path.resolve('src', 'assets', 'models'),
           to: 'assets/models/[path][name][ext]',
         },
+        {
+          from: './src/raytracer-gpu/shaders/**/*.wgsl',
+          to: '[name][ext]',
+        },
       ],
     }),
   ],

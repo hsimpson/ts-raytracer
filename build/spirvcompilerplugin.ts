@@ -29,6 +29,7 @@ export default class SpirVCompilerPlugin /*extends webpack.Plugin*/ {
     const logger = compilation.getLogger(PLUGIN_NAME);
     return new Promise((resolve) => {
       const child = child_process.spawn(cmd, args);
+      // logger.info(`${cmd} ${args.join(' ')}`);
 
       let stderrStr = '';
 
@@ -73,11 +74,11 @@ export default class SpirVCompilerPlugin /*extends webpack.Plugin*/ {
           switch (this.options.compiler) {
             case SpirvCompiler.glslc:
               cmd = 'glslc'; // glslc.exe on windows
-              args.push([inputFile, '-o', outputFile]);
+              args.push(...[inputFile, '-o', outputFile]);
               break;
             case SpirvCompiler.glslangValidator:
               cmd = 'glslangValidator'; // glslangValidator.exe on windows
-              args.push(['-V', '-o', outputFile, inputFile]);
+              args.push(...['-V', '-o', outputFile, inputFile]);
               break;
           }
 

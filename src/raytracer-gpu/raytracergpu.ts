@@ -92,8 +92,8 @@ export class RaytracerGPU extends RaytracerBase {
     await computePipeline.initialize();
 
     const renderPipeline = new WebGPURenderPipeline({
-      vertexShaderUrl: 'renderer.vert.spv',
-      fragmentShaderUrl: 'renderer.frag.spv',
+      vertexShaderUrl: 'renderer.vert.wgsl',
+      fragmentShaderUrl: 'renderer.frag.wgsl',
       sharedPixelBuffer: computePipeline.pixelBuffer,
       uniformParams: {
         width: this._rayTracerOptions.imageWidth,
