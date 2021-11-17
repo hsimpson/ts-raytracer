@@ -21,7 +21,7 @@ interface ComputeUniformParams {
 }
 
 interface WebGPUComputePiplineOptions {
-  computeShaderUrl: string;
+  computeShaderUrl: URL;
   uniformParams: ComputeUniformParams;
   camera: Camera;
   world: HittableList;

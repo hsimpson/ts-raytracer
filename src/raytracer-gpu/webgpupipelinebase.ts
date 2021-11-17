@@ -1,5 +1,6 @@
 import { WebGPUContext } from './webgpucontext';
 import { WebGPUObjectBase } from './webgpuobjectbase';
+import { preprocessShader } from './wgslpreprocessor';
 
 interface IUniformParams {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -12,25 +13,30 @@ export abstract class WebGPUPipelineBase extends WebGPUObjectBase {
   protected _bindGroupLayout: GPUBindGroupLayout;
   protected _bindGroup: GPUBindGroup;
 
-  protected async loadShader(shaderUrl: string): Promise<GPUShaderModule> {
-    const response = await fetch(shaderUrl);
-    let shaderModule: GPUShaderModule;
+  protected async loadShader(shaderUrl: URL): Promise<GPUShaderModule> {
     console.log(`compiling shader: ${shaderUrl}`);
 
-    if (shaderUrl.endsWith('wgsl')) {
-      shaderModule = WebGPUContext.device.createShaderModule({
-        code: await response.text(),
-      });
-    } else {
-      const buffer = await response.arrayBuffer();
-      shaderModule = WebGPUContext.device.createShaderModule({
-        code: new Uint32Array(buffer),
-      });
-    }
+    const code = await preprocessShader(shaderUrl);
+    const shaderModule = WebGPUContext.device.createShaderModule({
+      code,
+    });
+
+    let error = false;
+    let warning = false;
 
     const compilationInfo = await shaderModule.compilationInfo();
     for (const message of compilationInfo.messages) {
+      if (message.type === 'error') {
+        error = true;
+      }
+      if (message.type === 'warning') {
+        warning = true;
+      }
       console.log(message.message);
+    }
+
+    if (error || warning) {
+      console.log(code);
     }
 
     return shaderModule;

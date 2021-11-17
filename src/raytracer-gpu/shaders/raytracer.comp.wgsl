@@ -1,3 +1,5 @@
+#include "./utils.wgsl"
+#include "./camera.wgsl"
 
 [[block]] struct ComputeParams {
   background: vec3<f32>;
@@ -12,6 +14,7 @@
   padding_2: f32;
 };
 [[binding(0), group(0)]] var<uniform> computeParams: ComputeParams;
+
 
 [[block]] struct PixelBuffer {
   pixels: array<vec4<f32>>;

@@ -71,8 +71,10 @@ export class RaytracerGPU extends RaytracerBase {
       0.1
     );
 
+    const baseUrl = window.location.origin;
+
     const computePipeline = new WebGPUComputePipline({
-      computeShaderUrl: 'raytracer.comp.wgsl',
+      computeShaderUrl: new URL('./raytracer.comp.wgsl', baseUrl),
       uniformParams: {
         background: cameraOptions.background,
         tileOffsetX: 0,
@@ -92,8 +94,8 @@ export class RaytracerGPU extends RaytracerBase {
     await computePipeline.initialize();
 
     const renderPipeline = new WebGPURenderPipeline({
-      vertexShaderUrl: 'renderer.vert.wgsl',
-      fragmentShaderUrl: 'renderer.frag.wgsl',
+      vertexShaderUrl: new URL('./renderer.vert.wgsl', baseUrl),
+      fragmentShaderUrl: new URL('renderer.frag.wgsl', baseUrl),
       sharedPixelBuffer: computePipeline.pixelBuffer,
       uniformParams: {
         width: this._rayTracerOptions.imageWidth,

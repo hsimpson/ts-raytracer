@@ -8,8 +8,8 @@ interface RenderUniformParams {
 }
 
 interface WebGPURenderPipelineOptions {
-  vertexShaderUrl: string;
-  fragmentShaderUrl: string;
+  vertexShaderUrl: URL;
+  fragmentShaderUrl: URL;
   sharedPixelBuffer: WebGPUBuffer;
   uniformParams: RenderUniformParams;
 }
