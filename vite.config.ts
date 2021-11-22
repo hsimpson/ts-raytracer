@@ -7,4 +7,7 @@ export default defineConfig({
   server: {
     port: 8081,
   },
+  build: {
+    minify: false,
+  },
 });
