@@ -43,5 +43,4 @@ fn main([[builtin(global_invocation_id)]] GlobalInvocationID: vec3<u32>) {
 
   pixelColor = pow(pixelColor, vec3<f32>(1.0 / 2.2));
   pixelBuffer.pixels[pixelIndex] = vec4<f32>(pixelColor, 1.0);
-
 }

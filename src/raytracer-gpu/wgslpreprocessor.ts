@@ -26,7 +26,8 @@ async function includeShaders(shaderUrl: URL): Promise<string> {
   let shaderText = await getUrlContent(shaderUrl);
   let match;
   INCLUDE_REGEX.lastIndex = 0;
-  const baseUrl = shaderUrl.toString().replace(shaderUrl.pathname, '');
+  const shaderUrlStr = shaderUrl.toString();
+  const baseUrl = shaderUrlStr.substring(0, shaderUrl.toString().lastIndexOf('/') + 1);
 
   while ((match = INCLUDE_REGEX.exec(shaderText)) !== null) {
     // This is necessary to avoid infinite loops with zero-width matches

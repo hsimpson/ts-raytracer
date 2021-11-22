@@ -1,4 +1,4 @@
-import ComputeWorker from 'worker-loader!./compute.worker';
+import ComputeWorker from './compute.worker?worker';
 import { Camera } from '../camera';
 import { HittableList } from '../hittables';
 import { deserialize, serialize } from '../serializing';
@@ -21,7 +21,7 @@ import {
 const map = DeserializerMap;
 
 const _controllerCtx: Worker = self as never;
-const _computeWorkers: Map<number, ComputeWorker> = new Map<number, ComputeWorker>();
+const _computeWorkers: Map<number, Worker> = new Map<number, Worker>();
 let _pixelArray: Uint8ClampedArray;
 
 const start = (msg: ControllerStartMessage): void => {

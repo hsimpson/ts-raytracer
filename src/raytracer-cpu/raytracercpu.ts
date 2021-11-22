@@ -1,4 +1,4 @@
-import ControllerWorker from 'worker-loader!./controller.worker';
+import ControllerWorker from './controller.worker?worker';
 import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
@@ -18,13 +18,12 @@ export interface RayTracerCPUOptions extends RayTracerBaseOptions {
 }
 
 export class RaytracerCPU extends RaytracerBase {
-  private _controllerWorker: ControllerWorker;
+  private _controllerWorker = new ControllerWorker();
   private _context2D: CanvasRenderingContext2D;
 
   public constructor(rayTracerCPUOptions: RayTracerCPUOptions) {
     super();
     this._rayTracerOptions = rayTracerCPUOptions;
-    this._controllerWorker = new ControllerWorker();
   }
 
   private updateImage(imageArray: Uint8ClampedArray): void {
