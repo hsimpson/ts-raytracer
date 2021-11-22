@@ -1,3 +1,5 @@
+import { urlDirname } from '../url';
+
 const INCLUDE_REGEX = /^#include\s"(.*)"$/gm;
 
 interface ShaderMap {
@@ -27,7 +29,7 @@ async function includeShaders(shaderUrl: URL): Promise<string> {
   let match;
   INCLUDE_REGEX.lastIndex = 0;
   const shaderUrlStr = shaderUrl.toString();
-  const baseUrl = shaderUrlStr.substring(0, shaderUrl.toString().lastIndexOf('/') + 1);
+  const baseUrl = urlDirname(shaderUrlStr);
 
   while ((match = INCLUDE_REGEX.exec(shaderText)) !== null) {
     // This is necessary to avoid infinite loops with zero-width matches
