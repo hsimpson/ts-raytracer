@@ -11,11 +11,11 @@ struct FragmentOutput {
   width: f32;
   height: f32;
 };
+
 [[binding(0), group(0)]] var<uniform> computeParams : ComputeParams;
 
 [[block]] struct PixelBuffer {
   pixels: array<vec4<f32>>;
-
 };
 [[binding(1), group(0)]] var<storage, read> pixelBuffer : PixelBuffer;
 

@@ -27,5 +27,8 @@
   "python.languageServer": "Pylance",
   "python.linting.enabled": true,
   "python.linting.pylintEnabled": true,
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "github.copilot.enable": {
+    "wgsl": false
+  }
 }

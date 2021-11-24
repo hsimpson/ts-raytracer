@@ -1,5 +1,7 @@
-#include "./utils.wgsl"
 #include "./camera.wgsl"
+#include "./utils.wgsl"
+
+let FLT_MAX = 99999.99;
 
 [[block]] struct ComputeParams {
   background: vec3<f32>;
@@ -27,6 +29,28 @@
 [[binding(2), group(0)]] var<storage, read_write> pixelBuffer : PixelBuffer;
 [[binding(3), group(0)]] var<storage, read_write> accumulationBuffer : AccumlationBuffer;
 
+#include "./hittable/hittable.wgsl"
+
+fn rayColor(ray: ptr<function, Ray, read_write>, background: vec3<f32>, depth: u32) 
+-> vec3<f32> {
+  var rec: HitRecord;
+  var color = vec3<f32>(1.0, 1.0, 1.0);
+
+  for(var i = 0u; i < depth; i = i + 1u) {
+    if(hittableListHit(ray, 0.001, FLT_MAX, &rec)) {
+      var newRay: Ray;
+      var attenuation: vec3<f32>;
+      
+      // TODO 
+    } else {
+      color = color * background;
+      break;
+    }
+  }
+
+  return color;
+}
+
 
 [[stage(compute), workgroup_size(8,8,1)]]
 fn main([[builtin(global_invocation_id)]] GlobalInvocationID: vec3<u32>) {
@@ -34,7 +58,25 @@ fn main([[builtin(global_invocation_id)]] GlobalInvocationID: vec3<u32>) {
   index.x = index.x + u32(computeParams.tileOffsetX);
   index.y = index.y + u32(computeParams.tileOffsetY);
 
-  var pixelColor: vec3<f32> = vec3<f32>(0.578, 0.656, 1.0);
+  let i = f32(index.x);
+  let j = computeParams.height - f32(index.y);
+
+  initSeed(index.x * index.y * u32(computeParams.currentSample) * 100000u);
+  let bounces = u32(computeParams.maxBounces);
+  let rnd = random();
+
+  let u = (i + rnd) / (computeParams.width - 1.0);
+  let v = (j + rnd) / (computeParams.height - 1.0);
+  var ray = cameraGetRay(u, v);
+  var pixelColor = rayColor(&ray, computeParams.background, bounces);
+
+
+  // var pixelColor: vec3<f32> = vec3<f32>(0.578, 0.656, 1.0);
+  // var pixelColor: vec3<f32> = vec3<f32>(
+  //   randomMinMax(0.0, 1.0),
+  //   randomMinMax(0.0, 1.0),
+  //   randomMinMax(0.0, 1.0)
+  // );
 
   let pixelIndex: u32 = index.y * u32(computeParams.width) + index.x;
   let accumulatedColor: vec3<f32> = accumulationBuffer.pixels[pixelIndex].rgb + pixelColor;
