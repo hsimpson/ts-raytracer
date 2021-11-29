@@ -4,10 +4,14 @@ let HITTABLETYPE_MOVINGSPHERE = 1u;
 let HITTABLETYPE_XYRECT = 2u;
 let HITTABLETYPE_XZRECT = 3u;
 let HITTABLETYPE_YZRECT = 4u;
-// let HITTABLETYPE_CONSTANTMEDIUM = 5u;
+let HITTABLETYPE_CONSTANTMEDIUM = 5u;
 let HITTABLETYPE_TRIANGLE = 6u;
 
+#include "../ray.wgsl"
 #include "./hittable_base.wgsl"
+#include "./sphere.wgsl"
+
+// FIXME: case identifiers
 
 fn hitPrimitve(
   primitve: Primitve,
@@ -19,15 +23,22 @@ fn hitPrimitve(
   let primitiveType = primitve.primitiveType;
   var hitted: bool = false;
 
-  switch (primitiveType) {
-    case 0u: {
-      //hitted = hitSphere(primitve, ray, tMin, tMax, rec);
-      hitted = true;
-      break;
-    }
-    default: {
-      break;
-    }
+  if(primitiveType == HITTABLETYPE_SPHERE) {
+    hitted = hitSphere(primitve, ray, tMin, tMax, rec);
+  } elseif(primitiveType == HITTABLETYPE_MOVINGSPHERE) {
+    // hitted = hitSphere(primitve, ray, tMin, tMax, rec);
+  } elseif(primitiveType == HITTABLETYPE_XYRECT) {
+    // hitted = hitSphere(primitve, ray, tMin, tMax, rec);
+  } elseif(primitiveType == HITTABLETYPE_XZRECT) {
+    // hitted = hitSphere(primitve, ray, tMin, tMax, rec);
+  } elseif(primitiveType == HITTABLETYPE_YZRECT) {
+    // hitted = hitSphere(primitve, ray, tMin, tMax, rec);
+  } elseif(primitiveType == HITTABLETYPE_CONSTANTMEDIUM) {
+    // hitted = hitSphere(primitve, ray, tMin, tMax, rec);
+  } elseif(primitiveType == HITTABLETYPE_TRIANGLE) {
+    // hitted = hitSphere(primitve, ray, tMin, tMax, rec);
+  } else {
+    hitted = false;
   }
 
   return hitted;

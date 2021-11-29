@@ -17,7 +17,7 @@ struct HitRecord {
 
 fn setFaceNormal(
   rec: ptr<function, HitRecord, read_write>,
-  ray: ptr<function, Ray, read>,
+  ray: ptr<function, Ray, read_write>,
   outwardNormal: vec3<f32>) {
   if(dot((*ray).direction, outwardNormal) < 0.0) {
     (*rec).frontFace = true;
@@ -28,11 +28,11 @@ fn setFaceNormal(
   }
 }
 
-fn rayAt(ray: ptr<function, Ray, read>, t: f32) -> vec3<f32> {
+fn rayAt(ray: ptr<function, Ray, read_write>, t: f32) -> vec3<f32> {
   return (*ray).origin + t * (*ray).direction;
 }
 
-fn transformRay(ray: ptr<function, Ray, read>, objectToWorld: mat4x4<f32>) -> Ray {
+fn transformRay(ray: ptr<function, Ray, read_write>, objectToWorld: mat4x4<f32>) -> Ray {
   let rotationmatrix: mat4x4<f32> = mat4x4<f32>(
     objectToWorld[0],
     objectToWorld[1],

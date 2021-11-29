@@ -30,6 +30,7 @@ let FLT_MAX = 99999.99;
 [[binding(3), group(0)]] var<storage, read_write> accumulationBuffer : AccumlationBuffer;
 
 #include "./hittable/hittable.wgsl"
+#include "./material/material.wgsl"
 
 fn rayColor(ray: ptr<function, Ray, read_write>, background: vec3<f32>, depth: u32) 
 -> vec3<f32> {
@@ -40,8 +41,19 @@ fn rayColor(ray: ptr<function, Ray, read_write>, background: vec3<f32>, depth: u
     if(hittableListHit(ray, 0.001, FLT_MAX, &rec)) {
       var newRay: Ray;
       var attenuation: vec3<f32>;
+      let emitted = materialEmitted(ray, &rec);
+      let wasScattered = materialScatter(ray, &rec, &attenuation, &newRay);
       
-      // TODO 
+
+      (*ray) = newRay;
+
+      if(wasScattered) {
+        color = color * (emitted + attenuation);
+      } else {
+        color = color * emitted;
+        break;
+      }
+
     } else {
       color = color * background;
       break;
