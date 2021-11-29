@@ -17,11 +17,21 @@ async function getShaderHash(text: string): Promise<string> {
 }
 
 async function getUrlContent(url: URL): Promise<string> {
-  const response = await fetch(url.toString());
+  const shaderUrl = url.toString();
+  const response = await fetch(shaderUrl);
+  let content = '';
   if (response.ok) {
-    return response.text();
+    const shaderCode = await response.text();
+    const hash = await getShaderHash(shaderCode);
+    if (!shaderMap[hash]) {
+      console.log(`Using shader module ${shaderUrl}`);
+      shaderMap[hash] = true;
+      content = shaderCode;
+    }
+  } else {
+    console.error(`Failed to load shader module ${shaderUrl}`);
   }
-  return '';
+  return content;
 }
 
 async function includeShaders(shaderUrl: URL): Promise<string> {
@@ -44,13 +54,7 @@ async function includeShaders(shaderUrl: URL): Promise<string> {
       const includeUrl = new URL(filename, baseUrl);
       const includeText = await includeShaders(includeUrl);
 
-      const hash = await getShaderHash(includeText);
-      if (!shaderMap[hash]) {
-        shaderMap[hash] = true;
-        shaderText = shaderText.replace(replacement, includeText);
-      } else {
-        shaderText = shaderText.replace(replacement, '');
-      }
+      shaderText = shaderText.replace(replacement, includeText);
     }
   }
 
