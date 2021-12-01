@@ -40,8 +40,10 @@ fn transformRay(ray: ptr<function, Ray, read_write>, objectToWorld: mat4x4<f32>)
     vec4<f32>(0.0, 0.0, 0.0, 1.0)
   );
 
-  let origin: vec4<f32> = inverseMatrix4x4(objectToWorld) * vec4<f32>((*ray).origin, 1.0);
-  let direction: vec4<f32> = inverseMatrix4x4(rotationmatrix) * vec4<f32>((*ray).direction, 1.0);
+  // let origin: vec4<f32> = inverseMatrix4x4(objectToWorld) * vec4<f32>((*ray).origin, 1.0);
+  // let direction: vec4<f32> = inverseMatrix4x4(rotationmatrix) * vec4<f32>((*ray).direction, 1.0);
+  let origin: vec4<f32> = objectToWorld * vec4<f32>((*ray).origin, 1.0);
+  let direction: vec4<f32> = rotationmatrix * vec4<f32>((*ray).direction, 1.0);
 
   return Ray (
     origin.xyz,
