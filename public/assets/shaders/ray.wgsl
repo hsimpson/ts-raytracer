@@ -32,18 +32,13 @@ fn rayAt(ray: ptr<function, Ray, read_write>, t: f32) -> vec3<f32> {
   return (*ray).origin + t * (*ray).direction;
 }
 
-fn transformRay(ray: ptr<function, Ray, read_write>, objectToWorld: mat4x4<f32>) -> Ray {
-  let rotationmatrix: mat4x4<f32> = mat4x4<f32>(
-    objectToWorld[0],
-    objectToWorld[1],
-    objectToWorld[2],
-    vec4<f32>(0.0, 0.0, 0.0, 1.0)
-  );
-
-  // let origin: vec4<f32> = inverseMatrix4x4(objectToWorld) * vec4<f32>((*ray).origin, 1.0);
-  // let direction: vec4<f32> = inverseMatrix4x4(rotationmatrix) * vec4<f32>((*ray).direction, 1.0);
-  let origin: vec4<f32> = objectToWorld * vec4<f32>((*ray).origin, 1.0);
-  let direction: vec4<f32> = rotationmatrix * vec4<f32>((*ray).direction, 1.0);
+fn transformRay(
+  ray: ptr<function, Ray, read_write>, 
+  inverseMatrix: mat4x4<f32>,
+  inverseRotation: mat4x4<f32>) -> Ray {
+  
+  let origin: vec4<f32> = inverseMatrix * vec4<f32>((*ray).origin, 1.0);
+  let direction: vec4<f32> = inverseRotation * vec4<f32>((*ray).direction, 1.0);
 
   return Ray (
     origin.xyz,

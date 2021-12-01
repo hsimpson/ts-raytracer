@@ -9,7 +9,7 @@ fn hitXYRect(
   tMax: f32,
   rec: ptr<function, HitRecord, read_write>
 ) -> bool {
-  var transformedRay = transformRay(ray, rect.objectToWorld);
+  var transformedRay = transformRay(ray, rect.inverseMatrix, rect.inverseRotation);
 
   let t = (rect.k - transformedRay.origin.z) / transformedRay.direction.z;
   if (t < tMin || t > tMax) {
@@ -43,7 +43,7 @@ fn hitXZRect(
   tMax: f32,
   rec: ptr<function, HitRecord, read_write>
 ) -> bool {
-  var transformedRay = transformRay(ray, rect.objectToWorld);
+  var transformedRay = transformRay(ray, rect.inverseMatrix, rect.inverseRotation);
 
   let t = (rect.k - transformedRay.origin.y) / transformedRay.direction.y;
   if (t < tMin || t > tMax) {
@@ -77,7 +77,7 @@ fn hitYZRect(
   tMax: f32,
   rec: ptr<function, HitRecord, read_write>
 ) -> bool {
-  var transformedRay = transformRay(ray, rect.objectToWorld);
+  var transformedRay = transformRay(ray, rect.inverseMatrix, rect.inverseRotation);
 
   let t = (rect.k - transformedRay.origin.x) / transformedRay.direction.x;
   if (t < tMin || t > tMax) {

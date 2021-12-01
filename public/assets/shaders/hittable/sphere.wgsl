@@ -9,7 +9,7 @@ fn hitSphere(
   tMax: f32,
   rec: ptr<function, HitRecord, read_write>
 ) -> bool {
-  var transformedRay = transformRay(ray, sphere.objectToWorld);
+  var transformedRay = transformRay(ray, sphere.inverseMatrix, sphere.inverseRotation);
 
   let center       = sphere.center0.xyz;
   let oc           = transformedRay.origin - center;

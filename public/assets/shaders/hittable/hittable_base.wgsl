@@ -1,5 +1,8 @@
 struct Primitve {
   objectToWorld: mat4x4<f32>;
+  inverseMatrix: mat4x4<f32>;
+  inverseRotation: mat4x4<f32>;
+  
   bounds: vec4<f32>;
   center0: vec4<f32>;  // center0 xyz, time0 w
   center1: vec4<f32>;  // center1 xyz, time1 w
