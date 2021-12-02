@@ -13,7 +13,7 @@ let MATERIALTYPE_NORMAL = 5u;
 #include "./metal.wgsl"
 #include "./dielectric.wgsl"
 #include "./diffuselight.wgsl"
-// #include "./normal.wgsl"
+#include "./normal.wgsl"
 
 fn materialScatter(
   ray: ptr<function, Ray, read_write>,
@@ -34,7 +34,7 @@ fn materialScatter(
   } elseif(materialType == MATERIALTYPE_DIELECTRIC) {
     wasScattered = dielectricScatter(material, ray, rec, attenuation, scattered);
   } elseif(materialType == MATERIALTYPE_NORMAL) {
-    //
+    wasScattered =  normalScattered(material, ray, rec, attenuation, scattered);
   } else {
     wasScattered = false;
   }

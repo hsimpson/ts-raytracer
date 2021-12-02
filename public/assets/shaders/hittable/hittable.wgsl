@@ -12,7 +12,7 @@ let HITTABLETYPE_TRIANGLE = 6u;
 #include "./sphere.wgsl"
 // #include "./movingsphere.wgsl"
 #include "./rect.wgsl"
-// #include "./triangle.wgsl"
+#include "./triangle.wgsl"
 
 // FIXME: case identifiers
 
@@ -39,7 +39,7 @@ fn hitPrimitve(
   } elseif(primitiveType == HITTABLETYPE_CONSTANTMEDIUM) {
     // hitted = hitSphere(primitve, ray, tMin, tMax, rec);
   } elseif(primitiveType == HITTABLETYPE_TRIANGLE) {
-    // hitted = hitSphere(primitve, ray, tMin, tMax, rec);
+    hitted = hitTriangle(primitve, ray, tMin, tMax, rec);
   } else {
     hitted = false;
   }

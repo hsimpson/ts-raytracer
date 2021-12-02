@@ -1,12 +1,11 @@
-import ControllerWorker from './controller.worker?worker';
 import { Camera } from '../camera';
+import { HittableList } from '../hittables';
 import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
 import { serialize } from '../serializing';
-import { HittableList } from '../hittables';
+import ControllerWorker from './controller.worker?worker';
 import {
   ControllerCommands,
-  ControllerEndMessage,
   ControllerStartMessage,
   ControllerStopMessage,
   ControllerUpdateMessage,
@@ -56,7 +55,7 @@ export class RaytracerCPU extends RaytracerBase {
     const stats = `CPU, cores: ${cores} -- ${this.getStats(duration)}`;
 
     if (this._rayTracerOptions.download) {
-      await this.downloadImage(this._rayTracerOptions.canvas, this._context2D, stats);
+      await this.downloadImage(this._context2D, stats);
     }
 
     if (this._doneCallback) {

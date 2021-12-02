@@ -170,7 +170,7 @@ export class RaytracerGPU extends RaytracerBase {
       }
 
       canvas2dContext.putImageData(imageData, 0, 0);
-      await this.downloadImage(canvas2d, canvas2dContext, stats);
+      await this.downloadImage(canvas2dContext, stats);
     }
 
     if (this._doneCallback) {
