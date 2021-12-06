@@ -10,7 +10,7 @@ let HITTABLETYPE_TRIANGLE = 6u;
 #include "../ray.wgsl"
 #include "./hittable_base.wgsl"
 #include "./sphere.wgsl"
-// #include "./movingsphere.wgsl"
+#include "./movingsphere.wgsl"
 #include "./rect.wgsl"
 #include "./triangle.wgsl"
 
@@ -29,7 +29,7 @@ fn hitPrimitve(
   if(primitiveType == HITTABLETYPE_SPHERE) {
     hitted = hitSphere(primitve, ray, tMin, tMax, rec);
   } elseif(primitiveType == HITTABLETYPE_MOVINGSPHERE) {
-    // hitted = hitSphere(primitve, ray, tMin, tMax, rec);
+    hitted = hitMovingSphere(primitve, ray, tMin, tMax, rec);
   } elseif(primitiveType == HITTABLETYPE_XYRECT) {
     hitted = hitXYRect(primitve, ray, tMin, tMax, rec);
   } elseif(primitiveType == HITTABLETYPE_XZRECT) {
