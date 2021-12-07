@@ -12,7 +12,7 @@
   t0: f32;
   t1: f32;
 };
-[[binding(1), group(0)]] var<uniform> camera: Camera;
+[[group(0), binding(1)]] var<uniform> camera: Camera;
 
 
 fn cameraGetRay(s: f32, t: f32) -> Ray {

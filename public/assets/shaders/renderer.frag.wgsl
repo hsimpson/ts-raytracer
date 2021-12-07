@@ -12,12 +12,12 @@ struct FragmentOutput {
   height: f32;
 };
 
-[[binding(0), group(0)]] var<uniform> computeParams : ComputeParams;
+[[group(0), binding(0)]] var<uniform> computeParams : ComputeParams;
 
 [[block]] struct PixelBuffer {
   pixels: array<vec4<f32>>;
 };
-[[binding(1), group(0)]] var<storage, read> pixelBuffer : PixelBuffer;
+[[group(0), binding(1)]] var<storage, read> pixelBuffer : PixelBuffer;
 
 [[stage(fragment)]]
 fn main(input: FragmentInput) -> FragmentOutput {

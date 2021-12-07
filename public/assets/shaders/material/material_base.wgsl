@@ -10,4 +10,4 @@ struct Material {
   materials: array<Material>;
 };
 
-[[binding(5), group(0)]] var<storage, read_write> materialBuffer: Materials;
+[[group(0), binding(5)]] var<storage, read_write> materialBuffer: Materials;

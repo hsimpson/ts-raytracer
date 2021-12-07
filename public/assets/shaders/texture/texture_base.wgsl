@@ -18,4 +18,4 @@ struct Texture {
   textures: array<Texture>;
 };
 
-[[binding(6), group(0)]] var<storage, read_write> textureBuffer: Textures;
+[[group(0), binding(6)]] var<storage, read_write> textureBuffer: Textures;
