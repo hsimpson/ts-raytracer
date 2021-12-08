@@ -1,0 +1,75 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  vertical-align: baseline;
+  background: #cdcdcd;
+  width: 100vw;
+  height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  overflow: hidden;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 250px auto;
+  overflow: hidden;
+}
+
+.gui {
+  display: grid;
+  padding: 10px;
+  grid-gap: 10px;
+  grid-auto-rows: max-content;
+}
+
+.input,
+.dropdown {
+  display: grid;
+  grid-gap: 5px;
+}
+
+.checkbox.disabled {
+  color: #909090;
+}
+
+.renderButton {
+  font-size: 18px;
+  font-weight: bold;
+  padding: 5px;
+}
+
+.render-container {
+  display: grid;
+  grid-template-rows: 30px auto;
+  border-left: 4px solid #909090;
+  background-color: #b4b4b4;
+  overflow: hidden;
+}
+
+.stats {
+  padding: 5px;
+}
+
+.canvas-container {
+  padding: 20px;
+  justify-content: center;
+  justify-items: center; /* needed for firefox */
+  align-content: center;
+  display: grid;
+  overflow: hidden;
+}
+
+.canvas {
+  max-width: 100%;
+  max-height: 100%;
+  border: 1px solid red;
+  display: none;
+  background: repeating-conic-gradient(#525252 0% 25%, #cfcfcf 0% 50%) 50% / 16px 16px;
+}
+
+.canvas.enabled {
+  display: block;
+}
