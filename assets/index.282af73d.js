@@ -3463,7 +3463,7 @@ const Gui = () => {
   });
 };
 function WorkerWrapper() {
-  return new Worker("/assets/controller.worker.699444e7.js", {
+  return new Worker("assets/controller.worker.b25b3e32.js", {
     "type": "module"
   });
 }

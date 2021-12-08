@@ -17,7 +17,7 @@ var __spreadValues = (a, b) => {
 (function() {
   "use strict";
   function WorkerWrapper() {
-    return new Worker("/assets/compute.worker.bf243d73.js", {
+    return new Worker("assets/compute.worker.bf243d73.js", {
       "type": "module"
     });
   }
