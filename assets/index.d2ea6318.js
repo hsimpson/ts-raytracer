@@ -3077,7 +3077,7 @@ class RaytracerGPU extends RaytracerBase {
     const { world, cameraOptions } = await getScene(this._rayTracerOptions.scene);
     const camera = new Camera();
     camera.init(cameraOptions.lookFrom, cameraOptions.lookAt, cameraOptions.vUp, cameraOptions.fovY, aspectRatio, cameraOptions.aperture, cameraOptions.focusDist, 0, 0.1);
-    const baseUrl = window.location.origin;
+    const baseUrl = window.location.href;
     const computePipeline = new WebGPUComputePipline({
       computeShaderUrl: new URL("assets/shaders/raytracer.comp.wgsl", baseUrl),
       uniformParams: {
