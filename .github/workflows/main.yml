@@ -2,8 +2,8 @@ name: Build Web
 
 on:
   push:
-    tags:
-      - '*'
+    branches:
+      - master
 
 jobs:
   build:
