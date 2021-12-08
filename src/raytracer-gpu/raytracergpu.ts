@@ -16,8 +16,8 @@ export class RaytracerGPU extends RaytracerBase {
   private _initialized = false;
 
   private _presentationFormat: GPUTextureFormat;
-  private _renderTarget: GPUTexture;
-  private _renderTargetView: GPUTextureView;
+  // private _renderTarget: GPUTexture;
+  // private _renderTargetView: GPUTextureView;
 
   public constructor(rayTracerGPUOptions: RayTracerGPUOptions) {
     super();
@@ -52,7 +52,7 @@ export class RaytracerGPU extends RaytracerBase {
     };
 
     const colorTexture = WebGPUContext.device.createTexture(colorTextureDesc);
-    this._renderTargetView = colorTexture.createView();
+    // this._renderTargetView = colorTexture.createView();
 
     const aspectRatio = this._rayTracerOptions.imageWidth / this._rayTracerOptions.imageHeight;
 
@@ -71,8 +71,10 @@ export class RaytracerGPU extends RaytracerBase {
       0.1
     );
 
+    const baseUrl = window.location.origin;
+
     const computePipeline = new WebGPUComputePipline({
-      computeShaderUrl: 'raytracer.comp.spv',
+      computeShaderUrl: new URL('assets/shaders/raytracer.comp.wgsl', baseUrl),
       uniformParams: {
         background: cameraOptions.background,
         tileOffsetX: 0,
@@ -92,8 +94,8 @@ export class RaytracerGPU extends RaytracerBase {
     await computePipeline.initialize();
 
     const renderPipeline = new WebGPURenderPipeline({
-      vertexShaderUrl: 'renderer.vert.spv',
-      fragmentShaderUrl: 'renderer.frag.spv',
+      vertexShaderUrl: new URL('assets/shaders/renderer.vert.wgsl', baseUrl),
+      fragmentShaderUrl: new URL('assets/shaders/renderer.frag.wgsl', baseUrl),
       sharedPixelBuffer: computePipeline.pixelBuffer,
       uniformParams: {
         width: this._rayTracerOptions.imageWidth,
@@ -168,7 +170,7 @@ export class RaytracerGPU extends RaytracerBase {
       }
 
       canvas2dContext.putImageData(imageData, 0, 0);
-      await this.downloadImage(canvas2d, canvas2dContext, stats);
+      await this.downloadImage(canvas2dContext, stats);
     }
 
     if (this._doneCallback) {

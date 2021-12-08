@@ -57,28 +57,31 @@ export abstract class RaytracerBase {
     context2D.fillText(stats, 5, 5);
   }
 
-  protected async downloadImage(
-    canvas: HTMLCanvasElement,
-    context: CanvasRenderingContext2D,
-    stats: string
-  ): Promise<void> {
-    const canvasDownload = async (): Promise<Blob> => {
-      return new Promise((resolve) => {
-        canvas.toBlob(
-          (blob) => {
-            resolve(blob);
-          },
-          'image/png',
-          1.0
-        );
-      });
-    };
+  private async canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+    return new Promise<Blob>((resolve) => {
+      canvas.toBlob(
+        (blob) => {
+          resolve(blob);
+        },
+        'image/png',
+        1.0
+      );
+    });
+  }
+
+  protected async downloadImage(context: CanvasRenderingContext2D, stats: string): Promise<void> {
+    const sourceCanvas = context.canvas;
+    const downloadCanvas = document.createElement('canvas');
+    downloadCanvas.width = sourceCanvas.width;
+    downloadCanvas.height = sourceCanvas.height;
+    const downloadContext = downloadCanvas.getContext('2d');
+    downloadContext.drawImage(sourceCanvas, 0, 0);
 
     if (this._rayTracerOptions.addStatsToImage) {
-      this.writeStatsToImage(stats, context);
+      this.writeStatsToImage(stats, downloadContext);
     }
 
-    const blob = await canvasDownload();
+    const blob = await this.canvasBlob(downloadCanvas);
     const anchor = document.createElement('a');
     anchor.download = 'rendering.png'; // optional, but you can give the file a name
     anchor.href = URL.createObjectURL(blob);

@@ -11,26 +11,24 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [15.x]
+        node-version: [16.x]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
 
       - name: Install node_modules
-        run: npm ci
+        run: yarn insgtall
 
       - name: Build Prod
-        run: npm run build
+        run: yarn run build
 
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@3.5.8
+        uses: JamesIves/github-pages-deploy-action@4
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: dist
-          CLEAN: true
+          branch: gh-pages
+          folder: dist

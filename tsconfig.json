@@ -4,12 +4,13 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
     "jsx": "react",
+    "lib": ["DOM", "ES2020"],
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "sourceMap": true,
-    "lib": ["DOM", "ES2020"],
     "target": "ES2020",
     "typeRoots": ["./node_modules/@webgpu/types", "node_modules/@types"]
   }

@@ -2,8 +2,7 @@ import { quat, vec2, vec3, vec4 } from 'gl-matrix';
 import { GLTF, GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
 import { HittableList, Triangle } from './hittables';
 import { DiffuseLight, LambertianMaterial, Material, NormalMaterial } from './material';
-import { isDataUrl, isAbsoluteUrl } from './url';
-import path from 'path';
+import { isDataUrl, isAbsoluteUrl, urlDirname } from './url';
 
 // const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
 // const WHITEMATERIAL = new LambertianMaterial([0.73, 0.73, 0.73]);
@@ -17,7 +16,8 @@ export async function load(url: string): Promise<HittableList> {
   const gltf = (await response.json()) as GLTF;
 
   // decode buffers
-  const buffers = await decodeBuffers(gltf.buffers, path.dirname(url));
+  const baseUrl = urlDirname(url);
+  const buffers = await decodeBuffers(gltf.buffers, baseUrl);
 
   // get the default scene
   const scene = gltf.scenes[gltf.scene];
@@ -195,14 +195,15 @@ async function decodeBuffers(buffers: GLTFBuffer[], dirname: string): Promise<Ar
   const arrayBuffers: ArrayBuffer[] = [];
 
   for (const buffer of buffers) {
-    let url = buffer.uri;
+    let urlStr = buffer.uri;
 
     // check if it is relative
-    if (!isAbsoluteUrl(url) && !isDataUrl(url)) {
-      url = path.join(dirname, url);
+    if (!isAbsoluteUrl(urlStr) && !isDataUrl(urlStr)) {
+      const url = new URL(urlStr, dirname);
+      urlStr = url.toString();
     }
 
-    const response = await fetch(url);
+    const response = await fetch(urlStr);
     arrayBuffers.push(await response.arrayBuffer());
   }
 
