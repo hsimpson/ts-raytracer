@@ -1,6 +1,6 @@
 #include "./ray.wgsl"
 
-[[block]] struct Camera {
+struct Camera {
   origin: vec4<f32>;
   lowerLeftCorner: vec4<f32>;
   horizontal: vec4<f32>;
