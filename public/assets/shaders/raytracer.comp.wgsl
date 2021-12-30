@@ -3,7 +3,7 @@
 
 let FLT_MAX = 99999.99;
 
-[[block]] struct ComputeParams {
+struct ComputeParams {
   background: vec3<f32>;
   tileOffsetX: f32;
   tileOffsetY: f32;
@@ -18,11 +18,11 @@ let FLT_MAX = 99999.99;
 [[group(0), binding(0)]] var<uniform> computeParams: ComputeParams;
 
 
-[[block]] struct PixelBuffer {
+struct PixelBuffer {
   pixels: array<vec4<f32>>;
 };
 
-[[block]] struct AccumlationBuffer {
+struct AccumlationBuffer {
   pixels: array<vec4<f32>>;
 };
 

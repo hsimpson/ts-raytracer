@@ -6,7 +6,7 @@ struct Material {
   textureIndex: u32;
 };
 
-[[block]] struct Materials {
+struct Materials {
   materials: array<Material>;
 };
 

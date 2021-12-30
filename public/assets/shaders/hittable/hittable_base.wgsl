@@ -30,7 +30,7 @@ struct Primitve {
   // float pad_1;
 };
 
-[[block]] struct Primitives {
+struct Primitives {
   primitives: array<Primitve>;
 };
 

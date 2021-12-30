@@ -14,7 +14,7 @@ struct Texture {
   pad_2: f32;
 };
 
-[[block]] struct Textures {
+struct Textures {
   textures: array<Texture>;
 };
 
