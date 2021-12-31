@@ -40,7 +40,7 @@ export const RaytracerProperties = atom({
 
     samplesPerPixel: 20,
     maxBounces: 12,
-    numOfWorkers: navigator.hardwareConcurrency,
+    numOfWorkers: navigator.hardwareConcurrency || 8,
     // numOfWorkers: 1,
     webGPUavailable: false,
     webGPUenabled: false,
