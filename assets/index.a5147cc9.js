@@ -3230,7 +3230,7 @@ const RaytracerProperties = Recoil_index_6({
     imageHeight: 720,
     samplesPerPixel: 20,
     maxBounces: 12,
-    numOfWorkers: navigator.hardwareConcurrency,
+    numOfWorkers: navigator.hardwareConcurrency || 8,
     webGPUavailable: false,
     webGPUenabled: false,
     download: true,
@@ -3409,7 +3409,7 @@ const Gui = () => {
       label: "Num of CPU workers:",
       size: 5,
       min: 1,
-      max: navigator.hardwareConcurrency,
+      max: navigator.hardwareConcurrency || 8,
       value: raytracerState.numOfWorkers,
       onValueChange: (numOfWorkers) => setRaytracerState(__spreadProps(__spreadValues({}, raytracerState), {
         numOfWorkers
@@ -3462,8 +3462,13 @@ const Gui = () => {
     })]
   });
 };
+function WorkerWrapper$1() {
+  return new Worker("assets/compute.worker.dfd04421.js", {
+    "type": "module"
+  });
+}
 function WorkerWrapper() {
-  return new Worker("assets/controller.worker.b25b3e32.js", {
+  return new Worker("assets/controller.worker.1171e6ae.js", {
     "type": "module"
   });
 }
@@ -3471,8 +3476,10 @@ var ControllerCommands;
 (function(ControllerCommands2) {
   ControllerCommands2[ControllerCommands2["START"] = 0] = "START";
   ControllerCommands2[ControllerCommands2["STOP"] = 1] = "STOP";
-  ControllerCommands2[ControllerCommands2["UPDATE"] = 2] = "UPDATE";
-  ControllerCommands2[ControllerCommands2["END"] = 3] = "END";
+  ControllerCommands2[ControllerCommands2["READY"] = 2] = "READY";
+  ControllerCommands2[ControllerCommands2["UPDATE"] = 3] = "UPDATE";
+  ControllerCommands2[ControllerCommands2["WORKERDONE"] = 4] = "WORKERDONE";
+  ControllerCommands2[ControllerCommands2["END"] = 5] = "END";
 })(ControllerCommands || (ControllerCommands = {}));
 var ComputeCommands;
 (function(ComputeCommands2) {
@@ -3485,20 +3492,12 @@ class RaytracerCPU extends RaytracerBase {
   constructor(rayTracerCPUOptions) {
     super();
     this._controllerWorker = new WorkerWrapper();
+    this._computeWorkers = new Map();
+    this._computeTiles = [];
     this._rayTracerOptions = rayTracerCPUOptions;
   }
-  updateImage(imageArray) {
-    const imageData = this._context2D.createImageData(this._rayTracerOptions.imageWidth, this._rayTracerOptions.imageHeight);
-    let j = 0;
-    for (let y = this._rayTracerOptions.imageHeight - 1; y >= 0; y--) {
-      for (let x = 0; x < this._rayTracerOptions.imageWidth; x++) {
-        const imageIndex = (y * this._rayTracerOptions.imageWidth + x) * 4;
-        imageData.data[imageIndex] = imageArray[j++];
-        imageData.data[imageIndex + 1] = imageArray[j++];
-        imageData.data[imageIndex + 2] = imageArray[j++];
-        imageData.data[imageIndex + 3] = imageArray[j++];
-      }
-    }
+  updateImage() {
+    const imageData = new ImageData(this._imageArray, this._rayTracerOptions.imageWidth, this._rayTracerOptions.imageHeight);
     this._context2D.putImageData(imageData, 0, 0);
   }
   async onControllerFinshed() {
@@ -3516,12 +3515,80 @@ class RaytracerCPU extends RaytracerBase {
   async onControllerMessage(event) {
     const msg = event.data;
     switch (msg.cmd) {
+      case ControllerCommands.READY:
+        await this.createComputeWorkers();
+        break;
       case ControllerCommands.END:
         await this.onControllerFinshed();
         break;
       case ControllerCommands.UPDATE:
-        this.updateImage(msg.data.imageArray);
+        this._imageArray = msg.data.imageArray;
+        this.updateImage();
         break;
+    }
+  }
+  onWorkerMessage(event) {
+    const workerMsg = event.data;
+    switch (workerMsg.cmd) {
+      case ComputeCommands.READY: {
+        const readyMsg = workerMsg;
+        this.startComputeWorker(readyMsg.data.workerId);
+        break;
+      }
+      case ComputeCommands.END: {
+        const endMsg = workerMsg;
+        endMsg.cmd = ControllerCommands.WORKERDONE;
+        this._controllerWorker.postMessage(workerMsg);
+        if (this._computeTiles.length) {
+          this.startComputeWorker(endMsg.data.workerId);
+        } else {
+          this.stopComputeWorker(endMsg.data.workerId);
+        }
+        break;
+      }
+    }
+  }
+  async createComputeWorkers() {
+    const options = this._rayTracerOptions;
+    const { world, cameraOptions } = await getScene(this._rayTracerOptions.scene, true);
+    const aspectRatio = this._rayTracerOptions.imageWidth / this._rayTracerOptions.imageHeight;
+    const camera = new Camera();
+    camera.init(cameraOptions.lookFrom, cameraOptions.lookAt, cameraOptions.vUp, cameraOptions.fovY, aspectRatio, cameraOptions.aperture, cameraOptions.focusDist, 0, 0.1);
+    for (let workerId = 0; workerId < options.numOfWorkers; workerId++) {
+      const worker = new WorkerWrapper$1();
+      worker.onmessage = (event) => this.onWorkerMessage(event);
+      this._computeWorkers.set(workerId, worker);
+      const computeInitMessage = {
+        cmd: ComputeCommands.INIT,
+        data: {
+          workerId,
+          camera: serialize(Camera, camera),
+          world: serialize(HittableList, world),
+          background: cameraOptions.background,
+          imageWidth: options.imageWidth,
+          imageHeight: options.imageHeight,
+          samplesPerPixel: options.samplesPerPixel,
+          maxBounces: options.maxBounces
+        }
+      };
+      worker.postMessage(computeInitMessage);
+    }
+  }
+  startComputeWorker(workerId) {
+    const worker = this._computeWorkers.get(workerId);
+    const tile = this._computeTiles.shift();
+    const computeStartMessage = {
+      cmd: ComputeCommands.START,
+      data: __spreadValues({}, tile)
+    };
+    worker.postMessage(computeStartMessage);
+  }
+  stopComputeWorker(workerId) {
+    this._computeWorkers.get(workerId).terminate();
+    this._computeWorkers.delete(workerId);
+    if (this._computeWorkers.size === 0) {
+      this.updateImage();
+      this.stop();
     }
   }
   async start(doneCallback) {
@@ -3530,10 +3597,6 @@ class RaytracerCPU extends RaytracerBase {
     this._isRunning = true;
     this._startTime = performance.now();
     this._controllerWorker.onmessage = async (event) => this.onControllerMessage(event);
-    const { world, cameraOptions } = await getScene(this._rayTracerOptions.scene, true);
-    const aspectRatio = this._rayTracerOptions.imageWidth / this._rayTracerOptions.imageHeight;
-    const camera = new Camera();
-    camera.init(cameraOptions.lookFrom, cameraOptions.lookAt, cameraOptions.vUp, cameraOptions.fovY, aspectRatio, cameraOptions.aperture, cameraOptions.focusDist, 0, 0.1);
     const controllerStartMessage = {
       cmd: ControllerCommands.START,
       data: {
@@ -3543,13 +3606,11 @@ class RaytracerCPU extends RaytracerBase {
         maxBounces: this._rayTracerOptions.maxBounces,
         computeWorkers: this._rayTracerOptions.numOfWorkers,
         sceneIdx: this._rayTracerOptions.scene,
-        world: serialize(HittableList, world),
-        camera: serialize(Camera, camera),
-        background: cameraOptions.background,
         tileSize: this._rayTracerOptions.tileSize
       }
     };
     this._controllerWorker.postMessage(controllerStartMessage);
+    this._computeTiles = createComputeTiles(this._rayTracerOptions.imageWidth, this._rayTracerOptions.imageHeight, this._rayTracerOptions.tileSize);
   }
   stop() {
     const controllerStopMessage = {

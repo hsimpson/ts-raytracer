@@ -1,25 +1,11 @@
-var __defProp = Object.defineProperty;
-var __getOwnPropSymbols = Object.getOwnPropertySymbols;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __propIsEnum = Object.prototype.propertyIsEnumerable;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __spreadValues = (a, b) => {
-  for (var prop in b || (b = {}))
-    if (__hasOwnProp.call(b, prop))
-      __defNormalProp(a, prop, b[prop]);
-  if (__getOwnPropSymbols)
-    for (var prop of __getOwnPropSymbols(b)) {
-      if (__propIsEnum.call(b, prop))
-        __defNormalProp(a, prop, b[prop]);
-    }
-  return a;
-};
 (function() {
   "use strict";
-  function WorkerWrapper() {
-    return new Worker("assets/compute.worker.bf243d73.js", {
-      "type": "module"
-    });
+  const _metaMap = new Map();
+  function addClassName(type) {
+    _metaMap.set(type.name, type);
+  }
+  function serializable(type) {
+    addClassName(type);
   }
   var EPSILON$1 = 1e-6;
   var ARRAY_TYPE = typeof Float32Array !== "undefined" ? Float32Array : Array;
@@ -583,270 +569,6 @@ var __spreadValues = (a, b) => {
       return normalize(out, fromMat3(out, matr));
     };
   })();
-  class HitRecord {
-    constructor() {
-      this.p = create$2();
-      this.normal = create$2();
-      this.t = 0;
-      this.u = 0;
-      this.v = 0;
-      this.frontFace = true;
-    }
-    setFaceNormal(r, outward_normal) {
-      this.frontFace = dot(r.direction, outward_normal) < 0;
-      this.normal = this.frontFace ? outward_normal : negate(create$2(), outward_normal);
-    }
-    copyTo(dest) {
-      dest.p = copy(create$2(), this.p);
-      dest.normal = copy(create$2(), this.normal);
-      dest.t = this.t;
-      dest.u = this.u;
-      dest.v = this.v;
-      dest.frontFace = this.frontFace;
-      dest.mat = this.mat;
-    }
-  }
-  class Ray {
-    constructor(origin, direction, time = 0) {
-      if (origin) {
-        this._orig = origin;
-      }
-      if (direction) {
-        this._dir = direction;
-      }
-      this._time = time;
-    }
-    copyTo(dest) {
-      dest._orig = copy(create$2(), this._orig);
-      dest._dir = copy(create$2(), this._dir);
-      dest._time = this._time;
-    }
-    get origin() {
-      return this._orig;
-    }
-    set origin(origin) {
-      this._orig = origin;
-    }
-    get direction() {
-      return this._dir;
-    }
-    set direction(direction) {
-      this._dir = direction;
-    }
-    get time() {
-      return this._time;
-    }
-    at(t) {
-      return add(create$2(), this._orig, scale(create$2(), this._dir, t));
-    }
-  }
-  const CLASSNAME_KEY = "__CLASSNAME__";
-  function _serializeObject(type, instance) {
-    const target = {};
-    const name = instance.constructor.name;
-    const props = Object.getOwnPropertyNames(instance);
-    target[CLASSNAME_KEY] = name;
-    for (const prop of props) {
-      const val = instance[prop];
-      target[prop] = _serialize(val.constructor, val);
-    }
-    return target;
-  }
-  function _serializeArray(type, instance) {
-    const target = instance.map((val) => {
-      return _serialize(val.constructor, val);
-    });
-    return target;
-  }
-  function _serialize(type, instance) {
-    if (Array.isArray(instance)) {
-      return _serializeArray(type, instance);
-    } else if (instance instanceof Int8Array || instance instanceof Uint8Array || instance instanceof Uint8ClampedArray || instance instanceof Int16Array || instance instanceof Uint16Array || instance instanceof Int32Array || instance instanceof Uint32Array || instance instanceof Float32Array || instance instanceof Float64Array) {
-      return Array.from(instance);
-    } else if (typeof instance === "object") {
-      return _serializeObject(type, instance);
-    } else if (typeof instance === "string" || typeof instance === "number" || typeof instance === "boolean") {
-      return instance;
-    } else {
-      console.error(`Instance not serializable, constructor: ${instance.constructor.name}`);
-    }
-  }
-  function serialize(type, instance) {
-    return _serializeObject(type, instance);
-  }
-  const _metaMap = new Map();
-  function addClassName(type) {
-    _metaMap.set(type.name, type);
-  }
-  function getClassConstructor(name) {
-    if (_metaMap.has(name)) {
-      return _metaMap.get(name);
-    }
-    console.error(`${name} not serializable, use the @serializable decorator`);
-    return null;
-  }
-  function _deserialize(type, data) {
-    const instance = Object.create(type.prototype);
-    for (const k in data) {
-      const v = data[k];
-      if (Array.isArray(v)) {
-        instance[k] = v.map((val) => {
-          const className = val[CLASSNAME_KEY];
-          if (className) {
-            const newtype = getClassConstructor(val[CLASSNAME_KEY]);
-            return _deserialize(newtype, val);
-          }
-          return val;
-        });
-      } else if (typeof v === "object") {
-        const newtype = getClassConstructor(v[CLASSNAME_KEY]);
-        instance[k] = _deserialize(newtype, v);
-      } else {
-        instance[k] = v;
-      }
-    }
-    return instance;
-  }
-  function deserialize(type, data) {
-    return _deserialize(type, data);
-  }
-  function serializable(type) {
-    addClassName(type);
-  }
-  function degreeToRadians(degrees) {
-    return degrees * Math.PI / 180;
-  }
-  function randomNumber() {
-    return Math.random();
-  }
-  function randomNumberRange(min, max) {
-    return min + (max - min) * randomNumber();
-  }
-  function clamp(x, min, max) {
-    if (x < min) {
-      return min;
-    }
-    if (x > max) {
-      return max;
-    }
-    return x;
-  }
-  function randomInt(min, max) {
-    return Math.floor(randomNumberRange(min, max + 1));
-  }
-  function getSphereUV(p) {
-    const phi = Math.atan2(p[2], p[0]);
-    const theta = Math.asin(p[1]);
-    const u = 1 - (phi + Math.PI) / (2 * Math.PI);
-    const v = (theta + Math.PI / 2) / Math.PI;
-    return { u, v };
-  }
-  function lengthSquared(v) {
-    return v[0] ** 2 + v[1] ** 2 + v[2] ** 2;
-  }
-  function reflect(v, n) {
-    return subtract(create$2(), v, scale(create$2(), n, 2 * dot(v, n)));
-  }
-  function refract(uv, n, etai_over_etat) {
-    const cos_theta = dot(negate(create$2(), uv), n);
-    const uvTheta = add(create$2(), uv, scale(create$2(), n, cos_theta));
-    const r_out_parallel = scale(create$2(), uvTheta, etai_over_etat);
-    const r_out_perp = scale(create$2(), n, -Math.sqrt(1 - lengthSquared(r_out_parallel)));
-    return add(create$2(), r_out_parallel, r_out_perp);
-  }
-  function randomInUnitSphere() {
-    while (true) {
-      const p = randomRange(-1, 1);
-      if (lengthSquared(p) >= 1) {
-        continue;
-      }
-      return p;
-    }
-  }
-  function randomRange(min, max) {
-    return [randomNumberRange(min, max), randomNumberRange(min, max), randomNumberRange(min, max)];
-  }
-  function randomUnitVector() {
-    const a = randomNumberRange(0, 2 * Math.PI);
-    const z = randomNumberRange(-1, 1);
-    const r = Math.sqrt(1 - z * z);
-    return [r * Math.cos(a), r * Math.sin(a), z];
-  }
-  function randomInUnitdisk() {
-    while (true) {
-      const p = [randomNumberRange(-1, 1), randomNumberRange(-1, 1), 0];
-      if (lengthSquared(p) >= 1) {
-        continue;
-      }
-      return p;
-    }
-  }
-  var __defProp$m = Object.defineProperty;
-  var __getOwnPropDesc$m = Object.getOwnPropertyDescriptor;
-  var __decorateClass$m = (decorators, target, key, kind) => {
-    var result = kind > 1 ? void 0 : kind ? __getOwnPropDesc$m(target, key) : target;
-    for (var i = decorators.length - 1, decorator; i >= 0; i--)
-      if (decorator = decorators[i])
-        result = (kind ? decorator(target, key, result) : decorator(result)) || result;
-    if (kind && result)
-      __defProp$m(target, key, result);
-    return result;
-  };
-  let Camera = class {
-    constructor() {
-      this.lowerLeftCorner = create$2();
-      this.horizontal = create$2();
-      this.vertical = create$2();
-      this.u = create$2();
-      this.v = create$2();
-      this.w = create$2();
-    }
-    init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist, t0 = 0, t1 = 0) {
-      const theta = degreeToRadians(fovY);
-      const h = Math.tan(theta / 2);
-      const viewport_height = 2 * h;
-      const viewport_width = aspectRatio * viewport_height;
-      normalize$2(this.w, subtract(create$2(), lookFrom, lookAt));
-      normalize$2(this.u, cross(create$2(), vUp, this.w));
-      cross(this.v, this.w, this.u);
-      this.lookFrom = lookFrom;
-      scale(this.horizontal, this.u, focusDist * viewport_width);
-      scale(this.vertical, this.v, focusDist * viewport_height);
-      const half_horizontal = scale(create$2(), this.horizontal, 0.5);
-      const half_vertical = scale(create$2(), this.vertical, 0.5);
-      const focusW = scale(create$2(), this.w, focusDist);
-      subtract(this.lowerLeftCorner, subtract(create$2(), subtract(create$2(), this.lookFrom, half_horizontal), half_vertical), focusW);
-      this.lenseRadius = aperture / 2;
-      this.time0 = t0;
-      this.time1 = t1;
-    }
-    getRay(s, t) {
-      const rd = scale(create$2(), randomInUnitdisk(), this.lenseRadius);
-      const vecU = scale(create$2(), this.u, rd[0]);
-      const vecV = scale(create$2(), this.v, rd[1]);
-      const offset = add(create$2(), vecU, vecV);
-      const sHor = scale(create$2(), this.horizontal, s);
-      const tVer = scale(create$2(), this.vertical, t);
-      return new Ray(add(create$2(), this.lookFrom, offset), sub(create$2(), sub(create$2(), add(create$2(), add(create$2(), this.lowerLeftCorner, sHor), tVer), this.lookFrom), offset), randomNumberRange(this.time0, this.time1));
-    }
-    getUniformArray() {
-      const array = [];
-      array.push(...this.lookFrom, 0);
-      array.push(...this.lowerLeftCorner, 0);
-      array.push(...this.horizontal, 0);
-      array.push(...this.vertical, 0);
-      array.push(...this.u, 0);
-      array.push(...this.v, 0);
-      array.push(...this.w, 0);
-      array.push(this.lenseRadius);
-      array.push(this.time0);
-      array.push(this.time1);
-      return new Float32Array(array);
-    }
-  };
-  Camera = __decorateClass$m([
-    serializable
-  ], Camera);
   var __defProp$l = Object.defineProperty;
   var __getOwnPropDesc$l = Object.getOwnPropertyDescriptor;
   var __decorateClass$l = (decorators, target, key, kind) => {
@@ -904,6 +626,63 @@ var __spreadValues = (a, b) => {
   AABB = __decorateClass$l([
     serializable
   ], AABB);
+  class HitRecord {
+    constructor() {
+      this.p = create$2();
+      this.normal = create$2();
+      this.t = 0;
+      this.u = 0;
+      this.v = 0;
+      this.frontFace = true;
+    }
+    setFaceNormal(r, outward_normal) {
+      this.frontFace = dot(r.direction, outward_normal) < 0;
+      this.normal = this.frontFace ? outward_normal : negate(create$2(), outward_normal);
+    }
+    copyTo(dest) {
+      dest.p = copy(create$2(), this.p);
+      dest.normal = copy(create$2(), this.normal);
+      dest.t = this.t;
+      dest.u = this.u;
+      dest.v = this.v;
+      dest.frontFace = this.frontFace;
+      dest.mat = this.mat;
+    }
+  }
+  class Ray {
+    constructor(origin, direction, time = 0) {
+      if (origin) {
+        this._orig = origin;
+      }
+      if (direction) {
+        this._dir = direction;
+      }
+      this._time = time;
+    }
+    copyTo(dest) {
+      dest._orig = copy(create$2(), this._orig);
+      dest._dir = copy(create$2(), this._dir);
+      dest._time = this._time;
+    }
+    get origin() {
+      return this._orig;
+    }
+    set origin(origin) {
+      this._orig = origin;
+    }
+    get direction() {
+      return this._dir;
+    }
+    set direction(direction) {
+      this._dir = direction;
+    }
+    get time() {
+      return this._time;
+    }
+    at(t) {
+      return add(create$2(), this._orig, scale(create$2(), this._dir, t));
+    }
+  }
   var __defProp$k = Object.defineProperty;
   var __getOwnPropDesc$k = Object.getOwnPropertyDescriptor;
   var __decorateClass$k = (decorators, target, key, kind) => {
@@ -1214,6 +993,62 @@ var __spreadValues = (a, b) => {
   Box = __decorateClass$h([
     serializable
   ], Box);
+  function randomNumber() {
+    return Math.random();
+  }
+  function randomNumberRange(min, max) {
+    return min + (max - min) * randomNumber();
+  }
+  function clamp(x, min, max) {
+    if (x < min) {
+      return min;
+    }
+    if (x > max) {
+      return max;
+    }
+    return x;
+  }
+  function randomInt(min, max) {
+    return Math.floor(randomNumberRange(min, max + 1));
+  }
+  function getSphereUV(p) {
+    const phi = Math.atan2(p[2], p[0]);
+    const theta = Math.asin(p[1]);
+    const u = 1 - (phi + Math.PI) / (2 * Math.PI);
+    const v = (theta + Math.PI / 2) / Math.PI;
+    return { u, v };
+  }
+  function lengthSquared(v) {
+    return v[0] ** 2 + v[1] ** 2 + v[2] ** 2;
+  }
+  function reflect(v, n) {
+    return subtract(create$2(), v, scale(create$2(), n, 2 * dot(v, n)));
+  }
+  function refract(uv, n, etai_over_etat) {
+    const cos_theta = dot(negate(create$2(), uv), n);
+    const uvTheta = add(create$2(), uv, scale(create$2(), n, cos_theta));
+    const r_out_parallel = scale(create$2(), uvTheta, etai_over_etat);
+    const r_out_perp = scale(create$2(), n, -Math.sqrt(1 - lengthSquared(r_out_parallel)));
+    return add(create$2(), r_out_parallel, r_out_perp);
+  }
+  function randomInUnitSphere() {
+    while (true) {
+      const p = randomRange(-1, 1);
+      if (lengthSquared(p) >= 1) {
+        continue;
+      }
+      return p;
+    }
+  }
+  function randomRange(min, max) {
+    return [randomNumberRange(min, max), randomNumberRange(min, max), randomNumberRange(min, max)];
+  }
+  function randomUnitVector() {
+    const a = randomNumberRange(0, 2 * Math.PI);
+    const z = randomNumberRange(-1, 1);
+    const r = Math.sqrt(1 - z * z);
+    return [r * Math.cos(a), r * Math.sin(a), z];
+  }
   var __defProp$g = Object.defineProperty;
   var __getOwnPropDesc$g = Object.getOwnPropertyDescriptor;
   var __decorateClass$g = (decorators, target, key, kind) => {
@@ -2585,7 +2420,7 @@ var __spreadValues = (a, b) => {
   Sphere = __decorateClass$1([
     serializable
   ], Sphere);
-  var __defProp2 = Object.defineProperty;
+  var __defProp = Object.defineProperty;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
   var __decorateClass = (decorators, target, key, kind) => {
     var result = kind > 1 ? void 0 : kind ? __getOwnPropDesc(target, key) : target;
@@ -2593,7 +2428,7 @@ var __spreadValues = (a, b) => {
       if (decorator = decorators[i])
         result = (kind ? decorator(target, key, result) : decorator(result)) || result;
     if (kind && result)
-      __defProp2(target, key, result);
+      __defProp(target, key, result);
     return result;
   };
   function avgVector3(vectors) {
@@ -2729,26 +2564,14 @@ var __spreadValues = (a, b) => {
   Triangle = __decorateClass([
     serializable
   ], Triangle);
-  function createComputeTiles(imageWidth, imageHeight, tileSize) {
-    const computeTiles = [];
-    for (let y = 0; y < imageHeight; y += tileSize) {
-      for (let x = 0; x < imageWidth; x += tileSize) {
-        computeTiles.push({
-          x,
-          y,
-          width: x + tileSize < imageWidth ? tileSize : imageWidth - x,
-          height: y + tileSize < imageHeight ? tileSize : imageHeight - y
-        });
-      }
-    }
-    return computeTiles;
-  }
   var ControllerCommands;
   (function(ControllerCommands2) {
     ControllerCommands2[ControllerCommands2["START"] = 0] = "START";
     ControllerCommands2[ControllerCommands2["STOP"] = 1] = "STOP";
-    ControllerCommands2[ControllerCommands2["UPDATE"] = 2] = "UPDATE";
-    ControllerCommands2[ControllerCommands2["END"] = 3] = "END";
+    ControllerCommands2[ControllerCommands2["READY"] = 2] = "READY";
+    ControllerCommands2[ControllerCommands2["UPDATE"] = 3] = "UPDATE";
+    ControllerCommands2[ControllerCommands2["WORKERDONE"] = 4] = "WORKERDONE";
+    ControllerCommands2[ControllerCommands2["END"] = 5] = "END";
   })(ControllerCommands || (ControllerCommands = {}));
   var ComputeCommands;
   (function(ComputeCommands2) {
@@ -2758,113 +2581,41 @@ var __spreadValues = (a, b) => {
     ComputeCommands2[ComputeCommands2["END"] = 3] = "END";
   })(ComputeCommands || (ComputeCommands = {}));
   const _controllerCtx = self;
-  const _computeWorkers = new Map();
   let _pixelArray;
+  let _imageWidth;
+  let _imageHeight;
   const start = (msg) => {
-    const imageWidth = msg.data.imageWidth;
-    const imageHeight = msg.data.imageHeight;
-    const samplesPerPixel = msg.data.samplesPerPixel;
-    const maxBounces = msg.data.maxBounces;
-    const tileSize = msg.data.tileSize;
-    const computeTiles = createComputeTiles(imageWidth, imageHeight, tileSize);
-    _pixelArray = new Uint8ClampedArray(imageWidth * imageHeight * 4);
-    const world = deserialize(HittableList, msg.data.world);
-    const camera = deserialize(Camera, msg.data.camera);
-    const workerIsDone = (msg2) => {
-      const workerArray = msg2.data.pixelArray;
-      let dataOffset = 0;
-      let imageOffset = (msg2.data.y * imageWidth + msg2.data.x) * 4;
-      for (let j = 0; j < msg2.data.height; j++) {
-        for (let i = 0; i < msg2.data.width; i++) {
-          _pixelArray[imageOffset++] = workerArray[dataOffset++];
-          _pixelArray[imageOffset++] = workerArray[dataOffset++];
-          _pixelArray[imageOffset++] = workerArray[dataOffset++];
-          _pixelArray[imageOffset++] = workerArray[dataOffset++];
-        }
-        imageOffset += (imageWidth - msg2.data.width) * 4;
-      }
-      const controllerUpdateMessage = {
-        cmd: ControllerCommands.UPDATE,
-        data: {
-          imageArray: _pixelArray
-        }
-      };
-      _controllerCtx.postMessage(controllerUpdateMessage);
+    _imageWidth = msg.data.imageWidth;
+    _imageHeight = msg.data.imageHeight;
+    _pixelArray = new Uint8ClampedArray(_imageWidth * _imageHeight * 4);
+    const controllerReadyMessage = {
+      cmd: ControllerCommands.READY
     };
-    const onMessageFromComputeWorker = (event) => {
-      const workerMsg = event.data;
-      switch (workerMsg.cmd) {
-        case ComputeCommands.READY: {
-          const readyMsg = workerMsg;
-          startComputeWorker(readyMsg.data.workerId);
-          break;
-        }
-        case ComputeCommands.END: {
-          const endMsg = workerMsg;
-          workerIsDone(endMsg);
-          if (computeTiles.length) {
-            startComputeWorker(endMsg.data.workerId);
-          } else {
-            stopWorker(endMsg.data.workerId);
-          }
-          break;
-        }
-      }
-    };
-    const initComputeWorker = (workerId2) => {
-      const worker = _computeWorkers.get(workerId2);
-      const computeInitMessage = {
-        cmd: ComputeCommands.INIT,
-        data: {
-          workerId: workerId2,
-          camera: serialize(Camera, camera),
-          world: serialize(HittableList, world),
-          background: msg.data.background,
-          imageWidth,
-          imageHeight,
-          samplesPerPixel,
-          maxBounces
-        }
-      };
-      worker.postMessage(computeInitMessage);
-    };
-    const startComputeWorker = (workerId2) => {
-      const worker = _computeWorkers.get(workerId2);
-      const tile = computeTiles.shift();
-      const computeStartMessage = {
-        cmd: ComputeCommands.START,
-        data: __spreadValues({}, tile)
-      };
-      worker.postMessage(computeStartMessage);
-    };
-    let workerId = 0;
-    while (workerId < msg.data.computeWorkers && workerId < computeTiles.length) {
-      const computeWorker = new WorkerWrapper();
-      computeWorker.onmessage = onMessageFromComputeWorker;
-      _computeWorkers.set(workerId, computeWorker);
-      initComputeWorker(workerId);
-      workerId++;
-    }
+    _controllerCtx.postMessage(controllerReadyMessage);
   };
-  const stopWorker = (id) => {
-    _computeWorkers.get(id).terminate();
-    _computeWorkers.delete(id);
-    if (_computeWorkers.size === 0) {
-      const controllerEndMessage = {
-        cmd: ControllerCommands.END,
-        data: {
-          imageArray: _pixelArray
-        }
-      };
-      _controllerCtx.postMessage(controllerEndMessage);
+  const workerIsDone = (msg) => {
+    const workerArray = msg.data.pixelArray;
+    let dataOffset = 0;
+    let imageOffset = (msg.data.y * _imageWidth + msg.data.x) * 4;
+    for (let j = 0; j < msg.data.height; j++) {
+      for (let i = 0; i < msg.data.width; i++) {
+        _pixelArray[imageOffset++] = workerArray[dataOffset++];
+        _pixelArray[imageOffset++] = workerArray[dataOffset++];
+        _pixelArray[imageOffset++] = workerArray[dataOffset++];
+        _pixelArray[imageOffset++] = workerArray[dataOffset++];
+      }
+      imageOffset += (_imageWidth - msg.data.width) * 4;
     }
+    const controllerUpdateMessage = {
+      cmd: ControllerCommands.UPDATE,
+      data: {
+        imageArray: _pixelArray
+      }
+    };
+    _controllerCtx.postMessage(controllerUpdateMessage);
   };
   const stop = () => {
     console.log("controller stop");
-    for (const [id, computeWorker] of _computeWorkers) {
-      computeWorker.terminate();
-      _computeWorkers.delete(id);
-    }
     const controllerEndMessage = {
       cmd: ControllerCommands.END,
       data: {
@@ -2881,6 +2632,9 @@ var __spreadValues = (a, b) => {
         break;
       case ControllerCommands.STOP:
         stop();
+        break;
+      case ControllerCommands.WORKERDONE:
+        workerIsDone(msg);
         break;
     }
   });
