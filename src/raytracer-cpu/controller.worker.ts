@@ -1,17 +1,9 @@
-import ComputeWorker from './compute.worker?worker';
-import { Camera } from '../camera';
-import { HittableList } from '../hittables';
-import { deserialize, serialize } from '../serializing';
-import { ComputeTile, createComputeTiles } from '../tiles';
 import { DeserializerMap } from './deserializermap';
 import {
-  ComputeCommands,
   ComputeEndMessage,
-  ComputeInitMessage,
-  ComputeReadyMessage,
-  ComputeStartMessage,
   ControllerCommands,
   ControllerEndMessage,
+  ControllerReadyMessage,
   ControllerStartMessage,
   ControllerUpdateMessage,
   WorkerMessage,
@@ -21,142 +13,52 @@ import {
 const map = DeserializerMap;
 
 const _controllerCtx: Worker = self as never;
-const _computeWorkers: Map<number, Worker> = new Map<number, Worker>();
+
 let _pixelArray: Uint8ClampedArray;
+let _imageWidth: number;
+let _imageHeight: number;
 
 const start = (msg: ControllerStartMessage): void => {
-  const imageWidth = msg.data.imageWidth;
-  const imageHeight = msg.data.imageHeight;
-  const samplesPerPixel = msg.data.samplesPerPixel;
-  const maxBounces = msg.data.maxBounces;
-  const tileSize = msg.data.tileSize;
-  const computeTiles: ComputeTile[] = createComputeTiles(imageWidth, imageHeight, tileSize);
+  _imageWidth = msg.data.imageWidth;
+  _imageHeight = msg.data.imageHeight;
 
-  _pixelArray = new Uint8ClampedArray(imageWidth * imageHeight * 4);
-
-  const world = deserialize(HittableList, msg.data.world);
-  const camera = deserialize(Camera, msg.data.camera);
-
-  const workerIsDone = (msg: ComputeEndMessage): void => {
-    const workerArray = msg.data.pixelArray;
-
-    let dataOffset = 0;
-    let imageOffset = (msg.data.y * imageWidth + msg.data.x) * 4;
-    // let imageOffset = (_imageHeight - (msg.data.y + 1)) * _imageWidth * 3;
-    // let imageOffset = _imageHeight - (msg.data.y*)
-
-    for (let j = 0; j < msg.data.height; j++) {
-      for (let i = 0; i < msg.data.width; i++) {
-        _pixelArray[imageOffset++] = workerArray[dataOffset++];
-        _pixelArray[imageOffset++] = workerArray[dataOffset++];
-        _pixelArray[imageOffset++] = workerArray[dataOffset++];
-        _pixelArray[imageOffset++] = workerArray[dataOffset++];
-      }
-      imageOffset += (imageWidth - msg.data.width) * 4;
-    }
-
-    const controllerUpdateMessage: ControllerUpdateMessage = {
-      cmd: ControllerCommands.UPDATE,
-      data: {
-        imageArray: _pixelArray,
-      },
-    };
-    _controllerCtx.postMessage(controllerUpdateMessage);
+  _pixelArray = new Uint8ClampedArray(_imageWidth * _imageHeight * 4);
+  const controllerReadyMessage: ControllerReadyMessage = {
+    cmd: ControllerCommands.READY,
   };
 
-  const onMessageFromComputeWorker = (event: MessageEvent): void => {
-    const workerMsg = event.data as WorkerMessage;
-
-    switch (workerMsg.cmd as ComputeCommands) {
-      case ComputeCommands.READY: {
-        const readyMsg = workerMsg as ComputeReadyMessage;
-        startComputeWorker(readyMsg.data.workerId);
-        break;
-      }
-      case ComputeCommands.END: {
-        const endMsg = workerMsg as ComputeEndMessage;
-        workerIsDone(endMsg);
-
-        if (computeTiles.length) {
-          startComputeWorker(endMsg.data.workerId);
-        } else {
-          stopWorker(endMsg.data.workerId); // no more tiles to render
-        }
-        break;
-      }
-
-      default:
-        break;
-    }
-  };
-
-  const initComputeWorker = (workerId: number): void => {
-    const worker = _computeWorkers.get(workerId);
-    const computeInitMessage: ComputeInitMessage = {
-      cmd: ComputeCommands.INIT,
-      data: {
-        workerId,
-        camera: serialize(Camera, camera),
-        world: serialize(HittableList, world),
-        background: msg.data.background,
-        imageWidth: imageWidth,
-        imageHeight: imageHeight,
-        samplesPerPixel: samplesPerPixel,
-        maxBounces: maxBounces,
-      },
-    };
-    worker.postMessage(computeInitMessage);
-  };
-
-  const startComputeWorker = (workerId: number): void => {
-    const worker = _computeWorkers.get(workerId);
-    const tile = computeTiles.shift();
-
-    const computeStartMessage: ComputeStartMessage = {
-      cmd: ComputeCommands.START,
-      data: {
-        ...tile,
-      },
-    };
-    worker.postMessage(computeStartMessage);
-  };
-
-  // create and init all workers
-  let workerId = 0;
-  while (workerId < msg.data.computeWorkers && workerId < computeTiles.length) {
-    const computeWorker = new ComputeWorker();
-    computeWorker.onmessage = onMessageFromComputeWorker;
-    _computeWorkers.set(workerId, computeWorker);
-
-    initComputeWorker(workerId);
-
-    workerId++;
-  }
+  _controllerCtx.postMessage(controllerReadyMessage);
 };
 
-const stopWorker = (id: number): void => {
-  _computeWorkers.get(id).terminate();
-  _computeWorkers.delete(id);
+const workerIsDone = (msg: ComputeEndMessage): void => {
+  const workerArray = msg.data.pixelArray;
 
-  if (_computeWorkers.size === 0) {
-    const controllerEndMessage: ControllerEndMessage = {
-      cmd: ControllerCommands.END,
-      data: {
-        imageArray: _pixelArray,
-      },
-    };
-    _controllerCtx.postMessage(controllerEndMessage);
+  let dataOffset = 0;
+  let imageOffset = (msg.data.y * _imageWidth + msg.data.x) * 4;
+  // let imageOffset = (_imageHeight - (msg.data.y + 1)) * _imageWidth * 3;
+  // let imageOffset = _imageHeight - (msg.data.y*)
+
+  for (let j = 0; j < msg.data.height; j++) {
+    for (let i = 0; i < msg.data.width; i++) {
+      _pixelArray[imageOffset++] = workerArray[dataOffset++];
+      _pixelArray[imageOffset++] = workerArray[dataOffset++];
+      _pixelArray[imageOffset++] = workerArray[dataOffset++];
+      _pixelArray[imageOffset++] = workerArray[dataOffset++];
+    }
+    imageOffset += (_imageWidth - msg.data.width) * 4;
   }
+
+  const controllerUpdateMessage: ControllerUpdateMessage = {
+    cmd: ControllerCommands.UPDATE,
+    data: {
+      imageArray: _pixelArray,
+    },
+  };
+  _controllerCtx.postMessage(controllerUpdateMessage);
 };
 
 const stop = (): void => {
   console.log('controller stop');
-
-  // stop the compute workers
-  for (const [id, computeWorker] of _computeWorkers) {
-    computeWorker.terminate();
-    _computeWorkers.delete(id);
-  }
 
   const controllerEndMessage: ControllerEndMessage = {
     cmd: ControllerCommands.END,
@@ -178,7 +80,9 @@ _controllerCtx.addEventListener('message', (event) => {
     case ControllerCommands.STOP:
       stop();
       break;
-
+    case ControllerCommands.WORKERDONE:
+      workerIsDone(msg as ComputeEndMessage);
+      break;
     default:
       break;
   }
