@@ -36,12 +36,24 @@ export class RaytracerCPU extends RaytracerBase {
   }
 
   private updateImage(): void {
-    const imageData = new ImageData(
-      this._imageArray,
+    const imageData = this._context2D.createImageData(
       this._rayTracerOptions.imageWidth,
       this._rayTracerOptions.imageHeight
     );
 
+    let j = 0;
+    // for (let y = 0; y < this._rayTracerOptions.imageHeight; y++) {
+    for (let y = this._rayTracerOptions.imageHeight - 1; y >= 0; y--) {
+      for (let x = 0; x < this._rayTracerOptions.imageWidth; x++) {
+        const imageIndex = (y * this._rayTracerOptions.imageWidth + x) * 4;
+        // const arrayIndex = (y * this._rayTracerOptions.imageWidth + x) * 3;
+
+        imageData.data[imageIndex] = this._imageArray[j++];
+        imageData.data[imageIndex + 1] = this._imageArray[j++];
+        imageData.data[imageIndex + 2] = this._imageArray[j++];
+        imageData.data[imageIndex + 3] = this._imageArray[j++];
+      }
+    }
     this._context2D.putImageData(imageData, 0, 0);
   }
 
