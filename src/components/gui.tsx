@@ -36,6 +36,7 @@ const Gui = (): React.ReactElement => {
     // { text: 'Cornell Box Smoke', value: 6, disabled: raytracerState.webGPUenabled },
     // { text: 'Final Scene', value: 7, disabled: raytracerState.webGPUenabled },
     { text: 'GLTF Scene', value: 8, disabled: false },
+    { text: 'PBR Scene', value: 9, disabled: false },
   ];
 
   return (

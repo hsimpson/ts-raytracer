@@ -395,6 +395,44 @@ async function gltfScene(useBVH: boolean): Promise<{ world: HittableList; camera
   }
 }
 
+function pbrScene(_useBVH: boolean): { world: HittableList; cameraOptions: CameraOptions } {
+  const world = new HittableList();
+
+  // floor
+  const checkerTexture = new CheckerTexture([0.8, 0.8, 0.8], [0.2, 0.2, 0.2], 20);
+  const floorMaterial = new LambertianMaterial();
+  floorMaterial.texture = checkerTexture;
+  const floor = new XZRect(0, 10, 0, 10, 0, floorMaterial);
+  floor.transform.translate([-5, 0, -5]);
+  world.add(floor);
+
+  // light
+  const diffuseLight = new DiffuseLight([4, 4, 4]);
+  const light = new XZRect(0, 1, 0, 1, 0, diffuseLight);
+  light.transform.translate([-0.5, 0.8, -0.5]);
+  world.add(light);
+
+  // const metallic = 1.0;
+  // const roughness = 0.5;
+  // const sphereMaterial = new PBRMaterial([0.5, 0.05, 0.05], metallic, roughness);
+  const sphereMaterial = new LambertianMaterial([0.5, 0.05, 0.05]);
+  const pbrSphere = new Sphere([0, 0, 0], 0.25, sphereMaterial);
+  // const pbrSphere = new Sphere([0, 0.25, 0], 0.25, sphereMaterial);
+  pbrSphere.transform.translate([0, 0.25, 0]);
+
+  world.add(pbrSphere);
+
+  const cameraOptions: CameraOptions = {
+    ...defaultCameraOptions,
+    lookFrom: [0, 0.3, 3],
+    lookAt: [0, 0.25, 0],
+    fovY: 30,
+    // background: [0.7, 0.8, 1.0],
+    background: [0, 0, 0],
+  };
+  return { world, cameraOptions };
+}
+
 const sceneCreators = [
   // gpuTestScene,
   randomScene,
@@ -406,6 +444,7 @@ const sceneCreators = [
   cornellBoxSmoke,
   finalScene,
   gltfScene,
+  pbrScene,
 ];
 
 export async function getScene(
