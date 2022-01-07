@@ -29,11 +29,11 @@ fn materialScatter(
 
   if(materialType == MATERIALTYPE_LAMBERTIAN) {
     wasScattered = lambertScatter(material, ray, rec, attenuation, scattered);
-  } elseif(materialType == MATERIALTYPE_METAL) {
+  } else if(materialType == MATERIALTYPE_METAL) {
     wasScattered = metalScatter(material, ray, rec, attenuation, scattered);
-  } elseif(materialType == MATERIALTYPE_DIELECTRIC) {
+  } else if(materialType == MATERIALTYPE_DIELECTRIC) {
     wasScattered = dielectricScatter(material, ray, rec, attenuation, scattered);
-  } elseif(materialType == MATERIALTYPE_NORMAL) {
+  } else if(materialType == MATERIALTYPE_NORMAL) {
     wasScattered =  normalScattered(material, ray, rec, attenuation, scattered);
   } else {
     wasScattered = false;
