@@ -1,4 +1,11 @@
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => {
+  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
 (function() {
+  var _a, _b;
   "use strict";
   var EPSILON$1 = 1e-6;
   var ARRAY_TYPE = typeof Float32Array !== "undefined" ? Float32Array : Array;
@@ -570,12 +577,13 @@
   })();
   class HitRecord {
     constructor() {
-      this.p = create$2();
-      this.normal = create$2();
-      this.t = 0;
-      this.u = 0;
-      this.v = 0;
-      this.frontFace = true;
+      __publicField(this, "p", create$2());
+      __publicField(this, "normal", create$2());
+      __publicField(this, "t", 0);
+      __publicField(this, "u", 0);
+      __publicField(this, "v", 0);
+      __publicField(this, "frontFace", true);
+      __publicField(this, "mat");
     }
     setFaceNormal(r, outward_normal) {
       this.frontFace = dot(r.direction, outward_normal) < 0;
@@ -593,6 +601,9 @@
   }
   class Ray {
     constructor(origin, direction, time = 0) {
+      __publicField(this, "_orig");
+      __publicField(this, "_dir");
+      __publicField(this, "_time");
       if (origin) {
         this._orig = origin;
       }
@@ -639,10 +650,14 @@
     if (!rec.mat.scatter(ray, rec, attenuation, scattered)) {
       return emitted;
     }
-    return add(create$2(), emitted, multiply$1(create$2(), attenuation, rayColor(scattered, background2, world2, depth - 1)));
+    return add(
+      create$2(),
+      emitted,
+      multiply$1(create$2(), attenuation, rayColor(scattered, background2, world2, depth - 1))
+    );
   }
   const CLASSNAME_KEY = "__CLASSNAME__";
-  const _metaMap = new Map();
+  const _metaMap = /* @__PURE__ */ new Map();
   function addClassName(type) {
     _metaMap.set(type.name, type);
   }
@@ -774,12 +789,16 @@
   };
   let Camera = class {
     constructor() {
-      this.lowerLeftCorner = create$2();
-      this.horizontal = create$2();
-      this.vertical = create$2();
-      this.u = create$2();
-      this.v = create$2();
-      this.w = create$2();
+      __publicField(this, "lookFrom");
+      __publicField(this, "lowerLeftCorner", create$2());
+      __publicField(this, "horizontal", create$2());
+      __publicField(this, "vertical", create$2());
+      __publicField(this, "u", create$2());
+      __publicField(this, "v", create$2());
+      __publicField(this, "w", create$2());
+      __publicField(this, "lenseRadius");
+      __publicField(this, "time0");
+      __publicField(this, "time1");
     }
     init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist, t0 = 0, t1 = 0) {
       const theta = degreeToRadians(fovY);
@@ -795,7 +814,11 @@
       const half_horizontal = scale(create$2(), this.horizontal, 0.5);
       const half_vertical = scale(create$2(), this.vertical, 0.5);
       const focusW = scale(create$2(), this.w, focusDist);
-      subtract(this.lowerLeftCorner, subtract(create$2(), subtract(create$2(), this.lookFrom, half_horizontal), half_vertical), focusW);
+      subtract(
+        this.lowerLeftCorner,
+        subtract(create$2(), subtract(create$2(), this.lookFrom, half_horizontal), half_vertical),
+        focusW
+      );
       this.lenseRadius = aperture / 2;
       this.time0 = t0;
       this.time1 = t1;
@@ -807,7 +830,15 @@
       const offset = add(create$2(), vecU, vecV);
       const sHor = scale(create$2(), this.horizontal, s);
       const tVer = scale(create$2(), this.vertical, t);
-      return new Ray(add(create$2(), this.lookFrom, offset), sub(create$2(), sub(create$2(), add(create$2(), add(create$2(), this.lowerLeftCorner, sHor), tVer), this.lookFrom), offset), randomNumberRange(this.time0, this.time1));
+      return new Ray(
+        add(create$2(), this.lookFrom, offset),
+        sub(
+          create$2(),
+          sub(create$2(), add(create$2(), add(create$2(), this.lowerLeftCorner, sHor), tVer), this.lookFrom),
+          offset
+        ),
+        randomNumberRange(this.time0, this.time1)
+      );
     }
     getUniformArray() {
       const array = [];
@@ -821,6 +852,7 @@
       array.push(this.lenseRadius);
       array.push(this.time0);
       array.push(this.time1);
+      array.push([0, 0, 0, 0]);
       return new Float32Array(array);
     }
   };
@@ -839,14 +871,21 @@
     return result;
   };
   let AABB = class {
+    // private _size: vec3;
+    // private _center: vec3;
     constructor(min, max) {
-      this._min = min != null ? min : [0, 0, 0];
-      this._max = max != null ? max : [0, 0, 0];
+      __publicField(this, "_min");
+      __publicField(this, "_max");
+      this._min = min ?? [0, 0, 0];
+      this._max = max ?? [0, 0, 0];
     }
     copyTo(dest) {
       dest._min = copy(create$2(), this._min);
       dest._max = copy(create$2(), this._max);
     }
+    // public logBox(): string {
+    //   return `center: ${this._center.toString()} | size: ${this._size.toString()}`;
+    // }
     get min() {
       return this._min;
     }
@@ -867,6 +906,24 @@
       }
       return true;
     }
+    // public hit(ray: Ray, tMin: number, tMax: number): boolean {
+    //   for (let a = 0; a < 3; a++) {
+    //     const invD = 1.0 / ray.direction[a];
+    //     let t0 = (this._min[a] - ray.origin[a]) * invD;
+    //     let t1 = (this._max[a] - ray.origin[a]) * invD;
+    //     if (invD < 0.0) {
+    //       const tmp = t0;
+    //       t0 = t1;
+    //       t1 = tmp;
+    //     }
+    //     tMin = t0 > tMin ? t0 : tMin;
+    //     tMax = t1 < tMax ? t1 : tMax;
+    //     if (tMax <= tMin) {
+    //       return false;
+    //     }
+    //   }
+    //   return true;
+    // }
     static surroundingBox(box0, box1) {
       const small = [
         Math.min(box0.min[0], box1.min[0]),
@@ -897,14 +954,14 @@
   };
   let Transform = class {
     constructor() {
-      this._objectToWorldMatrix = create$3();
-      this._worldToObjectMatrix = create$3();
-      this._rotationMatrix = create$3();
-      this._inverseRotationMatrix = create$3();
-      this._normalMatrix = create$3();
-      this._position = create$2();
-      this._rotation = create();
-      this._isTransformed = false;
+      __publicField(this, "_objectToWorldMatrix", create$3());
+      __publicField(this, "_worldToObjectMatrix", create$3());
+      __publicField(this, "_rotationMatrix", create$3());
+      __publicField(this, "_inverseRotationMatrix", create$3());
+      __publicField(this, "_normalMatrix", create$3());
+      __publicField(this, "_position", create$2());
+      __publicField(this, "_rotation", create());
+      __publicField(this, "_isTransformed", false);
     }
     get objectToWorld() {
       return this._objectToWorldMatrix;
@@ -923,7 +980,12 @@
       transformMat4(movedOrigin, movedOrigin, this._worldToObjectMatrix);
       const movedDirection = fromValues(ray.direction[0], ray.direction[1], ray.direction[2]);
       transformMat4(movedDirection, movedDirection, this._inverseRotationMatrix);
-      return new Ray([movedOrigin[0], movedOrigin[1], movedOrigin[2]], [movedDirection[0], movedDirection[1], movedDirection[2]], ray.time);
+      return new Ray(
+        [movedOrigin[0], movedOrigin[1], movedOrigin[2]],
+        [movedDirection[0], movedDirection[1], movedDirection[2]],
+        // ray.direction,
+        ray.time
+      );
     }
     transformRecord(ray, rec) {
       if (!this._isTransformed) {
@@ -950,6 +1012,12 @@
       tempQuat = fromEuler(tempQuat, angleX, angelY, angleZ);
       this.rotateQuat(tempQuat);
     }
+    // public transformVec3(v: vec3): vec3 {
+    //   if(!this._isTransformed) {
+    //     return v;
+    //   }
+    //   return vec3.transformMat4(vec3.create(), v, this._objectToWorldMatrix);
+    // }
     _updateMatrix() {
       this._isTransformed = true;
       const translationMatrix = create$3();
@@ -967,8 +1035,9 @@
   ], Transform);
   class Hittable {
     constructor() {
-      this.name = "";
-      this.transform = new Transform();
+      __publicField(this, "material");
+      __publicField(this, "name", "");
+      __publicField(this, "transform", new Transform());
     }
   }
   var __defProp$j = Object.defineProperty;
@@ -985,6 +1054,12 @@
   let XYRect = class extends Hittable {
     constructor(x0, x1, y0, y1, k, material) {
       super();
+      __publicField(this, "x0");
+      __publicField(this, "x1");
+      __publicField(this, "y0");
+      __publicField(this, "y1");
+      __publicField(this, "k");
+      __publicField(this, "bbox");
       this.x0 = x0;
       this.x1 = x1;
       this.y0 = y0;
@@ -1024,6 +1099,12 @@
   let XZRect = class extends Hittable {
     constructor(x0, x1, z0, z1, k, material) {
       super();
+      __publicField(this, "x0");
+      __publicField(this, "x1");
+      __publicField(this, "z0");
+      __publicField(this, "z1");
+      __publicField(this, "k");
+      __publicField(this, "bbox");
       this.x0 = x0;
       this.x1 = x1;
       this.z0 = z0;
@@ -1063,6 +1144,12 @@
   let YZRect = class extends Hittable {
     constructor(y0, y1, z0, z1, k, material) {
       super();
+      __publicField(this, "y0");
+      __publicField(this, "y1");
+      __publicField(this, "z0");
+      __publicField(this, "z1");
+      __publicField(this, "k");
+      __publicField(this, "bbox");
       this.y0 = y0;
       this.y1 = y1;
       this.z0 = z0;
@@ -1113,7 +1200,7 @@
   let HittableList = class extends Hittable {
     constructor(object) {
       super();
-      this._objects = [];
+      __publicField(this, "_objects", []);
       if (object) {
         this.add(object);
       }
@@ -1121,6 +1208,9 @@
     get objects() {
       return this._objects;
     }
+    // public clear(): void {
+    //   this._objects.length = 0;
+    // }
     add(object) {
       this._objects.push(object);
     }
@@ -1164,7 +1254,9 @@
   let Box = class extends Hittable {
     constructor(p0, p1, mat) {
       super();
-      this._sides = new HittableList();
+      __publicField(this, "_boxMin");
+      __publicField(this, "_boxMax");
+      __publicField(this, "_sides", new HittableList());
       this._boxMin = p0;
       this._boxMax = p1;
       this._sides.add(new XYRect(p0[0], p1[0], p0[1], p1[1], p1[2], mat));
@@ -1210,8 +1302,11 @@
   let BVHNode = class extends Hittable {
     constructor() {
       super();
-      this.bbox = new AABB();
-      this.id = _id;
+      __publicField(this, "bbox", new AABB());
+      __publicField(this, "left");
+      __publicField(this, "right");
+      __publicField(this, "id", _id);
+      __publicField(this, "level");
       _id++;
     }
     static createFromHitableList(list, time0, time1) {
@@ -1270,6 +1365,17 @@
       const boxRight = this.right.boundingBox(time0, time1);
       this.bbox = AABB.surroundingBox(boxLeft, boxRight);
     }
+    // public hit(r: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
+    //   //console.time(`BVH-hit #${this.id}`);
+    //   if (!this.box.hit(r, tMin, tMax)) {
+    //     return false;
+    //     //console.timeEnd(`BVH-hit #${this.id}`);
+    //   }
+    //   const hitLeft = this.left.hit(r, tMin, tMax, rec);
+    //   const hitRight = this.right.hit(r, tMin, hitLeft ? rec.t : tMax, rec);
+    //   //console.timeEnd(`BVH-hit #${this.id}`);
+    //   return hitLeft || hitRight;
+    // }
     hit(ray, tMin, tMax, rec) {
       if (!this.bbox.hit(ray, tMin, tMax)) {
         return false;
@@ -1321,6 +1427,7 @@
   let DielectricMaterial = class extends Material {
     constructor(refIdx) {
       super();
+      __publicField(this, "_indexOfRefraction");
       this._indexOfRefraction = refIdx;
     }
     get indexOfRefraction() {
@@ -1372,6 +1479,7 @@
   let SolidColor = class extends Texture {
     constructor(color) {
       super();
+      __publicField(this, "_color");
       this._color = color;
     }
     value(_u, _v, _p) {
@@ -1398,6 +1506,9 @@
   let CheckerTexture = class extends Texture {
     constructor(odd, even, scale2) {
       super();
+      __publicField(this, "_odd");
+      __publicField(this, "_even");
+      __publicField(this, "_scale");
       this._odd = new SolidColor(odd);
       this._even = new SolidColor(even);
       this._scale = scale2 || 5;
@@ -1438,13 +1549,14 @@
       __defProp$c(target, key, result);
     return result;
   };
-  let ImageTexture = class extends Texture {
+  let ImageTexture = (_a = class extends Texture {
     constructor() {
       super();
-      this._width = 0;
-      this._height = 0;
-      this._bytesPerScanLine = 0;
-      this._url = "";
+      __publicField(this, "_width", 0);
+      __publicField(this, "_height", 0);
+      __publicField(this, "_bytesPerScanLine", 0);
+      __publicField(this, "_data");
+      __publicField(this, "_url", "");
     }
     async load(imageUrl) {
       this._url = imageUrl;
@@ -1494,18 +1606,109 @@
     get url() {
       return this._url;
     }
-  };
-  ImageTexture.BytesPerPixel = 4;
+  }, __publicField(_a, "BytesPerPixel", 4), _a);
   ImageTexture = __decorateClass$c([
     serializable
   ], ImageTexture);
-  const F2 = 0.5 * (Math.sqrt(3) - 1);
-  const G2 = (3 - Math.sqrt(3)) / 6;
+  var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
+  function getDefaultExportFromCjs(x) {
+    return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
+  }
+  var alea$1 = { exports: {} };
+  (function(module, exports) {
+    (function(root, factory) {
+      {
+        module.exports = factory();
+      }
+    })(commonjsGlobal, function() {
+      Alea.importState = function(i) {
+        var random = new Alea();
+        random.importState(i);
+        return random;
+      };
+      return Alea;
+      function Alea() {
+        return function(args) {
+          var s0 = 0;
+          var s1 = 0;
+          var s2 = 0;
+          var c = 1;
+          if (args.length == 0) {
+            args = [+/* @__PURE__ */ new Date()];
+          }
+          var mash = Mash();
+          s0 = mash(" ");
+          s1 = mash(" ");
+          s2 = mash(" ");
+          for (var i = 0; i < args.length; i++) {
+            s0 -= mash(args[i]);
+            if (s0 < 0) {
+              s0 += 1;
+            }
+            s1 -= mash(args[i]);
+            if (s1 < 0) {
+              s1 += 1;
+            }
+            s2 -= mash(args[i]);
+            if (s2 < 0) {
+              s2 += 1;
+            }
+          }
+          mash = null;
+          var random = function() {
+            var t = 2091639 * s0 + c * 23283064365386963e-26;
+            s0 = s1;
+            s1 = s2;
+            return s2 = t - (c = t | 0);
+          };
+          random.next = random;
+          random.uint32 = function() {
+            return random() * 4294967296;
+          };
+          random.fract53 = function() {
+            return random() + (random() * 2097152 | 0) * 11102230246251565e-32;
+          };
+          random.version = "Alea 0.9";
+          random.args = args;
+          random.exportState = function() {
+            return [s0, s1, s2, c];
+          };
+          random.importState = function(i2) {
+            s0 = +i2[0] || 0;
+            s1 = +i2[1] || 0;
+            s2 = +i2[2] || 0;
+            c = +i2[3] || 0;
+          };
+          return random;
+        }(Array.prototype.slice.call(arguments));
+      }
+      function Mash() {
+        var n = 4022871197;
+        var mash = function(data) {
+          data = data.toString();
+          for (var i = 0; i < data.length; i++) {
+            n += data.charCodeAt(i);
+            var h = 0.02519603282416938 * n;
+            n = h >>> 0;
+            h -= n;
+            h *= n;
+            n = h >>> 0;
+            h -= n;
+            n += h * 4294967296;
+          }
+          return (n >>> 0) * 23283064365386963e-26;
+        };
+        mash.version = "Mash 0.9";
+        return mash;
+      }
+    });
+  })(alea$1);
+  var aleaExports = alea$1.exports;
+  var alea = /* @__PURE__ */ getDefaultExportFromCjs(aleaExports);
   const F3 = 1 / 3;
   const G3 = 1 / 6;
-  const F4 = (Math.sqrt(5) - 1) / 4;
-  const G4 = (5 - Math.sqrt(5)) / 20;
-  const grad3 = new Float32Array([
+  const fastFloor = (x) => Math.floor(x) | 0;
+  const grad3 = /* @__PURE__ */ new Float64Array([
     1,
     1,
     0,
@@ -1543,203 +1746,17 @@
     -1,
     -1
   ]);
-  const grad4 = new Float32Array([
-    0,
-    1,
-    1,
-    1,
-    0,
-    1,
-    1,
-    -1,
-    0,
-    1,
-    -1,
-    1,
-    0,
-    1,
-    -1,
-    -1,
-    0,
-    -1,
-    1,
-    1,
-    0,
-    -1,
-    1,
-    -1,
-    0,
-    -1,
-    -1,
-    1,
-    0,
-    -1,
-    -1,
-    -1,
-    1,
-    0,
-    1,
-    1,
-    1,
-    0,
-    1,
-    -1,
-    1,
-    0,
-    -1,
-    1,
-    1,
-    0,
-    -1,
-    -1,
-    -1,
-    0,
-    1,
-    1,
-    -1,
-    0,
-    1,
-    -1,
-    -1,
-    0,
-    -1,
-    1,
-    -1,
-    0,
-    -1,
-    -1,
-    1,
-    1,
-    0,
-    1,
-    1,
-    1,
-    0,
-    -1,
-    1,
-    -1,
-    0,
-    1,
-    1,
-    -1,
-    0,
-    -1,
-    -1,
-    1,
-    0,
-    1,
-    -1,
-    1,
-    0,
-    -1,
-    -1,
-    -1,
-    0,
-    1,
-    -1,
-    -1,
-    0,
-    -1,
-    1,
-    1,
-    1,
-    0,
-    1,
-    1,
-    -1,
-    0,
-    1,
-    -1,
-    1,
-    0,
-    1,
-    -1,
-    -1,
-    0,
-    -1,
-    1,
-    1,
-    0,
-    -1,
-    1,
-    -1,
-    0,
-    -1,
-    -1,
-    1,
-    0,
-    -1,
-    -1,
-    -1,
-    0
-  ]);
-  class SimplexNoise {
-    constructor(randomOrSeed = Math.random) {
-      const random = typeof randomOrSeed == "function" ? randomOrSeed : alea(randomOrSeed);
-      this.p = buildPermutationTable(random);
-      this.perm = new Uint8Array(512);
-      this.permMod12 = new Uint8Array(512);
-      for (let i = 0; i < 512; i++) {
-        this.perm[i] = this.p[i & 255];
-        this.permMod12[i] = this.perm[i] % 12;
-      }
-    }
-    noise2D(x, y) {
-      const permMod12 = this.permMod12;
-      const perm = this.perm;
-      let n0 = 0;
-      let n1 = 0;
-      let n2 = 0;
-      const s = (x + y) * F2;
-      const i = Math.floor(x + s);
-      const j = Math.floor(y + s);
-      const t = (i + j) * G2;
-      const X0 = i - t;
-      const Y0 = j - t;
-      const x0 = x - X0;
-      const y0 = y - Y0;
-      let i1, j1;
-      if (x0 > y0) {
-        i1 = 1;
-        j1 = 0;
-      } else {
-        i1 = 0;
-        j1 = 1;
-      }
-      const x1 = x0 - i1 + G2;
-      const y1 = y0 - j1 + G2;
-      const x2 = x0 - 1 + 2 * G2;
-      const y2 = y0 - 1 + 2 * G2;
-      const ii = i & 255;
-      const jj = j & 255;
-      let t0 = 0.5 - x0 * x0 - y0 * y0;
-      if (t0 >= 0) {
-        const gi0 = permMod12[ii + perm[jj]] * 3;
-        t0 *= t0;
-        n0 = t0 * t0 * (grad3[gi0] * x0 + grad3[gi0 + 1] * y0);
-      }
-      let t1 = 0.5 - x1 * x1 - y1 * y1;
-      if (t1 >= 0) {
-        const gi1 = permMod12[ii + i1 + perm[jj + j1]] * 3;
-        t1 *= t1;
-        n1 = t1 * t1 * (grad3[gi1] * x1 + grad3[gi1 + 1] * y1);
-      }
-      let t2 = 0.5 - x2 * x2 - y2 * y2;
-      if (t2 >= 0) {
-        const gi2 = permMod12[ii + 1 + perm[jj + 1]] * 3;
-        t2 *= t2;
-        n2 = t2 * t2 * (grad3[gi2] * x2 + grad3[gi2 + 1] * y2);
-      }
-      return 70 * (n0 + n1 + n2);
-    }
-    noise3D(x, y, z) {
-      const permMod12 = this.permMod12;
-      const perm = this.perm;
+  function createNoise3D(random = Math.random) {
+    const perm = buildPermutationTable(random);
+    const permGrad3x = new Float64Array(perm).map((v) => grad3[v % 12 * 3]);
+    const permGrad3y = new Float64Array(perm).map((v) => grad3[v % 12 * 3 + 1]);
+    const permGrad3z = new Float64Array(perm).map((v) => grad3[v % 12 * 3 + 2]);
+    return function noise3D2(x, y, z) {
       let n0, n1, n2, n3;
       const s = (x + y + z) * F3;
-      const i = Math.floor(x + s);
-      const j = Math.floor(y + s);
-      const k = Math.floor(z + s);
+      const i = fastFloor(x + s);
+      const j = fastFloor(y + s);
+      const k = fastFloor(z + s);
       const t = (i + j + k) * G3;
       const X0 = i - t;
       const Y0 = j - t;
@@ -1812,214 +1829,53 @@
       if (t0 < 0)
         n0 = 0;
       else {
-        const gi0 = permMod12[ii + perm[jj + perm[kk]]] * 3;
+        const gi0 = ii + perm[jj + perm[kk]];
         t0 *= t0;
-        n0 = t0 * t0 * (grad3[gi0] * x0 + grad3[gi0 + 1] * y0 + grad3[gi0 + 2] * z0);
+        n0 = t0 * t0 * (permGrad3x[gi0] * x0 + permGrad3y[gi0] * y0 + permGrad3z[gi0] * z0);
       }
       let t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1;
       if (t1 < 0)
         n1 = 0;
       else {
-        const gi1 = permMod12[ii + i1 + perm[jj + j1 + perm[kk + k1]]] * 3;
+        const gi1 = ii + i1 + perm[jj + j1 + perm[kk + k1]];
         t1 *= t1;
-        n1 = t1 * t1 * (grad3[gi1] * x1 + grad3[gi1 + 1] * y1 + grad3[gi1 + 2] * z1);
+        n1 = t1 * t1 * (permGrad3x[gi1] * x1 + permGrad3y[gi1] * y1 + permGrad3z[gi1] * z1);
       }
       let t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2;
       if (t2 < 0)
         n2 = 0;
       else {
-        const gi2 = permMod12[ii + i2 + perm[jj + j2 + perm[kk + k2]]] * 3;
+        const gi2 = ii + i2 + perm[jj + j2 + perm[kk + k2]];
         t2 *= t2;
-        n2 = t2 * t2 * (grad3[gi2] * x2 + grad3[gi2 + 1] * y2 + grad3[gi2 + 2] * z2);
+        n2 = t2 * t2 * (permGrad3x[gi2] * x2 + permGrad3y[gi2] * y2 + permGrad3z[gi2] * z2);
       }
       let t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3;
       if (t3 < 0)
         n3 = 0;
       else {
-        const gi3 = permMod12[ii + 1 + perm[jj + 1 + perm[kk + 1]]] * 3;
+        const gi3 = ii + 1 + perm[jj + 1 + perm[kk + 1]];
         t3 *= t3;
-        n3 = t3 * t3 * (grad3[gi3] * x3 + grad3[gi3 + 1] * y3 + grad3[gi3 + 2] * z3);
+        n3 = t3 * t3 * (permGrad3x[gi3] * x3 + permGrad3y[gi3] * y3 + permGrad3z[gi3] * z3);
       }
       return 32 * (n0 + n1 + n2 + n3);
-    }
-    noise4D(x, y, z, w) {
-      const perm = this.perm;
-      let n0, n1, n2, n3, n4;
-      const s = (x + y + z + w) * F4;
-      const i = Math.floor(x + s);
-      const j = Math.floor(y + s);
-      const k = Math.floor(z + s);
-      const l = Math.floor(w + s);
-      const t = (i + j + k + l) * G4;
-      const X0 = i - t;
-      const Y0 = j - t;
-      const Z0 = k - t;
-      const W0 = l - t;
-      const x0 = x - X0;
-      const y0 = y - Y0;
-      const z0 = z - Z0;
-      const w0 = w - W0;
-      let rankx = 0;
-      let ranky = 0;
-      let rankz = 0;
-      let rankw = 0;
-      if (x0 > y0)
-        rankx++;
-      else
-        ranky++;
-      if (x0 > z0)
-        rankx++;
-      else
-        rankz++;
-      if (x0 > w0)
-        rankx++;
-      else
-        rankw++;
-      if (y0 > z0)
-        ranky++;
-      else
-        rankz++;
-      if (y0 > w0)
-        ranky++;
-      else
-        rankw++;
-      if (z0 > w0)
-        rankz++;
-      else
-        rankw++;
-      const i1 = rankx >= 3 ? 1 : 0;
-      const j1 = ranky >= 3 ? 1 : 0;
-      const k1 = rankz >= 3 ? 1 : 0;
-      const l1 = rankw >= 3 ? 1 : 0;
-      const i2 = rankx >= 2 ? 1 : 0;
-      const j2 = ranky >= 2 ? 1 : 0;
-      const k2 = rankz >= 2 ? 1 : 0;
-      const l2 = rankw >= 2 ? 1 : 0;
-      const i3 = rankx >= 1 ? 1 : 0;
-      const j3 = ranky >= 1 ? 1 : 0;
-      const k3 = rankz >= 1 ? 1 : 0;
-      const l3 = rankw >= 1 ? 1 : 0;
-      const x1 = x0 - i1 + G4;
-      const y1 = y0 - j1 + G4;
-      const z1 = z0 - k1 + G4;
-      const w1 = w0 - l1 + G4;
-      const x2 = x0 - i2 + 2 * G4;
-      const y2 = y0 - j2 + 2 * G4;
-      const z2 = z0 - k2 + 2 * G4;
-      const w2 = w0 - l2 + 2 * G4;
-      const x3 = x0 - i3 + 3 * G4;
-      const y3 = y0 - j3 + 3 * G4;
-      const z3 = z0 - k3 + 3 * G4;
-      const w3 = w0 - l3 + 3 * G4;
-      const x4 = x0 - 1 + 4 * G4;
-      const y4 = y0 - 1 + 4 * G4;
-      const z4 = z0 - 1 + 4 * G4;
-      const w4 = w0 - 1 + 4 * G4;
-      const ii = i & 255;
-      const jj = j & 255;
-      const kk = k & 255;
-      const ll = l & 255;
-      let t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0 - w0 * w0;
-      if (t0 < 0)
-        n0 = 0;
-      else {
-        const gi0 = perm[ii + perm[jj + perm[kk + perm[ll]]]] % 32 * 4;
-        t0 *= t0;
-        n0 = t0 * t0 * (grad4[gi0] * x0 + grad4[gi0 + 1] * y0 + grad4[gi0 + 2] * z0 + grad4[gi0 + 3] * w0);
-      }
-      let t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1 - w1 * w1;
-      if (t1 < 0)
-        n1 = 0;
-      else {
-        const gi1 = perm[ii + i1 + perm[jj + j1 + perm[kk + k1 + perm[ll + l1]]]] % 32 * 4;
-        t1 *= t1;
-        n1 = t1 * t1 * (grad4[gi1] * x1 + grad4[gi1 + 1] * y1 + grad4[gi1 + 2] * z1 + grad4[gi1 + 3] * w1);
-      }
-      let t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2 - w2 * w2;
-      if (t2 < 0)
-        n2 = 0;
-      else {
-        const gi2 = perm[ii + i2 + perm[jj + j2 + perm[kk + k2 + perm[ll + l2]]]] % 32 * 4;
-        t2 *= t2;
-        n2 = t2 * t2 * (grad4[gi2] * x2 + grad4[gi2 + 1] * y2 + grad4[gi2 + 2] * z2 + grad4[gi2 + 3] * w2);
-      }
-      let t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3 - w3 * w3;
-      if (t3 < 0)
-        n3 = 0;
-      else {
-        const gi3 = perm[ii + i3 + perm[jj + j3 + perm[kk + k3 + perm[ll + l3]]]] % 32 * 4;
-        t3 *= t3;
-        n3 = t3 * t3 * (grad4[gi3] * x3 + grad4[gi3 + 1] * y3 + grad4[gi3 + 2] * z3 + grad4[gi3 + 3] * w3);
-      }
-      let t4 = 0.6 - x4 * x4 - y4 * y4 - z4 * z4 - w4 * w4;
-      if (t4 < 0)
-        n4 = 0;
-      else {
-        const gi4 = perm[ii + 1 + perm[jj + 1 + perm[kk + 1 + perm[ll + 1]]]] % 32 * 4;
-        t4 *= t4;
-        n4 = t4 * t4 * (grad4[gi4] * x4 + grad4[gi4 + 1] * y4 + grad4[gi4 + 2] * z4 + grad4[gi4 + 3] * w4);
-      }
-      return 27 * (n0 + n1 + n2 + n3 + n4);
-    }
+    };
   }
-  var SimplexNoise$1 = SimplexNoise;
   function buildPermutationTable(random) {
-    const p = new Uint8Array(256);
-    for (let i = 0; i < 256; i++) {
+    const tableSize = 512;
+    const p = new Uint8Array(tableSize);
+    for (let i = 0; i < tableSize / 2; i++) {
       p[i] = i;
     }
-    for (let i = 0; i < 255; i++) {
+    for (let i = 0; i < tableSize / 2 - 1; i++) {
       const r = i + ~~(random() * (256 - i));
       const aux = p[i];
       p[i] = p[r];
       p[r] = aux;
     }
+    for (let i = 256; i < tableSize; i++) {
+      p[i] = p[i - 256];
+    }
     return p;
-  }
-  function alea(seed) {
-    let s0 = 0;
-    let s1 = 0;
-    let s2 = 0;
-    let c = 1;
-    const mash = masher();
-    s0 = mash(" ");
-    s1 = mash(" ");
-    s2 = mash(" ");
-    s0 -= mash(seed);
-    if (s0 < 0) {
-      s0 += 1;
-    }
-    s1 -= mash(seed);
-    if (s1 < 0) {
-      s1 += 1;
-    }
-    s2 -= mash(seed);
-    if (s2 < 0) {
-      s2 += 1;
-    }
-    return function() {
-      const t = 2091639 * s0 + c * 23283064365386963e-26;
-      s0 = s1;
-      s1 = s2;
-      return s2 = t - (c = t | 0);
-    };
-  }
-  function masher() {
-    let n = 4022871197;
-    return function(data) {
-      data = data.toString();
-      for (let i = 0; i < data.length; i++) {
-        n += data.charCodeAt(i);
-        let h = 0.02519603282416938 * n;
-        n = h >>> 0;
-        h -= n;
-        h *= n;
-        n = h >>> 0;
-        h -= n;
-        n += h * 4294967296;
-      }
-      return (n >>> 0) * 23283064365386963e-26;
-    };
   }
   var __defProp$b = Object.defineProperty;
   var __getOwnPropDesc$b = Object.getOwnPropertyDescriptor;
@@ -2032,8 +1888,12 @@
       __defProp$b(target, key, result);
     return result;
   };
-  let Perlin = class {
+  let Perlin = (_b = class {
     constructor() {
+      __publicField(this, "_ranVecs");
+      __publicField(this, "_permX");
+      __publicField(this, "_permY");
+      __publicField(this, "_permZ");
       this._ranVecs = new Array(Perlin._pointCount);
       for (let i = 0; i < Perlin._pointCount; i++) {
         this._ranVecs[i] = normalize$2(create$2(), randomRange(-1, 1));
@@ -2090,8 +1950,7 @@
         array[target] = tmp;
       }
     }
-  };
-  Perlin._pointCount = 256;
+  }, __publicField(_b, "_pointCount", 256), _b);
   Perlin = __decorateClass$b([
     serializable
   ], Perlin);
@@ -2121,32 +1980,36 @@
       __defProp$a(target, key, result);
     return result;
   };
-  const RANDOMSEED = "just a random seed string";
+  const prng = alea("just a random seed string");
+  const noise3D = createNoise3D(prng);
   let NoiseTexture = class extends Texture {
+    // private _simplexNoise: SimplexNoise;
     constructor(scale2) {
       super();
-      this._noise = new Perlin();
+      __publicField(this, "_noise", new Perlin());
+      __publicField(this, "_scale");
       this._scale = scale2;
     }
     get scale() {
       return this._scale;
     }
     turb(p, depth = 7) {
-      if (!this._simplexNoise) {
-        this._simplexNoise = new SimplexNoise$1(RANDOMSEED);
-      }
       let accum = 0;
       const tempP = p;
       let weight = 1;
       for (let i = 0; i < depth; i++) {
-        accum += weight * this._simplexNoise.noise3D(p[0], p[1], p[2]);
+        accum += weight * noise3D(p[0], p[1], p[2]);
         weight *= 0.5;
         scale(tempP, tempP, 2);
       }
       return Math.abs(accum);
     }
     value(u, v, p) {
-      return scale(create$2(), scale(create$2(), fromValues(1, 1, 1), 0.5), 1 + Math.sin(this._scale * p[2] + 10 * this.turb(p)));
+      return scale(
+        create$2(),
+        scale(create$2(), fromValues(1, 1, 1), 0.5),
+        1 + Math.sin(this._scale * p[2] + 10 * this.turb(p))
+      );
     }
   };
   NoiseTexture = __decorateClass$a([
@@ -2166,6 +2029,7 @@
   let DiffuseLight = class extends Material {
     constructor(color) {
       super();
+      __publicField(this, "_emit");
       if (color) {
         this._emit = new SolidColor(color);
       }
@@ -2197,6 +2061,7 @@
   let IsoTropic = class extends Material {
     constructor(albedo) {
       super();
+      __publicField(this, "_albedo");
       if (albedo instanceof Texture) {
         this._albedo = albedo;
       } else {
@@ -2226,6 +2091,7 @@
   let LambertianMaterial = class extends Material {
     constructor(color) {
       super();
+      __publicField(this, "_albedo");
       if (color) {
         this._albedo = new SolidColor(color);
       }
@@ -2261,6 +2127,8 @@
   let MetalMaterial = class extends Material {
     constructor(color, roughness) {
       super();
+      __publicField(this, "_baseColor");
+      __publicField(this, "_roughness");
       this._baseColor = color;
       this._roughness = roughness;
     }
@@ -2272,7 +2140,11 @@
     }
     scatter(r_in, rec, attenuation, scattered) {
       const refl = reflect(normalize$2(create$2(), r_in.direction), rec.normal);
-      new Ray(rec.p, add(create$2(), refl, scale(create$2(), randomInUnitSphere(), this._roughness)), r_in.time).copyTo(scattered);
+      new Ray(
+        rec.p,
+        add(create$2(), refl, scale(create$2(), randomInUnitSphere(), this._roughness)),
+        r_in.time
+      ).copyTo(scattered);
       copy(attenuation, this._baseColor);
       return dot(scattered.direction, rec.normal) > 0;
     }
@@ -2294,7 +2166,7 @@
   let NormalMaterial = class extends Material {
     constructor() {
       super(...arguments);
-      this.corrected = false;
+      __publicField(this, "corrected", false);
     }
     scatter(ray, rec, attenuation, scattered) {
       const scatter_direction = add(create$2(), rec.normal, randomUnitVector());
@@ -2349,6 +2221,9 @@
   let ConstantMedium = class extends Hittable {
     constructor(boundary, density, material) {
       super();
+      __publicField(this, "_boundary");
+      __publicField(this, "_phaseFunction");
+      __publicField(this, "_negInvDensity");
       this._boundary = boundary;
       this._negInvDensity = -1 / density;
       this._phaseFunction = new IsoTropic(material);
@@ -2408,6 +2283,11 @@
   let MovingSphere = class extends Hittable {
     constructor(center0, center1, t0, t1, radius, mat) {
       super();
+      __publicField(this, "_center0");
+      __publicField(this, "_center1");
+      __publicField(this, "_time0");
+      __publicField(this, "_time1");
+      __publicField(this, "_radius");
       this._center0 = center0;
       this._center1 = center1;
       this._time0 = t0;
@@ -2482,8 +2362,14 @@
       const transformedCenterT0 = transformMat4(create$2(), this.center(t0), this.transform.objectToWorld);
       const transformedCenterT1 = transformMat4(create$2(), this.center(t1), this.transform.objectToWorld);
       const r = fromValues(this._radius, this._radius, this._radius);
-      const box0 = new AABB(sub(create$2(), transformedCenterT0, r), add(create$2(), transformedCenterT0, r));
-      const box1 = new AABB(sub(create$2(), transformedCenterT1, r), add(create$2(), transformedCenterT1, r));
+      const box0 = new AABB(
+        sub(create$2(), transformedCenterT0, r),
+        add(create$2(), transformedCenterT0, r)
+      );
+      const box1 = new AABB(
+        sub(create$2(), transformedCenterT1, r),
+        add(create$2(), transformedCenterT1, r)
+      );
       return AABB.surroundingBox(box0, box1);
     }
   };
@@ -2504,6 +2390,8 @@
   let Sphere = class extends Hittable {
     constructor(center, radius, mat) {
       super();
+      __publicField(this, "_center");
+      __publicField(this, "_radius");
       this._center = center;
       this._radius = radius;
       this.material = mat;
@@ -2565,7 +2453,7 @@
   Sphere = __decorateClass$1([
     serializable
   ], Sphere);
-  var __defProp = Object.defineProperty;
+  var __defProp2 = Object.defineProperty;
   var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
   var __decorateClass = (decorators, target, key, kind) => {
     var result = kind > 1 ? void 0 : kind ? __getOwnPropDesc(target, key) : target;
@@ -2573,7 +2461,7 @@
       if (decorator = decorators[i])
         result = (kind ? decorator(target, key, result) : decorator(result)) || result;
     if (kind && result)
-      __defProp(target, key, result);
+      __defProp2(target, key, result);
     return result;
   };
   function avgVector3(vectors) {
@@ -2589,8 +2477,19 @@
   let Triangle = class extends Hittable {
     constructor(v0, v1, v2, n0, n1, n2, uv0, uv1, uv2) {
       super();
-      this.transform = new Transform();
-      this.doubleSided = false;
+      __publicField(this, "v0");
+      __publicField(this, "n0");
+      __publicField(this, "uv0");
+      __publicField(this, "v1");
+      __publicField(this, "n1");
+      __publicField(this, "uv1");
+      __publicField(this, "v2");
+      __publicField(this, "n2");
+      __publicField(this, "uv2");
+      __publicField(this, "surfaceNormal");
+      __publicField(this, "transform", new Transform());
+      __publicField(this, "material");
+      __publicField(this, "doubleSided", false);
       this.v0 = v0;
       this.v1 = v1;
       this.v2 = v2;
@@ -2611,9 +2510,9 @@
       }
       this.surfaceNormal = create$2();
       normalize$2(this.surfaceNormal, avgVector3([this.n0, this.n1, this.n2]));
-      this.uv0 = uv0 != null ? uv0 : [0, 0];
-      this.uv1 = uv1 != null ? uv1 : [0, 0];
-      this.uv2 = uv2 != null ? uv2 : [0, 0];
+      this.uv0 = uv0 ?? [0, 0];
+      this.uv1 = uv1 ?? [0, 0];
+      this.uv2 = uv2 ?? [0, 0];
     }
     applyTransform() {
       transformMat4(this.v0, this.v0, this.transform.objectToWorld);
@@ -2626,6 +2525,7 @@
       normalize$2(this.n1, this.n1);
       normalize$2(this.n2, this.n2);
     }
+    /* from https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf */
     hit(ray, tMin, tMax, rec) {
       const transformedRay = this.transform.transformRay(ray);
       const edge1 = subtract(create$2(), this.v1, this.v0);
@@ -2709,22 +2609,13 @@
   Triangle = __decorateClass([
     serializable
   ], Triangle);
-  var ControllerCommands;
-  (function(ControllerCommands2) {
-    ControllerCommands2[ControllerCommands2["START"] = 0] = "START";
-    ControllerCommands2[ControllerCommands2["STOP"] = 1] = "STOP";
-    ControllerCommands2[ControllerCommands2["READY"] = 2] = "READY";
-    ControllerCommands2[ControllerCommands2["UPDATE"] = 3] = "UPDATE";
-    ControllerCommands2[ControllerCommands2["WORKERDONE"] = 4] = "WORKERDONE";
-    ControllerCommands2[ControllerCommands2["END"] = 5] = "END";
-  })(ControllerCommands || (ControllerCommands = {}));
-  var ComputeCommands;
-  (function(ComputeCommands2) {
+  var ComputeCommands = /* @__PURE__ */ ((ComputeCommands2) => {
     ComputeCommands2[ComputeCommands2["INIT"] = 0] = "INIT";
     ComputeCommands2[ComputeCommands2["READY"] = 1] = "READY";
     ComputeCommands2[ComputeCommands2["START"] = 2] = "START";
     ComputeCommands2[ComputeCommands2["END"] = 3] = "END";
-  })(ComputeCommands || (ComputeCommands = {}));
+    return ComputeCommands2;
+  })(ComputeCommands || {});
   const controllerCtx = self;
   let workerId;
   let camera;

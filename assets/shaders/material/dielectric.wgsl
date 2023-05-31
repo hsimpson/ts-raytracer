@@ -10,10 +10,10 @@ fn schlick(cosine: f32, refractIdx: f32) -> f32 {
 
 fn dielectricScatter(
   material: Material,
-  ray: ptr<function, Ray, read_write>,
-  rec: ptr<function, HitRecord, read_write>,
-  attenuation: ptr<function, vec3<f32>, read_write>,
-  scattered: ptr<function, Ray, read_write>,
+  ray: ptr<function, Ray>,
+  rec: ptr<function, HitRecord>,
+  attenuation: ptr<function, vec3<f32>>,
+  scattered: ptr<function, Ray>,
 ) -> bool {  
   *attenuation = vec3<f32>(1.0, 1.0, 1.0);
   var etaiOverEtat: f32;

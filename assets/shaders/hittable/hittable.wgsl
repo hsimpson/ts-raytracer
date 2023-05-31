@@ -1,11 +1,11 @@
 
-let HITTABLETYPE_SPHERE = 0u;
-let HITTABLETYPE_MOVINGSPHERE = 1u;
-let HITTABLETYPE_XYRECT = 2u;
-let HITTABLETYPE_XZRECT = 3u;
-let HITTABLETYPE_YZRECT = 4u;
-let HITTABLETYPE_CONSTANTMEDIUM = 5u;
-let HITTABLETYPE_TRIANGLE = 6u;
+const HITTABLETYPE_SPHERE = 0u;
+const HITTABLETYPE_MOVINGSPHERE = 1u;
+const HITTABLETYPE_XYRECT = 2u;
+const HITTABLETYPE_XZRECT = 3u;
+const HITTABLETYPE_YZRECT = 4u;
+const HITTABLETYPE_CONSTANTMEDIUM = 5u;
+const HITTABLETYPE_TRIANGLE = 6u;
 
 #include "../ray.wgsl"
 #include "./hittable_base.wgsl"
@@ -18,10 +18,10 @@ let HITTABLETYPE_TRIANGLE = 6u;
 
 fn hitPrimitve(
   primitve: Primitve,
-  ray: ptr<function, Ray, read_write>,
+  ray: ptr<function, Ray>,
   tMin: f32,
   tMax: f32,
-  rec: ptr<function, HitRecord, read_write>
+  rec: ptr<function, HitRecord>
 ) -> bool {
   let primitiveType = primitve.primitiveType;
   var hitted: bool = false;
@@ -48,10 +48,10 @@ fn hitPrimitve(
 }
 
 fn hittableListHit(
-  ray: ptr<function, Ray, read_write>,
+  ray: ptr<function, Ray>,
   tMin: f32,
   tMax: f32,
-  rec: ptr<function, HitRecord, read_write>
+  rec: ptr<function, HitRecord>
 ) -> bool {
   var tempRec: HitRecord;
   var hitAnything = false;

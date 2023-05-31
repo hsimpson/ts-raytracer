@@ -5,10 +5,10 @@
 
 fn lambertScatter(
   material: Material,
-  ray: ptr<function, Ray, read_write>,
-  rec: ptr<function, HitRecord, read_write>,
-  attenuation: ptr<function, vec3<f32>, read_write>,
-  scattered: ptr<function, Ray, read_write>,
+  ray: ptr<function, Ray>,
+  rec: ptr<function, HitRecord>,
+  attenuation: ptr<function, vec3<f32>>,
+  scattered: ptr<function, Ray>,
 ) -> bool {
   let scatterDirection = (*rec).normal + randomUnitVector();
   *scattered = Ray((*rec).p, scatterDirection, (*ray).time);

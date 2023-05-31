@@ -1,25 +1,24 @@
 
 struct FragmentInput {
-  [[location(0)]] uv: vec2<f32>;
+  @location(0) uv: vec2<f32>,
 };
 
 struct FragmentOutput {
-  [[location(0)]] fragColor: vec4<f32>;
+  @location(0) fragColor: vec4<f32>,
 };
 
 struct ComputeParams {
-  width: f32;
-  height: f32;
+  width: f32,
+  height: f32,
 };
-
-[[group(0), binding(0)]] var<uniform> computeParams : ComputeParams;
+@group(0) @binding(0) var<uniform> computeParams : ComputeParams;
 
 struct PixelBuffer {
-  pixels: array<vec4<f32>>;
+  pixels: array<vec4<f32>>,
 };
-[[group(0), binding(1)]] var<storage, read> pixelBuffer : PixelBuffer;
+@group(0) @binding(1) var<storage, read> pixelBuffer : PixelBuffer;
 
-[[stage(fragment)]]
+@fragment
 fn main(input: FragmentInput) -> FragmentOutput {
   var output = FragmentOutput();
   let resolution: vec2<f32> = vec2<f32>(computeParams.width, computeParams.height);

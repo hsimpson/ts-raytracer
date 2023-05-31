@@ -2,15 +2,15 @@
 #include "../utils.wgsl"
 #include "./hittable_base.wgsl"
 
-let EPSILON = 0.000001;
-let TEST_CULL = true;
+const EPSILON = 0.000001;
+const TEST_CULL = true;
 
 fn hitTriangle(
   tri: Primitve,
-  ray: ptr<function, Ray, read_write>,
+  ray: ptr<function, Ray>,
   tMin: f32,
   tMax: f32,
-  rec: ptr<function, HitRecord, read_write>
+  rec: ptr<function, HitRecord>
 ) -> bool {
   let v0 = tri.v0.xyz;
   let v1 = tri.v1.xyz;
