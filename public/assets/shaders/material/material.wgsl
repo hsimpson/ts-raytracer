@@ -1,9 +1,9 @@
-let MATERIALTYPE_LAMBERTIAN = 0u;
-let MATERIALTYPE_METAL = 1u;
-let MATERIALTYPE_DIELECTRIC = 2u;
-let MATERIALTYPE_ISOTROPIC = 3u;
-let MATERIALTYPE_DIFFUSELIGHT = 4u;
-let MATERIALTYPE_NORMAL = 5u;
+const MATERIALTYPE_LAMBERTIAN = 0u;
+const MATERIALTYPE_METAL = 1u;
+const MATERIALTYPE_DIELECTRIC = 2u;
+const MATERIALTYPE_ISOTROPIC = 3u;
+const MATERIALTYPE_DIFFUSELIGHT = 4u;
+const MATERIALTYPE_NORMAL = 5u;
 
 #include "../utils.wgsl"
 #include "../ray.wgsl"
@@ -16,10 +16,10 @@ let MATERIALTYPE_NORMAL = 5u;
 #include "./normal.wgsl"
 
 fn materialScatter(
-  ray: ptr<function, Ray, read_write>,
-  rec: ptr<function, HitRecord, read_write>,
-  attenuation: ptr<function, vec3<f32>, read_write>,
-  scattered: ptr<function, Ray, read_write>,
+  ray: ptr<function, Ray>,
+  rec: ptr<function, HitRecord>,
+  attenuation: ptr<function, vec3<f32>>,
+  scattered: ptr<function, Ray>,
 ) -> bool {
   let materialIndex = (*rec).materialIndex;
   let material = materialBuffer.materials[materialIndex];
@@ -43,8 +43,8 @@ fn materialScatter(
 }
 
 fn materialEmitted(
-  ray: ptr<function, Ray, read_write>,
-  rec: ptr<function, HitRecord, read_write>,
+  ray: ptr<function, Ray>,
+  rec: ptr<function, HitRecord>,
 ) -> vec3<f32> {
   let materialIndex = (*rec).materialIndex;
   let material = materialBuffer.materials[materialIndex];

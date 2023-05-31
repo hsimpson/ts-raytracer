@@ -1,8 +1,8 @@
 
-let TEXTURETYPE_SOLID = 0u;
-let TEXTURETYPE_CHECKER = 1u;
-let TEXTURETYPE_NOISE = 2u;
-let TEXTURETYPE_IMAGE = 3u;
+const TEXTURETYPE_SOLID = 0u;
+const TEXTURETYPE_CHECKER = 1u;
+const TEXTURETYPE_NOISE = 2u;
+const TEXTURETYPE_IMAGE = 3u;
 
 #include "./texture_base.wgsl"
 #include "./solid.wgsl"

@@ -1,18 +1,18 @@
 #include "./ray.wgsl"
 
 struct Camera {
-  origin: vec4<f32>;
-  lowerLeftCorner: vec4<f32>;
-  horizontal: vec4<f32>;
-  vertical: vec4<f32>;
-  u: vec4<f32>;
-  v: vec4<f32>;
-  w: vec4<f32>;
-  lensRadius: f32;
-  t0: f32;
-  t1: f32;
+  origin: vec4<f32>,
+  lowerLeftCorner: vec4<f32>,
+  horizontal: vec4<f32>,
+  vertical: vec4<f32>,
+  u: vec4<f32>,
+  v: vec4<f32>,
+  w: vec4<f32>,
+  lensRadius: f32,
+  t0: f32,
+  t1: f32,
 };
-[[group(0), binding(1)]] var<uniform> camera: Camera;
+@group(0) @binding(1) var<uniform> camera: Camera;
 
 
 fn cameraGetRay(s: f32, t: f32) -> Ray {

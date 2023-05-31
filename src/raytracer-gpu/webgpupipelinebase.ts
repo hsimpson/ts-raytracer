@@ -13,6 +13,15 @@ export abstract class WebGPUPipelineBase extends WebGPUObjectBase {
   protected _bindGroupLayout: GPUBindGroupLayout;
   protected _bindGroup: GPUBindGroup;
 
+  private prepareCode(code: string) {
+    const lines = code.split('\n');
+    let result = '';
+    for (let i = 0; i < lines.length; i++) {
+      result += `${i + 1}: ${lines[i]}\n`;
+    }
+    return result;
+  }
+
   protected async loadShader(shaderUrl: URL): Promise<GPUShaderModule> {
     console.log(`compiling shader: ${shaderUrl}`);
 
@@ -21,22 +30,16 @@ export abstract class WebGPUPipelineBase extends WebGPUObjectBase {
       code,
     });
 
-    let error = false;
-    let warning = false;
-
-    const compilationInfo = await shaderModule.compilationInfo();
+    const compilationInfo = await shaderModule.getCompilationInfo();
     for (const message of compilationInfo.messages) {
       if (message.type === 'error') {
-        error = true;
+        console.error(message.message);
+        console.error(this.prepareCode(code));
       }
       if (message.type === 'warning') {
-        warning = true;
+        console.warn(message.message);
+        console.warn(this.prepareCode(code));
       }
-      console.log(message.message);
-    }
-
-    if (error || warning) {
-      console.log(code);
     }
 
     return shaderModule;
