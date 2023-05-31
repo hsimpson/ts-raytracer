@@ -1,6 +1,6 @@
 import React from 'react';
-import Gui from './gui';
 import Canvas from './canvas';
+import Gui from './gui';
 
 const App = (): React.ReactElement => {
   return (

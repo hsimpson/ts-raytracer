@@ -24,7 +24,7 @@ export abstract class WebGPUPipelineBase extends WebGPUObjectBase {
     let error = false;
     let warning = false;
 
-    const compilationInfo = await shaderModule.compilationInfo();
+    const compilationInfo = await shaderModule.getCompilationInfo();
     for (const message of compilationInfo.messages) {
       if (message.type === 'error') {
         error = true;
