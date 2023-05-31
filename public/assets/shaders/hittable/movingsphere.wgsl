@@ -17,10 +17,10 @@ fn center(sphere: Primitve, time: f32) -> vec3<f32> {
 
 fn hitMovingSphere(
   sphere: Primitve,
-  ray: ptr<function, Ray, read_write>,
+  ray: ptr<function, Ray>,
   tMin: f32,
   tMax: f32,
-  rec: ptr<function, HitRecord, read_write>
+  rec: ptr<function, HitRecord>
 ) -> bool {
   var transformedRay = transformRay(ray, sphere.inverseMatrix, sphere.inverseRotation);
 

@@ -1,5 +1,5 @@
 
-let PI = 3.1415926538;
+const PI = 3.1415926538;
 var<private> seed: u32;
 
 fn initSeed(s: u32) {

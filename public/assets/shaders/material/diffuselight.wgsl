@@ -3,7 +3,7 @@
 #include "./material_base.wgsl"
 #include "../texture/texture.wgsl"
 
-fn diffuseLightEmitted(material: Material, rec: ptr<function, HitRecord, read_write>) -> vec3<f32> {
+fn diffuseLightEmitted(material: Material, rec: ptr<function, HitRecord>) -> vec3<f32> {
   let textureIndex = material.textureIndex;
   let texture = textureBuffer.textures[textureIndex];
   
