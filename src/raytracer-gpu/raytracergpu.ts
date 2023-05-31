@@ -115,7 +115,7 @@ export class RaytracerGPU extends RaytracerBase {
           this._rayTracerOptions.tileSize
         );
 
-        const frequency = 50;
+        const frequency = 100;
         let sample = 1;
         let tile: ComputeTile;
         const frame = (): void => {
@@ -125,14 +125,13 @@ export class RaytracerGPU extends RaytracerBase {
             if (sample === 1) {
               tile = computeTiles.shift();
             }
-            this.computePass(computePipeline, sample, tile);
-            if (sample < this._rayTracerOptions.samplesPerPixel) {
-              sample++;
-            } else {
+            this.computePass(computePipeline, sample++, tile);
+            if (sample > this._rayTracerOptions.samplesPerPixel) {
               sample = 1;
             }
             duration += window.performance.now() - frameStartTime;
           } while (computeTiles.length && duration < frequency);
+          // console.log(duration);
           this.renderPass(renderPipeline);
 
           if (computeTiles.length || sample < this._rayTracerOptions.samplesPerPixel - 1) {
@@ -212,6 +211,7 @@ export class RaytracerGPU extends RaytracerBase {
   }
 
   private computePass(computePipeline: WebGPUComputePipline, sample: number, tile: ComputeTile): void {
+    // console.log('computePass', sample, tile);
     const commandEncoder = WebGPUContext.device.createCommandEncoder();
 
     computePipeline.updateUniformBuffer(sample, tile);
@@ -225,6 +225,7 @@ export class RaytracerGPU extends RaytracerBase {
   }
 
   private renderPass(renderPipeLine: WebGPURenderPipeline): void {
+    // console.log('renderPass');
     const commandEncoder = WebGPUContext.device.createCommandEncoder();
 
     // renderPipeLine.updateUniformBuffer(sample);
