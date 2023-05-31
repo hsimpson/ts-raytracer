@@ -7,7 +7,6 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "yarn run build && gh-pages -d dist",
     "check-types": "tsc --noemit",
     "lint:ts": "eslint . --ext .ts,.tsx --fix",
     "lint": "yarn check-types && yarn lint:ts"
@@ -39,7 +38,6 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "gh-pages": "^5.0.0",
     "prettier": "^2.8.8",
     "resize-observer-polyfill": "^1.5.1",
     "rimraf": "^5.0.1",
