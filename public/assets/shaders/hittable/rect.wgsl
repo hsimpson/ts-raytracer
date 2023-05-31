@@ -61,7 +61,7 @@ fn hitXZRect(
   (*rec).uv.y = (z - rect.bounds.z) / (rect.bounds.w - rect.bounds.z);
   (*rec).t    = t;
 
-  let outwardNormal = vec3<f32>(0.0, 0.0, 1.0);
+  let outwardNormal = vec3<f32>(0.0, 1.0, 0.0);
   setFaceNormal(rec, &transformedRay, outwardNormal);
   (*rec).materialIndex = rect.materialIndex;
   (*rec).p             = rayAt(&transformedRay, (*rec).t);
@@ -95,7 +95,7 @@ fn hitYZRect(
   (*rec).uv.y = (z - rect.bounds.z) / (rect.bounds.w - rect.bounds.z);
   (*rec).t    = t;
 
-  let outwardNormal = vec3<f32>(0.0, 0.0, 1.0);
+  let outwardNormal = vec3<f32>(1.0, 0.0, 0.0);
   setFaceNormal(rec, &transformedRay, outwardNormal);
   (*rec).materialIndex = rect.materialIndex;
   (*rec).p             = rayAt(&transformedRay, (*rec).t);

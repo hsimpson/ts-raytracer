@@ -3,7 +3,7 @@
 
 let FLT_MAX = 99999.99;
 
-[[block]] struct ComputeParams {
+struct ComputeParams {
   background: vec3<f32>;
   tileOffsetX: f32;
   tileOffsetY: f32;
@@ -15,19 +15,19 @@ let FLT_MAX = 99999.99;
   padding_1: f32;
   padding_2: f32;
 };
-[[binding(0), group(0)]] var<uniform> computeParams: ComputeParams;
+[[group(0), binding(0)]] var<uniform> computeParams: ComputeParams;
 
 
-[[block]] struct PixelBuffer {
+struct PixelBuffer {
   pixels: array<vec4<f32>>;
 };
 
-[[block]] struct AccumlationBuffer {
+struct AccumlationBuffer {
   pixels: array<vec4<f32>>;
 };
 
-[[binding(2), group(0)]] var<storage, read_write> pixelBuffer : PixelBuffer;
-[[binding(3), group(0)]] var<storage, read_write> accumulationBuffer : AccumlationBuffer;
+[[group(0), binding(2)]] var<storage, read_write> pixelBuffer : PixelBuffer;
+[[group(0), binding(3)]] var<storage, read_write> accumulationBuffer : AccumlationBuffer;
 
 #include "./hittable/hittable.wgsl"
 #include "./material/material.wgsl"

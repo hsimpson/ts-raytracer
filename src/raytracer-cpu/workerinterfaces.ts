@@ -4,7 +4,9 @@ import { vec3 } from 'gl-matrix';
 export enum ControllerCommands {
   START,
   STOP,
+  READY,
   UPDATE,
+  WORKERDONE,
   END,
 }
 
@@ -32,9 +34,6 @@ export interface ControllerStartMessage extends WorkerMessage {
     maxBounces: number;
     computeWorkers: number;
     sceneIdx: number;
-    world: JsonObject;
-    camera: JsonObject;
-    background: vec3;
     tileSize: number;
   };
 }
@@ -93,3 +92,4 @@ export interface ComputeReadyMessage extends WorkerMessage {
 
 // empty messages
 export type ControllerStopMessage = WorkerMessage;
+export type ControllerReadyMessage = WorkerMessage;

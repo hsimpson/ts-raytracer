@@ -28,17 +28,17 @@ fn hitPrimitve(
 
   if(primitiveType == HITTABLETYPE_SPHERE) {
     hitted = hitSphere(primitve, ray, tMin, tMax, rec);
-  } elseif(primitiveType == HITTABLETYPE_MOVINGSPHERE) {
+  } else if(primitiveType == HITTABLETYPE_MOVINGSPHERE) {
     hitted = hitMovingSphere(primitve, ray, tMin, tMax, rec);
-  } elseif(primitiveType == HITTABLETYPE_XYRECT) {
+  } else if(primitiveType == HITTABLETYPE_XYRECT) {
     hitted = hitXYRect(primitve, ray, tMin, tMax, rec);
-  } elseif(primitiveType == HITTABLETYPE_XZRECT) {
+  } else if(primitiveType == HITTABLETYPE_XZRECT) {
     hitted = hitXZRect(primitve, ray, tMin, tMax, rec);
-  } elseif(primitiveType == HITTABLETYPE_YZRECT) {
+  } else if(primitiveType == HITTABLETYPE_YZRECT) {
     hitted = hitYZRect(primitve, ray, tMin, tMax, rec);
-  } elseif(primitiveType == HITTABLETYPE_CONSTANTMEDIUM) {
+  } else if(primitiveType == HITTABLETYPE_CONSTANTMEDIUM) {
     // hitted = hitSphere(primitve, ray, tMin, tMax, rec);
-  } elseif(primitiveType == HITTABLETYPE_TRIANGLE) {
+  } else if(primitiveType == HITTABLETYPE_TRIANGLE) {
     hitted = hitTriangle(primitve, ray, tMin, tMax, rec);
   } else {
     hitted = false;

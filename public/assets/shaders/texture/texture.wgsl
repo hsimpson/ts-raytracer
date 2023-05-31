@@ -8,7 +8,7 @@ let TEXTURETYPE_IMAGE = 3u;
 #include "./solid.wgsl"
 #include "./checker.wgsl"
 #include "./noise.wgsl"
-// #include "./image.wgsl"
+#include "./image.wgsl"
 
 fn textureValue(texture: Texture, uv: vec2<f32>, p: vec3<f32>) -> vec3<f32> {
   var color = vec3<f32>(0.0, 0.0, 0.0);
@@ -16,12 +16,12 @@ fn textureValue(texture: Texture, uv: vec2<f32>, p: vec3<f32>) -> vec3<f32> {
   
   if(textureType == TEXTURETYPE_SOLID) {
     color = solidTextureValue(texture, uv, p);
-  } elseif(textureType == TEXTURETYPE_CHECKER) {
+  } else if(textureType == TEXTURETYPE_CHECKER) {
     color = checkerTextureValue(texture, uv, p);
-  } elseif(textureType == TEXTURETYPE_NOISE) {
+  } else if(textureType == TEXTURETYPE_NOISE) {
     color = noiseTextureValue(texture, uv, p);
-  } elseif(textureType == TEXTURETYPE_IMAGE) {
-    //
+  } else if(textureType == TEXTURETYPE_IMAGE) {
+    color = imageTextureValue(texture, uv, p);
   }
 
   return color;

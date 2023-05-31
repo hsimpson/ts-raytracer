@@ -30,8 +30,8 @@ struct Primitve {
   // float pad_1;
 };
 
-[[block]] struct Primitives {
+struct Primitives {
   primitives: array<Primitve>;
 };
 
-[[binding(4), group(0)]] var<storage, read_write> primitivesBuffer: Primitives;
+[[group(0), binding(4)]] var<storage, read_write> primitivesBuffer: Primitives;

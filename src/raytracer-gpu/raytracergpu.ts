@@ -71,7 +71,7 @@ export class RaytracerGPU extends RaytracerBase {
       0.1
     );
 
-    const baseUrl = window.location.origin;
+    const baseUrl = window.location.href;
 
     const computePipeline = new WebGPUComputePipline({
       computeShaderUrl: new URL('assets/shaders/raytracer.comp.wgsl', baseUrl),

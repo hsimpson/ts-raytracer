@@ -2,6 +2,19 @@
 #include "../utils.wgsl"
 #include "./hittable_base.wgsl"
 
+fn center(sphere: Primitve, time: f32) -> vec3<f32> {
+  let center0 = sphere.center0.xyz;
+  let center1 = sphere.center1.xyz;
+
+  let time0 = sphere.center0.w;
+  let time1 = sphere.center1.w;
+
+  let timeDiff   = (time - time0) / (time1 - time0);
+  let  centerDiff = center1 - center0;
+
+  return center0 + (centerDiff * timeDiff);
+}
+
 fn hitMovingSphere(
   sphere: Primitve,
   ray: ptr<function, Ray, read_write>,
@@ -11,7 +24,7 @@ fn hitMovingSphere(
 ) -> bool {
   var transformedRay = transformRay(ray, sphere.inverseMatrix, sphere.inverseRotation);
 
-  let center       = sphere.center0.xyz;
+  let center       = center(sphere, transformedRay.time);
   let oc           = transformedRay.origin - center;
   let a            = lengthSquared(transformedRay.direction);
   let half_b       = dot(oc, transformedRay.direction);
