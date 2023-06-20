@@ -1,38 +1,38 @@
 #include "./camera.wgsl"
 #include "./utils.wgsl"
 
-let FLT_MAX = 99999.99;
+const FLT_MAX = 99999.99;
 
 struct ComputeParams {
-  background: vec3<f32>;
-  tileOffsetX: f32;
-  tileOffsetY: f32;
-  width: f32;
-  height: f32;
-  currentSample: f32;
-  maxBounces: f32;
-  padding_0: f32;
-  padding_1: f32;
-  padding_2: f32;
+  background: vec3<f32>,
+  tileOffsetX: f32,
+  tileOffsetY: f32,
+  width: f32,
+  height: f32,
+  currentSample: f32,
+  maxBounces: f32,
+  padding_0: f32,
+  padding_1: f32,
+  padding_2: f32,
 };
-[[group(0), binding(0)]] var<uniform> computeParams: ComputeParams;
+@group(0) @binding(0) var<uniform> computeParams: ComputeParams;
 
 
 struct PixelBuffer {
-  pixels: array<vec4<f32>>;
+  pixels: array<vec4<f32>>,
 };
 
 struct AccumlationBuffer {
-  pixels: array<vec4<f32>>;
+  pixels: array<vec4<f32>>,
 };
 
-[[group(0), binding(2)]] var<storage, read_write> pixelBuffer : PixelBuffer;
-[[group(0), binding(3)]] var<storage, read_write> accumulationBuffer : AccumlationBuffer;
+@group(0) @binding(2) var<storage, read_write> pixelBuffer : PixelBuffer;
+@group(0) @binding(3) var<storage, read_write> accumulationBuffer : AccumlationBuffer;
 
 #include "./hittable/hittable.wgsl"
 #include "./material/material.wgsl"
 
-fn rayColor(ray: ptr<function, Ray, read_write>, background: vec3<f32>, depth: u32) 
+fn rayColor(ray: ptr<function, Ray>, background: vec3<f32>, depth: u32) 
 -> vec3<f32> {
   var rec: HitRecord;
   var color = vec3<f32>(1.0, 1.0, 1.0);
@@ -64,8 +64,8 @@ fn rayColor(ray: ptr<function, Ray, read_write>, background: vec3<f32>, depth: u
 }
 
 
-[[stage(compute), workgroup_size(8,8,1)]]
-fn main([[builtin(global_invocation_id)]] GlobalInvocationID: vec3<u32>) {
+@compute @workgroup_size(8,8,1)
+fn main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
   var index: vec2<u32> = GlobalInvocationID.xy;
   index.x = index.x + u32(computeParams.tileOffsetX);
   index.y = index.y + u32(computeParams.tileOffsetY);

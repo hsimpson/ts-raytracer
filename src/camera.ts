@@ -1,7 +1,7 @@
+import { vec3 } from 'gl-matrix';
 import { Ray } from './raytracer-cpu/ray';
 import { serializable } from './serializing';
-import { degreeToRadians, randomNumberRange, randomInUnitdisk } from './util';
-import { vec3 } from 'gl-matrix';
+import { degreeToRadians, randomInUnitdisk, randomNumberRange } from './util';
 
 export interface CameraOptions {
   lookFrom: vec3;
@@ -39,7 +39,7 @@ export class Camera {
     aperture: number,
     focusDist: number,
     t0 = 0,
-    t1 = 0
+    t1 = 0,
   ): void {
     const theta = degreeToRadians(fovY);
     const h = Math.tan(theta / 2);
@@ -62,7 +62,7 @@ export class Camera {
     vec3.subtract(
       this.lowerLeftCorner,
       vec3.subtract(vec3.create(), vec3.subtract(vec3.create(), this.lookFrom, half_horizontal), half_vertical),
-      focusW
+      focusW,
     );
 
     this.lenseRadius = aperture / 2;
@@ -84,14 +84,10 @@ export class Camera {
       vec3.add(vec3.create(), this.lookFrom, offset),
       vec3.sub(
         vec3.create(),
-        vec3.sub(
-          vec3.create(),
-          vec3.add(vec3.create(), vec3.add(vec3.create(), this.lowerLeftCorner, sHor), tVer),
-          this.lookFrom
-        ),
-        offset
+        vec3.sub(vec3.create(), vec3.add(vec3.create(), vec3.add(vec3.create(), this.lowerLeftCorner, sHor), tVer), this.lookFrom),
+        offset,
       ),
-      randomNumberRange(this.time0, this.time1)
+      randomNumberRange(this.time0, this.time1),
     );
   }
 
@@ -107,6 +103,9 @@ export class Camera {
     array.push(this.lenseRadius);
     array.push(this.time0);
     array.push(this.time1);
+
+    // padding
+    array.push([0, 0, 0, 0]);
 
     return new Float32Array(array);
   }
