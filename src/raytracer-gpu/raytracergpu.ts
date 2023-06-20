@@ -6,7 +6,6 @@ import { WebGPUBuffer } from './webgpubuffer';
 import { WebGPUComputePipline } from './webgpucomputepipeline';
 import { WebGPUContext } from './webgpucontext';
 import { WebGPURenderPipeline } from './webgpurenderpipeline';
-// import { sleep } from '../util';
 
 const LOCAL_SIZE = 8;
 
@@ -105,48 +104,14 @@ export class RaytracerGPU extends RaytracerBase {
 
     await renderPipeline.initialize();
 
-    // const imageData = this._context2D.createImageData(this._imageWidth, this._imageHeight);
-
-    const raytracing = async (): Promise<void> => {
-      return new Promise(resolve => {
-        const computeTiles = createComputeTiles(
-          this._rayTracerOptions.imageWidth,
-          this._rayTracerOptions.imageHeight,
-          this._rayTracerOptions.tileSize,
-        );
-
-        const frequency = 100;
-        let sample = 1;
-        let tile: ComputeTile;
-        const frame = (): void => {
-          const frameStartTime = window.performance.now();
-          let duration = 0;
-          do {
-            if (sample === 1) {
-              tile = computeTiles.shift();
-            }
-            this.computePass(computePipeline, sample++, tile);
-            if (sample > this._rayTracerOptions.samplesPerPixel) {
-              sample = 1;
-            }
-            duration += window.performance.now() - frameStartTime;
-          } while (computeTiles.length && duration < frequency);
-          // console.log(duration);
-          this.renderPass(renderPipeline);
-
-          if (computeTiles.length || sample < this._rayTracerOptions.samplesPerPixel - 1) {
-            window.requestAnimationFrame(frame);
-          } else {
-            resolve();
-          }
-        };
-        window.requestAnimationFrame(frame);
-      });
-    };
-
+    const computeTiles = createComputeTiles(
+      this._rayTracerOptions.imageWidth,
+      this._rayTracerOptions.imageHeight,
+      this._rayTracerOptions.tileSize,
+    );
     console.timeEnd('RaytracerGPU initialization');
-    // raytracer finished
-    await raytracing();
+
+    await this.renderTiles(computeTiles, computePipeline, renderPipeline);
 
     const duration = performance.now() - this._startTime;
     const stats = `WebGPU -- ${this.getStats(duration)}`;
@@ -177,6 +142,46 @@ export class RaytracerGPU extends RaytracerBase {
 
   public stop(): void {
     //
+  }
+
+  private async renderTiles(
+    tiles: ComputeTile[],
+    computePipeline: WebGPUComputePipline,
+    renderPipeline: WebGPURenderPipeline,
+  ): Promise<void> {
+    return new Promise(resolve => {
+      const numOfTiles = tiles.length;
+      console.log(`Number of tiles: ${numOfTiles}`);
+
+      let tileIndex = 0;
+      let sample = 1;
+      const frequency = 16;
+      const frame = (): void => {
+        const frameStartTime = window.performance.now();
+        let duration = 0;
+        do {
+          this.computePass(computePipeline, sample++, tiles[tileIndex]);
+
+          if (sample === this._rayTracerOptions.samplesPerPixel) {
+            sample = 1;
+            tileIndex++;
+            if (tileIndex === numOfTiles) {
+              this.renderPass(renderPipeline);
+              resolve();
+              return;
+            }
+          }
+          duration += window.performance.now() - frameStartTime;
+        } while (duration < frequency);
+        this.renderPass(renderPipeline);
+
+        if (tileIndex < numOfTiles - 1 || sample < this._rayTracerOptions.samplesPerPixel) {
+          window.requestAnimationFrame(frame);
+        }
+      };
+
+      window.requestAnimationFrame(frame);
+    });
   }
 
   private async initialize(): Promise<void> {
