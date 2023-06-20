@@ -17522,43 +17522,13 @@ class RaytracerGPU extends RaytracerBase {
       }
     });
     await renderPipeline.initialize();
-    const raytracing = async () => {
-      return new Promise((resolve) => {
-        const computeTiles = createComputeTiles(
-          this._rayTracerOptions.imageWidth,
-          this._rayTracerOptions.imageHeight,
-          this._rayTracerOptions.tileSize
-        );
-        const frequency = 50;
-        let sample = 1;
-        let tile;
-        const frame = () => {
-          const frameStartTime = window.performance.now();
-          let duration2 = 0;
-          do {
-            if (sample === 1) {
-              tile = computeTiles.shift();
-            }
-            this.computePass(computePipeline, sample, tile);
-            if (sample < this._rayTracerOptions.samplesPerPixel) {
-              sample++;
-            } else {
-              sample = 1;
-            }
-            duration2 += window.performance.now() - frameStartTime;
-          } while (computeTiles.length && duration2 < frequency);
-          this.renderPass(renderPipeline);
-          if (computeTiles.length || sample < this._rayTracerOptions.samplesPerPixel - 1) {
-            window.requestAnimationFrame(frame);
-          } else {
-            resolve();
-          }
-        };
-        window.requestAnimationFrame(frame);
-      });
-    };
+    const computeTiles = createComputeTiles(
+      this._rayTracerOptions.imageWidth,
+      this._rayTracerOptions.imageHeight,
+      this._rayTracerOptions.tileSize
+    );
     console.timeEnd("RaytracerGPU initialization");
-    await raytracing();
+    await this.renderTiles(computeTiles, computePipeline, renderPipeline);
     const duration = performance.now() - this._startTime;
     const stats = `WebGPU -- ${this.getStats(duration)}`;
     if (this._rayTracerOptions.download) {
@@ -17580,6 +17550,37 @@ class RaytracerGPU extends RaytracerBase {
     this._isRunning = false;
   }
   stop() {
+  }
+  async renderTiles(tiles, computePipeline, renderPipeline) {
+    return new Promise((resolve) => {
+      const numOfTiles = tiles.length;
+      console.log(`Number of tiles: ${numOfTiles}`);
+      let tileIndex = 0;
+      let sample = 1;
+      const frequency = 16;
+      const frame = () => {
+        const frameStartTime = window.performance.now();
+        let duration = 0;
+        do {
+          this.computePass(computePipeline, sample++, tiles[tileIndex]);
+          if (sample === this._rayTracerOptions.samplesPerPixel) {
+            sample = 1;
+            tileIndex++;
+            if (tileIndex === numOfTiles) {
+              this.renderPass(renderPipeline);
+              resolve();
+              return;
+            }
+          }
+          duration += window.performance.now() - frameStartTime;
+        } while (duration < frequency);
+        this.renderPass(renderPipeline);
+        if (tileIndex < numOfTiles - 1 || sample < this._rayTracerOptions.samplesPerPixel) {
+          window.requestAnimationFrame(frame);
+        }
+      };
+      window.requestAnimationFrame(frame);
+    });
   }
   async initialize() {
     if (this._initialized) {
