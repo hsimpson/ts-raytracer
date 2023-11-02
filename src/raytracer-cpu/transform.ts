@@ -42,7 +42,7 @@ export class Transform {
       [movedOrigin[0], movedOrigin[1], movedOrigin[2]],
       [movedDirection[0], movedDirection[1], movedDirection[2]],
       // ray.direction,
-      ray.time
+      ray.time,
     );
   }
 

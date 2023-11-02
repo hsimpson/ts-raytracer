@@ -23,7 +23,7 @@ export const DropDown = (props: DropDownProps): React.ReactElement => {
     <div className="dropdown">
       <span>{props.label}</span>
       <select defaultValue={props.default} onChange={onSelectChange}>
-        {props.items.map((item) => {
+        {props.items.map(item => {
           return (
             <option key={item.value} value={item.value} disabled={item.disabled}>
               {item.text}

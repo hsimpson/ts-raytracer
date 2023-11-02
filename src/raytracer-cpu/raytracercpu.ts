@@ -36,10 +36,7 @@ export class RaytracerCPU extends RaytracerBase {
   }
 
   private updateImage(): void {
-    const imageData = this._context2D.createImageData(
-      this._rayTracerOptions.imageWidth,
-      this._rayTracerOptions.imageHeight
-    );
+    const imageData = this._context2D.createImageData(this._rayTracerOptions.imageWidth, this._rayTracerOptions.imageHeight);
 
     let j = 0;
     // for (let y = 0; y < this._rayTracerOptions.imageHeight; y++) {
@@ -136,12 +133,12 @@ export class RaytracerCPU extends RaytracerBase {
       cameraOptions.aperture,
       cameraOptions.focusDist,
       0.0,
-      0.1
+      0.1,
     );
 
     for (let workerId = 0; workerId < options.numOfWorkers; workerId++) {
       const worker = new ComputeWorker();
-      worker.onmessage = (event) => this.onWorkerMessage(event);
+      worker.onmessage = event => this.onWorkerMessage(event);
       this._computeWorkers.set(workerId, worker);
 
       const computeInitMessage: ComputeInitMessage = {
@@ -191,7 +188,7 @@ export class RaytracerCPU extends RaytracerBase {
     this._isRunning = true;
     this._startTime = performance.now();
 
-    this._controllerWorker.onmessage = async (event) => this.onControllerMessage(event);
+    this._controllerWorker.onmessage = async event => this.onControllerMessage(event);
 
     const controllerStartMessage: ControllerStartMessage = {
       cmd: ControllerCommands.START,
@@ -211,7 +208,7 @@ export class RaytracerCPU extends RaytracerBase {
     this._computeTiles = createComputeTiles(
       this._rayTracerOptions.imageWidth,
       this._rayTracerOptions.imageHeight,
-      this._rayTracerOptions.tileSize
+      this._rayTracerOptions.tileSize,
     );
   }
 

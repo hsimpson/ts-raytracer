@@ -43,12 +43,13 @@ export class Perlin {
       [[], []],
     ];
 
-    for (let di = 0; di < 2; di++)
-      for (let dj = 0; dj < 2; dj++)
-        for (let dk = 0; dk < 2; dk++)
-          c[di][dj][dk] = this._ranVecs[
-            this._permX[(i + di) & 255] ^ this._permY[(j + dj) & 255] ^ this._permZ[(k + dk) & 255]
-          ];
+    for (let di = 0; di < 2; di++) {
+      for (let dj = 0; dj < 2; dj++) {
+        for (let dk = 0; dk < 2; dk++) {
+          c[di][dj][dk] = this._ranVecs[this._permX[(i + di) & 255] ^ this._permY[(j + dj) & 255] ^ this._permZ[(k + dk) & 255]];
+        }
+      }
+    }
 
     // const noise = this._ranFloat[this._permX[i] ^ this._permY[j] ^ this._permZ[k]];
     const noise = trilinearInterp(c, u, v, w);

@@ -119,7 +119,7 @@ export class RaytracerGPU extends RaytracerBase {
     if (this._rayTracerOptions.download) {
       const pixelBuffer = await this.copyBuffer(computePipeline);
 
-      const canvas2d = document.createElement('canvas') as HTMLCanvasElement;
+      const canvas2d = document.createElement('canvas');
       canvas2d.width = this._rayTracerOptions.imageWidth;
       canvas2d.height = this._rayTracerOptions.imageHeight;
       const canvas2dContext = canvas2d.getContext('2d');

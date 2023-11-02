@@ -1,18 +1,7 @@
 import { vec3 } from 'gl-matrix';
 import { CameraOptions } from './camera';
 import * as GLTFLoader from './gltfloader';
-import {
-  Box,
-  BVHNode,
-  ConstantMedium,
-  Hittable,
-  HittableList,
-  MovingSphere,
-  Sphere,
-  XYRect,
-  XZRect,
-  YZRect,
-} from './hittables';
+import { Box, BVHNode, ConstantMedium, Hittable, HittableList, MovingSphere, Sphere, XYRect, XZRect, YZRect } from './hittables';
 import { DielectricMaterial, DiffuseLight, LambertianMaterial, Material, MetalMaterial } from './material';
 import { CheckerTexture, ImageTexture, NoiseTexture } from './textures';
 import { random, randomNumber, randomNumberRange, randomRange } from './util';
@@ -391,7 +380,7 @@ async function gltfScene(useBVH: boolean): Promise<{ world: HittableList; camera
       cameraOptions,
     };
   } else {
-    return { world: world, cameraOptions };
+    return { world, cameraOptions };
   }
 }
 
@@ -408,10 +397,7 @@ const sceneCreators = [
   gltfScene,
 ];
 
-export async function getScene(
-  sceneIndex: number,
-  useBVH = false
-): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
+export async function getScene(sceneIndex: number, useBVH = false): Promise<{ world: HittableList; cameraOptions: CameraOptions }> {
   const { world, cameraOptions } = await sceneCreators[sceneIndex](useBVH);
   // const { world, cameraOptions } = await sceneCreators[sceneIndex](false);
   return { world, cameraOptions };

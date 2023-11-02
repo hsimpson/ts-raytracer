@@ -1,7 +1,7 @@
 import { HitRecord } from '../raytracer-cpu/hitrecord';
 import { Ray } from '../raytracer-cpu/ray';
 import { serializable } from '../serializing';
-import { randomInt, sortArrayRange } from '../util';
+import { randomInt } from '../util';
 import { AABB } from './aabb';
 import { Hittable } from './hittable';
 import { HittableList } from './hittablelist';
@@ -31,8 +31,8 @@ export class BVHNode extends Hittable {
     node.level = _level;
 
     const flatList = new HittableList();
-    const fillFlatList = (list: HittableList): void => {
-      for (const object of list.objects) {
+    const fillFlatList = (l: HittableList): void => {
+      for (const object of l.objects) {
         if (object instanceof HittableList) {
           fillFlatList(object);
         } else {
@@ -51,13 +51,7 @@ export class BVHNode extends Hittable {
     return node;
   }
 
-  public static createFromObjects(
-    objects: Hittable[],
-    start: number,
-    end: number,
-    time0: number,
-    time1: number
-  ): BVHNode {
+  public static createFromObjects(objects: Hittable[], start: number, end: number, time0: number, time1: number): BVHNode {
     const node = new BVHNode();
     node.init(objects, start, end, time0, time1);
     return node;

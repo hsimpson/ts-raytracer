@@ -35,7 +35,7 @@ export function sortArrayRange<T>(array: T[], start: number, end: number, compar
 }
 
 export async function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export function logMatrix(mat: mat4): void {
@@ -154,21 +154,13 @@ export function randomInUnitdisk(): vec3 {
 export function mod4(x: vec4, y: number): vec4 {
   // x - y * floor(x/y).
 
-  return vec4.subtract(
-    vec4.create(),
-    x,
-    vec4.scale(vec4.create(), vec4.floor(vec4.create(), vec4.scale(vec4.create(), x, 1 / y)), y)
-  );
+  return vec4.subtract(vec4.create(), x, vec4.scale(vec4.create(), vec4.floor(vec4.create(), vec4.scale(vec4.create(), x, 1 / y)), y));
 }
 
 export function mod3(x: vec3, y: number): vec3 {
   // x - y * floor(x/y).
 
-  return vec3.subtract(
-    vec3.create(),
-    x,
-    vec3.scale(vec3.create(), vec3.floor(vec3.create(), vec3.scale(vec3.create(), x, 1 / y)), y)
-  );
+  return vec3.subtract(vec3.create(), x, vec3.scale(vec3.create(), vec3.floor(vec3.create(), vec3.scale(vec3.create(), x, 1 / y)), y));
 }
 
 export function addScalar3(v: vec3, s: number): vec3 {
@@ -194,12 +186,7 @@ export function step3(edge: vec3, x: vec3): vec3 {
 
 export function step4(edge: vec4, x: vec4): vec4 {
   // For element i of the return value, 0.0 is returned if x[i] < edge[i], and 1.0 is returned otherwise.
-  return vec4.fromValues(
-    x[0] < edge[0] ? 0.0 : 1.0,
-    x[1] < edge[1] ? 0.0 : 1.0,
-    x[2] < edge[2] ? 0.0 : 1.0,
-    x[3] < edge[3] ? 0.0 : 1.0
-  );
+  return vec4.fromValues(x[0] < edge[0] ? 0.0 : 1.0, x[1] < edge[1] ? 0.0 : 1.0, x[2] < edge[2] ? 0.0 : 1.0, x[3] < edge[3] ? 0.0 : 1.0);
 }
 
 export function abs3(x: vec3): vec3 {

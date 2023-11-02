@@ -17,7 +17,7 @@ function _serializeObject(type: SerializableType, instance: any): JsonObject {
 }
 
 function _serializeArray(type: SerializableType, instance: any): JsonArray {
-  const target = instance.map((val) => {
+  const target = instance.map(val => {
     return _serialize(val.constructor, val);
   });
   return target;

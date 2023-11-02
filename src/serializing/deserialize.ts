@@ -7,7 +7,7 @@ function _deserialize(type: SerializableType, data: JsonObject): any {
   for (const k in data) {
     const v = data[k];
     if (Array.isArray(v)) {
-      instance[k] = v.map((val) => {
+      instance[k] = v.map(val => {
         const className = val[CLASSNAME_KEY];
         if (className) {
           const newtype = getClassConstructor(val[CLASSNAME_KEY]);
@@ -17,7 +17,7 @@ function _deserialize(type: SerializableType, data: JsonObject): any {
       });
     } else if (typeof v === 'object') {
       const newtype = getClassConstructor(v[CLASSNAME_KEY] as string);
-      instance[k] = _deserialize(newtype, v as JsonObject);
+      instance[k] = _deserialize(newtype, v);
     } else {
       instance[k] = v;
     }

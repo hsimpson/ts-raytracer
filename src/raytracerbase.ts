@@ -34,15 +34,15 @@ export abstract class RaytracerBase {
     const mins = duration % 60;
     const hrs = (duration - mins) / 60;
 
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${ms
       .toString()
-      .padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+      .padStart(3, '0')}`;
   }
 
   protected getStats(duration: number): string {
-    const stats = `spp: ${this._rayTracerOptions.samplesPerPixel}, bounces: ${
-      this._rayTracerOptions.maxBounces
-    }, tilesize: ${this._rayTracerOptions.tileSize}px, time: ${RaytracerBase.msToTimeString(duration)}`;
+    const stats = `spp: ${this._rayTracerOptions.samplesPerPixel}, bounces: ${this._rayTracerOptions.maxBounces}, tilesize: ${
+      this._rayTracerOptions.tileSize
+    }px, time: ${RaytracerBase.msToTimeString(duration)}`;
     console.log(stats);
     return stats;
   }
@@ -58,13 +58,13 @@ export abstract class RaytracerBase {
   }
 
   private async canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {
-    return new Promise<Blob>((resolve) => {
+    return new Promise<Blob>(resolve => {
       canvas.toBlob(
-        (blob) => {
+        blob => {
           resolve(blob);
         },
         'image/png',
-        1.0
+        1.0,
       );
     });
   }

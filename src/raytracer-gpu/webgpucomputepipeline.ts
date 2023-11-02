@@ -1,11 +1,11 @@
-import { Camera } from '../camera';
-import { HittableList } from '../hittables';
 import { vec3 } from 'gl-matrix';
+import { Camera as CameraObject } from '../camera';
+import { HittableList } from '../hittables';
+import { ComputeTile } from '../tiles';
 import { RaytracingBuffers } from './raytracingbuffers';
 import { WebGPUBuffer } from './webgpubuffer';
 import { WebGPUContext } from './webgpucontext';
 import { WebGPUPipelineBase } from './webgpupipelinebase';
-import { ComputeTile } from '../tiles';
 
 interface ComputeUniformParams {
   background: vec3;
@@ -23,7 +23,7 @@ interface ComputeUniformParams {
 interface WebGPUComputePiplineOptions {
   computeShaderUrl: URL;
   uniformParams: ComputeUniformParams;
-  camera: Camera;
+  camera: CameraObject;
   world: HittableList;
 }
 
@@ -70,10 +70,7 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
     this._initialized = true;
 
     const pixelBufferSize =
-      this._options.uniformParams.imageWidth *
-      this._options.uniformParams.imageHeight *
-      4 *
-      Float32Array.BYTES_PER_ELEMENT;
+      this._options.uniformParams.imageWidth * this._options.uniformParams.imageHeight * 4 * Float32Array.BYTES_PER_ELEMENT;
 
     //COPY_SRC is needed because the pixel buffer is read after each compute call
     this._pixelBuffer.create(pixelBufferSize, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
@@ -81,10 +78,7 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
 
     const uniformArray = this.getParamsArray(this._options.uniformParams);
     //COPY_DST is needed because the uniforms are updated after each compute call
-    this._computeParamsUniformBuffer.createWithArrayMapped(
-      uniformArray,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-    );
+    this._computeParamsUniformBuffer.createWithArrayMapped(uniformArray, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
 
     const cameraArray = this._options.camera.getUniformArray();
     this._computeCameraUniformBuffer.createWithArrayMapped(cameraArray, GPUBufferUsage.UNIFORM);

@@ -27,20 +27,16 @@ export function snoise(v: vec3): number {
   const x1 = vec3.add(
     vec3.create(),
     vec3.subtract(vec3.create(), x0, i1),
-    vec3.scale(vec3.create(), vec3.fromValues(C[0], C[0], C[0]), 1.0)
+    vec3.scale(vec3.create(), vec3.fromValues(C[0], C[0], C[0]), 1.0),
   );
 
   const x2 = vec3.add(
     vec3.create(),
     vec3.subtract(vec3.create(), x0, i2),
-    vec3.scale(vec3.create(), vec3.fromValues(C[0], C[0], C[0]), 2.0)
+    vec3.scale(vec3.create(), vec3.fromValues(C[0], C[0], C[0]), 2.0),
   );
 
-  const x3 = vec3.add(
-    vec3.create(),
-    subScalar3(x0, 1.0),
-    vec3.scale(vec3.create(), vec3.fromValues(C[0], C[0], C[0]), 3.0)
-  );
+  const x3 = vec3.add(vec3.create(), subScalar3(x0, 1.0), vec3.scale(vec3.create(), vec3.fromValues(C[0], C[0], C[0]), 3.0));
 
   // Permutations
   i = mod3(i, 289.0);
@@ -53,27 +49,23 @@ export function snoise(v: vec3): number {
           vec4.add(
             vec4.create(),
             addScalar4(vec4.fromValues(0.0, i1[2], i2[2], 1.0), i[2]),
-            addScalar4(vec4.fromValues(0.0, i1[1], i2[1], 1.0), i[1])
+            addScalar4(vec4.fromValues(0.0, i1[1], i2[1], 1.0), i[1]),
           ),
-          addScalar4(vec4.fromValues(0.0, i1[0], i2[0], 1.0), i[0])
-        )
-      )
-    )
+          addScalar4(vec4.fromValues(0.0, i1[0], i2[0], 1.0), i[0]),
+        ),
+      ),
+    ),
   );
 
   // Gradients
   // ( N*N points uniformly over a square, mapped onto an octahedron.)
   const n_ = 1.0 / 7.0;
-  const ns = vec3.sub(
-    vec3.create(),
-    vec3.scale(vec3.create(), vec3.fromValues(D[3], D[1], D[2]), n_),
-    vec3.fromValues(D[0], D[2], D[0])
-  );
+  const ns = vec3.sub(vec3.create(), vec3.scale(vec3.create(), vec3.fromValues(D[3], D[1], D[2]), n_), vec3.fromValues(D[0], D[2], D[0]));
 
   const j = vec4.sub(
     vec4.create(),
     p,
-    vec4.scale(vec4.create(), vec4.floor(vec4.create(), vec4.scale(vec4.create(), p, ns[2] * ns[2])), 49.0)
+    vec4.scale(vec4.create(), vec4.floor(vec4.create(), vec4.scale(vec4.create(), p, ns[2] * ns[2])), 49.0),
   );
 
   const x_ = vec4.floor(vec4.create(), vec4.scale(vec4.create(), j, ns[2]));
@@ -93,20 +85,12 @@ export function snoise(v: vec3): number {
   const a0 = vec4.add(
     vec4.create(),
     vec4.fromValues(b0[0], b0[2], b0[1], b0[3]),
-    vec4.multiply(
-      vec4.create(),
-      vec4.fromValues(s0[0], s0[2], s0[1], s0[3]),
-      vec4.fromValues(sh[0], sh[0], sh[1], sh[1])
-    )
+    vec4.multiply(vec4.create(), vec4.fromValues(s0[0], s0[2], s0[1], s0[3]), vec4.fromValues(sh[0], sh[0], sh[1], sh[1])),
   );
   const a1 = vec4.add(
     vec4.create(),
     vec4.fromValues(b1[0], b1[2], b1[1], b1[3]),
-    vec4.multiply(
-      vec4.create(),
-      vec4.fromValues(s1[0], s1[2], s1[1], s1[3]),
-      vec4.fromValues(sh[2], sh[2], sh[3], sh[3])
-    )
+    vec4.multiply(vec4.create(), vec4.fromValues(s1[0], s1[2], s1[1], s1[3]), vec4.fromValues(sh[2], sh[2], sh[3], sh[3])),
   );
 
   const p0 = vec3.fromValues(a0[0], a0[1], h[0]);
@@ -128,17 +112,14 @@ export function snoise(v: vec3): number {
     vec4.subtract(
       vec4.create(),
       vec4.fromValues(0.6, 0.6, 0.6, 0.6),
-      vec4.fromValues(vec3.dot(x0, x0), vec3.dot(x1, x1), vec3.dot(x2, x2), vec3.dot(x3, x3))
+      vec4.fromValues(vec3.dot(x0, x0), vec3.dot(x1, x1), vec3.dot(x2, x2), vec3.dot(x3, x3)),
     ),
-    vec4.create()
+    vec4.create(),
   );
   vec4.multiply(m, m, m);
 
   return (
     42.0 *
-    vec4.dot(
-      vec4.multiply(vec4.create(), m, m),
-      vec4.fromValues(vec3.dot(p0, x0), vec3.dot(p1, x1), vec3.dot(p2, x2), vec3.dot(p3, x3))
-    )
+    vec4.dot(vec4.multiply(vec4.create(), m, m), vec4.fromValues(vec3.dot(p0, x0), vec3.dot(p1, x1), vec3.dot(p2, x2), vec3.dot(p3, x3)))
   );
 }

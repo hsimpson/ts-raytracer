@@ -73,11 +73,7 @@ export function rayColor(ray: Ray, background: vec3, world: Hittable, depth: num
 
   //emitted + attenuation * ray_color(scattered, background, world, depth-1);
 
-  return vec3.add(
-    vec3.create(),
-    emitted,
-    vec3.multiply(vec3.create(), attenuation, rayColor(scattered, background, world, depth - 1))
-  );
+  return vec3.add(vec3.create(), emitted, vec3.multiply(vec3.create(), attenuation, rayColor(scattered, background, world, depth - 1)));
 
   // return Vector.addVec3(emitted, Vector.multVec3(attenuation, rayColor(scattered, background, world, depth - 1)));
 

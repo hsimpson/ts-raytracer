@@ -80,7 +80,7 @@ function start(msg: ComputeStartMessage): void {
   const computeEndMessage: ComputeEndMessage = {
     cmd: ComputeCommands.END,
     data: {
-      workerId: workerId,
+      workerId,
       pixelArray: dataArray,
       x,
       y,
@@ -94,7 +94,7 @@ function start(msg: ComputeStartMessage): void {
 }
 
 // Respond to message from parent thread
-controllerCtx.addEventListener('message', (event) => {
+controllerCtx.addEventListener('message', event => {
   const msg = event.data as WorkerMessage;
 
   switch (msg.cmd) {
