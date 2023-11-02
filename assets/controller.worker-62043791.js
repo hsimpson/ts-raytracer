@@ -5,8 +5,14 @@ var __publicField = (obj, key, value) => {
   return value;
 };
 (function() {
-  var _a, _b;
   "use strict";
+  const _metaMap = /* @__PURE__ */ new Map();
+  function addClassName(type) {
+    _metaMap.set(type.name, type);
+  }
+  function serializable(type) {
+    addClassName(type);
+  }
   var EPSILON$1 = 1e-6;
   var ARRAY_TYPE = typeof Float32Array !== "undefined" ? Float32Array : Array;
   if (!Math.hypot)
@@ -131,7 +137,7 @@ var __publicField = (obj, key, value) => {
     out[15] = (a20 * b03 - a21 * b01 + a22 * b00) * det;
     return out;
   }
-  function multiply$2(out, a, b) {
+  function multiply$1(out, a, b) {
     var a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3];
     var a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7];
     var a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
@@ -285,12 +291,6 @@ var __publicField = (obj, key, value) => {
     out[0] = a[0] - b[0];
     out[1] = a[1] - b[1];
     out[2] = a[2] - b[2];
-    return out;
-  }
-  function multiply$1(out, a, b) {
-    out[0] = a[0] * b[0];
-    out[1] = a[1] * b[1];
-    out[2] = a[2] * b[2];
     return out;
   }
   function scale(out, a, b) {
@@ -575,290 +575,6 @@ var __publicField = (obj, key, value) => {
       return normalize(out, fromMat3(out, matr));
     };
   })();
-  class HitRecord {
-    constructor() {
-      __publicField(this, "p", create$2());
-      __publicField(this, "normal", create$2());
-      __publicField(this, "t", 0);
-      __publicField(this, "u", 0);
-      __publicField(this, "v", 0);
-      __publicField(this, "frontFace", true);
-      __publicField(this, "mat");
-    }
-    setFaceNormal(r, outward_normal) {
-      this.frontFace = dot(r.direction, outward_normal) < 0;
-      this.normal = this.frontFace ? outward_normal : negate(create$2(), outward_normal);
-    }
-    copyTo(dest) {
-      dest.p = copy(create$2(), this.p);
-      dest.normal = copy(create$2(), this.normal);
-      dest.t = this.t;
-      dest.u = this.u;
-      dest.v = this.v;
-      dest.frontFace = this.frontFace;
-      dest.mat = this.mat;
-    }
-  }
-  class Ray {
-    constructor(origin, direction, time = 0) {
-      __publicField(this, "_orig");
-      __publicField(this, "_dir");
-      __publicField(this, "_time");
-      if (origin) {
-        this._orig = origin;
-      }
-      if (direction) {
-        this._dir = direction;
-      }
-      this._time = time;
-    }
-    copyTo(dest) {
-      dest._orig = copy(create$2(), this._orig);
-      dest._dir = copy(create$2(), this._dir);
-      dest._time = this._time;
-    }
-    get origin() {
-      return this._orig;
-    }
-    set origin(origin) {
-      this._orig = origin;
-    }
-    get direction() {
-      return this._dir;
-    }
-    set direction(direction) {
-      this._dir = direction;
-    }
-    get time() {
-      return this._time;
-    }
-    at(t) {
-      return add(create$2(), this._orig, scale(create$2(), this._dir, t));
-    }
-  }
-  function rayColor(ray, background2, world2, depth) {
-    const rec = new HitRecord();
-    if (depth <= 0) {
-      return [0, 0, 0];
-    }
-    if (!world2.hit(ray, 1e-3, Number.POSITIVE_INFINITY, rec)) {
-      return background2;
-    }
-    const scattered = new Ray();
-    const attenuation = [0, 0, 0];
-    const emitted = rec.mat.emitted(rec.u, rec.v, rec.p);
-    if (!rec.mat.scatter(ray, rec, attenuation, scattered)) {
-      return emitted;
-    }
-    return add(
-      create$2(),
-      emitted,
-      multiply$1(create$2(), attenuation, rayColor(scattered, background2, world2, depth - 1))
-    );
-  }
-  const CLASSNAME_KEY = "__CLASSNAME__";
-  const _metaMap = /* @__PURE__ */ new Map();
-  function addClassName(type) {
-    _metaMap.set(type.name, type);
-  }
-  function getClassConstructor(name) {
-    if (_metaMap.has(name)) {
-      return _metaMap.get(name);
-    }
-    console.error(`${name} not serializable, use the @serializable decorator`);
-    return null;
-  }
-  function _deserialize(type, data) {
-    const instance = Object.create(type.prototype);
-    for (const k in data) {
-      const v = data[k];
-      if (Array.isArray(v)) {
-        instance[k] = v.map((val) => {
-          const className = val[CLASSNAME_KEY];
-          if (className) {
-            const newtype = getClassConstructor(val[CLASSNAME_KEY]);
-            return _deserialize(newtype, val);
-          }
-          return val;
-        });
-      } else if (typeof v === "object") {
-        const newtype = getClassConstructor(v[CLASSNAME_KEY]);
-        instance[k] = _deserialize(newtype, v);
-      } else {
-        instance[k] = v;
-      }
-    }
-    return instance;
-  }
-  function deserialize(type, data) {
-    return _deserialize(type, data);
-  }
-  function serializable(type) {
-    addClassName(type);
-  }
-  const GAMMA = 1 / 2.2;
-  function degreeToRadians(degrees) {
-    return degrees * Math.PI / 180;
-  }
-  function randomNumber() {
-    return Math.random();
-  }
-  function randomNumberRange(min, max) {
-    return min + (max - min) * randomNumber();
-  }
-  function clamp(x, min, max) {
-    if (x < min) {
-      return min;
-    }
-    if (x > max) {
-      return max;
-    }
-    return x;
-  }
-  function randomInt(min, max) {
-    return Math.floor(randomNumberRange(min, max + 1));
-  }
-  function getSphereUV(p) {
-    const phi = Math.atan2(p[2], p[0]);
-    const theta = Math.asin(p[1]);
-    const u = 1 - (phi + Math.PI) / (2 * Math.PI);
-    const v = (theta + Math.PI / 2) / Math.PI;
-    return { u, v };
-  }
-  function writeColor(array, offset, color, spp) {
-    let [r, g, b] = color;
-    const scale2 = 1 / spp;
-    r = Math.pow(scale2 * r, GAMMA);
-    g = Math.pow(scale2 * g, GAMMA);
-    b = Math.pow(scale2 * b, GAMMA);
-    array[offset++] = r * 255;
-    array[offset++] = g * 255;
-    array[offset++] = b * 255;
-    array[offset++] = 255;
-  }
-  function lengthSquared(v) {
-    return v[0] ** 2 + v[1] ** 2 + v[2] ** 2;
-  }
-  function reflect(v, n) {
-    return subtract(create$2(), v, scale(create$2(), n, 2 * dot(v, n)));
-  }
-  function refract(uv, n, etai_over_etat) {
-    const cos_theta = dot(negate(create$2(), uv), n);
-    const uvTheta = add(create$2(), uv, scale(create$2(), n, cos_theta));
-    const r_out_parallel = scale(create$2(), uvTheta, etai_over_etat);
-    const r_out_perp = scale(create$2(), n, -Math.sqrt(1 - lengthSquared(r_out_parallel)));
-    return add(create$2(), r_out_parallel, r_out_perp);
-  }
-  function randomInUnitSphere() {
-    while (true) {
-      const p = randomRange(-1, 1);
-      if (lengthSquared(p) >= 1) {
-        continue;
-      }
-      return p;
-    }
-  }
-  function randomRange(min, max) {
-    return [randomNumberRange(min, max), randomNumberRange(min, max), randomNumberRange(min, max)];
-  }
-  function randomUnitVector() {
-    const a = randomNumberRange(0, 2 * Math.PI);
-    const z = randomNumberRange(-1, 1);
-    const r = Math.sqrt(1 - z * z);
-    return [r * Math.cos(a), r * Math.sin(a), z];
-  }
-  function randomInUnitdisk() {
-    while (true) {
-      const p = [randomNumberRange(-1, 1), randomNumberRange(-1, 1), 0];
-      if (lengthSquared(p) >= 1) {
-        continue;
-      }
-      return p;
-    }
-  }
-  var __defProp$m = Object.defineProperty;
-  var __getOwnPropDesc$m = Object.getOwnPropertyDescriptor;
-  var __decorateClass$m = (decorators, target, key, kind) => {
-    var result = kind > 1 ? void 0 : kind ? __getOwnPropDesc$m(target, key) : target;
-    for (var i = decorators.length - 1, decorator; i >= 0; i--)
-      if (decorator = decorators[i])
-        result = (kind ? decorator(target, key, result) : decorator(result)) || result;
-    if (kind && result)
-      __defProp$m(target, key, result);
-    return result;
-  };
-  let Camera = class {
-    constructor() {
-      __publicField(this, "lookFrom");
-      __publicField(this, "lowerLeftCorner", create$2());
-      __publicField(this, "horizontal", create$2());
-      __publicField(this, "vertical", create$2());
-      __publicField(this, "u", create$2());
-      __publicField(this, "v", create$2());
-      __publicField(this, "w", create$2());
-      __publicField(this, "lenseRadius");
-      __publicField(this, "time0");
-      __publicField(this, "time1");
-    }
-    init(lookFrom, lookAt, vUp, fovY, aspectRatio, aperture, focusDist, t0 = 0, t1 = 0) {
-      const theta = degreeToRadians(fovY);
-      const h = Math.tan(theta / 2);
-      const viewport_height = 2 * h;
-      const viewport_width = aspectRatio * viewport_height;
-      normalize$2(this.w, subtract(create$2(), lookFrom, lookAt));
-      normalize$2(this.u, cross(create$2(), vUp, this.w));
-      cross(this.v, this.w, this.u);
-      this.lookFrom = lookFrom;
-      scale(this.horizontal, this.u, focusDist * viewport_width);
-      scale(this.vertical, this.v, focusDist * viewport_height);
-      const half_horizontal = scale(create$2(), this.horizontal, 0.5);
-      const half_vertical = scale(create$2(), this.vertical, 0.5);
-      const focusW = scale(create$2(), this.w, focusDist);
-      subtract(
-        this.lowerLeftCorner,
-        subtract(create$2(), subtract(create$2(), this.lookFrom, half_horizontal), half_vertical),
-        focusW
-      );
-      this.lenseRadius = aperture / 2;
-      this.time0 = t0;
-      this.time1 = t1;
-    }
-    getRay(s, t) {
-      const rd = scale(create$2(), randomInUnitdisk(), this.lenseRadius);
-      const vecU = scale(create$2(), this.u, rd[0]);
-      const vecV = scale(create$2(), this.v, rd[1]);
-      const offset = add(create$2(), vecU, vecV);
-      const sHor = scale(create$2(), this.horizontal, s);
-      const tVer = scale(create$2(), this.vertical, t);
-      return new Ray(
-        add(create$2(), this.lookFrom, offset),
-        sub(
-          create$2(),
-          sub(create$2(), add(create$2(), add(create$2(), this.lowerLeftCorner, sHor), tVer), this.lookFrom),
-          offset
-        ),
-        randomNumberRange(this.time0, this.time1)
-      );
-    }
-    getUniformArray() {
-      const array = [];
-      array.push(...this.lookFrom, 0);
-      array.push(...this.lowerLeftCorner, 0);
-      array.push(...this.horizontal, 0);
-      array.push(...this.vertical, 0);
-      array.push(...this.u, 0);
-      array.push(...this.v, 0);
-      array.push(...this.w, 0);
-      array.push(this.lenseRadius);
-      array.push(this.time0);
-      array.push(this.time1);
-      array.push([0, 0, 0, 0]);
-      return new Float32Array(array);
-    }
-  };
-  Camera = __decorateClass$m([
-    serializable
-  ], Camera);
   var __defProp$l = Object.defineProperty;
   var __getOwnPropDesc$l = Object.getOwnPropertyDescriptor;
   var __decorateClass$l = (decorators, target, key, kind) => {
@@ -925,22 +641,75 @@ var __publicField = (obj, key, value) => {
     //   return true;
     // }
     static surroundingBox(box0, box1) {
-      const small = [
-        Math.min(box0.min[0], box1.min[0]),
-        Math.min(box0.min[1], box1.min[1]),
-        Math.min(box0.min[2], box1.min[2])
-      ];
-      const big = [
-        Math.max(box0.max[0], box1.max[0]),
-        Math.max(box0.max[1], box1.max[1]),
-        Math.max(box0.max[2], box1.max[2])
-      ];
+      const small = [Math.min(box0.min[0], box1.min[0]), Math.min(box0.min[1], box1.min[1]), Math.min(box0.min[2], box1.min[2])];
+      const big = [Math.max(box0.max[0], box1.max[0]), Math.max(box0.max[1], box1.max[1]), Math.max(box0.max[2], box1.max[2])];
       return new AABB(small, big);
     }
   };
   AABB = __decorateClass$l([
     serializable
   ], AABB);
+  class HitRecord {
+    constructor() {
+      __publicField(this, "p", create$2());
+      __publicField(this, "normal", create$2());
+      __publicField(this, "t", 0);
+      __publicField(this, "u", 0);
+      __publicField(this, "v", 0);
+      __publicField(this, "frontFace", true);
+      __publicField(this, "mat");
+    }
+    setFaceNormal(r, outward_normal) {
+      this.frontFace = dot(r.direction, outward_normal) < 0;
+      this.normal = this.frontFace ? outward_normal : negate(create$2(), outward_normal);
+    }
+    copyTo(dest) {
+      dest.p = copy(create$2(), this.p);
+      dest.normal = copy(create$2(), this.normal);
+      dest.t = this.t;
+      dest.u = this.u;
+      dest.v = this.v;
+      dest.frontFace = this.frontFace;
+      dest.mat = this.mat;
+    }
+  }
+  class Ray {
+    constructor(origin, direction, time = 0) {
+      __publicField(this, "_orig");
+      __publicField(this, "_dir");
+      __publicField(this, "_time");
+      if (origin) {
+        this._orig = origin;
+      }
+      if (direction) {
+        this._dir = direction;
+      }
+      this._time = time;
+    }
+    copyTo(dest) {
+      dest._orig = copy(create$2(), this._orig);
+      dest._dir = copy(create$2(), this._dir);
+      dest._time = this._time;
+    }
+    get origin() {
+      return this._orig;
+    }
+    set origin(origin) {
+      this._orig = origin;
+    }
+    get direction() {
+      return this._dir;
+    }
+    set direction(direction) {
+      this._dir = direction;
+    }
+    get time() {
+      return this._time;
+    }
+    at(t) {
+      return add(create$2(), this._orig, scale(create$2(), this._dir, t));
+    }
+  }
   var __defProp$k = Object.defineProperty;
   var __getOwnPropDesc$k = Object.getOwnPropertyDescriptor;
   var __decorateClass$k = (decorators, target, key, kind) => {
@@ -1023,7 +792,7 @@ var __publicField = (obj, key, value) => {
       const translationMatrix = create$3();
       translate(translationMatrix, translationMatrix, this._position);
       fromQuat(this._rotationMatrix, this._rotation);
-      multiply$2(this._objectToWorldMatrix, translationMatrix, this._rotationMatrix);
+      multiply$1(this._objectToWorldMatrix, translationMatrix, this._rotationMatrix);
       invert(this._worldToObjectMatrix, this._objectToWorldMatrix);
       invert(this._inverseRotationMatrix, this._rotationMatrix);
       transpose(this._normalMatrix, this._rotationMatrix);
@@ -1286,6 +1055,62 @@ var __publicField = (obj, key, value) => {
   Box = __decorateClass$h([
     serializable
   ], Box);
+  function randomNumber() {
+    return Math.random();
+  }
+  function randomNumberRange(min, max) {
+    return min + (max - min) * randomNumber();
+  }
+  function clamp(x, min, max) {
+    if (x < min) {
+      return min;
+    }
+    if (x > max) {
+      return max;
+    }
+    return x;
+  }
+  function randomInt(min, max) {
+    return Math.floor(randomNumberRange(min, max + 1));
+  }
+  function getSphereUV(p) {
+    const phi = Math.atan2(p[2], p[0]);
+    const theta = Math.asin(p[1]);
+    const u = 1 - (phi + Math.PI) / (2 * Math.PI);
+    const v = (theta + Math.PI / 2) / Math.PI;
+    return { u, v };
+  }
+  function lengthSquared(v) {
+    return v[0] ** 2 + v[1] ** 2 + v[2] ** 2;
+  }
+  function reflect(v, n) {
+    return subtract(create$2(), v, scale(create$2(), n, 2 * dot(v, n)));
+  }
+  function refract(uv, n, etai_over_etat) {
+    const cos_theta = dot(negate(create$2(), uv), n);
+    const uvTheta = add(create$2(), uv, scale(create$2(), n, cos_theta));
+    const r_out_parallel = scale(create$2(), uvTheta, etai_over_etat);
+    const r_out_perp = scale(create$2(), n, -Math.sqrt(1 - lengthSquared(r_out_parallel)));
+    return add(create$2(), r_out_parallel, r_out_perp);
+  }
+  function randomInUnitSphere() {
+    while (true) {
+      const p = randomRange(-1, 1);
+      if (lengthSquared(p) >= 1) {
+        continue;
+      }
+      return p;
+    }
+  }
+  function randomRange(min, max) {
+    return [randomNumberRange(min, max), randomNumberRange(min, max), randomNumberRange(min, max)];
+  }
+  function randomUnitVector() {
+    const a = randomNumberRange(0, 2 * Math.PI);
+    const z = randomNumberRange(-1, 1);
+    const r = Math.sqrt(1 - z * z);
+    return [r * Math.cos(a), r * Math.sin(a), z];
+  }
   var __defProp$g = Object.defineProperty;
   var __getOwnPropDesc$g = Object.getOwnPropertyDescriptor;
   var __decorateClass$g = (decorators, target, key, kind) => {
@@ -1317,8 +1142,8 @@ var __publicField = (obj, key, value) => {
       const node = new BVHNode();
       node.level = _level;
       const flatList = new HittableList();
-      const fillFlatList = (list2) => {
-        for (const object of list2.objects) {
+      const fillFlatList = (l) => {
+        for (const object of l.objects) {
           if (object instanceof HittableList) {
             fillFlatList(object);
           } else {
@@ -1540,6 +1365,7 @@ var __publicField = (obj, key, value) => {
   ], CheckerTexture);
   var __defProp$c = Object.defineProperty;
   var __getOwnPropDesc$c = Object.getOwnPropertyDescriptor;
+  var __defNormalProp$1 = (obj, key, value) => key in obj ? __defProp$c(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
   var __decorateClass$c = (decorators, target, key, kind) => {
     var result = kind > 1 ? void 0 : kind ? __getOwnPropDesc$c(target, key) : target;
     for (var i = decorators.length - 1, decorator; i >= 0; i--)
@@ -1549,7 +1375,11 @@ var __publicField = (obj, key, value) => {
       __defProp$c(target, key, result);
     return result;
   };
-  let ImageTexture = (_a = class extends Texture {
+  var __publicField$1 = (obj, key, value) => {
+    __defNormalProp$1(obj, typeof key !== "symbol" ? key + "" : key, value);
+    return value;
+  };
+  let ImageTexture = class extends Texture {
     constructor() {
       super();
       __publicField(this, "_width", 0);
@@ -1582,17 +1412,15 @@ var __publicField = (obj, key, value) => {
       v = 1 - clamp(v, 0, 1);
       let i = Math.trunc(u * this._width);
       let j = Math.trunc(v * this._height);
-      if (i >= this._width)
+      if (i >= this._width) {
         i = this._width - 1;
-      if (j >= this._height)
+      }
+      if (j >= this._height) {
         j = this._height - 1;
+      }
       const colorScale = 1 / 255;
       let pixelOffset = j * this._bytesPerScanLine + i * ImageTexture.BytesPerPixel;
-      return [
-        this._data[pixelOffset++] * colorScale,
-        this._data[pixelOffset++] * colorScale,
-        this._data[pixelOffset++] * colorScale
-      ];
+      return [this._data[pixelOffset++] * colorScale, this._data[pixelOffset++] * colorScale, this._data[pixelOffset++] * colorScale];
     }
     get width() {
       return this._width;
@@ -1606,7 +1434,8 @@ var __publicField = (obj, key, value) => {
     get url() {
       return this._url;
     }
-  }, __publicField(_a, "BytesPerPixel", 4), _a);
+  };
+  __publicField$1(ImageTexture, "BytesPerPixel", 4);
   ImageTexture = __decorateClass$c([
     serializable
   ], ImageTexture);
@@ -1879,6 +1708,7 @@ var __publicField = (obj, key, value) => {
   }
   var __defProp$b = Object.defineProperty;
   var __getOwnPropDesc$b = Object.getOwnPropertyDescriptor;
+  var __defNormalProp2 = (obj, key, value) => key in obj ? __defProp$b(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
   var __decorateClass$b = (decorators, target, key, kind) => {
     var result = kind > 1 ? void 0 : kind ? __getOwnPropDesc$b(target, key) : target;
     for (var i = decorators.length - 1, decorator; i >= 0; i--)
@@ -1888,7 +1718,11 @@ var __publicField = (obj, key, value) => {
       __defProp$b(target, key, result);
     return result;
   };
-  let Perlin = (_b = class {
+  var __publicField2 = (obj, key, value) => {
+    __defNormalProp2(obj, typeof key !== "symbol" ? key + "" : key, value);
+    return value;
+  };
+  let Perlin = class {
     constructor() {
       __publicField(this, "_ranVecs");
       __publicField(this, "_permX");
@@ -1916,10 +1750,13 @@ var __publicField = (obj, key, value) => {
         [[], []],
         [[], []]
       ];
-      for (let di = 0; di < 2; di++)
-        for (let dj = 0; dj < 2; dj++)
-          for (let dk = 0; dk < 2; dk++)
+      for (let di = 0; di < 2; di++) {
+        for (let dj = 0; dj < 2; dj++) {
+          for (let dk = 0; dk < 2; dk++) {
             c[di][dj][dk] = this._ranVecs[this._permX[i + di & 255] ^ this._permY[j + dj & 255] ^ this._permZ[k + dk & 255]];
+          }
+        }
+      }
       const noise = trilinearInterp(c, u, v, w);
       return noise;
     }
@@ -1950,7 +1787,8 @@ var __publicField = (obj, key, value) => {
         array[target] = tmp;
       }
     }
-  }, __publicField(_b, "_pointCount", 256), _b);
+  };
+  __publicField2(Perlin, "_pointCount", 256);
   Perlin = __decorateClass$b([
     serializable
   ], Perlin);
@@ -2140,11 +1978,9 @@ var __publicField = (obj, key, value) => {
     }
     scatter(r_in, rec, attenuation, scattered) {
       const refl = reflect(normalize$2(create$2(), r_in.direction), rec.normal);
-      new Ray(
-        rec.p,
-        add(create$2(), refl, scale(create$2(), randomInUnitSphere(), this._roughness)),
-        r_in.time
-      ).copyTo(scattered);
+      new Ray(rec.p, add(create$2(), refl, scale(create$2(), randomInUnitSphere(), this._roughness)), r_in.time).copyTo(
+        scattered
+      );
       copy(attenuation, this._baseColor);
       return dot(scattered.direction, rec.normal) > 0;
     }
@@ -2362,14 +2198,8 @@ var __publicField = (obj, key, value) => {
       const transformedCenterT0 = transformMat4(create$2(), this.center(t0), this.transform.objectToWorld);
       const transformedCenterT1 = transformMat4(create$2(), this.center(t1), this.transform.objectToWorld);
       const r = fromValues(this._radius, this._radius, this._radius);
-      const box0 = new AABB(
-        sub(create$2(), transformedCenterT0, r),
-        add(create$2(), transformedCenterT0, r)
-      );
-      const box1 = new AABB(
-        sub(create$2(), transformedCenterT1, r),
-        add(create$2(), transformedCenterT1, r)
-      );
+      const box0 = new AABB(sub(create$2(), transformedCenterT0, r), add(create$2(), transformedCenterT0, r));
+      const box1 = new AABB(sub(create$2(), transformedCenterT1, r), add(create$2(), transformedCenterT1, r));
       return AABB.surroundingBox(box0, box1);
     }
   };
@@ -2488,7 +2318,6 @@ var __publicField = (obj, key, value) => {
       __publicField(this, "uv2");
       __publicField(this, "surfaceNormal");
       __publicField(this, "transform", new Transform());
-      __publicField(this, "material");
       __publicField(this, "doubleSided", false);
       this.v0 = v0;
       this.v1 = v1;
@@ -2609,80 +2438,70 @@ var __publicField = (obj, key, value) => {
   Triangle = __decorateClass([
     serializable
   ], Triangle);
-  var ComputeCommands = /* @__PURE__ */ ((ComputeCommands2) => {
-    ComputeCommands2[ComputeCommands2["INIT"] = 0] = "INIT";
-    ComputeCommands2[ComputeCommands2["READY"] = 1] = "READY";
-    ComputeCommands2[ComputeCommands2["START"] = 2] = "START";
-    ComputeCommands2[ComputeCommands2["END"] = 3] = "END";
-    return ComputeCommands2;
-  })(ComputeCommands || {});
-  const controllerCtx = self;
-  let workerId;
-  let camera;
-  let world;
-  let background;
-  let imageWidth;
-  let imageHeight;
-  let samplesPerPixel;
-  let maxBounces;
-  function init(msg) {
-    workerId = msg.data.workerId;
-    camera = deserialize(Camera, msg.data.camera);
-    world = deserialize(HittableList, msg.data.world);
-    background = msg.data.background;
-    imageWidth = msg.data.imageWidth;
-    imageHeight = msg.data.imageHeight;
-    samplesPerPixel = msg.data.samplesPerPixel;
-    maxBounces = msg.data.maxBounces;
-    const computeReadyMessage = {
-      cmd: ComputeCommands.READY,
-      data: {
-        workerId
-      }
+  var ControllerCommands = /* @__PURE__ */ ((ControllerCommands2) => {
+    ControllerCommands2[ControllerCommands2["START"] = 0] = "START";
+    ControllerCommands2[ControllerCommands2["STOP"] = 1] = "STOP";
+    ControllerCommands2[ControllerCommands2["READY"] = 2] = "READY";
+    ControllerCommands2[ControllerCommands2["UPDATE"] = 3] = "UPDATE";
+    ControllerCommands2[ControllerCommands2["WORKERDONE"] = 4] = "WORKERDONE";
+    ControllerCommands2[ControllerCommands2["END"] = 5] = "END";
+    return ControllerCommands2;
+  })(ControllerCommands || {});
+  const _controllerCtx = self;
+  let _pixelArray;
+  let _imageWidth;
+  let _imageHeight;
+  const start = (msg) => {
+    _imageWidth = msg.data.imageWidth;
+    _imageHeight = msg.data.imageHeight;
+    _pixelArray = new Uint8ClampedArray(_imageWidth * _imageHeight * 4);
+    const controllerReadyMessage = {
+      cmd: ControllerCommands.READY
     };
-    controllerCtx.postMessage(computeReadyMessage);
-  }
-  function start(msg) {
-    const x = msg.data.x;
-    const y = msg.data.y;
-    const width = msg.data.width;
-    const height = msg.data.height;
-    const dataArray = new Uint8ClampedArray(width * height * 4);
-    let offset = 0;
-    for (let j = 0; j < height; j++) {
-      for (let i = 0; i < width; i++) {
-        const pixelColor = create$2();
-        for (let s = 0; s < samplesPerPixel; s++) {
-          const u = (i + x + randomNumber()) / (imageWidth - 1);
-          const v = (j + y + randomNumber()) / (imageHeight - 1);
-          const r = camera.getRay(u, v);
-          add(pixelColor, pixelColor, rayColor(r, background, world, maxBounces));
-        }
-        writeColor(dataArray, offset, pixelColor, samplesPerPixel);
-        offset += 4;
+    _controllerCtx.postMessage(controllerReadyMessage);
+  };
+  const workerIsDone = (msg) => {
+    const workerArray = msg.data.pixelArray;
+    let dataOffset = 0;
+    let imageOffset = (msg.data.y * _imageWidth + msg.data.x) * 4;
+    for (let j = 0; j < msg.data.height; j++) {
+      for (let i = 0; i < msg.data.width; i++) {
+        _pixelArray[imageOffset++] = workerArray[dataOffset++];
+        _pixelArray[imageOffset++] = workerArray[dataOffset++];
+        _pixelArray[imageOffset++] = workerArray[dataOffset++];
+        _pixelArray[imageOffset++] = workerArray[dataOffset++];
       }
+      imageOffset += (_imageWidth - msg.data.width) * 4;
     }
-    const computeEndMessage = {
-      cmd: ComputeCommands.END,
+    const controllerUpdateMessage = {
+      cmd: ControllerCommands.UPDATE,
       data: {
-        workerId,
-        pixelArray: dataArray,
-        x,
-        y,
-        width,
-        height
+        imageArray: _pixelArray
       }
     };
-    controllerCtx.postMessage(computeEndMessage);
-  }
-  controllerCtx.addEventListener("message", (event) => {
+    _controllerCtx.postMessage(controllerUpdateMessage);
+  };
+  const stop = () => {
+    console.log("controller stop");
+    const controllerEndMessage = {
+      cmd: ControllerCommands.END,
+      data: {
+        imageArray: _pixelArray
+      }
+    };
+    _controllerCtx.postMessage(controllerEndMessage);
+  };
+  _controllerCtx.addEventListener("message", (event) => {
     const msg = event.data;
     switch (msg.cmd) {
-      case ComputeCommands.INIT:
-        init(msg);
-        break;
-      case ComputeCommands.START:
+      case ControllerCommands.START:
         start(msg);
+        break;
+      case ControllerCommands.STOP:
+        stop();
+        break;
+      case ControllerCommands.WORKERDONE:
+        workerIsDone(msg);
         break;
     }
   });

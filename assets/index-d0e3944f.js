@@ -4,7 +4,6 @@ var __publicField = (obj, key, value) => {
   __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
   return value;
 };
-var _a, _b;
 (function polyfill() {
   const relList = document.createElement("link").relList;
   if (relList && relList.supports && relList.supports("modulepreload")) {
@@ -14139,16 +14138,8 @@ let AABB = class {
   //   return true;
   // }
   static surroundingBox(box0, box1) {
-    const small = [
-      Math.min(box0.min[0], box1.min[0]),
-      Math.min(box0.min[1], box1.min[1]),
-      Math.min(box0.min[2], box1.min[2])
-    ];
-    const big = [
-      Math.max(box0.max[0], box1.max[0]),
-      Math.max(box0.max[1], box1.max[1]),
-      Math.max(box0.max[2], box1.max[2])
-    ];
+    const small = [Math.min(box0.min[0], box1.min[0]), Math.min(box0.min[1], box1.min[1]), Math.min(box0.min[2], box1.min[2])];
+    const big = [Math.max(box0.max[0], box1.max[0]), Math.max(box0.max[1], box1.max[1]), Math.max(box0.max[2], box1.max[2])];
     return new AABB(small, big);
   }
 };
@@ -14531,8 +14522,8 @@ let BVHNode = class extends Hittable {
     const node = new BVHNode();
     node.level = _level;
     const flatList = new HittableList();
-    const fillFlatList = (list2) => {
-      for (const object of list2.objects) {
+    const fillFlatList = (l2) => {
+      for (const object of l2.objects) {
         if (object instanceof HittableList) {
           fillFlatList(object);
         } else {
@@ -14754,6 +14745,7 @@ CheckerTexture = __decorateClass$d([
 ], CheckerTexture);
 var __defProp$c = Object.defineProperty;
 var __getOwnPropDesc$c = Object.getOwnPropertyDescriptor;
+var __defNormalProp$1 = (obj, key, value) => key in obj ? __defProp$c(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __decorateClass$c = (decorators, target, key, kind) => {
   var result = kind > 1 ? void 0 : kind ? __getOwnPropDesc$c(target, key) : target;
   for (var i = decorators.length - 1, decorator; i >= 0; i--)
@@ -14763,7 +14755,11 @@ var __decorateClass$c = (decorators, target, key, kind) => {
     __defProp$c(target, key, result);
   return result;
 };
-let ImageTexture = (_a = class extends Texture {
+var __publicField$1 = (obj, key, value) => {
+  __defNormalProp$1(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
+let ImageTexture = class extends Texture {
   constructor() {
     super();
     __publicField(this, "_width", 0);
@@ -14796,17 +14792,15 @@ let ImageTexture = (_a = class extends Texture {
     v2 = 1 - clamp(v2, 0, 1);
     let i = Math.trunc(u2 * this._width);
     let j = Math.trunc(v2 * this._height);
-    if (i >= this._width)
+    if (i >= this._width) {
       i = this._width - 1;
-    if (j >= this._height)
+    }
+    if (j >= this._height) {
       j = this._height - 1;
+    }
     const colorScale = 1 / 255;
     let pixelOffset = j * this._bytesPerScanLine + i * ImageTexture.BytesPerPixel;
-    return [
-      this._data[pixelOffset++] * colorScale,
-      this._data[pixelOffset++] * colorScale,
-      this._data[pixelOffset++] * colorScale
-    ];
+    return [this._data[pixelOffset++] * colorScale, this._data[pixelOffset++] * colorScale, this._data[pixelOffset++] * colorScale];
   }
   get width() {
     return this._width;
@@ -14820,7 +14814,8 @@ let ImageTexture = (_a = class extends Texture {
   get url() {
     return this._url;
   }
-}, __publicField(_a, "BytesPerPixel", 4), _a);
+};
+__publicField$1(ImageTexture, "BytesPerPixel", 4);
 ImageTexture = __decorateClass$c([
   serializable
 ], ImageTexture);
@@ -15089,6 +15084,7 @@ function buildPermutationTable(random2) {
 }
 var __defProp$b = Object.defineProperty;
 var __getOwnPropDesc$b = Object.getOwnPropertyDescriptor;
+var __defNormalProp2 = (obj, key, value) => key in obj ? __defProp$b(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __decorateClass$b = (decorators, target, key, kind) => {
   var result = kind > 1 ? void 0 : kind ? __getOwnPropDesc$b(target, key) : target;
   for (var i = decorators.length - 1, decorator; i >= 0; i--)
@@ -15098,7 +15094,11 @@ var __decorateClass$b = (decorators, target, key, kind) => {
     __defProp$b(target, key, result);
   return result;
 };
-let Perlin = (_b = class {
+var __publicField2 = (obj, key, value) => {
+  __defNormalProp2(obj, typeof key !== "symbol" ? key + "" : key, value);
+  return value;
+};
+let Perlin = class {
   constructor() {
     __publicField(this, "_ranVecs");
     __publicField(this, "_permX");
@@ -15126,10 +15126,13 @@ let Perlin = (_b = class {
       [[], []],
       [[], []]
     ];
-    for (let di2 = 0; di2 < 2; di2++)
-      for (let dj2 = 0; dj2 < 2; dj2++)
-        for (let dk2 = 0; dk2 < 2; dk2++)
+    for (let di2 = 0; di2 < 2; di2++) {
+      for (let dj2 = 0; dj2 < 2; dj2++) {
+        for (let dk2 = 0; dk2 < 2; dk2++) {
           c[di2][dj2][dk2] = this._ranVecs[this._permX[i + di2 & 255] ^ this._permY[j + dj2 & 255] ^ this._permZ[k2 + dk2 & 255]];
+        }
+      }
+    }
     const noise = trilinearInterp(c, u2, v2, w2);
     return noise;
   }
@@ -15160,7 +15163,8 @@ let Perlin = (_b = class {
       array[target] = tmp;
     }
   }
-}, __publicField(_b, "_pointCount", 256), _b);
+};
+__publicField2(Perlin, "_pointCount", 256);
 Perlin = __decorateClass$b([
   serializable
 ], Perlin);
@@ -15350,11 +15354,9 @@ let MetalMaterial = class extends Material {
   }
   scatter(r_in, rec, attenuation, scattered) {
     const refl = reflect(normalize$2(create$2(), r_in.direction), rec.normal);
-    new Ray(
-      rec.p,
-      add(create$2(), refl, scale$1(create$2(), randomInUnitSphere(), this._roughness)),
-      r_in.time
-    ).copyTo(scattered);
+    new Ray(rec.p, add(create$2(), refl, scale$1(create$2(), randomInUnitSphere(), this._roughness)), r_in.time).copyTo(
+      scattered
+    );
     copy(attenuation, this._baseColor);
     return dot(scattered.direction, rec.normal) > 0;
   }
@@ -15572,14 +15574,8 @@ let MovingSphere = class extends Hittable {
     const transformedCenterT0 = transformMat4(create$2(), this.center(t0), this.transform.objectToWorld);
     const transformedCenterT1 = transformMat4(create$2(), this.center(t1), this.transform.objectToWorld);
     const r2 = fromValues$1(this._radius, this._radius, this._radius);
-    const box0 = new AABB(
-      sub(create$2(), transformedCenterT0, r2),
-      add(create$2(), transformedCenterT0, r2)
-    );
-    const box1 = new AABB(
-      sub(create$2(), transformedCenterT1, r2),
-      add(create$2(), transformedCenterT1, r2)
-    );
+    const box0 = new AABB(sub(create$2(), transformedCenterT0, r2), add(create$2(), transformedCenterT0, r2));
+    const box1 = new AABB(sub(create$2(), transformedCenterT1, r2), add(create$2(), transformedCenterT1, r2));
     return AABB.surroundingBox(box0, box1);
   }
 };
@@ -15698,7 +15694,6 @@ let Triangle = class extends Hittable {
     __publicField(this, "uv2");
     __publicField(this, "surfaceNormal");
     __publicField(this, "transform", new Transform());
-    __publicField(this, "material");
     __publicField(this, "doubleSided", false);
     this.v0 = v0;
     this.v1 = v1;
@@ -16353,10 +16348,10 @@ function createComputeTiles(imageWidth, imageHeight, tileSize) {
   return computeTiles;
 }
 function WorkerWrapper$1() {
-  return new Worker("" + new URL("compute.worker-155b2df9.js", import.meta.url).href);
+  return new Worker("" + new URL("compute.worker-6164df76.js", import.meta.url).href);
 }
 function WorkerWrapper() {
-  return new Worker("" + new URL("controller.worker-62292851.js", import.meta.url).href);
+  return new Worker("" + new URL("controller.worker-62043791.js", import.meta.url).href);
 }
 var ControllerCommands = /* @__PURE__ */ ((ControllerCommands2) => {
   ControllerCommands2[ControllerCommands2["START"] = 0] = "START";
@@ -16385,10 +16380,7 @@ class RaytracerCPU extends RaytracerBase {
     this._rayTracerOptions = rayTracerCPUOptions;
   }
   updateImage() {
-    const imageData = this._context2D.createImageData(
-      this._rayTracerOptions.imageWidth,
-      this._rayTracerOptions.imageHeight
-    );
+    const imageData = this._context2D.createImageData(this._rayTracerOptions.imageWidth, this._rayTracerOptions.imageHeight);
     let j = 0;
     for (let y2 = this._rayTracerOptions.imageHeight - 1; y2 >= 0; y2--) {
       for (let x2 = 0; x2 < this._rayTracerOptions.imageWidth; x2++) {
@@ -16541,7 +16533,7 @@ class RaytracerCPU extends RaytracerBase {
     this._rayTracerOptions.numOfWorkers = numOfWorkers;
   }
 }
-const _WebGPUContext = class {
+const _WebGPUContext = class _WebGPUContext {
   static createContext(device, queue, context) {
     _WebGPUContext._device = device;
     _WebGPUContext._queue = queue;
@@ -16557,10 +16549,10 @@ const _WebGPUContext = class {
     return _WebGPUContext._context;
   }
 };
+__publicField(_WebGPUContext, "_device");
+__publicField(_WebGPUContext, "_queue");
+__publicField(_WebGPUContext, "_context");
 let WebGPUContext = _WebGPUContext;
-__publicField(WebGPUContext, "_device");
-__publicField(WebGPUContext, "_queue");
-__publicField(WebGPUContext, "_context");
 class WebGPUBuffer {
   constructor() {
     __publicField(this, "_gpuBuffer");
@@ -17101,10 +17093,7 @@ class WebGPUComputePipline extends WebGPUPipelineBase {
     this._pixelBuffer.create(pixelBufferSize, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
     this._accumulationBuffer.create(pixelBufferSize, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
     const uniformArray = this.getParamsArray(this._options.uniformParams);
-    this._computeParamsUniformBuffer.createWithArrayMapped(
-      uniformArray,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-    );
+    this._computeParamsUniformBuffer.createWithArrayMapped(uniformArray, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
     const cameraArray = this._options.camera.getUniformArray();
     this._computeCameraUniformBuffer.createWithArrayMapped(cameraArray, GPUBufferUsage.UNIFORM);
     this.createObjects();
@@ -17796,17 +17785,7 @@ const NumberInput = (props) => {
   };
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "input", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("label", { children: props.label }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx(
-      "input",
-      {
-        type: "number",
-        size: props.size,
-        min: props.min,
-        max: props.max,
-        value: props.value,
-        onChange: onInputChange
-      }
-    )
+    /* @__PURE__ */ jsxRuntimeExports.jsx("input", { type: "number", size: props.size, min: props.min, max: props.max, value: props.value, onChange: onInputChange })
   ] });
 };
 const DropDown = (props) => {
