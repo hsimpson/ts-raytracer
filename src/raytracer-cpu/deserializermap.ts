@@ -1,24 +1,5 @@
-import {
-  AABB,
-  Box,
-  BVHNode,
-  ConstantMedium,
-  MovingSphere,
-  Sphere,
-  Triangle,
-  XYRect,
-  XZRect,
-  YZRect,
-} from '../hittables';
-import {
-  DielectricMaterial,
-  DiffuseLight,
-  IsoTropic,
-  LambertianMaterial,
-  MetalMaterial,
-  NormalMaterial,
-  UVMaterial,
-} from '../material';
+import { AABB, Box, BVHNode, ConstantMedium, MovingSphere, Sphere, Triangle, XYRect, XZRect, YZRect } from '../hittables';
+import { DielectricMaterial, DiffuseLight, IsoTropic, LambertianMaterial, MetalMaterial, NormalMaterial, UVMaterial } from '../material';
 import { CheckerTexture, ImageTexture, NoiseTexture, Perlin, SolidColor } from '../textures';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

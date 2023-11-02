@@ -68,7 +68,7 @@ export class WebGPURenderPipeline extends WebGPUPipelineBase {
           binding: 1,
           visibility: GPUShaderStage.FRAGMENT,
           buffer: {
-            type: 'storage',
+            type: 'read-only-storage',
           },
         },
       ],

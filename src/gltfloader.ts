@@ -84,8 +84,8 @@ export async function load(url: string): Promise<HittableList> {
         new Float32Array(
           buffers[positionBufferView.buffer],
           positionBufferView.byteOffset,
-          positionBufferView.byteLength / Float32Array.BYTES_PER_ELEMENT
-        )
+          positionBufferView.byteLength / Float32Array.BYTES_PER_ELEMENT,
+        ),
       );
 
       let normals;
@@ -98,8 +98,8 @@ export async function load(url: string): Promise<HittableList> {
           new Float32Array(
             buffers[normalBufferView.buffer],
             normalBufferView.byteOffset,
-            normalBufferView.byteLength / Float32Array.BYTES_PER_ELEMENT
-          )
+            normalBufferView.byteLength / Float32Array.BYTES_PER_ELEMENT,
+          ),
         );
       }
 
@@ -110,8 +110,8 @@ export async function load(url: string): Promise<HittableList> {
           new Float32Array(
             buffers[textureCoordBufferView.buffer],
             textureCoordBufferView.byteOffset,
-            textureCoordBufferView.byteLength / Float32Array.BYTES_PER_ELEMENT
-          )
+            textureCoordBufferView.byteLength / Float32Array.BYTES_PER_ELEMENT,
+          ),
         );
       }
 
@@ -121,7 +121,7 @@ export async function load(url: string): Promise<HittableList> {
         const indexArray = new Uint16Array(
           buffers[indicesBufferView.buffer],
           indicesBufferView.byteOffset,
-          indicesBufferView.byteLength / Uint16Array.BYTES_PER_ELEMENT
+          indicesBufferView.byteLength / Uint16Array.BYTES_PER_ELEMENT,
         );
 
         for (let i = 0; i < indicesAccessor.count; i++) {
@@ -158,7 +158,7 @@ export async function load(url: string): Promise<HittableList> {
 
             uv0,
             uv1,
-            uv2
+            uv2,
           );
 
           // // TODO: material

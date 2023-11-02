@@ -27,11 +27,9 @@ export class MetalMaterial extends Material {
   public scatter(r_in: Ray, rec: HitRecord, attenuation: vec3, scattered: Ray): boolean {
     const refl = reflect(vec3.normalize(vec3.create(), r_in.direction), rec.normal);
 
-    new Ray(
-      rec.p,
-      vec3.add(vec3.create(), refl, vec3.scale(vec3.create(), randomInUnitSphere(), this._roughness)),
-      r_in.time
-    ).copyTo(scattered);
+    new Ray(rec.p, vec3.add(vec3.create(), refl, vec3.scale(vec3.create(), randomInUnitSphere(), this._roughness)), r_in.time).copyTo(
+      scattered,
+    );
     vec3.copy(attenuation, this._baseColor);
     return vec3.dot(scattered.direction, rec.normal) > 0;
   }

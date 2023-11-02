@@ -1,5 +1,4 @@
 import { vec2, vec3 } from 'gl-matrix';
-import { Material } from '../material';
 import { HitRecord } from '../raytracer-cpu/hitrecord';
 import { Ray } from '../raytracer-cpu/ray';
 import { Transform } from '../raytracer-cpu/transform';
@@ -37,20 +36,9 @@ export class Triangle extends Hittable {
   public readonly surfaceNormal: vec3;
   public readonly transform: Transform = new Transform();
 
-  public material: Material;
   public doubleSided = false;
 
-  public constructor(
-    v0: vec3,
-    v1: vec3,
-    v2: vec3,
-    n0?: vec3,
-    n1?: vec3,
-    n2?: vec3,
-    uv0?: vec2,
-    uv1?: vec2,
-    uv2?: vec2
-  ) {
+  public constructor(v0: vec3, v1: vec3, v2: vec3, n0?: vec3, n1?: vec3, n2?: vec3, uv0?: vec2, uv1?: vec2, uv2?: vec2) {
     super();
     this.v0 = v0;
     this.v1 = v1;

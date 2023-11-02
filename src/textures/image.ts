@@ -51,18 +51,18 @@ export class ImageTexture extends Texture {
     let j = Math.trunc(v * this._height);
 
     // Clamp integer mapping, since actual coordinates should be less than 1.0
-    if (i >= this._width) i = this._width - 1;
-    if (j >= this._height) j = this._height - 1;
+    if (i >= this._width) {
+      i = this._width - 1;
+    }
+    if (j >= this._height) {
+      j = this._height - 1;
+    }
 
     const colorScale = 1.0 / 255.0;
 
     let pixelOffset = j * this._bytesPerScanLine + i * ImageTexture.BytesPerPixel;
 
-    return [
-      this._data[pixelOffset++] * colorScale,
-      this._data[pixelOffset++] * colorScale,
-      this._data[pixelOffset++] * colorScale,
-    ];
+    return [this._data[pixelOffset++] * colorScale, this._data[pixelOffset++] * colorScale, this._data[pixelOffset++] * colorScale];
   }
 
   public get width(): number {

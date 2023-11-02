@@ -70,7 +70,7 @@ const stop = (): void => {
 };
 
 // Respond to message from parent thread
-_controllerCtx.addEventListener('message', (event) => {
+_controllerCtx.addEventListener('message', event => {
   const msg = event.data as WorkerMessage;
 
   switch (msg.cmd as ControllerCommands) {

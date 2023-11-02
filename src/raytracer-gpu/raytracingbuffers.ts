@@ -1,9 +1,19 @@
 import { mat4, quat, vec2, vec4 } from 'gl-matrix';
-import { Box, Hittable, HittableList, MovingSphere, Sphere, Triangle, XYRect, XZRect, YZRect } from '../hittables';
+import {
+  Box,
+  MovingSphere as HMovingSphere,
+  Sphere as HSphere,
+  Triangle as HTriangle,
+  XYRect as HXYRect,
+  XZRect as HXZRect,
+  YZRect as HYZRect,
+  Hittable,
+  HittableList,
+} from '../hittables';
 import {
   DielectricMaterial,
-  DiffuseLight,
   LambertianMaterial,
+  DiffuseLight as MDiffuseLight,
   Material,
   MetalMaterial,
   NormalMaterial,
@@ -97,7 +107,7 @@ const PADDING_VALUE = -99;
 function log(message: string, bufferData: ArrayBuffer): void {
   const bytes = new Uint8Array(bufferData);
   let byteString = '';
-  bytes.forEach((value) => {
+  bytes.forEach(value => {
     byteString += value.toString(16).padStart(2, '0') + '';
   });
   console.log(message, byteString);
@@ -204,7 +214,7 @@ export class RaytracingBuffers {
         materialType: WebGPUMaterialType.Dielectric,
         textureIndex,
       };
-    } else if (mat instanceof DiffuseLight) {
+    } else if (mat instanceof MDiffuseLight) {
       gpuMat = {
         baseColor: [1, 1, 1, 1],
         roughness: 0,
@@ -259,9 +269,9 @@ export class RaytracingBuffers {
       uv2: vec4.create(),
     };
 
-    if (obj instanceof Sphere) {
+    if (obj instanceof HSphere) {
       gpuPrimitive = {
-        objectToWorld: objectToWorld,
+        objectToWorld,
         center0: vec4.fromValues(obj.center[0], obj.center[1], obj.center[2], 0),
         center1: [0, 0, 0, 1],
         radius: obj.radius,
@@ -274,9 +284,9 @@ export class RaytracingBuffers {
 
         // pad_0: PADDING_VALUE,
       };
-    } else if (obj instanceof MovingSphere) {
+    } else if (obj instanceof HMovingSphere) {
       gpuPrimitive = {
-        objectToWorld: objectToWorld,
+        objectToWorld,
         center0: vec4.fromValues(obj.center0[0], obj.center0[1], obj.center0[2], obj.time0),
         center1: vec4.fromValues(obj.center1[0], obj.center1[1], obj.center1[2], obj.time1),
         radius: obj.radius,
@@ -289,9 +299,9 @@ export class RaytracingBuffers {
 
         // pad_0: PADDING_VALUE,
       };
-    } else if (obj instanceof XYRect) {
+    } else if (obj instanceof HXYRect) {
       gpuPrimitive = {
-        objectToWorld: objectToWorld,
+        objectToWorld,
         bounds: [obj.x0, obj.x1, obj.y0, obj.y1],
         k: obj.k,
 
@@ -303,9 +313,9 @@ export class RaytracingBuffers {
 
         // pad_0: PADDING_VALUE,
       };
-    } else if (obj instanceof XZRect) {
+    } else if (obj instanceof HXZRect) {
       gpuPrimitive = {
-        objectToWorld: objectToWorld,
+        objectToWorld,
         bounds: [obj.x0, obj.x1, obj.z0, obj.z1],
         k: obj.k,
 
@@ -317,9 +327,9 @@ export class RaytracingBuffers {
 
         // pad_0: PADDING_VALUE,
       };
-    } else if (obj instanceof YZRect) {
+    } else if (obj instanceof HYZRect) {
       gpuPrimitive = {
-        objectToWorld: objectToWorld,
+        objectToWorld,
         bounds: [obj.y0, obj.y1, obj.z0, obj.z1],
         k: obj.k,
 
@@ -331,9 +341,9 @@ export class RaytracingBuffers {
 
         // pad_0: PADDING_VALUE,
       };
-    } else if (obj instanceof Triangle) {
+    } else if (obj instanceof HTriangle) {
       gpuPrimitive = {
-        objectToWorld: objectToWorld,
+        objectToWorld,
 
         ...triangleDummy,
         ...rectDummy,
