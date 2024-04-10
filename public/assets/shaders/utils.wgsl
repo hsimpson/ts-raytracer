@@ -1,4 +1,7 @@
-
+/* 
+ * this Pseudo-RNG (Pseudo Random Number Generator) is based on this paper: 
+ * https://indico.cern.ch/event/93877/contributions/2118070/attachments/1104200/1575343/acat3_revised_final.pdf
+ */
 const PI = 3.1415926538;
 var<private> seed: u32;
 
