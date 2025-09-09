@@ -14,7 +14,7 @@ export type RayTracerGPUOptions = RayTracerBaseOptions;
 export class RaytracerGPU extends RaytracerBase {
   private _initialized = false;
 
-  private _presentationFormat: GPUTextureFormat;
+  private _presentationFormat!: GPUTextureFormat;
   // private _renderTarget: GPUTexture;
   // private _renderTargetView: GPUTextureView;
 
@@ -124,7 +124,10 @@ export class RaytracerGPU extends RaytracerBase {
       canvas2d.height = this._rayTracerOptions.imageHeight;
       const canvas2dContext = canvas2d.getContext('2d');
 
-      const imageData = canvas2dContext.createImageData(this._rayTracerOptions.imageWidth, this._rayTracerOptions.imageHeight);
+      const imageData = canvas2dContext.createImageData(
+        this._rayTracerOptions.imageWidth,
+        this._rayTracerOptions.imageHeight,
+      );
 
       for (let i = 0; i < pixelBuffer.length; i++) {
         imageData.data[i] = pixelBuffer[i] * 255;
@@ -149,7 +152,7 @@ export class RaytracerGPU extends RaytracerBase {
     computePipeline: WebGPUComputePipline,
     renderPipeline: WebGPURenderPipeline,
   ): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const numOfTiles = tiles.length;
       console.log(`Number of tiles: ${numOfTiles}`);
 

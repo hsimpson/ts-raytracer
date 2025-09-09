@@ -1,13 +1,11 @@
 import { vec3 } from 'gl-matrix';
-import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Ray } from '../raytracer-cpu/ray';
-import { serializable } from '../serializing';
+import { HitRecord } from '../hittables/hitrecord';
+import { Ray } from '../hittables/ray';
 import { randomNumber, reflect, refract } from '../util';
 import { Material } from './material';
 
-@serializable
 export class DielectricMaterial extends Material {
-  private _indexOfRefraction: number;
+  private readonly _indexOfRefraction: number;
 
   public constructor(refIdx: number) {
     super();

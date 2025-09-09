@@ -1,16 +1,14 @@
 import { mat4, quat, vec3 } from 'gl-matrix';
-import { serializable } from '../serializing';
 import { HitRecord } from './hitrecord';
 import { Ray } from './ray';
 
-@serializable
 export class Transform {
-  private _objectToWorldMatrix = mat4.create();
-  private _worldToObjectMatrix = mat4.create();
-  private _rotationMatrix = mat4.create();
-  private _inverseRotationMatrix = mat4.create();
-  private _normalMatrix = mat4.create();
-  private _position = vec3.create();
+  private readonly _objectToWorldMatrix = mat4.create();
+  private readonly _worldToObjectMatrix = mat4.create();
+  private readonly _rotationMatrix = mat4.create();
+  private readonly _inverseRotationMatrix = mat4.create();
+  private readonly _normalMatrix = mat4.create();
+  private readonly _position = vec3.create();
   private _rotation = quat.create();
   private _isTransformed = false;
 

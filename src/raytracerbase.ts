@@ -58,9 +58,9 @@ export abstract class RaytracerBase {
   }
 
   private async canvasBlob(canvas: HTMLCanvasElement): Promise<Blob> {
-    return new Promise<Blob>(resolve => {
+    return new Promise<Blob>((resolve) => {
       canvas.toBlob(
-        blob => {
+        (blob) => {
           resolve(blob);
         },
         'image/png',

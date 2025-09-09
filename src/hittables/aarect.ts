@@ -1,19 +1,17 @@
 import { vec3 } from 'gl-matrix';
 import { Material } from '../material';
-import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Ray } from '../raytracer-cpu/ray';
-import { serializable } from '../serializing';
 import { AABB } from './aabb';
+import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
+import { Ray } from './ray';
 
-@serializable
 export class XYRect extends Hittable {
   public x0: number;
   public x1: number;
   public y0: number;
   public y1: number;
   public k: number;
-  private bbox: AABB;
+  private readonly bbox: AABB;
 
   public constructor(x0: number, x1: number, y0: number, y1: number, k: number, material: Material) {
     super();
@@ -60,14 +58,13 @@ export class XYRect extends Hittable {
   }
 }
 
-@serializable
 export class XZRect extends Hittable {
   public x0: number;
   public x1: number;
   public z0: number;
   public z1: number;
   public k: number;
-  private bbox: AABB;
+  private readonly bbox: AABB;
 
   public constructor(x0: number, x1: number, z0: number, z1: number, k: number, material: Material) {
     super();
@@ -113,14 +110,13 @@ export class XZRect extends Hittable {
   }
 }
 
-@serializable
 export class YZRect extends Hittable {
   public y0: number;
   public y1: number;
   public z0: number;
   public z1: number;
   public k: number;
-  private bbox: AABB;
+  private readonly bbox: AABB;
 
   public constructor(y0: number, y1: number, z0: number, z1: number, k: number, material: Material) {
     super();

@@ -1,8 +1,6 @@
-import { serializable } from '../serializing';
 import { vec3 } from 'gl-matrix';
-import { Ray } from '../raytracer-cpu/ray';
+import { Ray } from './ray';
 
-@serializable
 export class AABB {
   private _min: vec3;
   private _max: vec3;
@@ -81,9 +79,17 @@ export class AABB {
   // }
 
   public static surroundingBox(box0: AABB, box1: AABB): AABB {
-    const small: vec3 = [Math.min(box0.min[0], box1.min[0]), Math.min(box0.min[1], box1.min[1]), Math.min(box0.min[2], box1.min[2])];
+    const small: vec3 = [
+      Math.min(box0.min[0], box1.min[0]),
+      Math.min(box0.min[1], box1.min[1]),
+      Math.min(box0.min[2], box1.min[2]),
+    ];
 
-    const big: vec3 = [Math.max(box0.max[0], box1.max[0]), Math.max(box0.max[1], box1.max[1]), Math.max(box0.max[2], box1.max[2])];
+    const big: vec3 = [
+      Math.max(box0.max[0], box1.max[0]),
+      Math.max(box0.max[1], box1.max[1]),
+      Math.max(box0.max[2], box1.max[2]),
+    ];
 
     return new AABB(small, big);
   }

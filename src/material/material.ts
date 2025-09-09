@@ -1,6 +1,6 @@
 import { vec3 } from 'gl-matrix';
-import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Ray } from '../raytracer-cpu/ray';
+import { HitRecord } from '../hittables/hitrecord';
+import { Ray } from '../hittables/ray';
 import type { Texture } from '../textures';
 
 export abstract class Material {

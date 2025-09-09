@@ -1,12 +1,10 @@
-import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Ray } from '../raytracer-cpu/ray';
-import { serializable } from '../serializing';
 import { AABB } from './aabb';
+import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
+import { Ray } from './ray';
 
-@serializable
 export class HittableList extends Hittable {
-  private _objects: Hittable[] = [];
+  private readonly _objects: Hittable[] = [];
 
   public constructor(object?: Hittable) {
     super();

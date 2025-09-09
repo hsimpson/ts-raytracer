@@ -1,6 +1,4 @@
 import { vec3 } from 'gl-matrix';
-import { Ray } from './raytracer-cpu/ray';
-import { serializable } from './serializing';
 import { degreeToRadians, randomInUnitdisk, randomNumberRange } from './util';
 
 export interface CameraOptions {
@@ -13,22 +11,17 @@ export interface CameraOptions {
   focusDist: number;
 }
 
-@serializable
 export class Camera {
-  private lookFrom: vec3;
-  private lowerLeftCorner = vec3.create();
-  private horizontal = vec3.create();
-  private vertical = vec3.create();
-  private u = vec3.create();
-  private v = vec3.create();
-  private w = vec3.create();
-  private lenseRadius: number;
-  private time0: number;
-  private time1: number;
-
-  public constructor() {
-    //
-  }
+  private lookFrom: vec3 = vec3.create();
+  private readonly lowerLeftCorner = vec3.create();
+  private readonly horizontal = vec3.create();
+  private readonly vertical = vec3.create();
+  private readonly u = vec3.create();
+  private readonly v = vec3.create();
+  private readonly w = vec3.create();
+  private lenseRadius = 0;
+  private time0 = 0;
+  private time1 = 0;
 
   public init(
     lookFrom: vec3,
@@ -84,7 +77,11 @@ export class Camera {
       vec3.add(vec3.create(), this.lookFrom, offset),
       vec3.sub(
         vec3.create(),
-        vec3.sub(vec3.create(), vec3.add(vec3.create(), vec3.add(vec3.create(), this.lowerLeftCorner, sHor), tVer), this.lookFrom),
+        vec3.sub(
+          vec3.create(),
+          vec3.add(vec3.create(), vec3.add(vec3.create(), this.lowerLeftCorner, sHor), tVer),
+          this.lookFrom,
+        ),
         offset,
       ),
       randomNumberRange(this.time0, this.time1),
@@ -105,7 +102,7 @@ export class Camera {
     array.push(this.time1);
 
     // padding
-    array.push([0, 0, 0, 0]);
+    array.push(0, 0, 0, 0);
 
     return new Float32Array(array);
   }

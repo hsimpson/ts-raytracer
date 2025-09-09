@@ -2,7 +2,7 @@ import { quat, vec2, vec3, vec4 } from 'gl-matrix';
 import { GLTF, GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
 import { HittableList, Triangle } from './hittables';
 import { DiffuseLight, LambertianMaterial, Material, NormalMaterial } from './material';
-import { isDataUrl, isAbsoluteUrl, urlDirname } from './url';
+import { isAbsoluteUrl, isDataUrl, urlDirname } from './url';
 
 // const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
 // const WHITEMATERIAL = new LambertianMaterial([0.73, 0.73, 0.73]);
@@ -27,13 +27,11 @@ export async function load(url: string): Promise<HittableList> {
   const materials = gltf.materials;
 
   const raytracingMaterial: Material[] = [];
+  const defaultMaterial = new LambertianMaterial(vec3.fromValues(1.0, 1.0, 1.0));
 
   // create materials
   for (const material of materials) {
-    let baseColor = material.pbrMetallicRoughness.baseColorFactor;
-    if (!baseColor) {
-      baseColor = vec4.fromValues(0.5, 0.5, 0.5, 1.0);
-    }
+    const baseColor = material.pbrMetallicRoughness?.baseColorFactor ?? vec4.fromValues(0.5, 0.5, 0.5, 1.0);
 
     let mat: Material;
     if (material.emissiveFactor) {
@@ -164,7 +162,7 @@ export async function load(url: string): Promise<HittableList> {
           // // TODO: material
           // triangle.material = WHITEMATERIAL;
           // triangle.material = NORMALMATERIAL;
-          triangle.material = raytracingMaterial[primitive.material];
+          triangle.material = primitive.material ? raytracingMaterial[primitive.material] : defaultMaterial;
 
           if (node.translation) {
             triangle.transform.translate(translation);

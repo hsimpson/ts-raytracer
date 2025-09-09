@@ -20,7 +20,14 @@ const NumberInput = (props: InputProps): React.ReactElement => {
   return (
     <div className="input">
       <label>{props.label}</label>
-      <input type="number" size={props.size} min={props.min} max={props.max} value={props.value} onChange={onInputChange} />
+      <input
+        type="number"
+        size={props.size}
+        min={props.min}
+        max={props.max}
+        value={props.value}
+        onChange={onInputChange}
+      />
     </div>
   );
 };

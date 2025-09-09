@@ -1,9 +1,7 @@
 import { vec3 } from 'gl-matrix';
-import { serializable } from '../serializing';
 import { SolidColor } from './solidcolor';
 import { Texture } from './texture';
 
-@serializable
 export class CheckerTexture extends Texture {
   private _odd: Texture;
   private _even: Texture;
@@ -13,7 +11,7 @@ export class CheckerTexture extends Texture {
     super();
     this._odd = new SolidColor(odd);
     this._even = new SolidColor(even);
-    this._scale = scale || 5;
+    this._scale = scale ?? 5;
   }
 
   private modulo(x: number): number {

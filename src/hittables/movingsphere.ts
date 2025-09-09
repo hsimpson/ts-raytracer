@@ -1,19 +1,17 @@
 import { vec3 } from 'gl-matrix';
 import { Material } from '../material';
-import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Ray } from '../raytracer-cpu/ray';
-import { serializable } from '../serializing';
 import { getSphereUV, lengthSquared } from '../util';
 import { AABB } from './aabb';
+import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
+import { Ray } from './ray';
 
-@serializable
 export class MovingSphere extends Hittable {
-  private _center0: vec3;
-  private _center1: vec3;
-  private _time0: number;
-  private _time1: number;
-  private _radius: number;
+  private readonly _center0: vec3;
+  private readonly _center1: vec3;
+  private readonly _time0: number;
+  private readonly _time1: number;
+  private readonly _radius: number;
 
   public constructor(center0: vec3, center1: vec3, t0: number, t1: number, radius: number, mat: Material) {
     super();
@@ -108,9 +106,15 @@ export class MovingSphere extends Hittable {
     const transformedCenterT1 = vec3.transformMat4(vec3.create(), this.center(t1), this.transform.objectToWorld);
 
     const r = vec3.fromValues(this._radius, this._radius, this._radius);
-    const box0 = new AABB(vec3.sub(vec3.create(), transformedCenterT0, r), vec3.add(vec3.create(), transformedCenterT0, r));
+    const box0 = new AABB(
+      vec3.sub(vec3.create(), transformedCenterT0, r),
+      vec3.add(vec3.create(), transformedCenterT0, r),
+    );
 
-    const box1 = new AABB(vec3.sub(vec3.create(), transformedCenterT1, r), vec3.add(vec3.create(), transformedCenterT1, r));
+    const box1 = new AABB(
+      vec3.sub(vec3.create(), transformedCenterT1, r),
+      vec3.add(vec3.create(), transformedCenterT1, r),
+    );
 
     return AABB.surroundingBox(box0, box1);
   }

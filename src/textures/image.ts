@@ -1,9 +1,7 @@
 import { vec3 } from 'gl-matrix';
-import { serializable } from '../serializing';
-import { Texture } from './texture';
 import { clamp } from '../util';
+import { Texture } from './texture';
 
-@serializable
 export class ImageTexture extends Texture {
   private _width = 0;
   private _height = 0;
@@ -62,7 +60,11 @@ export class ImageTexture extends Texture {
 
     let pixelOffset = j * this._bytesPerScanLine + i * ImageTexture.BytesPerPixel;
 
-    return [this._data[pixelOffset++] * colorScale, this._data[pixelOffset++] * colorScale, this._data[pixelOffset++] * colorScale];
+    return [
+      this._data[pixelOffset++] * colorScale,
+      this._data[pixelOffset++] * colorScale,
+      this._data[pixelOffset++] * colorScale,
+    ];
   }
 
   public get width(): number {

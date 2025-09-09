@@ -1,10 +1,9 @@
 import { vec2, vec3 } from 'gl-matrix';
-import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Ray } from '../raytracer-cpu/ray';
-import { Transform } from '../raytracer-cpu/transform';
-import { serializable } from '../serializing';
 import { AABB } from './aabb';
+import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
+import { Ray } from './ray';
+import { Transform } from './transform';
 
 function avgVector3(vectors: vec3[]): vec3 {
   let x = 0,
@@ -19,26 +18,36 @@ function avgVector3(vectors: vec3[]): vec3 {
 }
 
 const EPSILON = 1e-8;
-@serializable
+
 export class Triangle extends Hittable {
   public readonly v0: vec3;
-  public readonly n0: vec3;
-  public readonly uv0: vec2;
+  public readonly n0?: vec3;
+  public readonly uv0?: vec2;
 
   public readonly v1: vec3;
-  public readonly n1: vec3;
-  public readonly uv1: vec2;
+  public readonly n1?: vec3;
+  public readonly uv1?: vec2;
 
   public readonly v2: vec3;
-  public readonly n2: vec3;
-  public readonly uv2: vec2;
+  public readonly n2?: vec3;
+  public readonly uv2?: vec2;
 
   public readonly surfaceNormal: vec3;
   public readonly transform: Transform = new Transform();
 
   public doubleSided = false;
 
-  public constructor(v0: vec3, v1: vec3, v2: vec3, n0?: vec3, n1?: vec3, n2?: vec3, uv0?: vec2, uv1?: vec2, uv2?: vec2) {
+  public constructor(
+    v0: vec3,
+    v1: vec3,
+    v2: vec3,
+    n0?: vec3,
+    n1?: vec3,
+    n2?: vec3,
+    uv0?: vec2,
+    uv1?: vec2,
+    uv2?: vec2,
+  ) {
     super();
     this.v0 = v0;
     this.v1 = v1;
@@ -73,7 +82,9 @@ export class Triangle extends Hittable {
     }
 
     this.surfaceNormal = vec3.create();
-    vec3.normalize(this.surfaceNormal, avgVector3([this.n0, this.n1, this.n2]));
+    if (this.n0 && this.n1 && this.n2) {
+      vec3.normalize(this.surfaceNormal, avgVector3([this.n0, this.n1, this.n2]));
+    }
 
     this.uv0 = uv0 ?? [0, 0];
     this.uv1 = uv1 ?? [0, 0];
@@ -85,13 +96,15 @@ export class Triangle extends Hittable {
     vec3.transformMat4(this.v1, this.v1, this.transform.objectToWorld);
     vec3.transformMat4(this.v2, this.v2, this.transform.objectToWorld);
 
-    vec3.transformMat4(this.n0, this.n0, this.transform.normalMatrix);
-    vec3.transformMat4(this.n1, this.n1, this.transform.normalMatrix);
-    vec3.transformMat4(this.n2, this.n2, this.transform.normalMatrix);
+    if (this.n0 && this.n1 && this.n2) {
+      vec3.transformMat4(this.n0, this.n0, this.transform.normalMatrix);
+      vec3.transformMat4(this.n1, this.n1, this.transform.normalMatrix);
+      vec3.transformMat4(this.n2, this.n2, this.transform.normalMatrix);
 
-    vec3.normalize(this.n0, this.n0);
-    vec3.normalize(this.n1, this.n1);
-    vec3.normalize(this.n2, this.n2);
+      vec3.normalize(this.n0, this.n0);
+      vec3.normalize(this.n1, this.n1);
+      vec3.normalize(this.n2, this.n2);
+    }
   }
 
   /* from https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf */
@@ -179,12 +192,14 @@ export class Triangle extends Hittable {
 
     const w = 1.0 - u - v;
 
-    const n0 = vec3.scale(vec3.create(), this.n0, w);
-    const n1 = vec3.scale(vec3.create(), this.n1, u);
-    const n2 = vec3.scale(vec3.create(), this.n2, v);
+    if (this.n0 && this.n1 && this.n2) {
+      const n0 = vec3.scale(vec3.create(), this.n0, w);
+      const n1 = vec3.scale(vec3.create(), this.n1, u);
+      const n2 = vec3.scale(vec3.create(), this.n2, v);
 
-    const outwardNormal = vec3.normalize(vec3.create(), vec3.add(vec3.create(), vec3.add(vec3.create(), n0, n1), n2));
-    rec.normal = outwardNormal;
+      const outwardNormal = vec3.normalize(vec3.create(), vec3.add(vec3.create(), vec3.add(vec3.create(), n0, n1), n2));
+      rec.normal = outwardNormal;
+    }
     rec.frontFace = true;
 
     return true;

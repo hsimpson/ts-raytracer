@@ -1,10 +1,8 @@
 import { vec3 } from 'gl-matrix';
-import { serializable } from '../serializing';
 import { Texture } from './texture';
 
-@serializable
 export class SolidColor extends Texture {
-  private _color: vec3;
+  private readonly _color: vec3;
 
   public constructor(color: vec3) {
     super();

@@ -3,7 +3,7 @@ export function isAbsoluteUrl(url: string): boolean {
 }
 
 export function isDataUrl(url: string): boolean {
-  return /^data:/.test(url);
+  return url.startsWith('data:');
 }
 
 export function urlDirname(url: string): string {

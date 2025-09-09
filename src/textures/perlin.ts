@@ -1,14 +1,12 @@
 import { vec3 } from 'gl-matrix';
-import { serializable } from '../serializing';
 import { randomInt, randomRange } from '../util';
 
-@serializable
 export class Perlin {
-  private static _pointCount = 256;
-  private _ranVecs: Array<vec3>;
-  private _permX: Array<number>;
-  private _permY: Array<number>;
-  private _permZ: Array<number>;
+  private static readonly _pointCount = 256;
+  private readonly _ranVecs: vec3[];
+  private readonly _permX: number[];
+  private readonly _permY: number[];
+  private readonly _permZ: number[];
 
   public constructor() {
     this._ranVecs = new Array<vec3>(Perlin._pointCount);
@@ -46,7 +44,8 @@ export class Perlin {
     for (let di = 0; di < 2; di++) {
       for (let dj = 0; dj < 2; dj++) {
         for (let dk = 0; dk < 2; dk++) {
-          c[di][dj][dk] = this._ranVecs[this._permX[(i + di) & 255] ^ this._permY[(j + dj) & 255] ^ this._permZ[(k + dk) & 255]];
+          c[di][dj][dk] =
+            this._ranVecs[this._permX[(i + di) & 255] ^ this._permY[(j + dj) & 255] ^ this._permZ[(k + dk) & 255]];
         }
       }
     }
@@ -69,7 +68,7 @@ export class Perlin {
     return Math.abs(accum);
   }
 
-  private static perlinGeneratePerm(): Array<number> {
+  private static perlinGeneratePerm(): number[] {
     const array = new Array<number>(Perlin._pointCount);
 
     for (let i = 0; i < Perlin._pointCount; i++) {
@@ -81,7 +80,7 @@ export class Perlin {
     return array;
   }
 
-  private static permute(array: Array<number>, n: number): void {
+  private static permute(array: number[], n: number): void {
     for (let i = n - 1; i > 0; i--) {
       const target = randomInt(0, i);
       const tmp = array[i];

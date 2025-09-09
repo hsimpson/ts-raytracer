@@ -1,18 +1,16 @@
 import { vec3 } from 'gl-matrix';
 import { IsoTropic, Material } from '../material';
-import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Ray } from '../raytracer-cpu/ray';
-import { serializable } from '../serializing';
 import { Texture } from '../textures';
 import { randomNumber } from '../util';
 import { AABB } from './aabb';
+import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
+import { Ray } from './ray';
 
-@serializable
 export class ConstantMedium extends Hittable {
-  private _boundary: Hittable;
-  private _phaseFunction: Material;
-  private _negInvDensity: number;
+  private readonly _boundary: Hittable;
+  private readonly _phaseFunction: Material;
+  private readonly _negInvDensity: number;
 
   public constructor(boundary: Hittable, density: number, material: vec3 | Texture) {
     super();
@@ -68,9 +66,10 @@ export class ConstantMedium extends Hittable {
     rec.p = r.at(rec.t);
 
     if (debugging) {
+      const p = rec.p as number[];
       console.log(`hitDistance = ${hitDistance}\n
                    rec.t = ${rec.t}\n
-                   rec.p = ${rec.p}
+                   rec.p = ${p.join(', ')}\n
       `);
     }
 

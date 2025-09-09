@@ -1,14 +1,12 @@
-import { serializable } from '../serializing';
 import { vec3 } from 'gl-matrix';
-import { HitRecord } from '../raytracer-cpu/hitrecord';
+import { HitRecord } from '../hittables/hitrecord';
+import { Ray } from '../hittables/ray';
+import { randomInUnitSphere, reflect } from '../util';
 import { Material } from './material';
-import { Ray } from '../raytracer-cpu/ray';
-import { reflect, randomInUnitSphere } from '../util';
 
-@serializable
 export class MetalMaterial extends Material {
-  private _baseColor: vec3;
-  private _roughness: number;
+  private readonly _baseColor: vec3;
+  private readonly _roughness: number;
 
   public constructor(color: vec3, roughness: number) {
     super();
@@ -27,9 +25,11 @@ export class MetalMaterial extends Material {
   public scatter(r_in: Ray, rec: HitRecord, attenuation: vec3, scattered: Ray): boolean {
     const refl = reflect(vec3.normalize(vec3.create(), r_in.direction), rec.normal);
 
-    new Ray(rec.p, vec3.add(vec3.create(), refl, vec3.scale(vec3.create(), randomInUnitSphere(), this._roughness)), r_in.time).copyTo(
-      scattered,
-    );
+    new Ray(
+      rec.p,
+      vec3.add(vec3.create(), refl, vec3.scale(vec3.create(), randomInUnitSphere(), this._roughness)),
+      r_in.time,
+    ).copyTo(scattered);
     vec3.copy(attenuation, this._baseColor);
     return vec3.dot(scattered.direction, rec.normal) > 0;
   }

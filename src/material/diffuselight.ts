@@ -1,19 +1,15 @@
 import { vec3 } from 'gl-matrix';
-import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Ray } from '../raytracer-cpu/ray';
-import { serializable } from '../serializing';
+import { HitRecord } from '../hittables/hitrecord';
+import { Ray } from '../hittables/ray';
 import { SolidColor, Texture } from '../textures';
 import { Material } from './material';
 
-@serializable
 export class DiffuseLight extends Material {
-  private _emit: Texture;
+  private readonly _emit: Texture;
 
-  public constructor(color?: vec3) {
+  public constructor(color: vec3) {
     super();
-    if (color) {
-      this._emit = new SolidColor(color);
-    }
+    this._emit = new SolidColor(color);
   }
 
   public get texture(): Texture {

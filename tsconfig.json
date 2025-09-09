@@ -6,12 +6,13 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "jsx": "react",
-    "lib": ["DOM", "ES2022"],
+    "lib": ["DOM", "ES2024"],
     "module": "commonjs",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "sourceMap": true,
-    "target": "ES2022",
+    "strict": true,
+    "target": "ES2024",
     "typeRoots": ["./node_modules/@webgpu/types", "node_modules/@types"]
   }
 }

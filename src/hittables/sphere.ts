@@ -1,16 +1,14 @@
 import { vec3 } from 'gl-matrix';
 import { Material } from '../material';
-import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Ray } from '../raytracer-cpu/ray';
-import { serializable } from '../serializing';
 import { getSphereUV, lengthSquared } from '../util';
 import { AABB } from './aabb';
+import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
+import { Ray } from './ray';
 
-@serializable
 export class Sphere extends Hittable {
-  private _center: vec3;
-  private _radius: number;
+  private readonly _center: vec3;
+  private readonly _radius: number;
 
   public constructor(center: vec3, radius: number, mat: Material) {
     super();

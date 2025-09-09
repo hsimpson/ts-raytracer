@@ -2,18 +2,15 @@ import { vec3 } from 'gl-matrix';
 // import { snoise } from './simplex3dnoise';
 import alea from 'alea';
 import { createNoise3D } from 'simplex-noise';
-import { serializable } from '../serializing';
-import { Perlin } from './perlin';
 import { Texture } from './texture';
 
 // create a random number generator based on a seed string
 const prng = alea('just a random seed string');
 const noise3D = createNoise3D(prng);
 
-@serializable
 export class NoiseTexture extends Texture {
-  private _noise = new Perlin();
-  private _scale: number;
+  // private readonly _noise = new Perlin();
+  private readonly _scale: number;
   // private _simplexNoise: SimplexNoise;
 
   public constructor(scale: number) {

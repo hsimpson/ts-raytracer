@@ -1,14 +1,12 @@
 import { vec3 } from 'gl-matrix';
-import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Ray } from '../raytracer-cpu/ray';
-import { serializable } from '../serializing';
+import { HitRecord } from '../hittables/hitrecord';
+import { Ray } from '../hittables/ray';
 import { SolidColor, Texture } from '../textures';
 import { randomInUnitSphere } from '../util';
 import { Material } from './material';
 
-@serializable
 export class IsoTropic extends Material {
-  private _albedo: Texture;
+  private readonly _albedo: Texture;
 
   public constructor(albedo: vec3 | Texture) {
     super();

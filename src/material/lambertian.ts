@@ -1,20 +1,16 @@
 import { vec3 } from 'gl-matrix';
-import { HitRecord } from '../raytracer-cpu/hitrecord';
-import { Ray } from '../raytracer-cpu/ray';
-import { serializable } from '../serializing';
+import { HitRecord } from '../hittables/hitrecord';
+import { Ray } from '../hittables/ray';
 import { SolidColor, Texture } from '../textures';
 import { randomUnitVector } from '../util';
 import { Material } from './material';
 
-@serializable
 export class LambertianMaterial extends Material {
   private _albedo: Texture;
 
-  public constructor(color?: vec3) {
+  public constructor(color: vec3) {
     super();
-    if (color) {
-      this._albedo = new SolidColor(color);
-    }
+    this._albedo = new SolidColor(color);
   }
 
   public set texture(texture: Texture) {
