@@ -6,7 +6,7 @@ export class ImageTexture extends Texture {
   private _width = 0;
   private _height = 0;
   private _bytesPerScanLine = 0;
-  private _data: Uint8ClampedArray;
+  private _data!: Uint8ClampedArray;
   private _url = '';
   private static BytesPerPixel = 4;
 
@@ -26,6 +26,9 @@ export class ImageTexture extends Texture {
     canvas.width = imgBitmap.width;
     canvas.height = imgBitmap.height;
     const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('Failed to get 2D context');
+    }
     ctx.drawImage(imgBitmap, 0, 0);
 
     const imgData = ctx.getImageData(0, 0, imgBitmap.width, imgBitmap.height);

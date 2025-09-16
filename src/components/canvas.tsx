@@ -42,9 +42,6 @@ const Canvas = (): React.ReactElement => {
     raytracer.addStatsToImage = raytracerState.addStatsToImage;
     raytracer.tileSize = raytracerState.tileSize;
 
-    console.log('raytracerRunningState', raytracerRunningState);
-    console.log('raytracer', raytracer);
-
     if (raytracerRunningState.isRunning && !raytracer.isRunning) {
       void raytracer.start(onRayTracerDone);
     } else if (!raytracerRunningState.isRunning && raytracer.isRunning) {

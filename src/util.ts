@@ -1,4 +1,4 @@
-import { vec3, vec4, mat4 } from 'gl-matrix';
+import { mat4, vec3, vec4 } from 'gl-matrix';
 
 // gamma 2.2
 const GAMMA = 1.0 / 2.2;
@@ -30,18 +30,10 @@ export function randomInt(min: number, max: number): number {
   return Math.floor(randomNumberRange(min, max + 1));
 }
 
-export function sortArrayRange<T>(array: T[], start: number, end: number, compareFn: (a: T, b: T) => number): void {
-  array = [].concat(...array.slice(0, start), ...array.slice(start, end).sort(compareFn), ...array.slice(end));
-}
-
-export async function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export function logMatrix(mat: mat4): void {
   const m = [];
-  for (let i = 0; i < mat.length; i++) {
-    m.push(mat[i].toFixed(2));
+  for (const v of mat) {
+    m.push(v.toFixed(2));
   }
 
   console.log(`${m[0]}, ${m[4]}, ${m[8]}, ${m[12]}`);
