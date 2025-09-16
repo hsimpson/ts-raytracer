@@ -1,7 +1,7 @@
 import { WebGPUContext } from './webgpucontext';
 
 export class WebGPUBuffer {
-  private _gpuBuffer: GPUBuffer;
+  private _gpuBuffer!: GPUBuffer;
   private _size = 0;
 
   public create(size: number, usage: GPUBufferUsageFlags): void {

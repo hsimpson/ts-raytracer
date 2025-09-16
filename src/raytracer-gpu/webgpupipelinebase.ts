@@ -2,16 +2,13 @@ import { WebGPUContext } from './webgpucontext';
 import { WebGPUObjectBase } from './webgpuobjectbase';
 import { preprocessShader } from './wgslpreprocessor';
 
-interface IUniformParams {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
-}
+type IUniformParams = Record<string, any>;
 
 export abstract class WebGPUPipelineBase extends WebGPUObjectBase {
   protected _initialized = false;
-  protected _pipeline: GPURenderPipeline | GPUComputePipeline;
-  protected _bindGroupLayout: GPUBindGroupLayout;
-  protected _bindGroup: GPUBindGroup;
+  protected _pipeline!: GPURenderPipeline | GPUComputePipeline;
+  protected _bindGroupLayout!: GPUBindGroupLayout;
+  protected _bindGroup!: GPUBindGroup;
 
   private prepareCode(code: string) {
     const lines = code.split('\n');
@@ -48,8 +45,8 @@ export abstract class WebGPUPipelineBase extends WebGPUObjectBase {
   protected getParamsArray(object: IUniformParams): Float32Array {
     const keys = Object.keys(object);
     const array = [];
-    for (let i = 0; i < keys.length; i++) {
-      const val = object[keys[i]];
+    for (const key of keys) {
+      const val = object[key];
       if (Array.isArray(val)) {
         array.push(...val);
       } else {

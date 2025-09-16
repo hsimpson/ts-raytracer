@@ -1,4 +1,5 @@
 import { vec3 } from 'gl-matrix';
+import { Ray } from './hittables/ray';
 import { degreeToRadians, randomInUnitdisk, randomNumberRange } from './util';
 
 export interface CameraOptions {

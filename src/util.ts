@@ -110,7 +110,6 @@ export function random(): vec3 {
 }
 
 export function randomInUnitSphere(): vec3 {
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const p = randomRange(-1, 1);
     if (lengthSquared(p) >= 1) {
@@ -141,7 +140,6 @@ export function randomInHemisphere(normal: vec3): vec3 {
 }
 
 export function randomInUnitdisk(): vec3 {
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const p: vec3 = [randomNumberRange(-1, 1), randomNumberRange(-1, 1), 0];
     if (lengthSquared(p) >= 1) {

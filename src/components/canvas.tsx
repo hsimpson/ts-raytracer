@@ -4,7 +4,6 @@ import { RaytracerGPU, RayTracerGPUOptions } from '../raytracer-gpu/raytracergpu
 import { raytracerProperties, raytracerRunningProperties } from './atoms';
 
 const Canvas = (): React.ReactElement => {
-  const canvasCPURef = React.useRef<HTMLCanvasElement>(null);
   const canvasGPURef = React.useRef<HTMLCanvasElement>(null);
   const [raytracerState] = useAtom(raytracerProperties);
   const [raytracerRunningState, setRaytracerRunningState] = useAtom(raytracerRunningProperties);
@@ -26,7 +25,7 @@ const Canvas = (): React.ReactElement => {
       tileSize: raytracerState.tileSize,
     };
 
-    if (!canvasCPURef.current || !canvasGPURef.current) {
+    if (!canvasGPURef.current) {
       return;
     }
 
@@ -42,6 +41,9 @@ const Canvas = (): React.ReactElement => {
     raytracer.download = raytracerState.download;
     raytracer.addStatsToImage = raytracerState.addStatsToImage;
     raytracer.tileSize = raytracerState.tileSize;
+
+    console.log('raytracerRunningState', raytracerRunningState);
+    console.log('raytracer', raytracer);
 
     if (raytracerRunningState.isRunning && !raytracer.isRunning) {
       void raytracer.start(onRayTracerDone);

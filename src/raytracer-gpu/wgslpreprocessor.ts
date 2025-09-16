@@ -2,9 +2,7 @@ import { urlDirname } from '../url';
 
 const INCLUDE_REGEX = /^#include\s"(.*)"$/gm;
 
-interface ShaderMap {
-  [key: string]: boolean;
-}
+type ShaderMap = Record<string, boolean>;
 
 let shaderMap: ShaderMap;
 

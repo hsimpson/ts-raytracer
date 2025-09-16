@@ -124,6 +124,10 @@ export class RaytracerGPU extends RaytracerBase {
       canvas2d.height = this._rayTracerOptions.imageHeight;
       const canvas2dContext = canvas2d.getContext('2d');
 
+      if (!canvas2dContext) {
+        throw new Error('Failed to get 2D context');
+      }
+
       const imageData = canvas2dContext.createImageData(
         this._rayTracerOptions.imageWidth,
         this._rayTracerOptions.imageHeight,
@@ -195,10 +199,16 @@ export class RaytracerGPU extends RaytracerBase {
 
     try {
       const adapter = await gpu.requestAdapter();
+      if (!adapter) {
+        throw new Error('Failed to get GPU adapter');
+      }
       const device = await adapter.requestDevice();
       const queue = device.queue;
 
-      const context: GPUCanvasContext = this._rayTracerOptions.canvas.getContext('webgpu');
+      const context = this._rayTracerOptions.canvas.getContext('webgpu');
+      if (!context) {
+        throw new Error('Failed to get WebGPU context from canvas');
+      }
       this._presentationFormat = gpu.getPreferredCanvasFormat();
       WebGPUContext.createContext(device, queue, context);
 

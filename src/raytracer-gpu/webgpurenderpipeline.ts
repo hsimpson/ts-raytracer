@@ -14,8 +14,6 @@ interface WebGPURenderPipelineOptions {
   uniformParams: RenderUniformParams;
 }
 
-/* eslint-disable indent */
-
 const _attributeElementCount = 3;
 // prettier-ignore
 const _vertexPositions = new Float32Array([
@@ -29,8 +27,6 @@ const _vertexPositions = new Float32Array([
    1.0, -1.0, 0.0,
   -1.0, -1.0, 0.0,
 ]);
-
-/* eslint-enable indent */
 
 export class WebGPURenderPipeline extends WebGPUPipelineBase {
   private _options: WebGPURenderPipelineOptions;

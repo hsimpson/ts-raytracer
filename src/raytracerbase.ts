@@ -15,8 +15,8 @@ export interface RayTracerBaseOptions {
 export abstract class RaytracerBase {
   protected _isRunning = false;
   protected _startTime = 0;
-  protected _rayTracerOptions: RayTracerBaseOptions;
-  protected _doneCallback: DoneCallback;
+  protected _rayTracerOptions!: RayTracerBaseOptions;
+  protected _doneCallback?: DoneCallback;
 
   // public constructor(rayTracerOptions: RayTracerBaseOptions) {
   //   this._rayTracerOptions = rayTracerOptions;
@@ -61,7 +61,9 @@ export abstract class RaytracerBase {
     return new Promise<Blob>((resolve) => {
       canvas.toBlob(
         (blob) => {
-          resolve(blob);
+          if (blob) {
+            resolve(blob);
+          }
         },
         'image/png',
         1.0,
@@ -75,10 +77,12 @@ export abstract class RaytracerBase {
     downloadCanvas.width = sourceCanvas.width;
     downloadCanvas.height = sourceCanvas.height;
     const downloadContext = downloadCanvas.getContext('2d');
-    downloadContext.drawImage(sourceCanvas, 0, 0);
+    if (downloadContext) {
+      downloadContext.drawImage(sourceCanvas, 0, 0);
 
-    if (this._rayTracerOptions.addStatsToImage) {
-      this.writeStatsToImage(stats, downloadContext);
+      if (this._rayTracerOptions.addStatsToImage) {
+        this.writeStatsToImage(stats, downloadContext);
+      }
     }
 
     const blob = await this.canvasBlob(downloadCanvas);

@@ -1,59 +1,26 @@
-Bugs:
-  Serializer:
-    ☐ Do not work in production/uglified code due to classnames
-
-  GPU:
-    ☐ Missing pixels when width or height is not devidable by fixed worksize devisor (8)
-    ☐ Uncaught in Promise->on heavy GPU frame load
-    ✔ Adapt new WebGPU Buffer Spec see: https://hackmd.io/szV68rOVQ56GYzPJMBko8A @done(20-09-01 21:33)
-    ☐ Perlin noise random values are now static and not created per texture
-
-  CPU:
-    ✔ ImageTexture not working on Firefox due to OffscreenCanvas is not able to use 2d context @done(20-09-11 00:52)
-
-  GUI:
-    ☐ Reset to default disable WebGPU -> probably check again
-    ✔ When layout is not completely visible (scrolling) with some combinations of resolution @done(20-11-07 17:02)
-    
-
 Features:
   Raytracer:
-    CPU:
-    ☐ Add progressive rendering like on GPU show each sample image
-    ☐ Look if Woker logik could be made with comlink: https://github.com/GoogleChromeLabs/comlink
-    ☐ Add tone mapping like ACES filmic
-    ☐ Add color correction/grading
-    Environment Textures:
-      ☐ HDR files
-      ☐ Open EXR files
-    ☐ Add PBR Material (probably Disney Principled BRDF/BSDF)
-      https://google.github.io/filament/Filament.html
-      https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#appendix-b-brdf-implementation
-      https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
-      https://academy.substance3d.com/courses/the-pbr-guide-part-1
-      https://academy.substance3d.com/courses/the-pbr-guide-part-2
-    ☐ Add denoising
-
     GPU:
       ☐ Add acceleration data stucture like BVH (https://research.nvidia.com/sites/default/files/pubs/2012-06_Maximizing-Parallelism-in/karras2012hpg_paper.pdf)
       ☐ Add motion blur
-      ✔ Add textures (solid and checkerboard) @done(20-10-23 23:01)
       ☐ Optional frame seperation like Blender Cycles with e.g. hilbert spiral
       ☐ Cancel GPU rendering
-      ✔ Display the render result with WebGPU with progressive rendering @done(20-11-07 20:37)
       ☐ Add WGSL implemenation
       ☐ Add tone mapping like ACES filmic
       ☐ Add color correction/grading
-      Environment Textures:
+      ☐ Environment Textures:
         ☐ HDR files
         ☐ Open EXR files
       ☐ Add PBR Material (probably Disney Principled BRDF/BSDF)
+        https://google.github.io/filament/Filament.html
+        https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#appendix-b-brdf-implementation
+        https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
+        https://academy.substance3d.com/courses/the-pbr-guide-part-1
+        https://academy.substance3d.com/courses/the-pbr-guide-part-2
       ☐ Add denoising
 
   Common:
     ☐ Add favicon
-    ✔ Add download of the image @done(20-11-07 15:08)
-
 
 Refactoring:
   TS:

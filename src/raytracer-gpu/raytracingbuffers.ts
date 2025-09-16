@@ -12,7 +12,6 @@ import {
 } from '../hittables';
 import {
   DielectricMaterial,
-  LambertianMaterial,
   DiffuseLight as MDiffuseLight,
   Material,
   MetalMaterial,
@@ -108,17 +107,17 @@ function log(message: string, bufferData: ArrayBuffer): void {
   const bytes = new Uint8Array(bufferData);
   let byteString = '';
   bytes.forEach((value) => {
-    byteString += value.toString(16).padStart(2, '0') + '';
+    byteString += value.toString(16).padStart(2, '0');
   });
   console.log(message, byteString);
 }
 
 export class RaytracingBuffers {
-  private _gpuMaterials: WebGPUMaterial[] = [];
-  private _gpuPrimitives: WebGPUPrimitive[] = [];
-  private _gpuTextures: WebGPUTexture[] = [];
+  private readonly _gpuMaterials: WebGPUMaterial[] = [];
+  private readonly _gpuPrimitives: WebGPUPrimitive[] = [];
+  private readonly _gpuTextures: WebGPUTexture[] = [];
   private _textureSize = 2;
-  private _imageTextures: ImageTexture[] = [];
+  private readonly _imageTextures: ImageTexture[] = [];
 
   public constructor(world: HittableList) {
     this.traverseHittables(world, mat4.create());
@@ -143,7 +142,7 @@ export class RaytracingBuffers {
     }
   }
 
-  private addTexture(tex: Texture): number {
+  private addTexture(tex?: Texture): number {
     const idx = this._gpuTextures.length;
     const gpuTex: WebGPUTexture = {
       color: [1, 1, 1, 1],
@@ -184,52 +183,31 @@ export class RaytracingBuffers {
 
   private addMaterial(mat: Material): number {
     const idx = this._gpuMaterials.length;
-    let gpuMat: WebGPUMaterial;
 
-    const tex = mat.texture;
+    // const tex = mat.texture;
     // const textureIndex = mat.texture ? this.addTexture(tex) : -1;
     const textureIndex = this.addTexture(mat.texture);
 
-    if (mat instanceof LambertianMaterial) {
-      gpuMat = {
-        baseColor: [1, 1, 1, 1],
-        roughness: 0,
-        indexOfRefraction: 1,
-        materialType: WebGPUMaterialType.Lambertian,
-        textureIndex,
-      };
-    } else if (mat instanceof MetalMaterial) {
-      gpuMat = {
-        baseColor: vec4.fromValues(mat.baseColor[0], mat.baseColor[1], mat.baseColor[2], 1),
-        roughness: mat.roughness,
-        indexOfRefraction: 1,
-        materialType: WebGPUMaterialType.Metal,
-        textureIndex,
-      };
+    // default to lambertian
+    const gpuMat: WebGPUMaterial = {
+      baseColor: [1, 1, 1, 1],
+      roughness: 0,
+      indexOfRefraction: 1,
+      materialType: WebGPUMaterialType.Lambertian,
+      textureIndex,
+    };
+
+    if (mat instanceof MetalMaterial) {
+      gpuMat.baseColor = vec4.fromValues(mat.baseColor[0], mat.baseColor[1], mat.baseColor[2], 1);
+      gpuMat.roughness = mat.roughness;
+      gpuMat.materialType = WebGPUMaterialType.Metal;
     } else if (mat instanceof DielectricMaterial) {
-      gpuMat = {
-        baseColor: [1, 1, 1, 1],
-        roughness: 0,
-        indexOfRefraction: mat.indexOfRefraction,
-        materialType: WebGPUMaterialType.Dielectric,
-        textureIndex,
-      };
+      gpuMat.indexOfRefraction = mat.indexOfRefraction;
+      gpuMat.materialType = WebGPUMaterialType.Dielectric;
     } else if (mat instanceof MDiffuseLight) {
-      gpuMat = {
-        baseColor: [1, 1, 1, 1],
-        roughness: 0,
-        indexOfRefraction: 1,
-        materialType: WebGPUMaterialType.DiffuseLight,
-        textureIndex,
-      };
+      gpuMat.materialType = WebGPUMaterialType.DiffuseLight;
     } else if (mat instanceof NormalMaterial) {
-      gpuMat = {
-        baseColor: [1, 1, 1, 1],
-        roughness: 0,
-        indexOfRefraction: 1,
-        materialType: WebGPUMaterialType.Normal,
-        textureIndex,
-      };
+      gpuMat.materialType = WebGPUMaterialType.Normal;
     }
 
     this._gpuMaterials.push(gpuMat);

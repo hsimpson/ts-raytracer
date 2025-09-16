@@ -42,17 +42,17 @@ const enum Bindings {
 }
 
 export class WebGPUComputePipline extends WebGPUPipelineBase {
-  private _options: WebGPUComputePiplineOptions;
-  private _raytracingBuffers: RaytracingBuffers;
+  private readonly _options: WebGPUComputePiplineOptions;
+  private readonly _raytracingBuffers: RaytracingBuffers;
 
-  private _computeParamsUniformBuffer = new WebGPUBuffer();
-  private _computeCameraUniformBuffer = new WebGPUBuffer();
-  private _pixelBuffer = new WebGPUBuffer();
-  private _accumulationBuffer = new WebGPUBuffer();
+  private readonly _computeParamsUniformBuffer = new WebGPUBuffer();
+  private readonly _computeCameraUniformBuffer = new WebGPUBuffer();
+  private readonly _pixelBuffer = new WebGPUBuffer();
+  private readonly _accumulationBuffer = new WebGPUBuffer();
 
-  private _primitivesBuffer = new WebGPUBuffer();
-  private _materialsBuffer = new WebGPUBuffer();
-  private _texturesBuffer = new WebGPUBuffer();
+  private readonly _primitivesBuffer = new WebGPUBuffer();
+  private readonly _materialsBuffer = new WebGPUBuffer();
+  private readonly _texturesBuffer = new WebGPUBuffer();
 
   public constructor(options: WebGPUComputePiplineOptions) {
     super();
