@@ -1,3 +1,4 @@
+import { WebGPUContext } from '@donnerknalli/webgpu-utils';
 import { mat4, quat, vec2, vec4 } from 'gl-matrix';
 import {
   Box,
@@ -19,7 +20,6 @@ import {
 } from '../material';
 import { CheckerTexture, ImageTexture, NoiseTexture, SolidColor, Texture } from '../textures';
 import { nextPowerOf2 } from '../util';
-import { WebGPUContext } from './webgpucontext';
 
 enum WebGPUMaterialType {
   Lambertian = 0,
@@ -118,9 +118,11 @@ export class RaytracingBuffers {
   private readonly _gpuTextures: WebGPUTexture[] = [];
   private _textureSize = 2;
   private readonly _imageTextures: ImageTexture[] = [];
+  private readonly _webGpuContext: WebGPUContext;
 
-  public constructor(world: HittableList) {
+  public constructor(world: HittableList, webGpuContext: WebGPUContext) {
     this.traverseHittables(world, mat4.create());
+    this._webGpuContext = webGpuContext;
   }
 
   public get hasImageTextures(): boolean {
@@ -406,7 +408,7 @@ export class RaytracingBuffers {
   }
 
   public async imageTexture(): Promise<{ sampler: GPUSampler; textureView: GPUTextureView }> {
-    const sampler = WebGPUContext.device.createSampler({
+    const sampler = this._webGpuContext.device.createSampler({
       minFilter: 'linear',
       magFilter: 'linear',
       // addressModeU: 'repeat',
@@ -446,7 +448,7 @@ export class RaytracingBuffers {
       imageBitmap = await window.createImageBitmap(new ImageData(2, 2));
     }
 
-    const texture = WebGPUContext.device.createTexture({
+    const texture = this._webGpuContext.device.createTexture({
       size: imageSize,
       // mipLevelCount: 1,
       // sampleCount: 1,
@@ -481,13 +483,14 @@ export class RaytracingBuffers {
     }*/
       ();
 
-    WebGPUContext.queue.copyExternalImageToTexture({ source: imageBitmap }, { texture }, imageSize);
+    this._webGpuContext.queue.copyExternalImageToTexture({ source: imageBitmap }, { texture }, imageSize);
 
     /*
     const textureCopyBuffer = new WebGPUBuffer();
     textureCopyBuffer.create(
       this._textureSize * this._textureSize * 4,
-      GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
+      GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+      'textureCopyBuffer',
     );
 
     for (let i = 0; i < this._imageTextures.length; i++) {

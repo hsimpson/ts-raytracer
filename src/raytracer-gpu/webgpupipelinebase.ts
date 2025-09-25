@@ -1,4 +1,4 @@
-import { WebGPUContext } from './webgpucontext';
+import { WebGPUContext } from '@donnerknalli/webgpu-utils';
 import { WebGPUObjectBase } from './webgpuobjectbase';
 import { preprocessShader } from './wgslpreprocessor';
 
@@ -9,6 +9,12 @@ export abstract class WebGPUPipelineBase extends WebGPUObjectBase {
   protected _pipeline!: GPURenderPipeline | GPUComputePipeline;
   protected _bindGroupLayout!: GPUBindGroupLayout;
   protected _bindGroup!: GPUBindGroup;
+  protected _webGpuContext: WebGPUContext;
+
+  public constructor(webGpuContext: WebGPUContext) {
+    super();
+    this._webGpuContext = webGpuContext;
+  }
 
   private prepareCode(code: string) {
     const lines = code.split('\n');
@@ -23,7 +29,7 @@ export abstract class WebGPUPipelineBase extends WebGPUObjectBase {
     console.log(`compiling shader: ${shaderUrl}`);
 
     const code = await preprocessShader(shaderUrl);
-    const shaderModule = WebGPUContext.device.createShaderModule({
+    const shaderModule = this._webGpuContext.device.createShaderModule({
       code,
     });
 
@@ -58,7 +64,7 @@ export abstract class WebGPUPipelineBase extends WebGPUObjectBase {
 
   protected abstract createBindGroup(): Promise<void>;
 
-  public abstract initialize(context: WebGPUContext): Promise<void>;
+  public abstract initialize(): Promise<void>;
 
   public get gpuPipeline(): GPURenderPipeline | GPUComputePipeline {
     return this._pipeline;

@@ -1,10 +1,9 @@
+import { BufferDataTypeKind, ScalarType, WebGPUBuffer, WebGPUContext } from '@donnerknalli/webgpu-utils';
 import { vec3 } from 'gl-matrix';
 import { Camera as CameraObject } from '../camera';
 import { HittableList } from '../hittables';
 import { ComputeTile } from '../tiles';
 import { RaytracingBuffers } from './raytracingbuffers';
-import { WebGPUBuffer } from './webgpubuffer';
-import { WebGPUContext } from './webgpucontext';
 import { WebGPUPipelineBase } from './webgpupipelinebase';
 
 interface ComputeUniformParams {
@@ -23,6 +22,7 @@ interface ComputeUniformParams {
 interface WebGPUComputePiplineOptions {
   computeShaderUrl: URL;
   uniformParams: ComputeUniformParams;
+  webGpuContext: WebGPUContext;
   camera: CameraObject;
   world: HittableList;
 }
@@ -45,22 +45,21 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
   private readonly _options: WebGPUComputePiplineOptions;
   private readonly _raytracingBuffers: RaytracingBuffers;
 
-  private readonly _computeParamsUniformBuffer = new WebGPUBuffer();
-  private readonly _computeCameraUniformBuffer = new WebGPUBuffer();
-  private readonly _pixelBuffer = new WebGPUBuffer();
-  private readonly _accumulationBuffer = new WebGPUBuffer();
-
-  private readonly _primitivesBuffer = new WebGPUBuffer();
-  private readonly _materialsBuffer = new WebGPUBuffer();
-  private readonly _texturesBuffer = new WebGPUBuffer();
+  private _computeParamsUniformBuffer!: WebGPUBuffer;
+  private _computeCameraUniformBuffer!: WebGPUBuffer;
+  private _pixelBuffer!: WebGPUBuffer;
+  private _accumulationBuffer!: WebGPUBuffer;
+  private _primitivesBuffer!: WebGPUBuffer;
+  private _materialsBuffer!: WebGPUBuffer;
+  private _texturesBuffer!: WebGPUBuffer;
 
   public constructor(options: WebGPUComputePiplineOptions) {
-    super();
+    super(options.webGpuContext);
     this._options = options;
     // this._options.uniformParams.randomSeed = Math.random();
     this._options.uniformParams.currentSample = 0;
 
-    this._raytracingBuffers = new RaytracingBuffers(this._options.world);
+    this._raytracingBuffers = new RaytracingBuffers(this._options.world, this._options.webGpuContext);
   }
 
   public async initialize(): Promise<void> {
@@ -69,27 +68,88 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
     }
     this._initialized = true;
 
-    const pixelBufferSize =
-      this._options.uniformParams.imageWidth *
-      this._options.uniformParams.imageHeight *
-      4 *
-      Float32Array.BYTES_PER_ELEMENT;
+    const pixelBufferSize = this._options.uniformParams.imageWidth * this._options.uniformParams.imageHeight * 4; // 4 floats per pixel (rgba)
 
     //COPY_SRC is needed because the pixel buffer is read after each compute call
-    this._pixelBuffer.create(pixelBufferSize, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
-    this._accumulationBuffer.create(pixelBufferSize, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
-
-    const uniformArray = this.getParamsArray(this._options.uniformParams);
-    //COPY_DST is needed because the uniforms are updated after each compute call
-    this._computeParamsUniformBuffer.createWithArrayMapped(
-      uniformArray,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    this._pixelBuffer = new WebGPUBuffer(
+      this._webGpuContext,
+      GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+      'pixelBuffer',
     );
+    this._pixelBuffer.setData('pixelBuffer', {
+      data: new Float32Array(pixelBufferSize),
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
+    });
+    this._pixelBuffer.writeBuffer();
 
+    this._accumulationBuffer = new WebGPUBuffer(
+      this._webGpuContext,
+      GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+      'accumulationBuffer',
+    );
+    this._accumulationBuffer.setData('accumulationBuffer', {
+      data: new Float32Array(pixelBufferSize),
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
+    });
+    this._accumulationBuffer.writeBuffer();
+
+    //COPY_DST is needed because the uniforms are updated after each compute call
+    this._computeParamsUniformBuffer = new WebGPUBuffer(
+      this._webGpuContext,
+      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      'computeParamsUniformBuffer',
+    );
+    const uniformArray = this.getParamsArray(this._options.uniformParams);
+    this._computeParamsUniformBuffer.setData('computeParams', {
+      data: uniformArray,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
+    });
+    this._computeParamsUniformBuffer.writeBuffer();
+
+    this._computeCameraUniformBuffer = new WebGPUBuffer(
+      this._webGpuContext,
+      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      'computeCameraUniformBuffer',
+    );
     const cameraArray = this._options.camera.getUniformArray();
-    this._computeCameraUniformBuffer.createWithArrayMapped(cameraArray, GPUBufferUsage.UNIFORM);
+    this._computeCameraUniformBuffer.setData('camera', {
+      data: cameraArray,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
+    });
+    this._computeCameraUniformBuffer.writeBuffer();
 
-    this.createObjects();
+    this._primitivesBuffer = new WebGPUBuffer(
+      this._webGpuContext,
+      GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+      'primitivesBuffer',
+    );
+    this._primitivesBuffer.setData('primitives', {
+      data: new Float32Array(this._raytracingBuffers.primitiveBuffer()),
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
+    });
+    this._primitivesBuffer.writeBuffer();
+
+    this._materialsBuffer = new WebGPUBuffer(
+      this._webGpuContext,
+      GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+      'materialsBuffer',
+    );
+    this._materialsBuffer.setData('materials', {
+      data: new Float32Array(this._raytracingBuffers.materialBuffer()),
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
+    });
+    this._materialsBuffer.writeBuffer();
+
+    this._texturesBuffer = new WebGPUBuffer(
+      this._webGpuContext,
+      GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+      'texturesBuffer',
+    );
+    this._texturesBuffer.setData('textures', {
+      data: new Float32Array(this._raytracingBuffers.textureBuffer()),
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
+    });
+    this._texturesBuffer.writeBuffer();
 
     const bindGroupLayoutDescriptor: GPUBindGroupLayoutDescriptor = {
       entries: [
@@ -165,15 +225,9 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
     ];
     // }
 
-    this._bindGroupLayout = WebGPUContext.device.createBindGroupLayout(bindGroupLayoutDescriptor);
+    this._bindGroupLayout = this._options.webGpuContext.device.createBindGroupLayout(bindGroupLayoutDescriptor);
 
     await this.createBindGroup();
-  }
-
-  public createObjects(): void {
-    this._primitivesBuffer.createWithArrayMapped(this._raytracingBuffers.primitiveBuffer(), GPUBufferUsage.STORAGE);
-    this._materialsBuffer.createWithArrayMapped(this._raytracingBuffers.materialBuffer(), GPUBufferUsage.STORAGE);
-    this._texturesBuffer.createWithArrayMapped(this._raytracingBuffers.textureBuffer(), GPUBufferUsage.STORAGE);
   }
 
   public updateUniformBuffer(sample: number, tile: ComputeTile): void {
@@ -182,7 +236,12 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
       this._options.uniformParams.tileOffsetX = tile.x;
       this._options.uniformParams.tileOffsetY = tile.y;
       const uniformArray = this.getParamsArray(this._options.uniformParams);
-      WebGPUContext.queue.writeBuffer(this._computeParamsUniformBuffer.gpuBuffer, 0, uniformArray.buffer);
+
+      this._computeCameraUniformBuffer.setData('computeParams', {
+        data: uniformArray,
+        dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
+      });
+      this._computeParamsUniformBuffer.writeBuffer();
     }
   }
 
@@ -193,57 +252,57 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
         {
           binding: Bindings.ComputeParams,
           resource: {
-            buffer: this._computeParamsUniformBuffer.gpuBuffer,
+            buffer: this._computeParamsUniformBuffer.getRawBuffer(),
             offset: 0,
-            size: this._computeParamsUniformBuffer.size,
+            size: this._computeParamsUniformBuffer.getRawBuffer().size,
           },
         },
         {
           binding: Bindings.Camera,
           resource: {
-            buffer: this._computeCameraUniformBuffer.gpuBuffer,
+            buffer: this._computeCameraUniformBuffer.getRawBuffer(),
             offset: 0,
-            size: this._computeCameraUniformBuffer.size,
+            size: this._computeCameraUniformBuffer.getRawBuffer().size,
           },
         },
         {
           binding: Bindings.PixelBuffer,
           resource: {
-            buffer: this._pixelBuffer.gpuBuffer,
+            buffer: this._pixelBuffer.getRawBuffer(),
             offset: 0,
-            size: this._pixelBuffer.size,
+            size: this._pixelBuffer.getRawBuffer().size,
           },
         },
         {
           binding: Bindings.AccumulationBuffer,
           resource: {
-            buffer: this._accumulationBuffer.gpuBuffer,
+            buffer: this._accumulationBuffer.getRawBuffer(),
             offset: 0,
-            size: this._accumulationBuffer.size,
+            size: this._accumulationBuffer.getRawBuffer().size,
           },
         },
         {
           binding: Bindings.Primitives,
           resource: {
-            buffer: this._primitivesBuffer.gpuBuffer,
+            buffer: this._primitivesBuffer.getRawBuffer(),
             offset: 0,
-            size: this._primitivesBuffer.size,
+            size: this._primitivesBuffer.getRawBuffer().size,
           },
         },
         {
           binding: Bindings.Materials,
           resource: {
-            buffer: this._materialsBuffer.gpuBuffer,
+            buffer: this._materialsBuffer.getRawBuffer(),
             offset: 0,
-            size: this._materialsBuffer.size,
+            size: this._materialsBuffer.getRawBuffer().size,
           },
         },
         {
           binding: Bindings.Textures,
           resource: {
-            buffer: this._texturesBuffer.gpuBuffer,
+            buffer: this._texturesBuffer.getRawBuffer(),
             offset: 0,
-            size: this._texturesBuffer.size,
+            size: this._texturesBuffer.getRawBuffer().size,
           },
         },
       ],
@@ -265,11 +324,11 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
     ];
     // }
 
-    this._bindGroup = WebGPUContext.device.createBindGroup(bindGroupDescriptor);
+    this._bindGroup = this._options.webGpuContext.device.createBindGroup(bindGroupDescriptor);
 
     this._bindGroup.label = `${this.name}-BindGroup`;
 
-    const layout = WebGPUContext.device.createPipelineLayout({
+    const layout = this._options.webGpuContext.device.createPipelineLayout({
       bindGroupLayouts: [this._bindGroupLayout],
     });
 
@@ -283,7 +342,7 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
       compute: computeStage,
     };
 
-    this._pipeline = WebGPUContext.device.createComputePipeline(pipelineDesc);
+    this._pipeline = this._options.webGpuContext.device.createComputePipeline(pipelineDesc);
   }
 
   public get gpuPipeline(): GPUComputePipeline {

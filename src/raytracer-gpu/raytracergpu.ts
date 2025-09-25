@@ -1,10 +1,9 @@
+import { BufferDataTypeKind, ScalarType, WebGPUBuffer, WebGPUContext } from '@donnerknalli/webgpu-utils';
 import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
 import { ComputeTile, createComputeTiles } from '../tiles';
-import { WebGPUBuffer } from './webgpubuffer';
 import { WebGPUComputePipline } from './webgpucomputepipeline';
-import { WebGPUContext } from './webgpucontext';
 import { WebGPURenderPipeline } from './webgpurenderpipeline';
 
 const LOCAL_SIZE = 8;
@@ -13,14 +12,14 @@ export type RayTracerGPUOptions = RayTracerBaseOptions;
 
 export class RaytracerGPU extends RaytracerBase {
   private _initialized = false;
+  private readonly _webGpuContext: WebGPUContext;
 
   private _presentationFormat!: GPUTextureFormat;
-  // private _renderTarget: GPUTexture;
-  // private _renderTargetView: GPUTextureView;
 
   public constructor(rayTracerGPUOptions: RayTracerGPUOptions) {
     super();
     this._rayTracerOptions = rayTracerGPUOptions;
+    this._webGpuContext = new WebGPUContext(this._rayTracerOptions.canvas);
   }
 
   public static supportsWebGPU(): boolean {
@@ -36,22 +35,6 @@ export class RaytracerGPU extends RaytracerBase {
     await this.initialize();
     this._doneCallback = doneCallback;
     this._isRunning = true;
-
-    const textureSize: GPUExtent3D = {
-      width: this._rayTracerOptions.imageWidth,
-      height: this._rayTracerOptions.imageHeight,
-      depthOrArrayLayers: 1,
-    };
-
-    const colorTextureDesc: GPUTextureDescriptor = {
-      size: textureSize,
-      sampleCount: 1,
-      format: 'bgra8unorm',
-      usage: GPUTextureUsage.RENDER_ATTACHMENT,
-    };
-
-    const colorTexture = WebGPUContext.device.createTexture(colorTextureDesc);
-    // this._renderTargetView = colorTexture.createView();
 
     const aspectRatio = this._rayTracerOptions.imageWidth / this._rayTracerOptions.imageHeight;
 
@@ -86,6 +69,7 @@ export class RaytracerGPU extends RaytracerBase {
         padding_1: 0,
         padding_2: 0,
       },
+      webGpuContext: this._webGpuContext,
       camera,
       world,
     });
@@ -100,6 +84,7 @@ export class RaytracerGPU extends RaytracerBase {
         width: this._rayTracerOptions.imageWidth,
         height: this._rayTracerOptions.imageHeight,
       },
+      webGpuContext: this._webGpuContext,
     });
 
     await renderPipeline.initialize();
@@ -195,42 +180,20 @@ export class RaytracerGPU extends RaytracerBase {
     if (this._initialized) {
       return;
     }
-    const gpu = navigator.gpu;
+    await this._webGpuContext.create();
+    this._presentationFormat = this._webGpuContext.preferredCanvasFormat;
 
-    try {
-      const adapter = await gpu.requestAdapter();
-      if (!adapter) {
-        throw new Error('Failed to get GPU adapter');
-      }
-      const device = await adapter.requestDevice();
-      const queue = device.queue;
+    this._webGpuContext.gpuCanvasContext.configure({
+      device: this._webGpuContext.device,
+      format: this._presentationFormat,
+    });
 
-      const context = this._rayTracerOptions.canvas.getContext('webgpu');
-      if (!context) {
-        throw new Error('Failed to get WebGPU context from canvas');
-      }
-      this._presentationFormat = gpu.getPreferredCanvasFormat();
-      WebGPUContext.createContext(device, queue, context);
-
-      // const canvasConfigure: GPUCanvasConfiguration = {
-      //   device,
-      //   format: this._presentationFormat,
-      //   usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
-      // };
-      context.configure({
-        device,
-        format: this._presentationFormat,
-      });
-
-      this._initialized = true;
-    } catch (error: unknown) {
-      console.log(error);
-    }
+    this._initialized = true;
   }
 
   private computePass(computePipeline: WebGPUComputePipline, sample: number, tile: ComputeTile): void {
     // console.log('computePass', sample, tile);
-    const commandEncoder = WebGPUContext.device.createCommandEncoder();
+    const commandEncoder = this._webGpuContext.device.createCommandEncoder();
 
     computePipeline.updateUniformBuffer(sample, tile);
     const passEncoder = commandEncoder.beginComputePass();
@@ -239,18 +202,18 @@ export class RaytracerGPU extends RaytracerBase {
     passEncoder.dispatchWorkgroups(tile.width / LOCAL_SIZE, tile.height / LOCAL_SIZE, 1);
     passEncoder.end();
 
-    WebGPUContext.queue.submit([commandEncoder.finish()]);
+    this._webGpuContext.queue.submit([commandEncoder.finish()]);
   }
 
   private renderPass(renderPipeLine: WebGPURenderPipeline): void {
     // console.log('renderPass');
-    const commandEncoder = WebGPUContext.device.createCommandEncoder();
+    const commandEncoder = this._webGpuContext.device.createCommandEncoder();
 
     // renderPipeLine.updateUniformBuffer(sample);
     const renderPassDesc: GPURenderPassDescriptor = {
       colorAttachments: [
         {
-          view: WebGPUContext.context.getCurrentTexture().createView(),
+          view: this._webGpuContext.gpuCanvasContext.getCurrentTexture().createView(),
           clearValue: { r: 0, g: 0, b: 0, a: 0 },
           loadOp: 'clear',
           storeOp: 'store',
@@ -265,19 +228,34 @@ export class RaytracerGPU extends RaytracerBase {
     passEncoder.draw(6, 1, 0, 0);
     passEncoder.end();
 
-    WebGPUContext.queue.submit([commandEncoder.finish()]);
+    this._webGpuContext.queue.submit([commandEncoder.finish()]);
   }
 
   private async copyBuffer(computePipeline: WebGPUComputePipline): Promise<Float32Array> {
-    const commandEncoder = WebGPUContext.device.createCommandEncoder();
+    const commandEncoder = this._webGpuContext.device.createCommandEncoder();
 
-    const bufferSize = this._rayTracerOptions.imageWidth * this._rayTracerOptions.imageHeight * 4 * 4;
-    const gpuDestBuffer = new WebGPUBuffer();
-    gpuDestBuffer.create(bufferSize, GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ);
+    const bufferSize = this._rayTracerOptions.imageWidth * this._rayTracerOptions.imageHeight * 4;
 
-    commandEncoder.copyBufferToBuffer(computePipeline.pixelBuffer.gpuBuffer, 0, gpuDestBuffer.gpuBuffer, 0, bufferSize);
+    const gpuDestBuffer = new WebGPUBuffer(
+      this._webGpuContext,
+      GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+      'gpuDestBuffer',
+    );
+    gpuDestBuffer.setData('copyBuffer', {
+      data: new Float32Array(bufferSize),
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
+    });
+    gpuDestBuffer.writeBuffer();
 
-    WebGPUContext.queue.submit([commandEncoder.finish()]);
+    commandEncoder.copyBufferToBuffer(
+      computePipeline.pixelBuffer.getRawBuffer(),
+      0,
+      gpuDestBuffer.getRawBuffer(),
+      0,
+      bufferSize,
+    );
+
+    this._webGpuContext.queue.submit([commandEncoder.finish()]);
     const arrayBuffer = await gpuDestBuffer.mapRead();
 
     return new Float32Array(arrayBuffer);
