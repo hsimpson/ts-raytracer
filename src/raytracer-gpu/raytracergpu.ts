@@ -152,7 +152,7 @@ export class RaytracerGPU extends RaytracerBase {
         const frameStartTime = window.performance.now();
         let duration = 0;
         do {
-          this.computePass(computePipeline, sample++, tiles[tileIndex]);
+          this.computePass(computePipeline, sample, tiles[tileIndex]);
 
           if (sample === this._rayTracerOptions.samplesPerPixel) {
             sample = 1;
@@ -162,6 +162,8 @@ export class RaytracerGPU extends RaytracerBase {
               resolve();
               return;
             }
+          } else {
+            sample++;
           }
           duration += window.performance.now() - frameStartTime;
         } while (duration < frequency);
@@ -192,7 +194,7 @@ export class RaytracerGPU extends RaytracerBase {
   }
 
   private computePass(computePipeline: WebGPUComputePipline, sample: number, tile: ComputeTile): void {
-    // console.log('computePass', sample, tile);
+    // console.log('computePass sample:', sample, tile);
     const commandEncoder = this._webGpuContext.device.createCommandEncoder();
 
     computePipeline.updateUniformBuffer(sample, tile);
