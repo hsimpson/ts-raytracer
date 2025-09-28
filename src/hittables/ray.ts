@@ -1,13 +1,13 @@
-import { vec3 } from 'gl-matrix';
+import { vec3, Vec3 } from 'wgpu-matrix';
 import { Hittable } from '.';
 import { HitRecord } from './hitrecord';
 
 export class Ray {
-  private _orig!: vec3;
-  private _dir!: vec3;
+  private _orig!: Vec3;
+  private _dir!: Vec3;
   private _time: number;
 
-  public constructor(origin?: vec3, direction?: vec3, time = 0.0) {
+  public constructor(origin?: Vec3, direction?: Vec3, time = 0.0) {
     if (origin) {
       this._orig = origin;
     }
@@ -25,19 +25,19 @@ export class Ray {
     dest._time = this._time;
   }
 
-  public get origin(): vec3 {
+  public get origin(): Vec3 {
     return this._orig;
   }
 
-  public set origin(origin: vec3) {
+  public set origin(origin: Vec3) {
     this._orig = origin;
   }
 
-  public get direction(): vec3 {
+  public get direction(): Vec3 {
     return this._dir;
   }
 
-  public set direction(direction: vec3) {
+  public set direction(direction: Vec3) {
     this._dir = direction;
   }
 
@@ -45,17 +45,17 @@ export class Ray {
     return this._time;
   }
 
-  public at(t: number): vec3 {
-    return vec3.add(vec3.create(), this._orig, vec3.scale(vec3.create(), this._dir, t));
+  public at(t: number): Vec3 {
+    return vec3.add(this._orig, vec3.scale(this._dir, t));
     // return vec3.addvec3(vec3.multScalarvec3(this._orig, 1 - t), vec3.multScalarvec3(this._dir, t));
   }
 }
 
-export function rayColor(ray: Ray, background: vec3, world: Hittable, depth: number): vec3 {
+export function rayColor(ray: Ray, background: Vec3, world: Hittable, depth: number): Vec3 {
   const rec = new HitRecord();
   // If we've exceeded the ray bounce limit, no more light is gathered.
   if (depth <= 0) {
-    return [0, 0, 0];
+    return vec3.zero();
   }
 
   // If the ray hits nothing, return the background color.
@@ -64,7 +64,7 @@ export function rayColor(ray: Ray, background: vec3, world: Hittable, depth: num
   }
 
   const scattered = new Ray();
-  const attenuation: vec3 = [0, 0, 0];
+  const attenuation = vec3.zero();
   const emitted = rec.mat.emitted(rec.u, rec.v, rec.p);
 
   if (!rec.mat.scatter(ray, rec, attenuation, scattered)) {

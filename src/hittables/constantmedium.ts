@@ -1,4 +1,4 @@
-import { vec3 } from 'gl-matrix';
+import { vec3, Vec3 } from 'wgpu-matrix';
 import { IsoTropic, Material } from '../material';
 import { Texture } from '../textures';
 import { randomNumber } from '../util';
@@ -12,7 +12,7 @@ export class ConstantMedium extends Hittable {
   private readonly _phaseFunction: Material;
   private readonly _negInvDensity: number;
 
-  public constructor(boundary: Hittable, density: number, material: vec3 | Texture) {
+  public constructor(boundary: Hittable, density: number, material: Vec3 | Texture) {
     super();
     this._boundary = boundary;
     this._negInvDensity = -1 / density;
@@ -66,14 +66,14 @@ export class ConstantMedium extends Hittable {
     rec.p = r.at(rec.t);
 
     if (debugging) {
-      const p = rec.p as number[];
+      const p = rec.p;
       console.log(`hitDistance = ${hitDistance}\n
                    rec.t = ${rec.t}\n
                    rec.p = ${p.join(', ')}\n
       `);
     }
 
-    rec.normal = [1, 0, 0]; // arbitrary
+    rec.normal = vec3.create(1, 0, 0); // arbitrary
     rec.frontFace = true; // also arbitrary
     rec.mat = this._phaseFunction;
 

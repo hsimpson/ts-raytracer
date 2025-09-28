@@ -1,11 +1,11 @@
-import { vec2, vec3 } from 'gl-matrix';
+import { vec2, Vec2, vec3, Vec3 } from 'wgpu-matrix';
 import { AABB } from './aabb';
 import { HitRecord } from './hitrecord';
 import { Hittable } from './hittable';
 import { Ray } from './ray';
 import { Transform } from './transform';
 
-function avgVector3(vectors: vec3[]): vec3 {
+function avgVector3(vectors: Vec3[]): Vec3 {
   let x = 0,
     y = 0,
     z = 0;
@@ -14,39 +14,39 @@ function avgVector3(vectors: vec3[]): vec3 {
     y += v[1];
     z += v[2];
   }
-  return [x / vectors.length, y / vectors.length, z / vectors.length];
+  return vec3.create(x / vectors.length, y / vectors.length, z / vectors.length);
 }
 
 const EPSILON = 1e-8;
 
 export class Triangle extends Hittable {
-  public readonly v0: vec3;
-  public readonly n0?: vec3;
-  public readonly uv0?: vec2;
+  public readonly v0: Vec3;
+  public readonly n0?: Vec3;
+  public readonly uv0?: Vec2;
 
-  public readonly v1: vec3;
-  public readonly n1?: vec3;
-  public readonly uv1?: vec2;
+  public readonly v1: Vec3;
+  public readonly n1?: Vec3;
+  public readonly uv1?: Vec2;
 
-  public readonly v2: vec3;
-  public readonly n2?: vec3;
-  public readonly uv2?: vec2;
+  public readonly v2: Vec3;
+  public readonly n2?: Vec3;
+  public readonly uv2?: Vec2;
 
-  public readonly surfaceNormal: vec3;
+  public readonly surfaceNormal: Vec3;
   public readonly transform: Transform = new Transform();
 
   public doubleSided = false;
 
   public constructor(
-    v0: vec3,
-    v1: vec3,
-    v2: vec3,
-    n0?: vec3,
-    n1?: vec3,
-    n2?: vec3,
-    uv0?: vec2,
-    uv1?: vec2,
-    uv2?: vec2,
+    v0: Vec3,
+    v1: Vec3,
+    v2: Vec3,
+    n0?: Vec3,
+    n1?: Vec3,
+    n2?: Vec3,
+    uv0?: Vec2,
+    uv1?: Vec2,
+    uv2?: Vec2,
   ) {
     super();
     this.v0 = v0;
@@ -86,9 +86,9 @@ export class Triangle extends Hittable {
       vec3.normalize(this.surfaceNormal, avgVector3([this.n0, this.n1, this.n2]));
     }
 
-    this.uv0 = uv0 ?? [0, 0];
-    this.uv1 = uv1 ?? [0, 0];
-    this.uv2 = uv2 ?? [0, 0];
+    this.uv0 = uv0 ?? vec2.zero();
+    this.uv1 = uv1 ?? vec2.zero();
+    this.uv2 = uv2 ?? vec2.zero();
   }
 
   public applyTransform(): void {
@@ -112,11 +112,11 @@ export class Triangle extends Hittable {
     const transformedRay = this.transform.transformRay(ray);
 
     /* find vectors for two edges sharing vert */
-    const edge1 = vec3.subtract(vec3.create(), this.v1, this.v0);
-    const edge2 = vec3.subtract(vec3.create(), this.v2, this.v0);
+    const edge1 = vec3.subtract(this.v1, this.v0);
+    const edge2 = vec3.subtract(this.v2, this.v0);
 
     /* begin calculating determinant - also used to calculate U parameter */
-    const pvec = vec3.cross(vec3.create(), transformedRay.direction, edge2);
+    const pvec = vec3.cross(transformedRay.direction, edge2);
 
     /*if determinant is near zero, ray lies in plane of triangle */
     const det = vec3.dot(edge1, pvec);
@@ -129,7 +129,7 @@ export class Triangle extends Hittable {
       }
 
       /* calculate distance from vert0 to ray origin */
-      const tvec = vec3.subtract(vec3.create(), transformedRay.origin, this.v0);
+      const tvec = vec3.subtract(transformedRay.origin, this.v0);
 
       /* calculate U parameter and test bounds */
       u = vec3.dot(tvec, pvec);
@@ -138,7 +138,7 @@ export class Triangle extends Hittable {
       }
 
       /* prepare to test V parameter */
-      const qvec = vec3.cross(vec3.create(), tvec, edge1);
+      const qvec = vec3.cross(tvec, edge1);
 
       /* calculate V parameter and test bounds */
       v = vec3.dot(transformedRay.direction, qvec);
@@ -161,7 +161,7 @@ export class Triangle extends Hittable {
       const invDet = 1.0 / det;
 
       /* calculate distance from vert0 to ray origin */
-      const tvec = vec3.subtract(vec3.create(), transformedRay.origin, this.v0);
+      const tvec = vec3.subtract(transformedRay.origin, this.v0);
 
       /* calculate U parameter and test bounds */
       u = vec3.dot(tvec, pvec) * invDet;
@@ -170,7 +170,7 @@ export class Triangle extends Hittable {
       }
 
       /* prepare to test V parameter */
-      const qvec = vec3.cross(vec3.create(), tvec, edge1);
+      const qvec = vec3.cross(tvec, edge1);
 
       /* calculate V parameter and test bounds */
       v = vec3.dot(transformedRay.direction, qvec) * invDet;
@@ -193,11 +193,11 @@ export class Triangle extends Hittable {
     const w = 1.0 - u - v;
 
     if (this.n0 && this.n1 && this.n2) {
-      const n0 = vec3.scale(vec3.create(), this.n0, w);
-      const n1 = vec3.scale(vec3.create(), this.n1, u);
-      const n2 = vec3.scale(vec3.create(), this.n2, v);
+      const n0 = vec3.scale(this.n0, w);
+      const n1 = vec3.scale(this.n1, u);
+      const n2 = vec3.scale(this.n2, v);
 
-      const outwardNormal = vec3.normalize(vec3.create(), vec3.add(vec3.create(), vec3.add(vec3.create(), n0, n1), n2));
+      const outwardNormal = vec3.normalize(vec3.add(vec3.add(n0, n1), n2));
       rec.normal = outwardNormal;
     }
     rec.frontFace = true;
@@ -206,14 +206,14 @@ export class Triangle extends Hittable {
   }
 
   public boundingBox(_t0: number, _t1: number): AABB {
-    let v0: vec3;
-    let v1: vec3;
-    let v2: vec3;
+    let v0: Vec3;
+    let v1: Vec3;
+    let v2: Vec3;
 
     if (this.transform.isTransformed) {
-      v0 = vec3.transformMat4(vec3.create(), this.v0, this.transform.objectToWorld);
-      v1 = vec3.transformMat4(vec3.create(), this.v1, this.transform.objectToWorld);
-      v2 = vec3.transformMat4(vec3.create(), this.v2, this.transform.objectToWorld);
+      v0 = vec3.transformMat4(this.v0, this.transform.objectToWorld);
+      v1 = vec3.transformMat4(this.v1, this.transform.objectToWorld);
+      v2 = vec3.transformMat4(this.v2, this.transform.objectToWorld);
     } else {
       v0 = this.v0;
       v1 = this.v1;
@@ -228,6 +228,6 @@ export class Triangle extends Hittable {
     const maxY = Math.max(v0[1], v1[1], v2[1]) + EPSILON;
     const maxZ = Math.max(v0[2], v1[2], v2[2]) + EPSILON;
 
-    return new AABB([minX, minY, minZ], [maxX, maxY, maxZ]);
+    return new AABB(vec3.create(minX, minY, minZ), vec3.create(maxX, maxY, maxZ));
   }
 }

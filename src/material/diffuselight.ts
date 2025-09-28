@@ -1,4 +1,4 @@
-import { vec3 } from 'gl-matrix';
+import { Vec3 } from 'wgpu-matrix';
 import { HitRecord } from '../hittables/hitrecord';
 import { Ray } from '../hittables/ray';
 import { SolidColor, Texture } from '../textures';
@@ -7,7 +7,7 @@ import { Material } from './material';
 export class DiffuseLight extends Material {
   private readonly _emit: Texture;
 
-  public constructor(color: vec3) {
+  public constructor(color: Vec3) {
     super();
     this._emit = new SolidColor(color);
   }
@@ -16,11 +16,11 @@ export class DiffuseLight extends Material {
     return this._emit;
   }
 
-  public scatter(_r_in: Ray, _rec: HitRecord, _attenuation: vec3, _scattered: Ray): boolean {
+  public scatter(_r_in: Ray, _rec: HitRecord, _attenuation: Vec3, _scattered: Ray): boolean {
     return false;
   }
 
-  public emitted(u: number, v: number, p: vec3): vec3 {
+  public emitted(u: number, v: number, p: Vec3): Vec3 {
     return this._emit.value(u, v, p);
   }
 }

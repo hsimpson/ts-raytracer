@@ -1,4 +1,4 @@
-import { vec3 } from 'gl-matrix';
+import { vec3 } from 'wgpu-matrix';
 import { Material } from '../material';
 import { AABB } from './aabb';
 import { HitRecord } from './hitrecord';
@@ -21,7 +21,10 @@ export class XYRect extends Hittable {
     this.y1 = y1;
     this.k = k;
     this.material = material;
-    this.bbox = new AABB([this.x0, this.y0, this.k - 0.0001], [this.x1, this.y1, this.k + 0.0001]);
+    this.bbox = new AABB(
+      vec3.create(this.x0, this.y0, this.k - 0.0001),
+      vec3.create(this.x1, this.y1, this.k + 0.0001),
+    );
   }
 
   public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
@@ -40,7 +43,7 @@ export class XYRect extends Hittable {
     rec.v = (y - this.y0) / (this.y1 - this.y0);
     rec.t = t;
 
-    const outwardNormal: vec3 = [0, 0, 1];
+    const outwardNormal = vec3.create(0, 0, 1);
     rec.setFaceNormal(transformedRay, outwardNormal);
     rec.mat = this.material;
     rec.p = transformedRay.at(t);
@@ -74,7 +77,10 @@ export class XZRect extends Hittable {
     this.z1 = z1;
     this.k = k;
     this.material = material;
-    this.bbox = new AABB([this.x0, this.k - 0.0001, this.z0], [this.x1, this.k + 0.0001, this.z1]);
+    this.bbox = new AABB(
+      vec3.create(this.x0, this.k - 0.0001, this.z0),
+      vec3.create(this.x1, this.k + 0.0001, this.z1),
+    );
   }
 
   public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
@@ -93,7 +99,7 @@ export class XZRect extends Hittable {
     rec.v = (z - this.z0) / (this.z1 - this.z0);
     rec.t = t;
 
-    const outwardNormal: vec3 = [0, 1, 0];
+    const outwardNormal = vec3.create(0, 1, 0);
     rec.setFaceNormal(transformedRay, outwardNormal);
     rec.mat = this.material;
     rec.p = transformedRay.at(t);
@@ -126,7 +132,10 @@ export class YZRect extends Hittable {
     this.z1 = z1;
     this.k = k;
     this.material = material;
-    this.bbox = new AABB([this.k - 0.0001, this.y0, this.z0], [this.k + 0.0001, this.y1, this.z1]);
+    this.bbox = new AABB(
+      vec3.create(this.k - 0.0001, this.y0, this.z0),
+      vec3.create(this.k + 0.0001, this.y1, this.z1),
+    );
   }
 
   public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
@@ -145,7 +154,7 @@ export class YZRect extends Hittable {
     rec.v = (z - this.z0) / (this.z1 - this.z0);
     rec.t = t;
 
-    const outwardNormal: vec3 = [1, 0, 0];
+    const outwardNormal = vec3.create(1, 0, 0);
     rec.setFaceNormal(transformedRay, outwardNormal);
     rec.mat = this.material;
     rec.p = transformedRay.at(t);

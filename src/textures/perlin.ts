@@ -1,17 +1,17 @@
-import { vec3 } from 'gl-matrix';
+import { vec3, Vec3 } from 'wgpu-matrix';
 import { randomInt, randomRange } from '../util';
 
 export class Perlin {
   private static readonly _pointCount = 256;
-  private readonly _ranVecs: vec3[];
+  private readonly _ranVecs: Vec3[];
   private readonly _permX: number[];
   private readonly _permY: number[];
   private readonly _permZ: number[];
 
   public constructor() {
-    this._ranVecs = new Array<vec3>(Perlin._pointCount);
+    this._ranVecs = new Array<Vec3>(Perlin._pointCount);
     for (let i = 0; i < Perlin._pointCount; i++) {
-      this._ranVecs[i] = vec3.normalize(vec3.create(), randomRange(-1, 1));
+      this._ranVecs[i] = vec3.normalize(randomRange(-1, 1));
     }
 
     this._permX = Perlin.perlinGeneratePerm();
@@ -19,7 +19,7 @@ export class Perlin {
     this._permZ = Perlin.perlinGeneratePerm();
   }
 
-  public noise(p: vec3): number {
+  public noise(p: Vec3): number {
     let u = p[0] - Math.floor(p[0]);
     let v = p[1] - Math.floor(p[1]);
     let w = p[2] - Math.floor(p[2]);
@@ -36,7 +36,7 @@ export class Perlin {
     const j = Math.floor(p[1]);
     const k = Math.floor(p[2]);
 
-    const c: vec3[][][] = [
+    const c: Vec3[][][] = [
       [[], []],
       [[], []],
     ];
@@ -55,14 +55,14 @@ export class Perlin {
     return noise;
   }
 
-  public turb(p: vec3, depth = 7): number {
+  public turb(p: Vec3, depth = 7): number {
     let accum = 0.0;
     const temp_p = p;
     let weight = 1.0;
     for (let i = 0; i < depth; i++) {
       accum += weight * this.noise(temp_p);
       weight *= 0.5;
-      vec3.scale(temp_p, temp_p, 2);
+      vec3.scale(temp_p, 2, temp_p);
     }
 
     return Math.abs(accum);
@@ -90,7 +90,7 @@ export class Perlin {
   }
 }
 
-function trilinearInterp(c: vec3[][][], u: number, v: number, w: number): number {
+function trilinearInterp(c: Vec3[][][], u: number, v: number, w: number): number {
   const uu = u * u * (3 - 2 * u);
   const vv = v * v * (3 - 2 * v);
   const ww = w * w * (3 - 2 * w);
@@ -99,7 +99,7 @@ function trilinearInterp(c: vec3[][][], u: number, v: number, w: number): number
   for (let i = 0; i < 2; i++) {
     for (let j = 0; j < 2; j++) {
       for (let k = 0; k < 2; k++) {
-        const weight: vec3 = [u - i, v - j, w - k];
+        const weight: Vec3 = vec3.create(u - i, v - j, w - k);
         // prettier-ignore
         accum += (i * uu + (1 - i) * (1 - uu))
                * (j * vv + (1 - j) * (1 - vv))

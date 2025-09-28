@@ -1,15 +1,15 @@
-import { vec3 } from 'gl-matrix';
+import { vec3, Vec3 } from 'wgpu-matrix';
 import { Ray } from './ray';
 
 export class AABB {
-  private _min: vec3;
-  private _max: vec3;
+  private _min: Vec3;
+  private _max: Vec3;
   // private _size: vec3;
   // private _center: vec3;
 
-  public constructor(min?: vec3, max?: vec3) {
-    this._min = min ?? [0, 0, 0];
-    this._max = max ?? [0, 0, 0];
+  public constructor(min?: Vec3, max?: Vec3) {
+    this._min = min ?? vec3.zero();
+    this._max = max ?? vec3.zero();
 
     // this._size = [this._max[0] - this._min[0], this._max[1] - this._min[1], this._max[2] - this._min[2]];
 
@@ -31,11 +31,11 @@ export class AABB {
   //   return `center: ${this._center.toString()} | size: ${this._size.toString()}`;
   // }
 
-  public get min(): vec3 {
+  public get min(): Vec3 {
     return this._min;
   }
 
-  public get max(): vec3 {
+  public get max(): Vec3 {
     return this._max;
   }
 
@@ -79,17 +79,17 @@ export class AABB {
   // }
 
   public static surroundingBox(box0: AABB, box1: AABB): AABB {
-    const small: vec3 = [
+    const small = vec3.create(
       Math.min(box0.min[0], box1.min[0]),
       Math.min(box0.min[1], box1.min[1]),
       Math.min(box0.min[2], box1.min[2]),
-    ];
+    );
 
-    const big: vec3 = [
+    const big = vec3.create(
       Math.max(box0.max[0], box1.max[0]),
       Math.max(box0.max[1], box1.max[1]),
       Math.max(box0.max[2], box1.max[2]),
-    ];
+    );
 
     return new AABB(small, big);
   }

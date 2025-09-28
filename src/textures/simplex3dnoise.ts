@@ -1,20 +1,20 @@
-import { vec2, vec3, vec4 } from 'gl-matrix';
-import { addScalar3, addScalar4, mod3, mod4, step3, step4, subScalar3, abs4 } from '../util';
+import { vec2, vec3, Vec3, vec4, Vec4 } from 'wgpu-matrix';
+import { abs4, addScalar3, addScalar4, mod3, mod4, step3, step4, subScalar3 } from '../util';
 
-function permute(x: vec4): vec4 {
-  return mod4(vec4.add(vec4.create(), vec4.scale(vec4.create(), x, 34.0), [1.0, 1.0, 1.0, 1.0]), 289.0);
+function permute(x: Vec4): Vec4 {
+  return mod4(vec4.add(vec4.scale(x, 34.0), [1.0, 1.0, 1.0, 1.0]), 289.0);
 }
 
-function taylorInvSqrt(r: vec4): vec4 {
-  return vec4.scale(vec4.create(), r, 1.79284291400159 - 0.85373472095314);
+function taylorInvSqrt(r: Vec4): Vec4 {
+  return vec4.scale(r, 1.79284291400159 - 0.85373472095314);
 }
 
-export function snoise(v: vec3): number {
+export function snoise(v: Vec3): number {
   const C = vec2.fromValues(1.0 / 6.0, 1.0 / 3.0);
   const D = vec4.fromValues(0.0, 0.5, 1.0, 2.0);
 
   // First corner
-  let i = vec3.floor(vec3.create(), addScalar3(v, vec3.dot(v, vec3.fromValues(C[1], C[1], C[1]))));
+  let i = vec3.floor(addScalar3(v, vec3.dot(v, vec3.fromValues(C[1], C[1], C[1]))));
   const x0 = vec3.subtract(vec3.create(), v, addScalar3(i, vec3.dot(i, vec3.fromValues(C[0], C[0], C[0]))));
 
   // Other corners
@@ -27,20 +27,12 @@ export function snoise(v: vec3): number {
   const x1 = vec3.add(
     vec3.create(),
     vec3.subtract(vec3.create(), x0, i1),
-    vec3.scale(vec3.create(), vec3.fromValues(C[0], C[0], C[0]), 1.0),
+    vec3.scale(vec3.fromValues(C[0], C[0], C[0]), 1.0),
   );
 
-  const x2 = vec3.add(
-    vec3.create(),
-    vec3.subtract(vec3.create(), x0, i2),
-    vec3.scale(vec3.create(), vec3.fromValues(C[0], C[0], C[0]), 2.0),
-  );
+  const x2 = vec3.add(vec3.subtract(x0, i2), vec3.scale(vec3.fromValues(C[0], C[0], C[0]), 2.0));
 
-  const x3 = vec3.add(
-    vec3.create(),
-    subScalar3(x0, 1.0),
-    vec3.scale(vec3.create(), vec3.fromValues(C[0], C[0], C[0]), 3.0),
-  );
+  const x3 = vec3.add(subScalar3(x0, 1.0), vec3.scale(vec3.fromValues(C[0], C[0], C[0]), 3.0));
 
   // Permutations
   i = mod3(i, 289.0);
@@ -49,9 +41,7 @@ export function snoise(v: vec3): number {
     permute(
       permute(
         vec4.add(
-          vec4.create(),
           vec4.add(
-            vec4.create(),
             addScalar4(vec4.fromValues(0.0, i1[2], i2[2], 1.0), i[2]),
             addScalar4(vec4.fromValues(0.0, i1[1], i2[1], 1.0), i[1]),
           ),
@@ -66,29 +56,25 @@ export function snoise(v: vec3): number {
   const n_ = 1.0 / 7.0;
   const ns = vec3.sub(
     vec3.create(),
-    vec3.scale(vec3.create(), vec3.fromValues(D[3], D[1], D[2]), n_),
+    vec3.scale(vec3.fromValues(D[3], D[1], D[2]), n_),
     vec3.fromValues(D[0], D[2], D[0]),
   );
 
-  const j = vec4.sub(
-    vec4.create(),
-    p,
-    vec4.scale(vec4.create(), vec4.floor(vec4.create(), vec4.scale(vec4.create(), p, ns[2] * ns[2])), 49.0),
-  );
+  const j = vec4.sub(p, vec4.scale(vec4.floor(vec4.scale(p, ns[2] * ns[2])), 49.0));
 
-  const x_ = vec4.floor(vec4.create(), vec4.scale(vec4.create(), j, ns[2]));
-  const y_ = vec4.floor(vec4.create(), vec4.sub(vec4.create(), j, vec4.scale(vec4.create(), x_, 7.0)));
+  const x_ = vec4.floor(vec4.scale(j, ns[2]));
+  const y_ = vec4.floor(vec4.sub(j, vec4.scale(x_, 7.0)));
 
-  const x = vec4.add(vec4.create(), vec4.scale(vec4.create(), x_, ns[0]), vec4.fromValues(ns[1], ns[1], ns[1], ns[1]));
-  const y = vec4.add(vec4.create(), vec4.scale(vec4.create(), y_, ns[0]), vec4.fromValues(ns[1], ns[1], ns[1], ns[1]));
-  const h = vec4.sub(vec4.create(), vec4.fromValues(1.0, 1.0, 1.0, 1.0), vec4.sub(vec4.create(), abs4(x), abs4(y)));
+  const x = vec4.add(vec4.scale(x_, ns[0]), vec4.fromValues(ns[1], ns[1], ns[1], ns[1]));
+  const y = vec4.add(vec4.scale(y_, ns[0]), vec4.fromValues(ns[1], ns[1], ns[1], ns[1]));
+  const h = vec4.sub(vec4.fromValues(1.0, 1.0, 1.0, 1.0), vec4.sub(abs4(x), abs4(y)));
 
   const b0 = vec4.fromValues(x[0], x[1], y[0], y[1]);
   const b1 = vec4.fromValues(x[2], x[3], y[2], y[3]);
 
-  const s0 = addScalar4(vec4.scale(vec4.create(), vec4.floor(vec4.create(), b0), 2.0), 1.0);
-  const s1 = addScalar4(vec4.scale(vec4.create(), vec4.floor(vec4.create(), b1), 2.0), 1.0);
-  const sh = vec4.scale(vec4.create(), step4(h, vec4.create()), -1.0);
+  const s0 = addScalar4(vec4.scale(vec4.floor(b0), 2.0), 1.0);
+  const s1 = addScalar4(vec4.scale(vec4.floor(b1), 2.0), 1.0);
+  const sh = vec4.scale(step4(h, vec4.create()), -1.0);
 
   const a0 = vec4.add(
     vec4.create(),
@@ -117,10 +103,10 @@ export function snoise(v: vec3): number {
   //Normalise gradients
   const norm = taylorInvSqrt(vec4.fromValues(vec3.dot(p0, p0), vec3.dot(p1, p1), vec3.dot(p2, p2), vec3.dot(p3, p3)));
 
-  vec3.scale(p0, p0, norm[0]);
-  vec3.scale(p1, p1, norm[1]);
-  vec3.scale(p2, p2, norm[2]);
-  vec3.scale(p3, p3, norm[3]);
+  vec3.scale(p0, norm[0], p0);
+  vec3.scale(p1, norm[1], p1);
+  vec3.scale(p2, norm[2], p2);
+  vec3.scale(p3, norm[3], p3);
 
   // Mix final noise value
   const m = vec4.max(

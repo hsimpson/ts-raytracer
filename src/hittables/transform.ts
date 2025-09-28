@@ -1,22 +1,22 @@
-import { mat4, quat, vec3 } from 'gl-matrix';
+import { Mat4, mat4, Quat, quat, Vec3, vec3 } from 'wgpu-matrix';
 import { HitRecord } from './hitrecord';
 import { Ray } from './ray';
 
 export class Transform {
-  private readonly _objectToWorldMatrix = mat4.create();
-  private readonly _worldToObjectMatrix = mat4.create();
-  private readonly _rotationMatrix = mat4.create();
-  private readonly _inverseRotationMatrix = mat4.create();
-  private readonly _normalMatrix = mat4.create();
-  private readonly _position = vec3.create();
-  private _rotation = quat.create();
+  private readonly _objectToWorldMatrix = mat4.identity();
+  private readonly _worldToObjectMatrix = mat4.identity();
+  private readonly _rotationMatrix = mat4.identity();
+  private readonly _inverseRotationMatrix = mat4.identity();
+  private readonly _normalMatrix = mat4.identity();
+  private _position = vec3.zero();
+  private _rotation = quat.identity();
   private _isTransformed = false;
 
-  public get objectToWorld(): mat4 {
+  public get objectToWorld(): Mat4 {
     return this._objectToWorldMatrix;
   }
 
-  public get normalMatrix(): mat4 {
+  public get normalMatrix(): Mat4 {
     return this._normalMatrix;
   }
 
@@ -37,8 +37,8 @@ export class Transform {
 
     //FIXME: when replace vec3
     return new Ray(
-      [movedOrigin[0], movedOrigin[1], movedOrigin[2]],
-      [movedDirection[0], movedDirection[1], movedDirection[2]],
+      movedOrigin,
+      movedDirection,
       // ray.direction,
       ray.time,
     );
@@ -57,23 +57,22 @@ export class Transform {
     vec3.transformMat4(movedN, movedN, this._normalMatrix);
     vec3.normalize(movedN, movedN);
 
-    rec.p = [movedP[0], movedP[1], movedP[2]];
-    rec.setFaceNormal(ray, [movedN[0], movedN[1], movedN[2]]);
+    rec.p = vec3.create(movedP[0], movedP[1], movedP[2]);
+    rec.setFaceNormal(ray, vec3.create(movedN[0], movedN[1], movedN[2]));
   }
 
-  public translate(translation: vec3): void {
-    vec3.add(this._position, this._position, translation);
+  public translate(translation: Vec3): void {
+    this._position = vec3.add(this._position, translation);
     this._updateMatrix();
   }
 
-  public rotateQuat(rotation: quat): void {
-    this._rotation = quat.multiply(this._rotation, this._rotation, rotation);
+  public rotateQuat(rotation: Quat): void {
+    this._rotation = quat.multiply(this._rotation, rotation);
     this._updateMatrix();
   }
 
   public rotateEuler(angleX: number, angelY: number, angleZ: number): void {
-    let tempQuat = quat.create();
-    tempQuat = quat.fromEuler(tempQuat, angleX, angelY, angleZ);
+    const tempQuat = quat.fromEuler(angleX, angelY, angleZ, 'zyx');
     this.rotateQuat(tempQuat);
   }
 

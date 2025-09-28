@@ -1,4 +1,4 @@
-import { vec3 } from 'gl-matrix';
+import { vec3, Vec3 } from 'wgpu-matrix';
 import { Material } from '../material';
 import { getSphereUV, lengthSquared } from '../util';
 import { AABB } from './aabb';
@@ -7,17 +7,17 @@ import { Hittable } from './hittable';
 import { Ray } from './ray';
 
 export class Sphere extends Hittable {
-  private readonly _center: vec3;
+  private readonly _center: Vec3;
   private readonly _radius: number;
 
-  public constructor(center: vec3, radius: number, mat: Material) {
+  public constructor(center: Vec3, radius: number, mat: Material) {
     super();
     this._center = center;
     this._radius = radius;
     this.material = mat;
   }
 
-  public get center(): vec3 {
+  public get center(): Vec3 {
     return this._center;
   }
 
@@ -28,7 +28,7 @@ export class Sphere extends Hittable {
   public hit(ray: Ray, tMain: number, tMax: number, rec: HitRecord): boolean {
     const transformedRay = this.transform.transformRay(ray);
 
-    const oc = vec3.subtract(vec3.create(), transformedRay.origin, this._center);
+    const oc = vec3.subtract(transformedRay.origin, this._center);
     const a = lengthSquared(transformedRay.direction);
     const half_b = vec3.dot(oc, transformedRay.direction);
     const c = lengthSquared(oc) - this._radius * this._radius;
@@ -40,10 +40,9 @@ export class Sphere extends Hittable {
       if (temp < tMax && temp > tMain) {
         rec.t = temp;
         rec.p = transformedRay.at(rec.t);
-        const outward_normal = vec3.create();
 
-        const pMinusCenter = vec3.subtract(vec3.create(), rec.p, this._center);
-        vec3.scale(outward_normal, pMinusCenter, 1.0 / this._radius);
+        const pMinusCenter = vec3.subtract(rec.p, this._center);
+        const outward_normal = vec3.scale(pMinusCenter, 1.0 / this._radius);
         rec.setFaceNormal(transformedRay, outward_normal);
 
         const uv = getSphereUV(outward_normal);
@@ -57,10 +56,9 @@ export class Sphere extends Hittable {
       if (temp < tMax && temp > tMain) {
         rec.t = temp;
         rec.p = transformedRay.at(rec.t);
-        const outward_normal = vec3.create();
 
-        const pMinusCenter = vec3.subtract(vec3.create(), rec.p, this._center);
-        vec3.scale(outward_normal, pMinusCenter, 1.0 / this._radius);
+        const pMinusCenter = vec3.subtract(rec.p, this._center);
+        const outward_normal = vec3.scale(pMinusCenter, 1.0 / this._radius);
         rec.setFaceNormal(transformedRay, outward_normal);
 
         const uv = getSphereUV(outward_normal);

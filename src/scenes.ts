@@ -1,4 +1,4 @@
-import { vec3 } from 'gl-matrix';
+import { vec3 } from 'wgpu-matrix';
 import { CameraOptions } from './camera';
 import * as GLTFLoader from './gltfloader';
 import {
@@ -18,10 +18,10 @@ import { CheckerTexture, ImageTexture, NoiseTexture } from './textures';
 import { random, randomNumber, randomNumberRange, randomRange } from './util';
 
 const defaultCameraOptions: CameraOptions = {
-  lookFrom: [0, 0, 5],
-  lookAt: [0, 0, 0],
-  vUp: [0, 1, 0],
-  background: [0.7, 0.8, 1.0],
+  lookFrom: vec3.create(0, 0, 5),
+  lookAt: vec3.zero(),
+  vUp: vec3.create(0, 1, 0),
+  background: vec3.create(0.7, 0.8, 1.0),
   focusDist: 10,
   aperture: 0.0,
   fovY: 40,
@@ -56,7 +56,7 @@ function gpuTestScene(useBVH: boolean): { world: HittableList; cameraOptions: Ca
   world.add(redSphere);
   world.add(greenSphere);
 
-  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [0, 2, 10], fovY: 10 };
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: vec3.create(0, 2, 10), fovY: 10 };
 
   if (useBVH) {
     return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
@@ -80,9 +80,9 @@ function randomScene(useBVH: boolean): { world: HittableList; cameraOptions: Cam
     for (let b = -count; b < count; b++) {
       //console.log(`${i++}`);
       const chooseMat = randomNumber();
-      const center: vec3 = [a + 0.9 * randomNumber(), 0.2, b + 0.9 * randomNumber()];
+      const center = vec3.create(a + 0.9 * randomNumber(), 0.2, b + 0.9 * randomNumber());
 
-      if (vec3.length(vec3.sub(vec3.create(), center, [4, 0.2, 0])) > 0.9) {
+      if (vec3.length(vec3.sub(center, [4, 0.2, 0])) > 0.9) {
         let sphereMaterial: Material;
 
         if (chooseMat < 0.8) {
@@ -115,7 +115,7 @@ function randomScene(useBVH: boolean): { world: HittableList; cameraOptions: Cam
   world.add(new Sphere([-4, 1, 0], 1, material2));
   world.add(new Sphere([4, 1, 0], 1, material3));
 
-  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [13, 2, 3], fovY: 20 };
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: vec3.create(13, 2, 3), fovY: 20 };
 
   if (useBVH) {
     return { world: new HittableList(BVHNode.createFromHitableList(world, 0.0, 1.0)), cameraOptions };
@@ -134,7 +134,7 @@ function twoCheckerSpheres(_useBVH: boolean): { world: HittableList; cameraOptio
   world.add(new Sphere([0, -10, 0], 10, sphereMaterial));
   world.add(new Sphere([0, 10, 0], 10, sphereMaterial));
 
-  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [13, 2, 3], fovY: 20 };
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: vec3.create(13, 2, 3), fovY: 20 };
 
   return { world, cameraOptions };
 }
@@ -149,7 +149,7 @@ function twoNoiseSpheres(_useBVH: boolean): { world: HittableList; cameraOptions
   world.add(new Sphere([0, -1000, 0], 1000, sphereMaterial));
   world.add(new Sphere([0, 2, 0], 2, sphereMaterial));
 
-  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [13, 2, 3], fovY: 20 };
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: vec3.create(13, 2, 3), fovY: 20 };
 
   return { world, cameraOptions };
 }
@@ -165,7 +165,7 @@ async function earthSphere(_useBVH: boolean): Promise<{ world: HittableList; cam
 
   world.add(new Sphere([0, 0, 0], 2, sphereMaterial));
 
-  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: [13, 2, 3], fovY: 20 };
+  const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: vec3.create(13, 2, 3), fovY: 20 };
 
   return { world, cameraOptions };
 }
@@ -185,9 +185,9 @@ function areaLight(_useBVH: boolean): { world: HittableList; cameraOptions: Came
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
-    lookFrom: [26, 3, 6],
-    lookAt: [0, 2, 0],
-    background: [0, 0, 0],
+    lookFrom: vec3.create(26, 3, 6),
+    lookAt: vec3.create(0, 2, 0),
+    background: vec3.zero(),
     fovY: 20,
   };
 
@@ -221,9 +221,9 @@ function cornellBox(useBVH: boolean): { world: HittableList; cameraOptions: Came
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
-    lookFrom: [278, 278, -800],
-    lookAt: [278, 278, 0],
-    background: [0, 0, 0],
+    lookFrom: vec3.create(278, 278, -800),
+    lookAt: vec3.create(278, 278, 0),
+    background: vec3.zero(),
   };
 
   if (useBVH) {
@@ -260,9 +260,9 @@ function cornellBoxSmoke(useBVH: boolean): { world: HittableList; cameraOptions:
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
-    lookFrom: [278, 278, -800],
-    lookAt: [278, 278, 0],
-    background: [0, 0, 0],
+    lookFrom: vec3.create(278, 278, -800),
+    lookAt: vec3.create(278, 278, 0),
+    background: vec3.zero(),
   };
 
   if (useBVH) {
@@ -303,7 +303,7 @@ async function finalScene(useBVH: boolean): Promise<{ world: HittableList; camer
   const light = new DiffuseLight([7, 7, 7]);
   world.add(new XZRect(123, 423, 147, 412, 554, light));
 
-  const center1: vec3 = [400, 400, 200];
+  const center1 = vec3.create(400, 400, 200);
   const center2 = vec3.add(vec3.create(), center1, [30, 0, 0]);
   const movingSphereMaterial = new LambertianMaterial([0.7, 0.3, 0.1]);
   world.add(new MovingSphere(center1, center2, 0, 1, 50, movingSphereMaterial));
@@ -345,9 +345,9 @@ async function finalScene(useBVH: boolean): Promise<{ world: HittableList; camer
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
-    lookFrom: [478, 278, -600],
-    lookAt: [278, 278, 0],
-    background: [0, 0, 0],
+    lookFrom: vec3.create(478, 278, -600),
+    lookAt: vec3.create(278, 278, 0),
+    background: vec3.zero(),
   };
 
   return { world, cameraOptions };
@@ -369,8 +369,8 @@ async function gltfScene(useBVH: boolean): Promise<{ world: HittableList; camera
 
   // const w = world.objects[0] as HittableList;
 
-  const lookFrom: vec3 = [2, 1.5, 6];
-  const lookAt: vec3 = [0, 0, 0];
+  const lookFrom = vec3.create(2, 1.5, 6);
+  const lookAt = vec3.zero();
   // const lookFrom: vec3 = [0, 0, 0];
   // const lookAt: vec3 = [0, 0, -1];
 
@@ -381,7 +381,7 @@ async function gltfScene(useBVH: boolean): Promise<{ world: HittableList; camera
   const fovY = 20;
 
   // const background: vec3 = [0, 0, 0];
-  const background: vec3 = [0.7, 0.8, 1.0];
+  const background = vec3.create(0.7, 0.8, 1.0);
 
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom, lookAt, fovY, background };
 

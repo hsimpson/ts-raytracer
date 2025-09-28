@@ -49,10 +49,10 @@
   "dependencies": {
     "@donnerknalli/webgpu-utils": "^0.0.4",
     "alea": "^1.0.1",
-    "gl-matrix": "^3.4.4",
     "jotai": "^2.15.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "simplex-noise": "^4.0.3"
+    "simplex-noise": "^4.0.3",
+    "wgpu-matrix": "^3.4.0"
   }
 }

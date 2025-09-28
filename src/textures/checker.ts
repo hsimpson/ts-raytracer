@@ -1,4 +1,4 @@
-import { vec3 } from 'gl-matrix';
+import { Vec3 } from 'wgpu-matrix';
 import { SolidColor } from './solidcolor';
 import { Texture } from './texture';
 
@@ -7,7 +7,7 @@ export class CheckerTexture extends Texture {
   private _even: Texture;
   private _scale: number;
 
-  public constructor(odd: vec3, even: vec3, scale?: number) {
+  public constructor(odd: Vec3, even: Vec3, scale?: number) {
     super();
     this._odd = new SolidColor(odd);
     this._even = new SolidColor(even);
@@ -18,7 +18,7 @@ export class CheckerTexture extends Texture {
     return x - Math.floor(x);
   }
 
-  public value(u: number, v: number, p: vec3): vec3 {
+  public value(u: number, v: number, p: Vec3): Vec3 {
     const x = this.modulo(u * this._scale) < 0.5;
     const y = this.modulo(v * this._scale) < 0.5;
 
@@ -29,11 +29,11 @@ export class CheckerTexture extends Texture {
     }
   }
 
-  public get odd(): vec3 {
+  public get odd(): Vec3 {
     return (this._odd as SolidColor).color;
   }
 
-  public get even(): vec3 {
+  public get even(): Vec3 {
     return (this._even as SolidColor).color;
   }
 

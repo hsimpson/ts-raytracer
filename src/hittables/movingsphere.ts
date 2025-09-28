@@ -1,4 +1,4 @@
-import { vec3 } from 'gl-matrix';
+import { vec3, Vec3 } from 'wgpu-matrix';
 import { Material } from '../material';
 import { getSphereUV, lengthSquared } from '../util';
 import { AABB } from './aabb';
@@ -7,13 +7,13 @@ import { Hittable } from './hittable';
 import { Ray } from './ray';
 
 export class MovingSphere extends Hittable {
-  private readonly _center0: vec3;
-  private readonly _center1: vec3;
+  private readonly _center0: Vec3;
+  private readonly _center1: Vec3;
   private readonly _time0: number;
   private readonly _time1: number;
   private readonly _radius: number;
 
-  public constructor(center0: vec3, center1: vec3, t0: number, t1: number, radius: number, mat: Material) {
+  public constructor(center0: Vec3, center1: Vec3, t0: number, t1: number, radius: number, mat: Material) {
     super();
     this._center0 = center0;
     this._center1 = center1;
@@ -23,11 +23,11 @@ export class MovingSphere extends Hittable {
     this.material = mat;
   }
 
-  public get center0(): vec3 {
+  public get center0(): Vec3 {
     return this._center0;
   }
 
-  public get center1(): vec3 {
+  public get center1(): Vec3 {
     return this._center1;
   }
 
@@ -46,7 +46,7 @@ export class MovingSphere extends Hittable {
   public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
     const transformedRay = this.transform.transformRay(ray);
 
-    const oc = vec3.subtract(vec3.create(), transformedRay.origin, this.center(transformedRay.time));
+    const oc = vec3.subtract(transformedRay.origin, this.center(transformedRay.time));
 
     const a = lengthSquared(transformedRay.direction);
     const half_b = vec3.dot(oc, transformedRay.direction);
@@ -59,10 +59,9 @@ export class MovingSphere extends Hittable {
       if (temp < tMax && temp > tMin) {
         rec.t = temp;
         rec.p = transformedRay.at(rec.t);
-        const outward_normal = vec3.create();
 
         const pMinusCenter = vec3.subtract(vec3.create(), rec.p, this.center(transformedRay.time));
-        vec3.scale(outward_normal, pMinusCenter, 1.0 / this._radius);
+        const outward_normal = vec3.scale(pMinusCenter, 1.0 / this._radius);
         rec.setFaceNormal(transformedRay, outward_normal);
 
         const uv = getSphereUV(outward_normal);
@@ -76,10 +75,9 @@ export class MovingSphere extends Hittable {
       if (temp < tMax && temp > tMin) {
         rec.t = temp;
         rec.p = transformedRay.at(rec.t);
-        const outward_normal = vec3.create();
 
         const pMinusCenter = vec3.subtract(vec3.create(), rec.p, this.center(transformedRay.time));
-        vec3.scale(outward_normal, pMinusCenter, 1.0 / this._radius);
+        const outward_normal = vec3.scale(pMinusCenter, 1.0 / this._radius);
         rec.setFaceNormal(transformedRay, outward_normal);
 
         const uv = getSphereUV(outward_normal);
@@ -93,12 +91,12 @@ export class MovingSphere extends Hittable {
     return false;
   }
 
-  public center(time: number): vec3 {
+  public center(time: number): Vec3 {
     const timeDiff = (time - this._time0) / (this._time1 - this._time0);
-    const centerDiff = vec3.subtract(vec3.create(), this._center1, this._center0);
+    const centerDiff = vec3.subtract(this._center1, this._center0);
 
-    const centerDiffT = vec3.scale(vec3.create(), centerDiff, timeDiff);
-    return vec3.add(vec3.create(), this._center0, centerDiffT);
+    const centerDiffT = vec3.scale(centerDiff, timeDiff);
+    return vec3.add(this._center0, centerDiffT);
   }
 
   public boundingBox(t0: number, t1: number): AABB {

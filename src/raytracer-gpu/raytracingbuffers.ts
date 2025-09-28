@@ -1,20 +1,20 @@
 import { WebGPUContext } from '@donnerknalli/webgpu-utils';
-import { mat4, quat, vec2, vec4 } from 'gl-matrix';
+import { mat4, Mat4, quat, vec2, Vec2, vec4, Vec4 } from 'wgpu-matrix';
 import {
   Box,
+  Hittable,
+  HittableList,
   MovingSphere as HMovingSphere,
   Sphere as HSphere,
   Triangle as HTriangle,
   XYRect as HXYRect,
   XZRect as HXZRect,
   YZRect as HYZRect,
-  Hittable,
-  HittableList,
 } from '../hittables';
 import {
   DielectricMaterial,
-  DiffuseLight as MDiffuseLight,
   Material,
+  DiffuseLight as MDiffuseLight,
   MetalMaterial,
   NormalMaterial,
 } from '../material';
@@ -49,10 +49,10 @@ export enum WebGPUTextureType {
 }
 
 interface WebGPUTexture {
-  color: vec4;
-  checkerOdd: vec4;
-  checkerEven: vec4;
-  uvOffset: vec2;
+  color: Vec4;
+  checkerOdd: Vec4;
+  checkerEven: Vec4;
+  uvOffset: Vec2;
   scale: number;
   textureType: number;
   imageTextureIndex: number;
@@ -66,7 +66,7 @@ interface WebGPUTexture {
   hasImageTexture?: boolean;
 }
 interface WebGPUMaterial {
-  baseColor: vec4;
+  baseColor: Vec4;
   roughness: number;
   indexOfRefraction: number;
   materialType: WebGPUMaterialType;
@@ -74,22 +74,22 @@ interface WebGPUMaterial {
 }
 
 interface WebGPUPrimitive {
-  objectToWorld: mat4;
-  bounds: vec4;
-  center0: vec4;
-  center1: vec4;
+  objectToWorld: Mat4;
+  bounds: Vec4;
+  center0: Vec4;
+  center1: Vec4;
 
-  v0: vec4; // triangle vertex
-  v1: vec4; // triangle vertex
-  v2: vec4; // triangle vertex
+  v0: Vec4; // triangle vertex
+  v1: Vec4; // triangle vertex
+  v2: Vec4; // triangle vertex
 
-  n0: vec4; // triangle vertex normal
-  n1: vec4; // triangle vertex normal
-  n2: vec4; // triangle vertex normal
+  n0: Vec4; // triangle vertex normal
+  n1: Vec4; // triangle vertex normal
+  n2: Vec4; // triangle vertex normal
 
-  uv0: vec4; // triangle vertex texture coordinate
-  uv1: vec4; // triangle vertex texture coordinate
-  uv2: vec4; // triangle vertex texture coordinate
+  uv0: Vec4; // triangle vertex texture coordinate
+  uv1: Vec4; // triangle vertex texture coordinate
+  uv2: Vec4; // triangle vertex texture coordinate
 
   radius: number;
   k: number;
@@ -121,7 +121,7 @@ export class RaytracingBuffers {
   private readonly _webGpuContext: WebGPUContext;
 
   public constructor(world: HittableList, webGpuContext: WebGPUContext) {
-    this.traverseHittables(world, mat4.create());
+    this.traverseHittables(world, mat4.identity());
     this._webGpuContext = webGpuContext;
   }
 
@@ -129,7 +129,7 @@ export class RaytracingBuffers {
     return this._imageTextures.length > 0;
   }
 
-  private traverseHittables(list: HittableList, objectToWorld: mat4): void {
+  private traverseHittables(list: HittableList, objectToWorld: Mat4): void {
     for (const object of list.objects) {
       const currentObjectToWorld = object.transform.objectToWorld;
       mat4.multiply(currentObjectToWorld, objectToWorld, currentObjectToWorld);
@@ -147,10 +147,10 @@ export class RaytracingBuffers {
   private addTexture(tex?: Texture): number {
     const idx = this._gpuTextures.length;
     const gpuTex: WebGPUTexture = {
-      color: [1, 1, 1, 1],
-      checkerOdd: [1, 1, 1, 1],
-      checkerEven: [1, 1, 1, 1],
-      uvOffset: [1, 1],
+      color: vec4.create(1, 1, 1, 1),
+      checkerOdd: vec4.create(1, 1, 1, 1),
+      checkerEven: vec4.create(1, 1, 1, 1),
+      uvOffset: vec2.create(1, 1),
       scale: 1,
       textureType: WebGPUTextureType.Solid,
       imageTextureIndex: -1,
@@ -192,7 +192,7 @@ export class RaytracingBuffers {
 
     // default to lambertian
     const gpuMat: WebGPUMaterial = {
-      baseColor: [1, 1, 1, 1],
+      baseColor: vec4.create(1, 1, 1, 1),
       roughness: 0,
       indexOfRefraction: 1,
       materialType: WebGPUMaterialType.Lambertian,
@@ -217,7 +217,7 @@ export class RaytracingBuffers {
     return idx;
   }
 
-  private addPrimitive(obj: Hittable, objectToWorld: mat4): number {
+  private addPrimitive(obj: Hittable, objectToWorld: Mat4): number {
     const idx = this._gpuPrimitives.length;
     let gpuPrimitive: WebGPUPrimitive;
 
@@ -253,7 +253,7 @@ export class RaytracingBuffers {
       gpuPrimitive = {
         objectToWorld,
         center0: vec4.fromValues(obj.center[0], obj.center[1], obj.center[2], 0),
-        center1: [0, 0, 0, 1],
+        center1: vec4.create(0, 0, 0, 1),
         radius: obj.radius,
 
         ...rectDummy,
@@ -282,7 +282,7 @@ export class RaytracingBuffers {
     } else if (obj instanceof HXYRect) {
       gpuPrimitive = {
         objectToWorld,
-        bounds: [obj.x0, obj.x1, obj.y0, obj.y1],
+        bounds: vec4.create(obj.x0, obj.x1, obj.y0, obj.y1),
         k: obj.k,
 
         ...sphereDummy,
@@ -296,7 +296,7 @@ export class RaytracingBuffers {
     } else if (obj instanceof HXZRect) {
       gpuPrimitive = {
         objectToWorld,
-        bounds: [obj.x0, obj.x1, obj.z0, obj.z1],
+        bounds: vec4.create(obj.x0, obj.x1, obj.z0, obj.z1),
         k: obj.k,
 
         ...sphereDummy,
@@ -310,7 +310,7 @@ export class RaytracingBuffers {
     } else if (obj instanceof HYZRect) {
       gpuPrimitive = {
         objectToWorld,
-        bounds: [obj.y0, obj.y1, obj.z0, obj.z1],
+        bounds: vec4.create(obj.y0, obj.y1, obj.z0, obj.z1),
         k: obj.k,
 
         ...sphereDummy,
@@ -333,17 +333,17 @@ export class RaytracingBuffers {
         materialIndex,
       };
 
-      gpuPrimitive.v0 = [obj.v0[0], obj.v0[1], obj.v0[2], 1];
-      gpuPrimitive.v1 = [obj.v1[0], obj.v1[1], obj.v1[2], 1];
-      gpuPrimitive.v2 = [obj.v2[0], obj.v2[1], obj.v2[2], 1];
+      gpuPrimitive.v0 = vec4.create(obj.v0[0], obj.v0[1], obj.v0[2], 1);
+      gpuPrimitive.v1 = vec4.create(obj.v1[0], obj.v1[1], obj.v1[2], 1);
+      gpuPrimitive.v2 = vec4.create(obj.v2[0], obj.v2[1], obj.v2[2], 1);
 
-      gpuPrimitive.n0 = [obj.n0[0], obj.n0[1], obj.n0[2], 1];
-      gpuPrimitive.n1 = [obj.n1[0], obj.n1[1], obj.n1[2], 1];
-      gpuPrimitive.n2 = [obj.n2[0], obj.n2[1], obj.n2[2], 1];
+      gpuPrimitive.n0 = obj.n0 ? vec4.create(obj.n0[0], obj.n0[1], obj.n0[2], 1) : vec4.create(0, 0, 0, 1);
+      gpuPrimitive.n1 = obj.n1 ? vec4.create(obj.n1[0], obj.n1[1], obj.n1[2], 1) : vec4.create(0, 0, 0, 1);
+      gpuPrimitive.n2 = obj.n2 ? vec4.create(obj.n2[0], obj.n2[1], obj.n2[2], 1) : vec4.create(0, 0, 0, 1);
 
-      gpuPrimitive.uv0 = [obj.uv0[0], obj.uv0[1], 1, 1];
-      gpuPrimitive.uv1 = [obj.uv1[0], obj.uv1[1], 1, 1];
-      gpuPrimitive.uv2 = [obj.uv2[0], obj.uv2[1], 1, 1];
+      gpuPrimitive.uv0 = obj.uv0 ? vec4.create(obj.uv0[0], obj.uv0[1], 1, 1) : vec4.create(0, 0, 1, 1);
+      gpuPrimitive.uv1 = obj.uv1 ? vec4.create(obj.uv1[0], obj.uv1[1], 1, 1) : vec4.create(0, 0, 1, 1);
+      gpuPrimitive.uv2 = obj.uv2 ? vec4.create(obj.uv2[0], obj.uv2[1], 1, 1) : vec4.create(0, 0, 1, 1);
     }
 
     if (gpuPrimitive) {
@@ -544,14 +544,14 @@ export class RaytracingBuffers {
     return bufferData;
   }
 
-  private writeMat4(buffer: Float32Array, offset: number, mat: mat4): number {
+  private writeMat4(buffer: Float32Array, offset: number, mat: Mat4): number {
     for (let i = 0; i < 16; i++) {
       buffer[offset++] = mat[i];
     }
     return offset;
   }
 
-  private writeVec4(buffer: Float32Array, offset: number, vec: vec4): number {
+  private writeVec4(buffer: Float32Array, offset: number, vec: Vec4): number {
     for (let i = 0; i < 4; i++) {
       buffer[offset++] = vec[i];
     }
@@ -568,8 +568,8 @@ export class RaytracingBuffers {
 
     let offset = 0;
     for (const primitiv of this._gpuPrimitives) {
-      const inverseMatrix = mat4.invert(mat4.create(), primitiv.objectToWorld);
-      const rotation = mat4.getRotation(quat.create(), primitiv.objectToWorld);
+      const inverseMatrix = mat4.invert(primitiv.objectToWorld);
+      const rotation = quat.fromMat(primitiv.objectToWorld);
       const inverseRotation = mat4.invert(mat4.create(), mat4.fromQuat(mat4.create(), rotation));
 
       offset = this.writeMat4(bufferDataF32, offset, primitiv.objectToWorld);

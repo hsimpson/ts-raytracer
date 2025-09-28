@@ -1,19 +1,19 @@
-import { vec3 } from 'gl-matrix';
+import { Vec3, vec3 } from 'wgpu-matrix';
 import { Material } from '../material';
 import { Ray } from './ray';
 
 export class HitRecord {
-  public p = vec3.create();
-  public normal = vec3.create();
+  public p = vec3.zero();
+  public normal = vec3.zero();
   public t = 0;
   public u = 0;
   public v = 0;
   public frontFace = true;
   public mat!: Material;
 
-  public setFaceNormal(r: Ray, outward_normal: vec3): void {
+  public setFaceNormal(r: Ray, outward_normal: Vec3): void {
     this.frontFace = vec3.dot(r.direction, outward_normal) < 0;
-    this.normal = this.frontFace ? outward_normal : vec3.negate(vec3.create(), outward_normal);
+    this.normal = this.frontFace ? outward_normal : vec3.negate(outward_normal);
   }
 
   public copyTo(dest: HitRecord): void {

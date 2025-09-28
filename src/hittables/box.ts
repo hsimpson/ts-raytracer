@@ -1,4 +1,4 @@
-import { vec3 } from 'gl-matrix';
+import { vec3, Vec3 } from 'wgpu-matrix';
 import { Material } from '../material';
 import { AABB } from './aabb';
 import { XYRect, XZRect, YZRect } from './aarect';
@@ -8,11 +8,11 @@ import { HittableList } from './hittablelist';
 import { Ray } from './ray';
 
 export class Box extends Hittable {
-  private readonly _boxMin: vec3;
-  private readonly _boxMax: vec3;
+  private readonly _boxMin: Vec3;
+  private readonly _boxMax: Vec3;
   private readonly _sides = new HittableList();
 
-  public constructor(p0: vec3, p1: vec3, mat: Material) {
+  public constructor(p0: Vec3, p1: Vec3, mat: Material) {
     super();
     this._boxMin = p0;
     this._boxMax = p1;
@@ -44,8 +44,8 @@ export class Box extends Hittable {
   }
 
   public boundingBox(_t0: number, _t1: number): AABB {
-    const transformedMin = vec3.transformMat4(vec3.create(), this._boxMin, this.transform.objectToWorld);
-    const transformedMax = vec3.transformMat4(vec3.create(), this._boxMax, this.transform.objectToWorld);
+    const transformedMin = vec3.transformMat4(this._boxMin, this.transform.objectToWorld);
+    const transformedMax = vec3.transformMat4(this._boxMax, this.transform.objectToWorld);
 
     return new AABB(transformedMin, transformedMax);
   }

@@ -1,4 +1,4 @@
-import { quat, vec2, vec3, vec4 } from 'gl-matrix';
+import { quat, vec2, Vec2, Vec3, vec3, vec4 } from 'wgpu-matrix';
 import { GLTF, GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
 import { HittableList, Triangle } from './hittables';
 import { DiffuseLight, LambertianMaterial, Material, NormalMaterial } from './material';
@@ -35,7 +35,7 @@ export async function load(url: string): Promise<HittableList> {
 
     let mat: Material;
     if (material.emissiveFactor) {
-      const emissiveColor = vec4.scale(vec4.create(), baseColor, 50);
+      const emissiveColor = vec4.scale(baseColor, 50);
       mat = new DiffuseLight(vec3.fromValues(emissiveColor[0], emissiveColor[1], emissiveColor[2]));
     } else {
       mat = new LambertianMaterial([baseColor[0], baseColor[1], baseColor[2]]);
@@ -52,10 +52,9 @@ export async function load(url: string): Promise<HittableList> {
     const triangleMesh = new HittableList();
     triangleMesh.name = mesh.name ?? 'unknown';
 
-    let translation = vec3.create();
-    let rotation = quat.create();
-    let scale = vec3.create();
-    vec3.set(scale, 1, 1, 1);
+    let translation = vec3.zero();
+    let rotation = quat.identity();
+    let scale = vec3.create(1, 1, 1);
 
     if (node.translation) {
       translation = node.translation;
@@ -208,26 +207,26 @@ async function decodeBuffers(buffers: GLTFBuffer[], dirname: string): Promise<Ar
   return arrayBuffers;
 }
 
-function getVec3List(array: Float32Array): vec3[] {
-  const vec3List: vec3[] = [];
+function getVec3List(array: Float32Array): Vec3[] {
+  const vec3List: Vec3[] = [];
 
   for (let i = 0; i < array.length; i++) {
     const x = array[i];
     const y = array[++i];
     const z = array[++i];
-    vec3List.push([x, y, z]);
+    vec3List.push(vec3.create(x, y, z));
   }
 
   return vec3List;
 }
 
-function getVec2List(array: Float32Array): vec2[] {
-  const vec2List: vec2[] = [];
+function getVec2List(array: Float32Array): Vec2[] {
+  const vec2List: Vec2[] = [];
 
   for (let i = 0; i < array.length; i++) {
     const u = array[i];
     const v = array[++i];
-    vec2List.push([u, v]);
+    vec2List.push(vec2.create(u, v));
   }
 
   return vec2List;

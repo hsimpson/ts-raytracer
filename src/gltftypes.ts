@@ -1,6 +1,6 @@
 // see: https://github.com/KhronosGroup/glTF/tree/master/specification/2.0#objects
 
-import type { quat, vec3, vec4 } from 'gl-matrix';
+import { Quat, Vec3, Vec4 } from 'wgpu-matrix';
 
 export interface GLTF {
   nodes: GLTFNode[];
@@ -46,8 +46,8 @@ export interface GLTFAccessor {
   bufferView: number;
   componentType: GLTFComponentType;
   count: number;
-  max: vec3;
-  min: vec3;
+  max: Vec3;
+  min: Vec3;
   type: GLTFAccessorType;
 }
 
@@ -60,9 +60,9 @@ export interface GLTFBufferView {
 export interface GLTFNode {
   mesh: number;
   name?: string;
-  rotation?: quat;
-  translation?: vec3;
-  scale?: vec3;
+  rotation?: Quat;
+  translation?: Vec3;
+  scale?: Vec3;
 }
 
 export interface GLTFMesh {
@@ -92,9 +92,9 @@ export interface GLTFMaterial {
   doubleSided: boolean;
   name?: string;
   pbrMetallicRoughness?: GLTFPBRMetallicRoughness;
-  emissiveFactor?: vec3;
+  emissiveFactor?: Vec3;
 }
 
 export interface GLTFPBRMetallicRoughness {
-  baseColorFactor?: vec4;
+  baseColorFactor?: Vec4;
 }

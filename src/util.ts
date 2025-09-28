@@ -1,4 +1,4 @@
-import { mat4, vec3, vec4 } from 'gl-matrix';
+import { Mat4, vec3, Vec3, vec4, Vec4 } from 'wgpu-matrix';
 
 // gamma 2.2
 const GAMMA = 1.0 / 2.2;
@@ -30,7 +30,7 @@ export function randomInt(min: number, max: number): number {
   return Math.floor(randomNumberRange(min, max + 1));
 }
 
-export function logMatrix(mat: mat4): void {
+export function logMatrix(mat: Mat4): void {
   const m = [];
   for (const v of mat) {
     m.push(v.toFixed(2));
@@ -42,15 +42,15 @@ export function logMatrix(mat: mat4): void {
   console.log(`${m[3]}, ${m[7]}, ${m[11]}, ${m[15]}`);
 }
 
-export function isPowerOf2(value: number): boolean {
-  return (value & (value - 1)) === 0 && value !== 0;
-}
+// export function isPowerOf2(value: number): boolean {
+//   return (value & (value - 1)) === 0 && value !== 0;
+// }
 
 export function nextPowerOf2(value: number): number {
   return Math.pow(2, Math.ceil(Math.log(value) / Math.LN2));
 }
 
-export function getSphereUV(p: vec3): { u: number; v: number } {
+export function getSphereUV(p: Vec3): { u: number; v: number } {
   const phi = Math.atan2(p[2], p[0]);
   const theta = Math.asin(p[1]);
   const u = 1 - (phi + Math.PI) / (2 * Math.PI);
@@ -58,7 +58,7 @@ export function getSphereUV(p: vec3): { u: number; v: number } {
   return { u, v };
 }
 
-export function writeColor(array: Uint8ClampedArray, offset: number, color: vec3, spp: number): void {
+export function writeColor(array: Uint8ClampedArray, offset: number, color: Vec3, spp: number): void {
   let [r, g, b] = color;
 
   // Divide the color total by the number of samples
@@ -81,27 +81,27 @@ export function writeColor(array: Uint8ClampedArray, offset: number, color: vec3
   array[offset++] = 255;
 }
 
-export function lengthSquared(v: vec3): number {
+export function lengthSquared(v: Vec3): number {
   return v[0] ** 2 + v[1] ** 2 + v[2] ** 2;
 }
 
-export function reflect(v: vec3, n: vec3): vec3 {
-  return vec3.subtract(vec3.create(), v, vec3.scale(vec3.create(), n, 2 * vec3.dot(v, n)));
+export function reflect(v: Vec3, n: Vec3): Vec3 {
+  return vec3.subtract(v, vec3.scale(n, 2 * vec3.dot(v, n)));
 }
 
-export function refract(uv: vec3, n: vec3, etai_over_etat: number): vec3 {
+export function refract(uv: Vec3, n: Vec3, etai_over_etat: number): Vec3 {
   const cos_theta = vec3.dot(vec3.negate(vec3.create(), uv), n);
-  const uvTheta = vec3.add(vec3.create(), uv, vec3.scale(vec3.create(), n, cos_theta));
-  const r_out_parallel = vec3.scale(vec3.create(), uvTheta, etai_over_etat);
-  const r_out_perp = vec3.scale(vec3.create(), n, -Math.sqrt(1 - lengthSquared(r_out_parallel)));
-  return vec3.add(vec3.create(), r_out_parallel, r_out_perp);
+  const uvTheta = vec3.add(vec3.create(), uv, vec3.scale(n, cos_theta));
+  const r_out_parallel = vec3.scale(uvTheta, etai_over_etat);
+  const r_out_perp = vec3.scale(n, -Math.sqrt(1 - lengthSquared(r_out_parallel)));
+  return vec3.add(r_out_parallel, r_out_perp);
 }
 
-export function random(): vec3 {
-  return [randomNumber(), randomNumber(), randomNumber()];
+export function random(): Vec3 {
+  return vec3.create(randomNumber(), randomNumber(), randomNumber());
 }
 
-export function randomInUnitSphere(): vec3 {
+export function randomInUnitSphere(): Vec3 {
   while (true) {
     const p = randomRange(-1, 1);
     if (lengthSquared(p) >= 1) {
@@ -111,18 +111,18 @@ export function randomInUnitSphere(): vec3 {
   }
 }
 
-export function randomRange(min: number, max: number): vec3 {
-  return [randomNumberRange(min, max), randomNumberRange(min, max), randomNumberRange(min, max)];
+export function randomRange(min: number, max: number): Vec3 {
+  return vec3.create(randomNumberRange(min, max), randomNumberRange(min, max), randomNumberRange(min, max));
 }
 
-export function randomUnitVector(): vec3 {
+export function randomUnitVector(): Vec3 {
   const a = randomNumberRange(0, 2 * Math.PI);
   const z = randomNumberRange(-1, 1);
   const r = Math.sqrt(1 - z * z);
-  return [r * Math.cos(a), r * Math.sin(a), z];
+  return vec3.create(r * Math.cos(a), r * Math.sin(a), z);
 }
 
-export function randomInHemisphere(normal: vec3): vec3 {
+export function randomInHemisphere(normal: Vec3): Vec3 {
   const in_unit_sphere = randomInUnitSphere();
   if (vec3.dot(in_unit_sphere, normal) > 0.0) {
     // In the same hemisphere as the normal
@@ -131,9 +131,9 @@ export function randomInHemisphere(normal: vec3): vec3 {
   return vec3.negate(in_unit_sphere, in_unit_sphere);
 }
 
-export function randomInUnitdisk(): vec3 {
+export function randomInUnitdisk(): Vec3 {
   while (true) {
-    const p: vec3 = [randomNumberRange(-1, 1), randomNumberRange(-1, 1), 0];
+    const p: Vec3 = vec3.create(randomNumberRange(-1, 1), randomNumberRange(-1, 1), 0);
     if (lengthSquared(p) >= 1) {
       continue;
     }
@@ -141,48 +141,40 @@ export function randomInUnitdisk(): vec3 {
   }
 }
 
-export function mod4(x: vec4, y: number): vec4 {
+export function mod4(x: Vec4, y: number): Vec4 {
   // x - y * floor(x/y).
 
-  return vec4.subtract(
-    vec4.create(),
-    x,
-    vec4.scale(vec4.create(), vec4.floor(vec4.create(), vec4.scale(vec4.create(), x, 1 / y)), y),
-  );
+  return vec4.subtract(x, vec4.scale(vec4.floor(vec4.scale(x, 1 / y)), y));
 }
 
-export function mod3(x: vec3, y: number): vec3 {
+export function mod3(x: Vec3, y: number): Vec3 {
   // x - y * floor(x/y).
 
-  return vec3.subtract(
-    vec3.create(),
-    x,
-    vec3.scale(vec3.create(), vec3.floor(vec3.create(), vec3.scale(vec3.create(), x, 1 / y)), y),
-  );
+  return vec3.subtract(x, vec3.scale(vec3.floor(vec3.scale(x, 1 / y)), y));
 }
 
-export function addScalar3(v: vec3, s: number): vec3 {
+export function addScalar3(v: Vec3, s: number): Vec3 {
   return vec3.fromValues(v[0] + s, v[1] + s, v[2] + s);
 }
 
-export function addScalar4(v: vec4, s: number): vec4 {
+export function addScalar4(v: Vec4, s: number): Vec4 {
   return vec4.fromValues(v[0] + s, v[1] + s, v[2] + s, v[3] + s);
 }
 
-export function subScalar3(v: vec3, s: number): vec3 {
+export function subScalar3(v: Vec3, s: number): Vec3 {
   return vec3.fromValues(v[0] - s, v[1] - s, v[2] - s);
 }
 
-export function subScalar4(v: vec4, s: number): vec4 {
+export function subScalar4(v: Vec4, s: number): Vec4 {
   return vec4.fromValues(v[0] - s, v[1] - s, v[2] - s, v[3] - s);
 }
 
-export function step3(edge: vec3, x: vec3): vec3 {
+export function step3(edge: Vec3, x: Vec3): Vec3 {
   // For element i of the return value, 0.0 is returned if x[i] < edge[i], and 1.0 is returned otherwise.
   return vec3.fromValues(x[0] < edge[0] ? 0.0 : 1.0, x[1] < edge[1] ? 0.0 : 1.0, x[2] < edge[2] ? 0.0 : 1.0);
 }
 
-export function step4(edge: vec4, x: vec4): vec4 {
+export function step4(edge: Vec4, x: Vec4): Vec4 {
   // For element i of the return value, 0.0 is returned if x[i] < edge[i], and 1.0 is returned otherwise.
   return vec4.fromValues(
     x[0] < edge[0] ? 0.0 : 1.0,
@@ -192,11 +184,11 @@ export function step4(edge: vec4, x: vec4): vec4 {
   );
 }
 
-export function abs3(x: vec3): vec3 {
+export function abs3(x: Vec3): Vec3 {
   return vec3.fromValues(Math.abs(x[0]), Math.abs(x[1]), Math.abs(x[2]));
 }
 
-export function abs4(x: vec4): vec4 {
+export function abs4(x: Vec4): Vec4 {
   return vec4.fromValues(Math.abs(x[0]), Math.abs(x[1]), Math.abs(x[2]), Math.abs(x[3]));
 }
 

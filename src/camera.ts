@@ -1,33 +1,33 @@
-import { vec3 } from 'gl-matrix';
+import { vec3, Vec3 } from 'wgpu-matrix';
 import { Ray } from './hittables/ray';
 import { degreeToRadians, randomInUnitdisk, randomNumberRange } from './util';
 
 export interface CameraOptions {
-  lookFrom: vec3;
-  lookAt: vec3;
-  vUp: vec3;
-  background: vec3;
+  lookFrom: Vec3;
+  lookAt: Vec3;
+  vUp: Vec3;
+  background: Vec3;
   fovY: number;
   aperture: number;
   focusDist: number;
 }
 
 export class Camera {
-  private lookFrom: vec3 = vec3.create();
-  private readonly lowerLeftCorner = vec3.create();
-  private readonly horizontal = vec3.create();
-  private readonly vertical = vec3.create();
-  private readonly u = vec3.create();
-  private readonly v = vec3.create();
-  private readonly w = vec3.create();
+  private lookFrom = vec3.zero();
+  private readonly lowerLeftCorner = vec3.zero();
+  private readonly horizontal = vec3.zero();
+  private readonly vertical = vec3.zero();
+  private readonly u = vec3.zero();
+  private readonly v = vec3.zero();
+  private readonly w = vec3.zero();
   private lenseRadius = 0;
   private time0 = 0;
   private time1 = 0;
 
   public init(
-    lookFrom: vec3,
-    lookAt: vec3,
-    vUp: vec3,
+    lookFrom: Vec3,
+    lookAt: Vec3,
+    vUp: Vec3,
     fovY: number,
     aspectRatio: number,
     aperture: number,
@@ -45,13 +45,13 @@ export class Camera {
     vec3.cross(this.v, this.w, this.u);
 
     this.lookFrom = lookFrom;
-    vec3.scale(this.horizontal, this.u, focusDist * viewport_width);
-    vec3.scale(this.vertical, this.v, focusDist * viewport_height);
+    vec3.scale(this.u, focusDist * viewport_width, this.horizontal);
+    vec3.scale(this.v, focusDist * viewport_height, this.vertical);
 
-    const half_horizontal = vec3.scale(vec3.create(), this.horizontal, 0.5);
-    const half_vertical = vec3.scale(vec3.create(), this.vertical, 0.5);
+    const half_horizontal = vec3.scale(this.horizontal, 0.5);
+    const half_vertical = vec3.scale(this.vertical, 0.5);
 
-    const focusW = vec3.scale(vec3.create(), this.w, focusDist);
+    const focusW = vec3.scale(this.w, focusDist);
 
     vec3.subtract(
       this.lowerLeftCorner,
@@ -65,14 +65,14 @@ export class Camera {
   }
 
   public getRay(s: number, t: number): Ray {
-    const rd = vec3.scale(vec3.create(), randomInUnitdisk(), this.lenseRadius);
+    const rd = vec3.scale(randomInUnitdisk(), this.lenseRadius);
 
-    const vecU = vec3.scale(vec3.create(), this.u, rd[0]);
-    const vecV = vec3.scale(vec3.create(), this.v, rd[1]);
-    const offset = vec3.add(vec3.create(), vecU, vecV);
+    const vecU = vec3.scale(this.u, rd[0]);
+    const vecV = vec3.scale(this.v, rd[1]);
+    const offset = vec3.add(vecU, vecV);
 
-    const sHor = vec3.scale(vec3.create(), this.horizontal, s);
-    const tVer = vec3.scale(vec3.create(), this.vertical, t);
+    const sHor = vec3.scale(this.horizontal, s);
+    const tVer = vec3.scale(this.vertical, t);
 
     return new Ray(
       vec3.add(vec3.create(), this.lookFrom, offset),

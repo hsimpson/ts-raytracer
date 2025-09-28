@@ -1,5 +1,5 @@
-import { vec3 } from 'gl-matrix';
+import { Vec3 } from 'wgpu-matrix';
 
 export abstract class Texture {
-  public abstract value(u: number, v: number, p: vec3): vec3;
+  public abstract value(u: number, v: number, p: Vec3): Vec3;
 }
