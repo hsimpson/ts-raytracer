@@ -1,4 +1,5 @@
 import { BufferDataTypeKind, ScalarType, WebGPUBuffer, WebGPUContext } from '@donnerknalli/webgpu-utils';
+import { vec2n } from 'wgpu-matrix';
 import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
@@ -59,15 +60,10 @@ export class RaytracerGPU extends RaytracerBase {
       computeShaderUrl: new URL('assets/shaders/raytracer.comp.wgsl', baseUrl),
       uniformParams: {
         background: cameraOptions.background,
-        tileOffsetX: 0,
-        tileOffsetY: 0,
-        imageWidth: this._rayTracerOptions.imageWidth,
-        imageHeight: this._rayTracerOptions.imageHeight,
+        tileOffset: vec2n.zero(),
+        imageSize: vec2n.create(this._rayTracerOptions.imageWidth, this._rayTracerOptions.imageHeight),
         currentSample: 1,
         maxBounces: this._rayTracerOptions.maxBounces,
-        padding_0: 0,
-        padding_1: 0,
-        padding_2: 0,
       },
       webGpuContext: this._webGpuContext,
       camera,
@@ -81,8 +77,7 @@ export class RaytracerGPU extends RaytracerBase {
       fragmentShaderUrl: new URL('assets/shaders/renderer.frag.wgsl', baseUrl),
       sharedPixelBuffer: computePipeline.pixelBuffer,
       uniformParams: {
-        width: this._rayTracerOptions.imageWidth,
-        height: this._rayTracerOptions.imageHeight,
+        size: vec2n.create(this._rayTracerOptions.imageWidth, this._rayTracerOptions.imageHeight),
       },
       webGpuContext: this._webGpuContext,
     });

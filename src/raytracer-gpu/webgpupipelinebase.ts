@@ -48,19 +48,19 @@ export abstract class WebGPUPipelineBase extends WebGPUObjectBase {
     return shaderModule;
   }
 
-  protected getParamsArray(object: IUniformParams): Float32Array {
-    const keys = Object.keys(object);
-    const array = [];
-    for (const key of keys) {
-      const val = object[key];
-      if (Array.isArray(val)) {
-        array.push(...val);
-      } else {
-        array.push(val);
-      }
-    }
-    return new Float32Array(array);
-  }
+  // protected getParamsArray(object: IUniformParams): Float32Array {
+  //   const keys = Object.keys(object);
+  //   const array = [];
+  //   for (const key of keys) {
+  //     const val = object[key];
+  //     if (Array.isArray(val)) {
+  //       array.push(...val);
+  //     } else {
+  //       array.push(val);
+  //     }
+  //   }
+  //   return new Float32Array(array);
+  // }
 
   protected abstract createBindGroup(): Promise<void>;
 

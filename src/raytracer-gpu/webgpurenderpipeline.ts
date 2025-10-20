@@ -1,9 +1,9 @@
 import { BufferDataTypeKind, ScalarType, WebGPUBuffer, WebGPUContext } from '@donnerknalli/webgpu-utils';
+import { Vec2n } from 'wgpu-matrix';
 import { WebGPUPipelineBase } from './webgpupipelinebase';
 
 interface RenderUniformParams {
-  width: number;
-  height: number;
+  size: Vec2n;
 }
 
 interface WebGPURenderPipelineOptions {

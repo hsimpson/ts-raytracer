@@ -23,6 +23,9 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[wgsl]": {
+    "editor.defaultFormatter": "wgsl-analyzer.wgsl-analyzer"
+  },
   "css.validate": false, // vscode built-in disabled
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",

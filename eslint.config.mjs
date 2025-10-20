@@ -26,7 +26,7 @@ export default tseslint.config(
   // eslint-rules
   {
     rules: {
-      'no-console': 'warn',
+      // 'no-console': 'warn',
       'linebreak-style': ['error', 'unix'],
       'no-unused-vars': 'off',
       'no-warning-comments': 'warn',

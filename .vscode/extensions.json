@@ -1,9 +1,10 @@
 {
   "recommendations": [
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "dtoplak.vscode-glsllint",
     "cesium.gltf-vscode",
+    "dbaeumer.vscode-eslint",
+    "dtoplak.vscode-glsllint",
+    "esbenp.prettier-vscode",
+    "wgsl-analyzer.wgsl-analyzer",
     "yoavbls.pretty-ts-errors"
   ]
 }

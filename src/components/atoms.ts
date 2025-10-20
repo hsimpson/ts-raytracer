@@ -18,14 +18,14 @@ export const raytracerProperties = atomWithReset({
   // imageHeight: 1080,
 
   // 720p HD ready
-  imageWidth: 1280,
-  imageHeight: 720,
+  // imageWidth: 1280,
+  // imageHeight: 720,
 
   // imageWidth: 1024,
   // imageHeight: 576,
 
-  // imageWidth: 512,
-  // imageHeight: 512,
+  imageWidth: 512,
+  imageHeight: 512,
 
   // imageWidth: 640,
   // imageHeight: 360,
@@ -36,14 +36,14 @@ export const raytracerProperties = atomWithReset({
   // imageWidth: 128,
   // imageHeight: 72,
 
-  samplesPerPixel: 20,
+  samplesPerPixel: 5,
   maxBounces: 12,
-  download: true,
+  download: false,
   addStatsToImage: true,
-  scene: 0,
+  scene: 1,
   // scene: 4,
   // scene: 8,
-  tileSize: 64,
+  tileSize: 256,
 });
 
 export const raytracerRunningProperties = atomWithReset({

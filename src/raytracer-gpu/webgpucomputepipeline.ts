@@ -1,5 +1,5 @@
 import { BufferDataTypeKind, ScalarType, WebGPUBuffer, WebGPUContext } from '@donnerknalli/webgpu-utils';
-import { vec3 } from 'gl-matrix';
+import { Vec2n, Vec3 } from 'wgpu-matrix';
 import { Camera as CameraObject } from '../camera';
 import { HittableList } from '../hittables';
 import { ComputeTile } from '../tiles';
@@ -7,16 +7,11 @@ import { RaytracingBuffers } from './raytracingbuffers';
 import { WebGPUPipelineBase } from './webgpupipelinebase';
 
 interface ComputeUniformParams {
-  background: vec3;
-  tileOffsetX: number;
-  tileOffsetY: number;
-  imageWidth: number;
-  imageHeight: number;
+  background: Vec3;
+  tileOffset: Vec2n;
+  imageSize: Vec2n;
   currentSample: number;
   maxBounces: number;
-  padding_0: number;
-  padding_1: number;
-  padding_2: number;
 }
 
 interface WebGPUComputePiplineOptions {
@@ -56,7 +51,6 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
   public constructor(options: WebGPUComputePiplineOptions) {
     super(options.webGpuContext);
     this._options = options;
-    // this._options.uniformParams.randomSeed = Math.random();
     this._options.uniformParams.currentSample = 0;
 
     this._raytracingBuffers = new RaytracingBuffers(this._options.world, this._options.webGpuContext);
@@ -68,7 +62,8 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
     }
     this._initialized = true;
 
-    const pixelBufferSize = this._options.uniformParams.imageWidth * this._options.uniformParams.imageHeight * 4; // 4 floats per pixel (rgba)
+    // 4 floats per pixel (rgba)
+    const pixelBufferSize = this._options.uniformParams.imageSize[0] * this._options.uniformParams.imageSize[1] * 4;
 
     //COPY_SRC is needed because the pixel buffer is read after each compute call
     this._pixelBuffer = new WebGPUBuffer(
@@ -99,9 +94,8 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
       GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       'computeParamsUniformBuffer',
     );
-    const uniformArray = this.getParamsArray(this._options.uniformParams);
-    this._computeParamsUniformBuffer.setData('computeParams', {
-      data: uniformArray,
+    this._computeParamsUniformBuffer.setData('computeParams_background', {
+      data: this._options.uniformParams.background,
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
     this._computeParamsUniformBuffer.writeBuffer();
@@ -233,14 +227,16 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
   public updateUniformBuffer(sample: number, tile: ComputeTile): void {
     if (this._initialized) {
       this._options.uniformParams.currentSample = sample;
-      this._options.uniformParams.tileOffsetX = tile.x;
-      this._options.uniformParams.tileOffsetY = tile.y;
-      const uniformArray = this.getParamsArray(this._options.uniformParams);
+      // this._options.uniformParams.tileOffsetX = tile.x;
+      // this._options.uniformParams.tileOffsetY = tile.y;
+      this._options.uniformParams.tileOffset = [tile.x, tile.y];
 
-      this._computeCameraUniformBuffer.setData('computeParams', {
-        data: uniformArray,
-        dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
-      });
+      // const uniformArray = this.getParamsArray(this._options.uniformParams);
+
+      // this._computeCameraUniformBuffer.setData('computeParams', {
+      //   data: uniformArray,
+      //   dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
+      // });
       this._computeParamsUniformBuffer.writeBuffer();
     }
   }
