@@ -2,15 +2,15 @@ import { vec3, Vec3 } from 'wgpu-matrix';
 import { Material } from '../material';
 import { AABB } from './aabb';
 import { XYRect, XZRect, YZRect } from './aarect';
+import { Hitable } from './hitable';
+import { HitableList } from './hitablelist';
 import { HitRecord } from './hitrecord';
-import { Hittable } from './hittable';
-import { HittableList } from './hittablelist';
 import { Ray } from './ray';
 
-export class Box extends Hittable {
+export class Box extends Hitable {
   private readonly _boxMin: Vec3;
   private readonly _boxMax: Vec3;
-  private readonly _sides = new HittableList();
+  private readonly _sides = new HitableList();
 
   public constructor(p0: Vec3, p1: Vec3, mat: Material) {
     super();
@@ -27,7 +27,7 @@ export class Box extends Hittable {
     this._sides.add(new YZRect(p0[1], p1[1], p0[2], p1[2], p0[0], mat));
   }
 
-  public get sides(): HittableList {
+  public get sides(): HitableList {
     return this._sides;
   }
 

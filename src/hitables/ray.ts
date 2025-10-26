@@ -1,5 +1,5 @@
 import { vec3, Vec3 } from 'wgpu-matrix';
-import { Hittable } from '.';
+import { Hitable } from '.';
 import { HitRecord } from './hitrecord';
 
 export class Ray {
@@ -51,7 +51,7 @@ export class Ray {
   }
 }
 
-export function rayColor(ray: Ray, background: Vec3, world: Hittable, depth: number): Vec3 {
+export function rayColor(ray: Ray, background: Vec3, world: Hitable, depth: number): Vec3 {
   const rec = new HitRecord();
   // If we've exceeded the ray bounce limit, no more light is gathered.
   if (depth <= 0) {

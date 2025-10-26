@@ -1,19 +1,19 @@
 import { AABB } from './aabb';
+import { Hitable } from './hitable';
 import { HitRecord } from './hitrecord';
-import { Hittable } from './hittable';
 import { Ray } from './ray';
 
-export class HittableList extends Hittable {
-  private readonly _objects: Hittable[] = [];
+export class HitableList extends Hitable {
+  private readonly _objects: Hitable[] = [];
 
-  public constructor(object?: Hittable) {
+  public constructor(object?: Hitable) {
     super();
     if (object) {
       this.add(object);
     }
   }
 
-  public get objects(): Hittable[] {
+  public get objects(): Hitable[] {
     return this._objects;
   }
 
@@ -21,7 +21,7 @@ export class HittableList extends Hittable {
   //   this._objects.length = 0;
   // }
 
-  public add(object: Hittable): void {
+  public add(object: Hitable): void {
     this._objects.push(object);
   }
 

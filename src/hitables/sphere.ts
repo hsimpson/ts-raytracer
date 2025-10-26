@@ -2,11 +2,11 @@ import { vec3, Vec3 } from 'wgpu-matrix';
 import { Material } from '../material';
 import { getSphereUV, lengthSquared } from '../util';
 import { AABB } from './aabb';
+import { Hitable } from './hitable';
 import { HitRecord } from './hitrecord';
-import { Hittable } from './hittable';
 import { Ray } from './ray';
 
-export class Sphere extends Hittable {
+export class Sphere extends Hitable {
   private readonly _center: Vec3;
   private readonly _radius: number;
 

@@ -1,11 +1,11 @@
 import { vec3 } from 'wgpu-matrix';
 import { Material } from '../material';
 import { AABB } from './aabb';
+import { Hitable } from './hitable';
 import { HitRecord } from './hitrecord';
-import { Hittable } from './hittable';
 import { Ray } from './ray';
 
-export class XYRect extends Hittable {
+export class XYRect extends Hitable {
   public x0: number;
   public x1: number;
   public y0: number;
@@ -61,7 +61,7 @@ export class XYRect extends Hittable {
   }
 }
 
-export class XZRect extends Hittable {
+export class XZRect extends Hitable {
   public x0: number;
   public x1: number;
   public z0: number;
@@ -116,7 +116,7 @@ export class XZRect extends Hittable {
   }
 }
 
-export class YZRect extends Hittable {
+export class YZRect extends Hitable {
   public y0: number;
   public y1: number;
   public z0: number;

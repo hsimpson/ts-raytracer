@@ -1,6 +1,6 @@
 import { quat, vec2, Vec2, Vec3, vec3, vec4 } from 'wgpu-matrix';
 import { GLTF, GLTFAccessor, GLTFBuffer, GLTFBufferView, GLTFMesh, GLTFNode } from './gltftypes';
-import { HittableList, Triangle } from './hittables';
+import { HitableList, Triangle } from './hitables';
 import { DiffuseLight, LambertianMaterial, Material, NormalMaterial } from './material';
 import { isAbsoluteUrl, isDataUrl, urlDirname } from './url';
 
@@ -9,8 +9,8 @@ import { isAbsoluteUrl, isDataUrl, urlDirname } from './url';
 const NORMALMATERIAL = new NormalMaterial();
 NORMALMATERIAL.corrected = true;
 
-export async function load(url: string): Promise<HittableList> {
-  const triangleMeshArray: HittableList = new HittableList();
+export async function load(url: string): Promise<HitableList> {
+  const triangleMeshArray: HitableList = new HitableList();
 
   const response = await fetch(url);
   const gltf = (await response.json()) as GLTF;
@@ -49,7 +49,7 @@ export async function load(url: string): Promise<HittableList> {
     const node: GLTFNode = gltf.nodes[nodeIdx];
     const mesh: GLTFMesh = gltf.meshes[node.mesh];
 
-    const triangleMesh = new HittableList();
+    const triangleMesh = new HitableList();
     triangleMesh.name = mesh.name ?? 'unknown';
 
     let translation = vec3.zero();

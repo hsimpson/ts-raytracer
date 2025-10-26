@@ -3,25 +3,25 @@
 
 const FLT_MAX = 99999.99;
 
-struct ComputeParams {
+struct ComputeUniformParams {
     background: vec3<f32>,
     tileOffset: vec2<u32>,
     imageSize: vec2<u32>,
     currentSample: u32,
     maxBounces: u32,
 };
-@group(0) @binding(0) var<uniform> computeParams: ComputeParams;
+@group(0) @binding(0) var<uniform> computeUniformParams: ComputeUniformParams;
 
 struct PixelBuffer {
     pixels: array<vec4<f32>>,
 };
 
-struct AccumlationBuffer {
+struct AccumulationBuffer {
     pixels: array<vec4<f32>>,
 };
 
 @group(0) @binding(2) var<storage, read_write> pixelBuffer : PixelBuffer;
-@group(0) @binding(3) var<storage, read_write> accumulationBuffer : AccumlationBuffer;
+@group(0) @binding(3) var<storage, read_write> accumulationBuffer : AccumulationBuffer;
 
 #include "./hittable/hittable.wgsl"
 #include "./material/material.wgsl"
@@ -55,25 +55,24 @@ fn rayColor(ray: ptr<function, Ray>, background: vec3<f32>, depth: u32) -> vec3<
     return color;
 }
 
-
 @compute @workgroup_size(8,8,1)
 fn main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
     var index: vec2<u32> = GlobalInvocationID.xy;
-  // index.x = index.x + u32(computeParams.tileOffsetX);
-  // index.y = index.y + u32(computeParams.tileOffsetY);
-    index += computeParams.tileOffset;
+  // index.x = index.x + u32(computeUniformParams.tileOffsetX);
+  // index.y = index.y + u32(computeUniformParams.tileOffsetY);
+    index += computeUniformParams.tileOffset;
 
     let i = f32(index.x);
-    let j = f32(computeParams.imageSize.y - index.y);
+    let j = f32(computeUniformParams.imageSize.y - index.y);
 
-    initSeed(index.x * index.y * computeParams.currentSample * 100000u);
-    let bounces = computeParams.maxBounces;
+    initSeed(index.x * index.y * computeUniformParams.currentSample * 100000u);
+    let bounces = computeUniformParams.maxBounces;
     let rnd = random();
 
-    let u = (i + rnd) / (f32(computeParams.imageSize.x) - 1.0);
-    let v = (j + rnd) / (f32(computeParams.imageSize.y) - 1.0);
+    let u = (i + rnd) / (f32(computeUniformParams.imageSize.x) - 1.0);
+    let v = (j + rnd) / (f32(computeUniformParams.imageSize.y) - 1.0);
     var ray = cameraGetRay(u, v);
-    var pixelColor = rayColor(&ray, computeParams.background, bounces);
+    var pixelColor = rayColor(&ray, computeUniformParams.background, bounces);
 
 
   // var pixelColor: vec3<f32> = vec3<f32>(0.578, 0.656, 1.0);
@@ -83,9 +82,9 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
   //   randomMinMax(0.0, 1.0)
   // );
 
-    let pixelIndex: u32 = index.y * computeParams.imageSize.x + index.x;
+    let pixelIndex: u32 = index.y * computeUniformParams.imageSize.x + index.x;
     let accumulatedColor: vec3<f32> = accumulationBuffer.pixels[pixelIndex].rgb + pixelColor;
-    pixelColor = accumulatedColor * (1.0 / f32(computeParams.currentSample));
+    pixelColor = accumulatedColor * (1.0 / f32(computeUniformParams.currentSample));
     accumulationBuffer.pixels[pixelIndex] = vec4<f32>(accumulatedColor, 1.0);
 
     pixelColor = pow(pixelColor, vec3<f32>(1.0 / 2.2));

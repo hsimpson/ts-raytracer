@@ -1,6 +1,6 @@
 import { vec3, Vec3 } from 'wgpu-matrix';
-import { HitRecord } from '../hittables/hitrecord';
-import { Ray } from '../hittables/ray';
+import { HitRecord } from '../hitables/hitrecord';
+import { Ray } from '../hitables/ray';
 import type { Texture } from '../textures';
 
 export abstract class Material {

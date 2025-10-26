@@ -5,7 +5,7 @@ import { Ray } from './ray';
 import { Transform } from './transform';
 // import { logMatrix } from '../util';
 
-export abstract class Hittable {
+export abstract class Hitable {
   public abstract hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean;
   public abstract boundingBox(t0: number, t1: number): AABB;
   public material!: Material;

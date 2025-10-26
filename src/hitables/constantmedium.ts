@@ -3,16 +3,16 @@ import { IsoTropic, Material } from '../material';
 import { Texture } from '../textures';
 import { randomNumber } from '../util';
 import { AABB } from './aabb';
+import { Hitable } from './hitable';
 import { HitRecord } from './hitrecord';
-import { Hittable } from './hittable';
 import { Ray } from './ray';
 
-export class ConstantMedium extends Hittable {
-  private readonly _boundary: Hittable;
+export class ConstantMedium extends Hitable {
+  private readonly _boundary: Hitable;
   private readonly _phaseFunction: Material;
   private readonly _negInvDensity: number;
 
-  public constructor(boundary: Hittable, density: number, material: Vec3 | Texture) {
+  public constructor(boundary: Hitable, density: number, material: Vec3 | Texture) {
     super();
     this._boundary = boundary;
     this._negInvDensity = -1 / density;

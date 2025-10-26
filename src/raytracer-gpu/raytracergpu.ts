@@ -4,7 +4,7 @@ import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
 import { ComputeTile, createComputeTiles } from '../tiles';
-import { WebGPUComputePipline } from './webgpucomputepipeline';
+import { WebGPUComputePipeline } from './webgpucomputepipeline';
 import { WebGPURenderPipeline } from './webgpurenderpipeline';
 
 const LOCAL_SIZE = 8;
@@ -56,9 +56,9 @@ export class RaytracerGPU extends RaytracerBase {
 
     const baseUrl = window.location.href;
 
-    const computePipeline = new WebGPUComputePipline({
+    const computePipeline = new WebGPUComputePipeline({
       computeShaderUrl: new URL('assets/shaders/raytracer.comp.wgsl', baseUrl),
-      uniformParams: {
+      computeUniformParams: {
         background: cameraOptions.background,
         tileOffset: vec2n.zero(),
         imageSize: vec2n.create(this._rayTracerOptions.imageWidth, this._rayTracerOptions.imageHeight),
@@ -76,7 +76,7 @@ export class RaytracerGPU extends RaytracerBase {
       vertexShaderUrl: new URL('assets/shaders/renderer.vert.wgsl', baseUrl),
       fragmentShaderUrl: new URL('assets/shaders/renderer.frag.wgsl', baseUrl),
       sharedPixelBuffer: computePipeline.pixelBuffer,
-      uniformParams: {
+      renderUniformParams: {
         size: vec2n.create(this._rayTracerOptions.imageWidth, this._rayTracerOptions.imageHeight),
       },
       webGpuContext: this._webGpuContext,
@@ -133,7 +133,7 @@ export class RaytracerGPU extends RaytracerBase {
 
   private async renderTiles(
     tiles: ComputeTile[],
-    computePipeline: WebGPUComputePipline,
+    computePipeline: WebGPUComputePipeline,
     renderPipeline: WebGPURenderPipeline,
   ): Promise<void> {
     return new Promise((resolve) => {
@@ -188,7 +188,7 @@ export class RaytracerGPU extends RaytracerBase {
     this._initialized = true;
   }
 
-  private computePass(computePipeline: WebGPUComputePipline, sample: number, tile: ComputeTile): void {
+  private computePass(computePipeline: WebGPUComputePipeline, sample: number, tile: ComputeTile): void {
     // console.log('computePass sample:', sample, tile);
     const commandEncoder = this._webGpuContext.device.createCommandEncoder();
 
@@ -221,14 +221,14 @@ export class RaytracerGPU extends RaytracerBase {
     const passEncoder = commandEncoder.beginRenderPass(renderPassDesc);
     passEncoder.setPipeline(renderPipeLine.gpuPipeline);
     passEncoder.setBindGroup(0, renderPipeLine.bindGroup);
-    passEncoder.setVertexBuffer(0, renderPipeLine.vertexPostionBuffer);
+    passEncoder.setVertexBuffer(0, renderPipeLine.vertexPositionBuffer);
     passEncoder.draw(6, 1, 0, 0);
     passEncoder.end();
 
     this._webGpuContext.queue.submit([commandEncoder.finish()]);
   }
 
-  private async copyBuffer(computePipeline: WebGPUComputePipline): Promise<Float32Array> {
+  private async copyBuffer(computePipeline: WebGPUComputePipeline): Promise<Float32Array> {
     const commandEncoder = this._webGpuContext.device.createCommandEncoder();
 
     const bufferSize = this._rayTracerOptions.imageWidth * this._rayTracerOptions.imageHeight * 4;

@@ -1,17 +1,17 @@
 import { randomInt } from '../util';
 import { AABB } from './aabb';
+import { Hitable } from './hitable';
+import { HitableList } from './hitablelist';
 import { HitRecord } from './hitrecord';
-import { Hittable } from './hittable';
-import { HittableList } from './hittablelist';
 import { Ray } from './ray';
 
 let _id = 0;
 let _level = 0;
 
-export class BVHNode extends Hittable {
+export class BVHNode extends Hitable {
   private bbox = new AABB();
-  private left!: Hittable;
-  private right!: Hittable;
+  private left!: Hitable;
+  private right!: Hitable;
   public readonly id = _id;
   public level!: number;
 
@@ -20,7 +20,7 @@ export class BVHNode extends Hittable {
     _id++;
   }
 
-  public static createFromHitableList(list: HittableList, time0: number, time1: number): BVHNode {
+  public static createFromHitableList(list: HitableList, time0: number, time1: number): BVHNode {
     _id = 0;
     _level = 0;
     console.log('BVH starting...');
@@ -28,10 +28,10 @@ export class BVHNode extends Hittable {
     const node = new BVHNode();
     node.level = _level;
 
-    const flatList = new HittableList();
-    const fillFlatList = (l: HittableList): void => {
+    const flatList = new HitableList();
+    const fillFlatList = (l: HitableList): void => {
       for (const object of l.objects) {
-        if (object instanceof HittableList) {
+        if (object instanceof HitableList) {
           fillFlatList(object);
         } else {
           flatList.add(object);
@@ -50,7 +50,7 @@ export class BVHNode extends Hittable {
   }
 
   public static createFromObjects(
-    objects: Hittable[],
+    objects: Hitable[],
     start: number,
     end: number,
     time0: number,
@@ -61,7 +61,7 @@ export class BVHNode extends Hittable {
     return node;
   }
 
-  private init(objects: Hittable[], start: number, end: number, time0: number, time1: number): void {
+  private init(objects: Hitable[], start: number, end: number, time0: number, time1: number): void {
     const axis = randomInt(0, 2);
     const comparator = axis === 0 ? boxXCompare : axis === 1 ? boxYCompare : boxZCompare;
 
@@ -130,21 +130,21 @@ export class BVHNode extends Hittable {
   }
 }
 
-function boxCompare(a: Hittable, b: Hittable, axis: number): number {
+function boxCompare(a: Hitable, b: Hitable, axis: number): number {
   const boxA = a.boundingBox(0, 0);
   const boxB = b.boundingBox(0, 0);
 
   return boxA.min[axis] < boxB.min[axis] ? -1 : 1;
 }
 
-function boxXCompare(a: Hittable, b: Hittable): number {
+function boxXCompare(a: Hitable, b: Hitable): number {
   return boxCompare(a, b, 0);
 }
 
-function boxYCompare(a: Hittable, b: Hittable): number {
+function boxYCompare(a: Hitable, b: Hitable): number {
   return boxCompare(a, b, 1);
 }
 
-function boxZCompare(a: Hittable, b: Hittable): number {
+function boxZCompare(a: Hitable, b: Hitable): number {
   return boxCompare(a, b, 2);
 }

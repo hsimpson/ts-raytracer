@@ -1,7 +1,7 @@
 import { vec2, Vec2, vec3, Vec3 } from 'wgpu-matrix';
 import { AABB } from './aabb';
+import { Hitable } from './hitable';
 import { HitRecord } from './hitrecord';
-import { Hittable } from './hittable';
 import { Ray } from './ray';
 import { Transform } from './transform';
 
@@ -19,7 +19,7 @@ function avgVector3(vectors: Vec3[]): Vec3 {
 
 const EPSILON = 1e-8;
 
-export class Triangle extends Hittable {
+export class Triangle extends Hitable {
   public readonly v0: Vec3;
   public readonly n0?: Vec3;
   public readonly uv0?: Vec2;

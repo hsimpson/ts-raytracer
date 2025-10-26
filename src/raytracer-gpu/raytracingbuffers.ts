@@ -2,15 +2,15 @@ import { WebGPUContext } from '@donnerknalli/webgpu-utils';
 import { mat4, Mat4, quat, vec2, Vec2, vec4, Vec4 } from 'wgpu-matrix';
 import {
   Box,
-  Hittable,
-  HittableList,
+  Hitable,
+  HitableList,
   MovingSphere as HMovingSphere,
   Sphere as HSphere,
   Triangle as HTriangle,
   XYRect as HXYRect,
   XZRect as HXZRect,
   YZRect as HYZRect,
-} from '../hittables';
+} from '../hitables';
 import {
   DielectricMaterial,
   Material,
@@ -120,7 +120,7 @@ export class RaytracingBuffers {
   private readonly _imageTextures: ImageTexture[] = [];
   private readonly _webGpuContext: WebGPUContext;
 
-  public constructor(world: HittableList, webGpuContext: WebGPUContext) {
+  public constructor(world: HitableList, webGpuContext: WebGPUContext) {
     this.traverseHittables(world, mat4.identity());
     this._webGpuContext = webGpuContext;
   }
@@ -129,12 +129,12 @@ export class RaytracingBuffers {
     return this._imageTextures.length > 0;
   }
 
-  private traverseHittables(list: HittableList, objectToWorld: Mat4): void {
+  private traverseHittables(list: HitableList, objectToWorld: Mat4): void {
     for (const object of list.objects) {
       const currentObjectToWorld = object.transform.objectToWorld;
       mat4.multiply(currentObjectToWorld, objectToWorld, currentObjectToWorld);
 
-      if (object instanceof HittableList) {
+      if (object instanceof HitableList) {
         this.traverseHittables(object, currentObjectToWorld);
       } else if (object instanceof Box) {
         this.traverseHittables(object.sides, currentObjectToWorld);
@@ -217,7 +217,7 @@ export class RaytracingBuffers {
     return idx;
   }
 
-  private addPrimitive(obj: Hittable, objectToWorld: Mat4): number {
+  private addPrimitive(obj: Hitable, objectToWorld: Mat4): number {
     const idx = this._gpuPrimitives.length;
     let gpuPrimitive: WebGPUPrimitive;
 

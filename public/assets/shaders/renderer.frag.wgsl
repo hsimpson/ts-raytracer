@@ -6,10 +6,10 @@ struct FragmentOutput {
     @location(0) fragColor: vec4<f32>,
 };
 
-struct ComputeParams {
+struct RenderUniformParams {
     size: vec2<u32>,
 };
-@group(0) @binding(0) var<uniform> computeParams: ComputeParams;
+@group(0) @binding(0) var<uniform> renderUniformParams: RenderUniformParams;
 
 struct PixelBuffer {
     pixels: array<vec4<f32>>,
@@ -19,7 +19,7 @@ struct PixelBuffer {
 @fragment
 fn main(input: FragmentInput) -> FragmentOutput {
     var output = FragmentOutput();
-    let resolution: vec2<f32> = vec2<f32>(computeParams.size);
+    let resolution: vec2<f32> = vec2<f32>(renderUniformParams.size);
 
     let bufferCoord: vec2<u32> = vec2<u32>(floor(input.uv * resolution));
     let pixelIndex: u32 = bufferCoord.y * u32(resolution.x) + bufferCoord.x;

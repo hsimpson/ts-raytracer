@@ -1,5 +1,5 @@
 import { vec3, Vec3 } from 'wgpu-matrix';
-import { Ray } from './hittables/ray';
+import { Ray } from './hitables/ray';
 import { degreeToRadians, randomInUnitdisk, randomNumberRange } from './util';
 
 export interface CameraOptions {
