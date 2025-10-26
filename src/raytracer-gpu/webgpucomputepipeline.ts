@@ -1,7 +1,7 @@
 import { BufferDataTypeKind, ScalarType, WebGPUBuffer, WebGPUContext } from '@donnerknalli/webgpu-utils';
 import { Vec2n, Vec3 } from 'wgpu-matrix';
 import { Camera as CameraObject } from '../camera';
-import { HittableList } from '../hittables';
+import { HitableList } from '../hitables';
 import { ComputeTile } from '../tiles';
 import { RaytracingBuffers } from './raytracingbuffers';
 import { WebGPUPipelineBase } from './webgpupipelinebase';
@@ -14,12 +14,12 @@ interface ComputeUniformParams {
   maxBounces: number;
 }
 
-interface WebGPUComputePiplineOptions {
+interface WebGPUComputePipelineOptions {
   computeShaderUrl: URL;
-  uniformParams: ComputeUniformParams;
+  computeUniformParams: ComputeUniformParams;
   webGpuContext: WebGPUContext;
   camera: CameraObject;
-  world: HittableList;
+  world: HitableList;
 }
 
 const enum Bindings {
@@ -36,8 +36,8 @@ const enum Bindings {
   ImageTexture = 8,
 }
 
-export class WebGPUComputePipline extends WebGPUPipelineBase {
-  private readonly _options: WebGPUComputePiplineOptions;
+export class WebGPUComputePipeline extends WebGPUPipelineBase {
+  private readonly _options: WebGPUComputePipelineOptions;
   private readonly _raytracingBuffers: RaytracingBuffers;
 
   private _computeParamsUniformBuffer!: WebGPUBuffer;
@@ -48,10 +48,10 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
   private _materialsBuffer!: WebGPUBuffer;
   private _texturesBuffer!: WebGPUBuffer;
 
-  public constructor(options: WebGPUComputePiplineOptions) {
+  public constructor(options: WebGPUComputePipelineOptions) {
     super(options.webGpuContext);
     this._options = options;
-    this._options.uniformParams.currentSample = 0;
+    this._options.computeUniformParams.currentSample = 0;
 
     this._raytracingBuffers = new RaytracingBuffers(this._options.world, this._options.webGpuContext);
   }
@@ -63,7 +63,8 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
     this._initialized = true;
 
     // 4 floats per pixel (rgba)
-    const pixelBufferSize = this._options.uniformParams.imageSize[0] * this._options.uniformParams.imageSize[1] * 4;
+    const pixelBufferSize =
+      this._options.computeUniformParams.imageSize[0] * this._options.computeUniformParams.imageSize[1] * 4;
 
     //COPY_SRC is needed because the pixel buffer is read after each compute call
     this._pixelBuffer = new WebGPUBuffer(
@@ -87,18 +88,6 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
     this._accumulationBuffer.writeBuffer();
-
-    //COPY_DST is needed because the uniforms are updated after each compute call
-    this._computeParamsUniformBuffer = new WebGPUBuffer(
-      this._webGpuContext,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      'computeParamsUniformBuffer',
-    );
-    this._computeParamsUniformBuffer.setData('computeParams_background', {
-      data: this._options.uniformParams.background,
-      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
-    });
-    this._computeParamsUniformBuffer.writeBuffer();
 
     this._computeCameraUniformBuffer = new WebGPUBuffer(
       this._webGpuContext,
@@ -144,6 +133,8 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
     this._texturesBuffer.writeBuffer();
+
+    this.createComputeUniformBuffer();
 
     const bindGroupLayoutDescriptor: GPUBindGroupLayoutDescriptor = {
       entries: [
@@ -224,12 +215,42 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
     await this.createBindGroup();
   }
 
+  private createComputeUniformBuffer() {
+    this._computeParamsUniformBuffer = new WebGPUBuffer(
+      this._webGpuContext,
+      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      'computeParamsUniformBuffer',
+    );
+    this._computeParamsUniformBuffer.setData('computeParamsUniform_background', {
+      data: this._options.computeUniformParams.background,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Vec3 },
+    });
+    this._computeParamsUniformBuffer.setData('computeParamsUniform_tileOffset', {
+      data: this._options.computeUniformParams.tileOffset,
+      dataType: { elementType: ScalarType.Uint32, bufferDataTypeKind: BufferDataTypeKind.Vec2 },
+    });
+    this._computeParamsUniformBuffer.setData('computeParamsUniform_imageSize', {
+      data: this._options.computeUniformParams.imageSize,
+      dataType: { elementType: ScalarType.Uint32, bufferDataTypeKind: BufferDataTypeKind.Vec2 },
+    });
+    this._computeParamsUniformBuffer.setData('computeParamsUniform_currentSample', {
+      data: this._options.computeUniformParams.currentSample,
+      dataType: { elementType: ScalarType.Uint32, bufferDataTypeKind: BufferDataTypeKind.Scalar },
+    });
+    this._computeParamsUniformBuffer.setData('computeParamsUniform_maxBounces', {
+      data: this._options.computeUniformParams.maxBounces,
+      dataType: { elementType: ScalarType.Uint32, bufferDataTypeKind: BufferDataTypeKind.Scalar },
+    });
+
+    this._computeParamsUniformBuffer.writeBuffer();
+  }
+
   public updateUniformBuffer(sample: number, tile: ComputeTile): void {
     if (this._initialized) {
-      this._options.uniformParams.currentSample = sample;
+      this._options.computeUniformParams.currentSample = sample;
       // this._options.uniformParams.tileOffsetX = tile.x;
       // this._options.uniformParams.tileOffsetY = tile.y;
-      this._options.uniformParams.tileOffset = [tile.x, tile.y];
+      this._options.computeUniformParams.tileOffset = [tile.x, tile.y];
 
       // const uniformArray = this.getParamsArray(this._options.uniformParams);
 
@@ -237,7 +258,7 @@ export class WebGPUComputePipline extends WebGPUPipelineBase {
       //   data: uniformArray,
       //   dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
       // });
-      this._computeParamsUniformBuffer.writeBuffer();
+      // this._computeParamsUniformBuffer.writeBuffer();
     }
   }
 

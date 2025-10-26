@@ -10,7 +10,7 @@ interface WebGPURenderPipelineOptions {
   vertexShaderUrl: URL;
   fragmentShaderUrl: URL;
   sharedPixelBuffer: WebGPUBuffer;
-  uniformParams: RenderUniformParams;
+  renderUniformParams: RenderUniformParams;
   webGpuContext: WebGPUContext;
 }
 
@@ -59,10 +59,9 @@ export class WebGPURenderPipeline extends WebGPUPipelineBase {
       GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       'renderParamsUniformBuffer',
     );
-    const uniformArray = this.getParamsArray(this._options.uniformParams);
-    this._renderParamsUniformBuffer.setData('params', {
-      data: uniformArray,
-      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
+    this._renderParamsUniformBuffer.setData('size', {
+      data: this._options.renderUniformParams.size,
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Vec2 },
     });
     this._renderParamsUniformBuffer.writeBuffer();
 
@@ -191,7 +190,7 @@ export class WebGPURenderPipeline extends WebGPUPipelineBase {
     return this._pipeline as GPURenderPipeline;
   }
 
-  public get vertexPostionBuffer(): GPUBuffer {
+  public get vertexPositionBuffer(): GPUBuffer {
     return this._vertexPositionBuffer.getRawBuffer();
   }
 }

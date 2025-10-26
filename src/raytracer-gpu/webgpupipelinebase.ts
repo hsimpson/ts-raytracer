@@ -2,8 +2,6 @@ import { WebGPUContext } from '@donnerknalli/webgpu-utils';
 import { WebGPUObjectBase } from './webgpuobjectbase';
 import { preprocessShader } from './wgslpreprocessor';
 
-type IUniformParams = Record<string, any>;
-
 export abstract class WebGPUPipelineBase extends WebGPUObjectBase {
   protected _initialized = false;
   protected _pipeline!: GPURenderPipeline | GPUComputePipeline;
