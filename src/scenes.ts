@@ -31,27 +31,27 @@ function gpuTestScene(useBVH: boolean): { world: HitableList; cameraOptions: Cam
   const world = new HitableList();
 
   // ground
-  const red = new LambertianMaterial([0.65, 0.05, 0.05]);
-  const green = new LambertianMaterial([0.12, 0.45, 0.15]);
+  const red = new LambertianMaterial(vec3.create(0.65, 0.05, 0.05));
+  const green = new LambertianMaterial(vec3.create(0.12, 0.45, 0.15));
   // const checkerTexture = new CheckerTexture([0.2, 0.3, 0.1], [0.9, 0.9, 0.9]);
-  const groundMaterial = new LambertianMaterial([0.5, 0.5, 0.5]);
+  const groundMaterial = new LambertianMaterial(vec3.create(0.5, 0.5, 0.5));
   // const groundMaterial = new LambertianMaterial();
   // groundMaterial.texture = checkerTexture;
 
-  const groundSphere = new Sphere([0, -1000, 0], 1000, groundMaterial);
+  const groundSphere = new Sphere(vec3.create(0, -1000, 0), 1000, groundMaterial);
   groundSphere.name = 'groundSphere';
   world.add(groundSphere);
 
   // const metal1 = new MetalMaterial([0.7, 0.6, 0.5], 0.1);
   // const dielectric1 = new DielectricMaterial(1.5);
 
-  const redSphere = new Sphere([0, 0, 0], 0.4, red);
+  const redSphere = new Sphere(vec3.create(0, 0, 0), 0.4, red);
   redSphere.name = 'redSphere';
-  redSphere.transform.translate([-0.4, 0.4, 0]);
+  redSphere.transform.translate(vec3.create(-0.4, 0.4, 0));
 
-  const greenSphere = new Sphere([0, 0, 0], 0.4, green);
+  const greenSphere = new Sphere(vec3.create(0, 0, 0), 0.4, green);
   greenSphere.name = 'greenSphere';
-  greenSphere.transform.translate([0.6, 0.4, 1]);
+  greenSphere.transform.translate(vec3.create(0.6, 0.4, 1));
 
   world.add(redSphere);
   world.add(greenSphere);
@@ -68,12 +68,12 @@ function gpuTestScene(useBVH: boolean): { world: HitableList; cameraOptions: Cam
 function randomScene(useBVH: boolean): { world: HitableList; cameraOptions: CameraOptions } {
   const world = new HitableList();
 
-  const groundMaterial = new LambertianMaterial([0.5, 0.5, 0.5]);
+  const groundMaterial = new LambertianMaterial(vec3.create(0.5, 0.5, 0.5));
   // const checkerTexture = new CheckerTexture(new vec3(0.2, 0.3, 0.1), new vec3(0.9, 0.9, 0.9));
   // const groundMaterial = new LambertianMaterial();
   // groundMaterial.texture = checkerTexture;
 
-  world.add(new Sphere([0, -1000, 0], 1000, groundMaterial));
+  world.add(new Sphere(vec3.create(0, -1000, 0), 1000, groundMaterial));
   // let i = 1;
   const count = 8;
   for (let a = -count; a < count; a++) {
@@ -89,7 +89,7 @@ function randomScene(useBVH: boolean): { world: HitableList; cameraOptions: Came
           // diffuse aka lambertian
           const albedo = vec3.multiply(vec3.create(), random(), random());
           sphereMaterial = new LambertianMaterial(albedo);
-          const center2 = vec3.add(vec3.create(), center, [0, randomNumberRange(0, 1.0), 0]);
+          const center2 = vec3.add(center, [0, randomNumberRange(0, 1.0), 0]);
           world.add(new MovingSphere(center, center2, 0.0, 1.0, 0.2, sphereMaterial));
           // world.add(new Sphere(center, 0.2, sphereMaterial));
         } else if (chooseMat < 0.95) {
@@ -108,12 +108,12 @@ function randomScene(useBVH: boolean): { world: HitableList; cameraOptions: Came
   }
 
   const material1 = new DielectricMaterial(1.5);
-  const material2 = new LambertianMaterial([0.4, 0.2, 0.1]);
-  const material3 = new MetalMaterial([0.7, 0.6, 0.5], 0.0);
+  const material2 = new LambertianMaterial(vec3.create(0.4, 0.2, 0.1));
+  const material3 = new MetalMaterial(vec3.create(0.7, 0.6, 0.5), 0.0);
 
-  world.add(new Sphere([1, 1, 0], 1, material1));
-  world.add(new Sphere([-4, 1, 0], 1, material2));
-  world.add(new Sphere([4, 1, 0], 1, material3));
+  world.add(new Sphere(vec3.create(1, 1, 0), 1, material1));
+  world.add(new Sphere(vec3.create(-4, 1, 0), 1, material2));
+  world.add(new Sphere(vec3.create(4, 1, 0), 1, material3));
 
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: vec3.create(13, 2, 3), fovY: 20 };
 
@@ -127,12 +127,12 @@ function randomScene(useBVH: boolean): { world: HitableList; cameraOptions: Came
 function twoCheckerSpheres(_useBVH: boolean): { world: HitableList; cameraOptions: CameraOptions } {
   const world = new HitableList();
 
-  const checkerTexture = new CheckerTexture([0.2, 0.3, 0.1], [0.9, 0.9, 0.9], 40);
+  const checkerTexture = new CheckerTexture(vec3.create(0.2, 0.3, 0.1), vec3.create(0.9, 0.9, 0.9), 40);
   const sphereMaterial = new LambertianMaterial();
   sphereMaterial.texture = checkerTexture;
 
-  world.add(new Sphere([0, -10, 0], 10, sphereMaterial));
-  world.add(new Sphere([0, 10, 0], 10, sphereMaterial));
+  world.add(new Sphere(vec3.create(0, -10, 0), 10, sphereMaterial));
+  world.add(new Sphere(vec3.create(0, 10, 0), 10, sphereMaterial));
 
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: vec3.create(13, 2, 3), fovY: 20 };
 
@@ -146,8 +146,8 @@ function twoNoiseSpheres(_useBVH: boolean): { world: HitableList; cameraOptions:
   const sphereMaterial = new LambertianMaterial();
   sphereMaterial.texture = perlinTexture;
 
-  world.add(new Sphere([0, -1000, 0], 1000, sphereMaterial));
-  world.add(new Sphere([0, 2, 0], 2, sphereMaterial));
+  world.add(new Sphere(vec3.create(0, -1000, 0), 1000, sphereMaterial));
+  world.add(new Sphere(vec3.create(0, 2, 0), 2, sphereMaterial));
 
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: vec3.create(13, 2, 3), fovY: 20 };
 
@@ -163,7 +163,7 @@ async function earthSphere(_useBVH: boolean): Promise<{ world: HitableList; came
   const sphereMaterial = new LambertianMaterial();
   sphereMaterial.texture = earthTexture;
 
-  world.add(new Sphere([0, 0, 0], 2, sphereMaterial));
+  world.add(new Sphere(vec3.create(0, 0, 0), 2, sphereMaterial));
 
   const cameraOptions: CameraOptions = { ...defaultCameraOptions, lookFrom: vec3.create(13, 2, 3), fovY: 20 };
 
@@ -176,12 +176,12 @@ function areaLight(_useBVH: boolean): { world: HitableList; cameraOptions: Camer
   const sphereMaterial = new LambertianMaterial();
   sphereMaterial.texture = perlinTexture;
 
-  world.add(new Sphere([0, -1000, 0], 1000, sphereMaterial));
-  world.add(new Sphere([0, 2, 0], 2, sphereMaterial));
+  world.add(new Sphere(vec3.create(0, -1000, 0), 1000, sphereMaterial));
+  world.add(new Sphere(vec3.create(0, 2, 0), 2, sphereMaterial));
 
-  const diffuseLight = new DiffuseLight([4, 4, 4]);
+  const diffuseLight = new DiffuseLight(vec3.create(4, 4, 4));
   world.add(new XYRect(3, 5, 1, 3, -2, diffuseLight));
-  world.add(new Sphere([0, 7, 0], 2, diffuseLight));
+  world.add(new Sphere(vec3.create(0, 7, 0), 2, diffuseLight));
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
@@ -197,10 +197,10 @@ function areaLight(_useBVH: boolean): { world: HitableList; cameraOptions: Camer
 function cornellBox(useBVH: boolean): { world: HitableList; cameraOptions: CameraOptions } {
   // http://www.graphics.cornell.edu/online/box/data.html
   const world = new HitableList();
-  const red = new LambertianMaterial([0.65, 0.05, 0.05]);
-  const white = new LambertianMaterial([0.73, 0.73, 0.73]);
-  const green = new LambertianMaterial([0.12, 0.45, 0.15]);
-  const light = new DiffuseLight([15, 15, 15]);
+  const red = new LambertianMaterial(vec3.create(0.65, 0.05, 0.05));
+  const white = new LambertianMaterial(vec3.create(0.73, 0.73, 0.73));
+  const green = new LambertianMaterial(vec3.create(0.12, 0.45, 0.15));
+  const light = new DiffuseLight(vec3.create(15, 15, 15));
 
   world.add(new YZRect(0, 555, 0, 555, 555, red)); // left wall
   world.add(new YZRect(0, 555, 0, 555, 0, green)); // right wall
@@ -209,13 +209,13 @@ function cornellBox(useBVH: boolean): { world: HitableList; cameraOptions: Camer
   world.add(new XZRect(0, 555, 0, 555, 555, white)); // ceiling
   world.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
 
-  const box1: Hitable = new Box([0, 0, 0], [165, 330, 165], white);
-  box1.transform.translate([265, 0, 295]);
+  const box1: Hitable = new Box(vec3.create(0, 0, 0), vec3.create(165, 330, 165), white);
+  box1.transform.translate(vec3.create(265, 0, 295));
   box1.transform.rotateEuler(0.0, 15.0, 0.0);
   world.add(box1);
 
-  const box2: Hitable = new Box([0, 0, 0], [165, 165, 165], white);
-  box2.transform.translate([130, 0, 65]);
+  const box2: Hitable = new Box(vec3.create(0, 0, 0), vec3.create(165, 165, 165), white);
+  box2.transform.translate(vec3.create(130, 0, 65));
   box2.transform.rotateEuler(0.0, -18.0, 0.0);
   world.add(box2);
 
@@ -236,10 +236,10 @@ function cornellBox(useBVH: boolean): { world: HitableList; cameraOptions: Camer
 function cornellBoxSmoke(useBVH: boolean): { world: HitableList; cameraOptions: CameraOptions } {
   // http://www.graphics.cornell.edu/online/box/data.html
   const world = new HitableList();
-  const red = new LambertianMaterial([0.65, 0.05, 0.05]);
-  const white = new LambertianMaterial([0.73, 0.73, 0.73]);
-  const green = new LambertianMaterial([0.12, 0.45, 0.15]);
-  const light = new DiffuseLight([15, 15, 15]);
+  const red = new LambertianMaterial(vec3.create(0.65, 0.05, 0.05));
+  const white = new LambertianMaterial(vec3.create(0.73, 0.73, 0.73));
+  const green = new LambertianMaterial(vec3.create(0.12, 0.45, 0.15));
+  const light = new DiffuseLight(vec3.create(15, 15, 15));
 
   world.add(new YZRect(0, 555, 0, 555, 555, red)); // left wall
   world.add(new YZRect(0, 555, 0, 555, 0, green)); // right wall
@@ -248,15 +248,15 @@ function cornellBoxSmoke(useBVH: boolean): { world: HitableList; cameraOptions: 
   world.add(new XZRect(0, 555, 0, 555, 555, white)); // ceiling
   world.add(new XYRect(0, 555, 0, 555, 555, white)); // back wall
 
-  const box1 = new Box([0, 0, 0], [165, 330, 165], white);
-  box1.transform.translate([265, 0, 295]);
+  const box1 = new Box(vec3.create(0, 0, 0), vec3.create(165, 330, 165), white);
+  box1.transform.translate(vec3.create(265, 0, 295));
   box1.transform.rotateEuler(0.0, 15.0, 0.0);
-  world.add(new ConstantMedium(box1, 0.01, [0, 0, 0]));
+  world.add(new ConstantMedium(box1, 0.01, vec3.create(0, 0, 0)));
 
-  const box2 = new Box([0, 0, 0], [165, 165, 165], white);
-  box2.transform.translate([130, 0, 65]);
+  const box2 = new Box(vec3.create(0, 0, 0), vec3.create(165, 165, 165), white);
+  box2.transform.translate(vec3.create(130, 0, 65));
   box2.transform.rotateEuler(0.0, -18.0, 0.0);
-  world.add(new ConstantMedium(box2, 0.01, [1, 1, 1]));
+  world.add(new ConstantMedium(box2, 0.01, vec3.create(1, 1, 1)));
 
   const cameraOptions: CameraOptions = {
     ...defaultCameraOptions,
@@ -276,7 +276,7 @@ async function finalScene(useBVH: boolean): Promise<{ world: HitableList; camera
   const world = new HitableList();
   const boxes1 = new HitableList();
 
-  const ground = new LambertianMaterial([0.48, 0.83, 0.53]);
+  const ground = new LambertianMaterial(vec3.create(0.48, 0.83, 0.53));
 
   const boxesPerSide = 20;
   const w = 100.0;
@@ -290,7 +290,7 @@ async function finalScene(useBVH: boolean): Promise<{ world: HitableList; camera
       const y1 = randomNumberRange(1, 101);
       const z1 = z0 + w;
 
-      boxes1.add(new Box([x0, y0, z0], [x1, y1, z1], ground));
+      boxes1.add(new Box(vec3.create(x0, y0, z0), vec3.create(x1, y1, z1), ground));
     }
   }
 
@@ -300,42 +300,42 @@ async function finalScene(useBVH: boolean): Promise<{ world: HitableList; camera
     world.add(boxes1);
   }
 
-  const light = new DiffuseLight([7, 7, 7]);
+  const light = new DiffuseLight(vec3.create(7, 7, 7));
   world.add(new XZRect(123, 423, 147, 412, 554, light));
 
   const center1 = vec3.create(400, 400, 200);
-  const center2 = vec3.add(vec3.create(), center1, [30, 0, 0]);
-  const movingSphereMaterial = new LambertianMaterial([0.7, 0.3, 0.1]);
+  const center2 = vec3.add(center1, [30, 0, 0]);
+  const movingSphereMaterial = new LambertianMaterial(vec3.create(0.7, 0.3, 0.1));
   world.add(new MovingSphere(center1, center2, 0, 1, 50, movingSphereMaterial));
 
-  world.add(new Sphere([260, 150, 45], 50, new DielectricMaterial(1.5)));
-  world.add(new Sphere([0, 150, 145], 50, new MetalMaterial([0.8, 0.8, 0.9], 10.0)));
+  world.add(new Sphere(vec3.create(260, 150, 45), 50, new DielectricMaterial(1.5)));
+  world.add(new Sphere(vec3.create(0, 150, 145), 50, new MetalMaterial(vec3.create(0.8, 0.8, 0.9), 10.0)));
 
-  const boundary1 = new Sphere([360, 150, 145], 70, new DielectricMaterial(1.5));
+  const boundary1 = new Sphere(vec3.create(360, 150, 145), 70, new DielectricMaterial(1.5));
   world.add(boundary1);
-  world.add(new ConstantMedium(boundary1, 0.2, [0.2, 0.4, 0.9]));
-  const boundary2 = new Sphere([0, 0, 0], 5000, new DielectricMaterial(1.5));
-  world.add(new ConstantMedium(boundary2, 0.0001, [1, 1, 1]));
+  world.add(new ConstantMedium(boundary1, 0.2, vec3.create(0.2, 0.4, 0.9)));
+  const boundary2 = new Sphere(vec3.create(0, 0, 0), 5000, new DielectricMaterial(1.5));
+  world.add(new ConstantMedium(boundary2, 0.0001, vec3.create(1, 1, 1)));
 
   const earthTexture = new ImageTexture();
   await earthTexture.load('assets/textures/earthmap.jpg');
 
   const earthMaterial = new LambertianMaterial();
   earthMaterial.texture = earthTexture;
-  world.add(new Sphere([400, 200, 400], 100, earthMaterial));
+  world.add(new Sphere(vec3.create(400, 200, 400), 100, earthMaterial));
 
   const perlinTexture = new NoiseTexture(0.1);
   const perlinMaterial = new LambertianMaterial();
   perlinMaterial.texture = perlinTexture;
-  world.add(new Sphere([220, 280, 300], 80, perlinMaterial));
+  world.add(new Sphere(vec3.create(220, 280, 300), 80, perlinMaterial));
 
   const boxes2 = new HitableList();
-  const white = new LambertianMaterial([0.73, 0.73, 0.73]);
+  const white = new LambertianMaterial(vec3.create(0.73, 0.73, 0.73));
   for (let j = 0; j < 1000; j++) {
     boxes2.add(new Sphere(randomRange(0, 165), 10, white));
   }
 
-  boxes2.transform.translate([-100, 270, 395]);
+  boxes2.transform.translate(vec3.create(-100, 270, 395));
   boxes2.transform.rotateEuler(0, 15, 0);
   if (useBVH) {
     world.add(BVHNode.createFromHitableList(boxes2, 0, 1));

@@ -258,7 +258,7 @@ export class WebGPUComputePipeline extends WebGPUPipelineBase {
       //   data: uniformArray,
       //   dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
       // });
-      // this._computeParamsUniformBuffer.writeBuffer();
+      this._computeParamsUniformBuffer.writeBuffer();
     }
   }
 

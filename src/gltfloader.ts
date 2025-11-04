@@ -4,10 +4,10 @@ import { HitableList, Triangle } from './hitables';
 import { DiffuseLight, LambertianMaterial, Material, NormalMaterial } from './material';
 import { isAbsoluteUrl, isDataUrl, urlDirname } from './url';
 
-// const REDMATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
-// const WHITEMATERIAL = new LambertianMaterial([0.73, 0.73, 0.73]);
-const NORMALMATERIAL = new NormalMaterial();
-NORMALMATERIAL.corrected = true;
+// const RED_MATERIAL = new LambertianMaterial([0.65, 0.05, 0.05]);
+// const WHITE_MATERIAL = new LambertianMaterial([0.73, 0.73, 0.73]);
+const NORMAL_MATERIAL = new NormalMaterial();
+NORMAL_MATERIAL.corrected = true;
 
 export async function load(url: string): Promise<HitableList> {
   const triangleMeshArray: HitableList = new HitableList();
@@ -38,7 +38,7 @@ export async function load(url: string): Promise<HitableList> {
       const emissiveColor = vec4.scale(baseColor, 50);
       mat = new DiffuseLight(vec3.fromValues(emissiveColor[0], emissiveColor[1], emissiveColor[2]));
     } else {
-      mat = new LambertianMaterial([baseColor[0], baseColor[1], baseColor[2]]);
+      mat = new LambertianMaterial(vec3.create(baseColor[0], baseColor[1], baseColor[2]));
     }
 
     raytracingMaterial.push(mat);
@@ -159,8 +159,8 @@ export async function load(url: string): Promise<HitableList> {
           );
 
           // // TODO: material
-          // triangle.material = WHITEMATERIAL;
-          // triangle.material = NORMALMATERIAL;
+          // triangle.material = WHITE_MATERIAL;
+          // triangle.material = NORMAL_MATERIAL;
           triangle.material = primitive.material ? raytracingMaterial[primitive.material] : defaultMaterial;
 
           if (node.translation) {

@@ -121,7 +121,7 @@ export class RaytracingBuffers {
   private readonly _webGpuContext: WebGPUContext;
 
   public constructor(world: HitableList, webGpuContext: WebGPUContext) {
-    this.traverseHittables(world, mat4.identity());
+    this.traverseHitables(world, mat4.identity());
     this._webGpuContext = webGpuContext;
   }
 
@@ -129,15 +129,15 @@ export class RaytracingBuffers {
     return this._imageTextures.length > 0;
   }
 
-  private traverseHittables(list: HitableList, objectToWorld: Mat4): void {
+  private traverseHitables(list: HitableList, objectToWorld: Mat4): void {
     for (const object of list.objects) {
       const currentObjectToWorld = object.transform.objectToWorld;
       mat4.multiply(currentObjectToWorld, objectToWorld, currentObjectToWorld);
 
       if (object instanceof HitableList) {
-        this.traverseHittables(object, currentObjectToWorld);
+        this.traverseHitables(object, currentObjectToWorld);
       } else if (object instanceof Box) {
-        this.traverseHittables(object.sides, currentObjectToWorld);
+        this.traverseHitables(object.sides, currentObjectToWorld);
       } else {
         this.addPrimitive(object, currentObjectToWorld);
       }
@@ -219,7 +219,7 @@ export class RaytracingBuffers {
 
   private addPrimitive(obj: Hitable, objectToWorld: Mat4): number {
     const idx = this._gpuPrimitives.length;
-    let gpuPrimitive: WebGPUPrimitive;
+    let gpuPrimitive: WebGPUPrimitive | undefined;
 
     const mat = obj.material;
     const materialIndex = obj.material ? this.addMaterial(mat) : -1;
@@ -567,36 +567,36 @@ export class RaytracingBuffers {
     const bufferDataU32 = new Uint32Array(bufferData);
 
     let offset = 0;
-    for (const primitiv of this._gpuPrimitives) {
-      const inverseMatrix = mat4.invert(primitiv.objectToWorld);
-      const rotation = quat.fromMat(primitiv.objectToWorld);
+    for (const primitive of this._gpuPrimitives) {
+      const inverseMatrix = mat4.invert(primitive.objectToWorld);
+      const rotation = quat.fromMat(primitive.objectToWorld);
       const inverseRotation = mat4.invert(mat4.create(), mat4.fromQuat(mat4.create(), rotation));
 
-      offset = this.writeMat4(bufferDataF32, offset, primitiv.objectToWorld);
+      offset = this.writeMat4(bufferDataF32, offset, primitive.objectToWorld);
       offset = this.writeMat4(bufferDataF32, offset, inverseMatrix);
       offset = this.writeMat4(bufferDataF32, offset, inverseRotation);
 
-      offset = this.writeVec4(bufferDataF32, offset, primitiv.bounds);
-      offset = this.writeVec4(bufferDataF32, offset, primitiv.center0);
-      offset = this.writeVec4(bufferDataF32, offset, primitiv.center1);
+      offset = this.writeVec4(bufferDataF32, offset, primitive.bounds);
+      offset = this.writeVec4(bufferDataF32, offset, primitive.center0);
+      offset = this.writeVec4(bufferDataF32, offset, primitive.center1);
 
-      offset = this.writeVec4(bufferDataF32, offset, primitiv.v0);
-      offset = this.writeVec4(bufferDataF32, offset, primitiv.v1);
-      offset = this.writeVec4(bufferDataF32, offset, primitiv.v2);
+      offset = this.writeVec4(bufferDataF32, offset, primitive.v0);
+      offset = this.writeVec4(bufferDataF32, offset, primitive.v1);
+      offset = this.writeVec4(bufferDataF32, offset, primitive.v2);
 
-      offset = this.writeVec4(bufferDataF32, offset, primitiv.n0);
-      offset = this.writeVec4(bufferDataF32, offset, primitiv.n1);
-      offset = this.writeVec4(bufferDataF32, offset, primitiv.n2);
+      offset = this.writeVec4(bufferDataF32, offset, primitive.n0);
+      offset = this.writeVec4(bufferDataF32, offset, primitive.n1);
+      offset = this.writeVec4(bufferDataF32, offset, primitive.n2);
 
-      offset = this.writeVec4(bufferDataF32, offset, primitiv.uv0);
-      offset = this.writeVec4(bufferDataF32, offset, primitiv.uv1);
-      offset = this.writeVec4(bufferDataF32, offset, primitiv.uv2);
+      offset = this.writeVec4(bufferDataF32, offset, primitive.uv0);
+      offset = this.writeVec4(bufferDataF32, offset, primitive.uv1);
+      offset = this.writeVec4(bufferDataF32, offset, primitive.uv2);
 
-      bufferDataF32[offset++] = primitiv.radius;
-      bufferDataF32[offset++] = primitiv.k;
+      bufferDataF32[offset++] = primitive.radius;
+      bufferDataF32[offset++] = primitive.k;
 
-      bufferDataU32[offset++] = primitiv.primitiveType;
-      bufferDataU32[offset++] = primitiv.materialIndex;
+      bufferDataU32[offset++] = primitive.primitiveType;
+      bufferDataU32[offset++] = primitive.materialIndex;
 
       // padding
       // bufferDataF32[offset++] = 0;
