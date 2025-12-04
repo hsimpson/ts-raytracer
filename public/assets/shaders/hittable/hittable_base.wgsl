@@ -1,4 +1,4 @@
-struct Primitve {
+struct Primitive {
   objectToWorld: mat4x4<f32>,
   inverseMatrix: mat4x4<f32>,
   inverseRotation: mat4x4<f32>,
@@ -31,7 +31,7 @@ struct Primitve {
 };
 
 struct Primitives {
-  primitives: array<Primitve>,
+  primitives: array<Primitive>,
 };
 
 @group(0) @binding(4) var<storage, read_write> primitivesBuffer: Primitives;

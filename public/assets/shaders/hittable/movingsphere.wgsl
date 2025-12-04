@@ -2,7 +2,7 @@
 #include "../utils.wgsl"
 #include "./hittable_base.wgsl"
 
-fn center(sphere: Primitve, time: f32) -> vec3<f32> {
+fn center(sphere: Primitive, time: f32) -> vec3<f32> {
   let center0 = sphere.center0.xyz;
   let center1 = sphere.center1.xyz;
 
@@ -16,7 +16,7 @@ fn center(sphere: Primitve, time: f32) -> vec3<f32> {
 }
 
 fn hitMovingSphere(
-  sphere: Primitve,
+  sphere: Primitive,
   ray: ptr<function, Ray>,
   tMin: f32,
   tMax: f32,

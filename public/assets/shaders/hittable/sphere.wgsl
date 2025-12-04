@@ -3,7 +3,7 @@
 #include "./hittable_base.wgsl"
 
 fn hitSphere(
-  sphere: Primitve,
+  sphere: Primitive,
   ray: ptr<function, Ray>,
   tMin: f32,
   tMax: f32,

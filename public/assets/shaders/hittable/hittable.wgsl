@@ -1,11 +1,11 @@
 
-const HITTABLETYPE_SPHERE = 0u;
-const HITTABLETYPE_MOVINGSPHERE = 1u;
-const HITTABLETYPE_XYRECT = 2u;
-const HITTABLETYPE_XZRECT = 3u;
-const HITTABLETYPE_YZRECT = 4u;
-const HITTABLETYPE_CONSTANTMEDIUM = 5u;
-const HITTABLETYPE_TRIANGLE = 6u;
+const HITABLETYPE_SPHERE = 0u;
+const HITABLETYPE_MOVINGSPHERE = 1u;
+const HITABLETYPE_XYRECT = 2u;
+const HITABLETYPE_XZRECT = 3u;
+const HITABLETYPE_YZRECT = 4u;
+const HITABLETYPE_CONSTANTMEDIUM = 5u;
+const HITABLETYPE_TRIANGLE = 6u;
 
 #include "../ray.wgsl"
 #include "./hittable_base.wgsl"
@@ -16,35 +16,35 @@ const HITTABLETYPE_TRIANGLE = 6u;
 
 // FIXME: case identifiers
 
-fn hitPrimitve(
-  primitve: Primitve,
+fn hitPrimitive(
+  primitive: Primitive,
   ray: ptr<function, Ray>,
   tMin: f32,
   tMax: f32,
   rec: ptr<function, HitRecord>
 ) -> bool {
-  let primitiveType = primitve.primitiveType;
-  var hitted: bool = false;
+  let primitiveType = primitive.primitiveType;
+  var hited: bool = false;
 
-  if(primitiveType == HITTABLETYPE_SPHERE) {
-    hitted = hitSphere(primitve, ray, tMin, tMax, rec);
-  } else if(primitiveType == HITTABLETYPE_MOVINGSPHERE) {
-    hitted = hitMovingSphere(primitve, ray, tMin, tMax, rec);
-  } else if(primitiveType == HITTABLETYPE_XYRECT) {
-    hitted = hitXYRect(primitve, ray, tMin, tMax, rec);
-  } else if(primitiveType == HITTABLETYPE_XZRECT) {
-    hitted = hitXZRect(primitve, ray, tMin, tMax, rec);
-  } else if(primitiveType == HITTABLETYPE_YZRECT) {
-    hitted = hitYZRect(primitve, ray, tMin, tMax, rec);
-  } else if(primitiveType == HITTABLETYPE_CONSTANTMEDIUM) {
-    // hitted = hitSphere(primitve, ray, tMin, tMax, rec);
-  } else if(primitiveType == HITTABLETYPE_TRIANGLE) {
-    hitted = hitTriangle(primitve, ray, tMin, tMax, rec);
+  if(primitiveType == HITABLETYPE_SPHERE) {
+    hited = hitSphere(primitive, ray, tMin, tMax, rec);
+  } else if(primitiveType == HITABLETYPE_MOVINGSPHERE) {
+    hited = hitMovingSphere(primitive, ray, tMin, tMax, rec);
+  } else if(primitiveType == HITABLETYPE_XYRECT) {
+    hited = hitXYRect(primitive, ray, tMin, tMax, rec);
+  } else if(primitiveType == HITABLETYPE_XZRECT) {
+    hited = hitXZRect(primitive, ray, tMin, tMax, rec);
+  } else if(primitiveType == HITABLETYPE_YZRECT) {
+    hited = hitYZRect(primitive, ray, tMin, tMax, rec);
+  } else if(primitiveType == HITABLETYPE_CONSTANTMEDIUM) {
+    // hited = hitSphere(primitive, ray, tMin, tMax, rec);
+  } else if(primitiveType == HITABLETYPE_TRIANGLE) {
+    hited = hitTriangle(primitive, ray, tMin, tMax, rec);
   } else {
-    hitted = false;
+    hited = false;
   }
 
-  return hitted;
+  return hited;
 }
 
 fn hittableListHit(
@@ -57,9 +57,9 @@ fn hittableListHit(
   var hitAnything = false;
   var closestSoFar = tMax;
 
-  let primitveCount = arrayLength(&(primitivesBuffer.primitives));
-  for(var i = 0u; i < primitveCount; i = i + 1u) {
-    if(hitPrimitve(primitivesBuffer.primitives[i], ray, tMin, closestSoFar, &tempRec)) {
+  let primitiveCount = arrayLength(&(primitivesBuffer.primitives));
+  for(var i = 0u; i < primitiveCount; i = i + 1u) {
+    if(hitPrimitive(primitivesBuffer.primitives[i], ray, tMin, closestSoFar, &tempRec)) {
       if(tempRec.t <= closestSoFar) {
         hitAnything = true;
         closestSoFar = tempRec.t;

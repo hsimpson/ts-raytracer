@@ -3,7 +3,7 @@
 #include "./hittable_base.wgsl"
 
 fn hitXYRect(
-  rect: Primitve,
+  rect: Primitive,
   ray: ptr<function, Ray>,
   tMin: f32,
   tMax: f32,
@@ -37,7 +37,7 @@ fn hitXYRect(
 }
 
 fn hitXZRect(
-  rect: Primitve,
+  rect: Primitive,
   ray: ptr<function, Ray>,
   tMin: f32,
   tMax: f32,
@@ -71,7 +71,7 @@ fn hitXZRect(
 }
 
 fn hitYZRect(
-  rect: Primitve,
+  rect: Primitive,
   ray: ptr<function, Ray>,
   tMin: f32,
   tMax: f32,

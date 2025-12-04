@@ -49,7 +49,7 @@ fn transformRay(
 
 fn transformRecord(rec: ptr<function, HitRecord>, objectToWorld: mat4x4<f32>) {
   (*rec).p = (objectToWorld * vec4<f32>((*rec).p, 1.0)).xyz;
-  // mat3 normalMatrix = transpose(inverse(mat3(primitve.objectToWorld)));
+  // mat3 normalMatrix = transpose(inverse(mat3(primitive.objectToWorld)));
   // mat3 normalMatrix = /*transpose*/ (inverse(mat3(rotationMatrix)));
   // vec3 transformedN = normalMatrix * rec.normal;
   // vec3 transformedN = (rotationMatrix * vec4(rec.normal, 1.0)).xyz;

@@ -6,7 +6,7 @@ const EPSILON = 0.000001;
 const TEST_CULL = true;
 
 fn hitTriangle(
-  tri: Primitve,
+  tri: Primitive,
   ray: ptr<function, Ray>,
   tMin: f32,
   tMax: f32,
