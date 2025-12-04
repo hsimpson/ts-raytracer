@@ -58,9 +58,9 @@ interface WebGPUTexture {
   imageTextureIndex: number;
 
   // padding
-  pad_0: number;
-  pad_1: number;
-  pad_2: number;
+  // pad_0: number;
+  // pad_1: number;
+  // pad_2: number;
 
   // optional for managing
   hasImageTexture?: boolean;
@@ -101,7 +101,7 @@ interface WebGPUPrimitive {
   // pad_0: number;
 }
 
-const PADDING_VALUE = -99;
+// const PADDING_VALUE = -99;
 
 function log(message: string, bufferData: ArrayBuffer): void {
   const bytes = new Uint8Array(bufferData);
@@ -154,9 +154,9 @@ export class RaytracingBuffers {
       scale: 1,
       textureType: WebGPUTextureType.Solid,
       imageTextureIndex: -1,
-      pad_0: PADDING_VALUE,
-      pad_1: PADDING_VALUE,
-      pad_2: PADDING_VALUE,
+      // pad_0: PADDING_VALUE,
+      // pad_1: PADDING_VALUE,
+      // pad_2: PADDING_VALUE,
     };
 
     if (tex instanceof SolidColor) {
@@ -398,9 +398,9 @@ export class RaytracingBuffers {
       bufferDataU32[offset++] = texture.imageTextureIndex;
 
       // paddings
-      bufferDataF32[offset++] = texture.pad_0;
-      bufferDataF32[offset++] = texture.pad_1;
-      bufferDataF32[offset++] = texture.pad_2;
+      // bufferDataF32[offset++] = texture.pad_0;
+      // bufferDataF32[offset++] = texture.pad_1;
+      // bufferDataF32[offset++] = texture.pad_2;
     }
 
     // log('Textures:', bufferData);
