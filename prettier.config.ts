@@ -1,4 +1,6 @@
-module.exports = {
+import { type Config } from 'prettier';
+
+const config: Config = {
   arrowParens: 'always',
   bracketSameLine: true,
   bracketSpacing: true,
@@ -16,3 +18,5 @@ module.exports = {
   trailingComma: 'all',
   useTabs: false,
 };
+
+export default config;

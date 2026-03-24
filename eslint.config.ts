@@ -1,56 +1,46 @@
+import eslintReact from '@eslint-react/eslint-plugin';
 import eslint from '@eslint/js';
 import configPrettier from 'eslint-config-prettier';
 import pluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-import pluginReact from 'eslint-plugin-react';
-import reactPlugin from 'eslint-plugin-react-hooks';
+import reactHooks from 'eslint-plugin-react-hooks';
+import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+export default defineConfig(
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,
   tseslint.configs.stylisticTypeChecked,
+  eslintReact.configs['strict-type-checked'],
+  reactHooks.configs.flat.recommended,
 
   {
-    ignores: ['build/**/*', 'eslint.config.mjs', 'prettier.config.js', 'vite.config.mjs'],
+    ignores: ['dist/**/*', 'tailwind.config.js'],
   },
+
+  // configuration for rules that require type information
   {
     languageOptions: {
-      ...pluginReact.configs.flat.recommended.languageOptions,
       parserOptions: {
         projectService: true,
-        tsconfigRootDir: import.meta.dirname,
       },
     },
   },
 
-  // eslint-rules
+  // customize eslint-rules
   {
     rules: {
-      // 'no-console': 'warn',
-      'linebreak-style': ['error', 'unix'],
-      'no-unused-vars': 'off',
+      'no-unused-vars': 'off', // Note: you must disable the base rule as it can report incorrect errors
       'no-warning-comments': 'warn',
-      'object-shorthand': ['warn', 'always'],
-      curly: 'warn',
       eqeqeq: 'error',
-      indent: ['error', 2, { SwitchCase: 1 }],
-      quotes: ['error', 'single'],
-      semi: ['error', 'always'],
     },
   },
 
-  // typescript-eslint rules
+  // customize typescript-eslint rules
   {
     rules: {
-      '@typescript-eslint/ban-ts-comment': 'warn',
+      '@typescript-eslint/consistent-type-definitions': 'off',
       '@typescript-eslint/explicit-member-accessibility': ['error', { accessibility: 'explicit' }],
-      '@typescript-eslint/interface-name-prefix': 'off',
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/no-parameter-properties': ['off'],
-      '@typescript-eslint/no-require-imports': 'warn',
       '@typescript-eslint/no-shadow': 'error',
-      '@typescript-eslint/no-unnecessary-condition': 'off',
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
@@ -67,22 +57,11 @@ export default tseslint.config(
     },
   },
 
-  // plugin-react and plugin-react-hooks
-  pluginReact.configs.flat.recommended,
+  // customize eslint-plugin-react-hooks rules
   {
-    plugins: {
-      react: pluginReact,
-      'react-hooks': reactPlugin,
-    },
     rules: {
-      'react/self-closing-comp': ['error', { component: true, html: true }],
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-    },
-    settings: {
-      react: {
-        version: 'detect',
-      },
     },
   },
 
