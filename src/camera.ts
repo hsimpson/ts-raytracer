@@ -40,11 +40,17 @@ export class Camera {
     const viewport_height = 2 * h;
     const viewport_width = aspectRatio * viewport_height;
 
-    vec3.normalize(this.w, vec3.subtract(vec3.create(), lookFrom, lookAt));
-    vec3.normalize(this.u, vec3.cross(vec3.create(), vUp, this.w));
-    vec3.cross(this.v, this.w, this.u);
+    const wDir = vec3.subtract(lookFrom, lookAt);
+    vec3.normalize(wDir, this.w);
+
+    const uDir = vec3.cross(vUp, this.w);
+    vec3.normalize(uDir, this.u);
+
+    vec3.cross(this.w, this.u, this.v);
 
     this.lookFrom = lookFrom;
+
+    // scale(v, k, dst?) returns v * k
     vec3.scale(this.u, focusDist * viewport_width, this.horizontal);
     vec3.scale(this.v, focusDist * viewport_height, this.vertical);
 
@@ -53,11 +59,10 @@ export class Camera {
 
     const focusW = vec3.scale(this.w, focusDist);
 
-    vec3.subtract(
-      this.lowerLeftCorner,
-      vec3.subtract(vec3.create(), vec3.subtract(vec3.create(), this.lookFrom, half_horizontal), half_vertical),
-      focusW,
-    );
+    // lowerLeftCorner = lookFrom - half_horizontal - half_vertical - focusW
+    const temp1 = vec3.subtract(this.lookFrom, half_horizontal);
+    const temp2 = vec3.subtract(temp1, half_vertical);
+    vec3.subtract(temp2, focusW, this.lowerLeftCorner);
 
     this.lenseRadius = aperture / 2;
     this.time0 = t0;

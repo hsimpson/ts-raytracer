@@ -221,25 +221,37 @@ export class WebGPUComputePipeline extends WebGPUPipelineBase {
       GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       'computeParamsUniformBuffer',
     );
-    this._computeParamsUniformBuffer.setData('computeParamsUniform_background', {
-      data: this._options.computeUniformParams.background,
-      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Vec3 },
-    });
-    this._computeParamsUniformBuffer.setData('computeParamsUniform_tileOffset', {
-      data: this._options.computeUniformParams.tileOffset,
-      dataType: { elementType: ScalarType.Uint32, bufferDataTypeKind: BufferDataTypeKind.Vec2 },
-    });
-    this._computeParamsUniformBuffer.setData('computeParamsUniform_imageSize', {
-      data: this._options.computeUniformParams.imageSize,
-      dataType: { elementType: ScalarType.Uint32, bufferDataTypeKind: BufferDataTypeKind.Vec2 },
-    });
-    this._computeParamsUniformBuffer.setData('computeParamsUniform_currentSample', {
-      data: this._options.computeUniformParams.currentSample,
-      dataType: { elementType: ScalarType.Uint32, bufferDataTypeKind: BufferDataTypeKind.Scalar },
-    });
-    this._computeParamsUniformBuffer.setData('computeParamsUniform_maxBounces', {
-      data: this._options.computeUniformParams.maxBounces,
-      dataType: { elementType: ScalarType.Uint32, bufferDataTypeKind: BufferDataTypeKind.Scalar },
+
+    // FIXME: hardcoding the uniform buffer layout here, consider creating a helper function to build the buffer with proper alignment
+
+    // Build uniform buffer as a single array with proper WGSL alignment
+    // background: vec3<f32> at offset 0 (12 bytes + 4 padding)
+    // tileOffset: vec2<u32> at offset 16 (8 bytes)
+    // imageSize: vec2<u32> at offset 24 (8 bytes)
+    // currentSample: u32 at offset 32 (4 bytes)
+    // maxBounces: u32 at offset 36 (4 bytes)
+    const uniformData = new ArrayBuffer(48); // 40 bytes + padding to 48 for alignment
+    const f32View = new Float32Array(uniformData);
+    const u32View = new Uint32Array(uniformData);
+
+    const bg = this._options.computeUniformParams.background;
+    f32View[0] = bg[0];
+    f32View[1] = bg[1];
+    f32View[2] = bg[2];
+    // f32View[3] is padding
+
+    u32View[4] = this._options.computeUniformParams.tileOffset[0];
+    u32View[5] = this._options.computeUniformParams.tileOffset[1];
+
+    u32View[6] = this._options.computeUniformParams.imageSize[0];
+    u32View[7] = this._options.computeUniformParams.imageSize[1];
+
+    u32View[8] = this._options.computeUniformParams.currentSample;
+    u32View[9] = this._options.computeUniformParams.maxBounces;
+
+    this._computeParamsUniformBuffer.setData('computeUniform', {
+      data: new Float32Array(uniformData),
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
 
     this._computeParamsUniformBuffer.writeBuffer();
@@ -248,16 +260,33 @@ export class WebGPUComputePipeline extends WebGPUPipelineBase {
   public updateUniformBuffer(sample: number, tile: ComputeTile): void {
     if (this._initialized) {
       this._options.computeUniformParams.currentSample = sample;
-      // this._options.uniformParams.tileOffsetX = tile.x;
-      // this._options.uniformParams.tileOffsetY = tile.y;
       this._options.computeUniformParams.tileOffset = [tile.x, tile.y];
 
-      // const uniformArray = this.getParamsArray(this._options.uniformParams);
+      // Rebuild the entire uniform buffer with proper WGSL alignment
+      const uniformData = new ArrayBuffer(48);
+      const f32View = new Float32Array(uniformData);
+      const u32View = new Uint32Array(uniformData);
 
-      // this._computeCameraUniformBuffer.setData('computeParams', {
-      //   data: uniformArray,
-      //   dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
-      // });
+      const bg = this._options.computeUniformParams.background;
+      f32View[0] = bg[0];
+      f32View[1] = bg[1];
+      f32View[2] = bg[2];
+      // f32View[3] is padding
+
+      u32View[4] = this._options.computeUniformParams.tileOffset[0];
+      u32View[5] = this._options.computeUniformParams.tileOffset[1];
+
+      u32View[6] = this._options.computeUniformParams.imageSize[0];
+      u32View[7] = this._options.computeUniformParams.imageSize[1];
+
+      u32View[8] = this._options.computeUniformParams.currentSample;
+      u32View[9] = this._options.computeUniformParams.maxBounces;
+
+      this._computeParamsUniformBuffer.setData('computeUniform', {
+        data: new Float32Array(uniformData),
+        dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
+      });
+
       this._computeParamsUniformBuffer.writeBuffer();
     }
   }

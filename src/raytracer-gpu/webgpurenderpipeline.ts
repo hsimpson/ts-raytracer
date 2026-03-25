@@ -61,7 +61,7 @@ export class WebGPURenderPipeline extends WebGPUPipelineBase {
     );
     this._renderParamsUniformBuffer.setData('size', {
       data: this._options.renderUniformParams.size,
-      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Vec2 },
+      dataType: { elementType: ScalarType.Uint32, bufferDataTypeKind: BufferDataTypeKind.Vec2 },
     });
     this._renderParamsUniformBuffer.writeBuffer();
 
@@ -142,7 +142,7 @@ export class WebGPURenderPipeline extends WebGPUPipelineBase {
     };
 
     const colorState: GPUColorTargetState = {
-      format: 'bgra8unorm',
+      format: 'rgba8unorm',
       blend: {
         color: {
           srcFactor: 'src-alpha',

@@ -397,10 +397,10 @@ export class RaytracingBuffers {
       bufferDataU32[offset++] = texture.textureType;
       bufferDataU32[offset++] = texture.imageTextureIndex;
 
-      // paddings
-      // bufferDataF32[offset++] = texture.pad_0;
-      // bufferDataF32[offset++] = texture.pad_1;
-      // bufferDataF32[offset++] = texture.pad_2;
+      // padding to match shader struct alignment
+      bufferDataF32[offset++] = 0;
+      bufferDataF32[offset++] = 0;
+      bufferDataF32[offset++] = 0;
     }
 
     // log('Textures:', bufferData);
@@ -569,8 +569,10 @@ export class RaytracingBuffers {
     let offset = 0;
     for (const primitive of this._gpuPrimitives) {
       const inverseMatrix = mat4.invert(primitive.objectToWorld);
+
       const rotation = quat.fromMat(primitive.objectToWorld);
-      const inverseRotation = mat4.invert(mat4.create(), mat4.fromQuat(mat4.create(), rotation));
+      const rotationMatrix = mat4.fromQuat(rotation);
+      const inverseRotation = mat4.invert(rotationMatrix);
 
       offset = this.writeMat4(bufferDataF32, offset, primitive.objectToWorld);
       offset = this.writeMat4(bufferDataF32, offset, inverseMatrix);
