@@ -1,26 +1,25 @@
 import { vec3, Vec3 } from 'wgpu-matrix';
 import { Material } from '../material';
-import { getSphereUV, lengthSquared } from '../util';
+import { getSphereUV } from '../util';
 import { AABB } from './aabb';
-import { Hitable } from './hitable';
+import { ObjectHitable } from './hitable';
 import { HitRecord } from './hitrecord';
 import { Ray } from './ray';
 
-export class MovingSphere extends Hitable {
+export class MovingSphere extends ObjectHitable {
   private readonly _center0: Vec3;
   private readonly _center1: Vec3;
   private readonly _time0: number;
   private readonly _time1: number;
   private readonly _radius: number;
 
-  public constructor(center0: Vec3, center1: Vec3, t0: number, t1: number, radius: number, mat: Material) {
-    super();
+  public constructor(center0: Vec3, center1: Vec3, t0: number, t1: number, radius: number, material: Material) {
+    super(material);
     this._center0 = center0;
     this._center1 = center1;
     this._time0 = t0;
     this._time1 = t1;
     this._radius = radius;
-    this.material = mat;
   }
 
   public get center0(): Vec3 {
@@ -48,13 +47,13 @@ export class MovingSphere extends Hitable {
 
     const oc = vec3.subtract(transformedRay.origin, this.center(transformedRay.time));
 
-    const a = lengthSquared(transformedRay.direction);
+    const a = vec3.lengthSq(transformedRay.direction);
     const half_b = vec3.dot(oc, transformedRay.direction);
-    const c = lengthSquared(oc) - this._radius * this._radius;
-    const discriminat = half_b * half_b - a * c;
+    const c = vec3.lengthSq(oc) - this._radius * this._radius;
+    const discriminant = half_b * half_b - a * c;
 
-    if (discriminat > 0) {
-      const root = Math.sqrt(discriminat);
+    if (discriminant > 0) {
+      const root = Math.sqrt(discriminant);
       let temp = (-half_b - root) / a;
       if (temp < tMax && temp > tMin) {
         rec.t = temp;
@@ -67,7 +66,7 @@ export class MovingSphere extends Hitable {
         const uv = getSphereUV(outward_normal);
         rec.u = uv.u;
         rec.v = uv.v;
-        rec.mat = this.material;
+        rec.material = this.material;
         this.transform.transformRecord(transformedRay, rec);
         return true;
       }
@@ -83,7 +82,7 @@ export class MovingSphere extends Hitable {
         const uv = getSphereUV(outward_normal);
         rec.u = uv.u;
         rec.v = uv.v;
-        rec.mat = this.material;
+        rec.material = this.material;
         this.transform.transformRecord(transformedRay, rec);
         return true;
       }

@@ -1,11 +1,11 @@
 import { vec3 } from 'wgpu-matrix';
 import { Material } from '../material';
 import { AABB } from './aabb';
-import { Hitable } from './hitable';
+import { ObjectHitable } from './hitable';
 import { HitRecord } from './hitrecord';
 import { Ray } from './ray';
 
-export class XYRect extends Hitable {
+export class XYRect extends ObjectHitable {
   public x0: number;
   public x1: number;
   public y0: number;
@@ -14,13 +14,12 @@ export class XYRect extends Hitable {
   private readonly bbox: AABB;
 
   public constructor(x0: number, x1: number, y0: number, y1: number, k: number, material: Material) {
-    super();
+    super(material);
     this.x0 = x0;
     this.x1 = x1;
     this.y0 = y0;
     this.y1 = y1;
     this.k = k;
-    this.material = material;
     this.bbox = new AABB(
       vec3.create(this.x0, this.y0, this.k - 0.0001),
       vec3.create(this.x1, this.y1, this.k + 0.0001),
@@ -45,7 +44,7 @@ export class XYRect extends Hitable {
 
     const outwardNormal = vec3.create(0, 0, 1);
     rec.setFaceNormal(transformedRay, outwardNormal);
-    rec.mat = this.material;
+    rec.material = this.material;
     rec.p = transformedRay.at(t);
 
     this.transform.transformRecord(transformedRay, rec);
@@ -61,7 +60,7 @@ export class XYRect extends Hitable {
   }
 }
 
-export class XZRect extends Hitable {
+export class XZRect extends ObjectHitable {
   public x0: number;
   public x1: number;
   public z0: number;
@@ -70,13 +69,12 @@ export class XZRect extends Hitable {
   private readonly bbox: AABB;
 
   public constructor(x0: number, x1: number, z0: number, z1: number, k: number, material: Material) {
-    super();
+    super(material);
     this.x0 = x0;
     this.x1 = x1;
     this.z0 = z0;
     this.z1 = z1;
     this.k = k;
-    this.material = material;
     this.bbox = new AABB(
       vec3.create(this.x0, this.k - 0.0001, this.z0),
       vec3.create(this.x1, this.k + 0.0001, this.z1),
@@ -101,7 +99,7 @@ export class XZRect extends Hitable {
 
     const outwardNormal = vec3.create(0, 1, 0);
     rec.setFaceNormal(transformedRay, outwardNormal);
-    rec.mat = this.material;
+    rec.material = this.material;
     rec.p = transformedRay.at(t);
 
     this.transform.transformRecord(transformedRay, rec);
@@ -116,7 +114,7 @@ export class XZRect extends Hitable {
   }
 }
 
-export class YZRect extends Hitable {
+export class YZRect extends ObjectHitable {
   public y0: number;
   public y1: number;
   public z0: number;
@@ -125,13 +123,12 @@ export class YZRect extends Hitable {
   private readonly bbox: AABB;
 
   public constructor(y0: number, y1: number, z0: number, z1: number, k: number, material: Material) {
-    super();
+    super(material);
     this.y0 = y0;
     this.y1 = y1;
     this.z0 = z0;
     this.z1 = z1;
     this.k = k;
-    this.material = material;
     this.bbox = new AABB(
       vec3.create(this.k - 0.0001, this.y0, this.z0),
       vec3.create(this.k + 0.0001, this.y1, this.z1),
@@ -156,7 +153,7 @@ export class YZRect extends Hitable {
 
     const outwardNormal = vec3.create(1, 0, 0);
     rec.setFaceNormal(transformedRay, outwardNormal);
-    rec.mat = this.material;
+    rec.material = this.material;
     rec.p = transformedRay.at(t);
 
     this.transform.transformRecord(transformedRay, rec);

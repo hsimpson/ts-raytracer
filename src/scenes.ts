@@ -27,6 +27,7 @@ const defaultCameraOptions: CameraOptions = {
   fovY: 40,
 };
 
+/*
 function gpuTestScene(useBVH: boolean): { world: HitableList; cameraOptions: CameraOptions } {
   const world = new HitableList();
 
@@ -64,6 +65,7 @@ function gpuTestScene(useBVH: boolean): { world: HitableList; cameraOptions: Cam
     return { world, cameraOptions };
   }
 }
+  */
 
 function randomScene(useBVH: boolean): { world: HitableList; cameraOptions: CameraOptions } {
   const world = new HitableList();

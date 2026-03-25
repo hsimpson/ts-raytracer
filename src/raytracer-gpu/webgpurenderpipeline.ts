@@ -186,7 +186,7 @@ export class WebGPURenderPipeline extends WebGPUPipelineBase {
   //   }
   // }
 
-  public get gpuPipeline(): GPURenderPipeline {
+  public override get gpuPipeline(): GPURenderPipeline {
     return this._pipeline as GPURenderPipeline;
   }
 

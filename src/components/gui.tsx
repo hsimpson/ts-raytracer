@@ -21,7 +21,7 @@ const Gui = (): React.ReactElement => {
 
   const sceneConfig: DropDownItem[] = [
     { text: 'Random Spheres', value: 0, disabled: false },
-    { text: '2 Checkboard spheres', value: 1, disabled: false },
+    { text: '2 Checkerboard spheres', value: 1, disabled: false },
     { text: '2 Noise spheres', value: 2, disabled: false },
     { text: 'Earth sphere', value: 3, disabled: false },
     { text: 'Area light', value: 4, disabled: false },
@@ -106,10 +106,10 @@ const Gui = (): React.ReactElement => {
         }}
       />
 
-      <button className="resetButton" onClick={onResetClicked}>
+      <button type="button" className="resetButton" onClick={onResetClicked}>
         Reset to default
       </button>
-      <button className="renderButton" onClick={onStartRenderClicked}>
+      <button type="button" className="renderButton" onClick={onStartRenderClicked}>
         {raytracerRunningState.isRunning ? 'Stop rendering!' : 'Start rendering!'}
       </button>
     </div>

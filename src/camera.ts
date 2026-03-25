@@ -1,6 +1,6 @@
 import { vec3, Vec3 } from 'wgpu-matrix';
 import { Ray } from './hitables/ray';
-import { degreeToRadians, randomInUnitdisk, randomNumberRange } from './util';
+import { degreeToRadians, randomInUnitDisk, randomNumberRange } from './util';
 
 export interface CameraOptions {
   lookFrom: Vec3;
@@ -65,7 +65,7 @@ export class Camera {
   }
 
   public getRay(s: number, t: number): Ray {
-    const rd = vec3.scale(randomInUnitdisk(), this.lenseRadius);
+    const rd = vec3.scale(randomInUnitDisk(), this.lenseRadius);
 
     const vecU = vec3.scale(this.u, rd[0]);
     const vecV = vec3.scale(this.v, rd[1]);

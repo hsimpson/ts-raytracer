@@ -2,29 +2,29 @@ import { vec3, Vec3 } from 'wgpu-matrix';
 import { Material } from '../material';
 import { AABB } from './aabb';
 import { XYRect, XZRect, YZRect } from './aarect';
-import { Hitable } from './hitable';
+import { ObjectHitable } from './hitable';
 import { HitableList } from './hitablelist';
 import { HitRecord } from './hitrecord';
 import { Ray } from './ray';
 
-export class Box extends Hitable {
+export class Box extends ObjectHitable {
   private readonly _boxMin: Vec3;
   private readonly _boxMax: Vec3;
   private readonly _sides = new HitableList();
 
-  public constructor(p0: Vec3, p1: Vec3, mat: Material) {
-    super();
+  public constructor(p0: Vec3, p1: Vec3, material: Material) {
+    super(material);
     this._boxMin = p0;
     this._boxMax = p1;
 
-    this._sides.add(new XYRect(p0[0], p1[0], p0[1], p1[1], p1[2], mat));
-    this._sides.add(new XYRect(p0[0], p1[0], p0[1], p1[1], p0[2], mat));
+    this._sides.add(new XYRect(p0[0], p1[0], p0[1], p1[1], p1[2], material));
+    this._sides.add(new XYRect(p0[0], p1[0], p0[1], p1[1], p0[2], material));
 
-    this._sides.add(new XZRect(p0[0], p1[0], p0[2], p1[2], p1[1], mat));
-    this._sides.add(new XZRect(p0[0], p1[0], p0[2], p1[2], p0[1], mat));
+    this._sides.add(new XZRect(p0[0], p1[0], p0[2], p1[2], p1[1], material));
+    this._sides.add(new XZRect(p0[0], p1[0], p0[2], p1[2], p0[1], material));
 
-    this._sides.add(new YZRect(p0[1], p1[1], p0[2], p1[2], p1[0], mat));
-    this._sides.add(new YZRect(p0[1], p1[1], p0[2], p1[2], p0[0], mat));
+    this._sides.add(new YZRect(p0[1], p1[1], p0[2], p1[2], p1[0], material));
+    this._sides.add(new YZRect(p0[1], p1[1], p0[2], p1[2], p0[0], material));
   }
 
   public get sides(): HitableList {

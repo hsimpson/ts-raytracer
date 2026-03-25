@@ -1,20 +1,19 @@
 import { vec3, Vec3 } from 'wgpu-matrix';
 import { Material } from '../material';
-import { getSphereUV, lengthSquared } from '../util';
+import { getSphereUV } from '../util';
 import { AABB } from './aabb';
-import { Hitable } from './hitable';
+import { ObjectHitable } from './hitable';
 import { HitRecord } from './hitrecord';
 import { Ray } from './ray';
 
-export class Sphere extends Hitable {
+export class Sphere extends ObjectHitable {
   private readonly _center: Vec3;
   private readonly _radius: number;
 
-  public constructor(center: Vec3, radius: number, mat: Material) {
-    super();
+  public constructor(center: Vec3, radius: number, material: Material) {
+    super(material);
     this._center = center;
     this._radius = radius;
-    this.material = mat;
   }
 
   public get center(): Vec3 {
@@ -29,13 +28,13 @@ export class Sphere extends Hitable {
     const transformedRay = this.transform.transformRay(ray);
 
     const oc = vec3.subtract(transformedRay.origin, this._center);
-    const a = lengthSquared(transformedRay.direction);
+    const a = vec3.lengthSq(transformedRay.direction);
     const half_b = vec3.dot(oc, transformedRay.direction);
-    const c = lengthSquared(oc) - this._radius * this._radius;
-    const discriminat = half_b * half_b - a * c;
+    const c = vec3.lengthSq(oc) - this._radius * this._radius;
+    const discriminant = half_b * half_b - a * c;
 
-    if (discriminat > 0) {
-      const root = Math.sqrt(discriminat);
+    if (discriminant > 0) {
+      const root = Math.sqrt(discriminant);
       let temp = (-half_b - root) / a;
       if (temp < tMax && temp > tMain) {
         rec.t = temp;
@@ -48,7 +47,7 @@ export class Sphere extends Hitable {
         const uv = getSphereUV(outward_normal);
         rec.u = uv.u;
         rec.v = uv.v;
-        rec.mat = this.material;
+        rec.material = this.material;
         this.transform.transformRecord(ray, rec);
         return true;
       }
@@ -64,7 +63,7 @@ export class Sphere extends Hitable {
         const uv = getSphereUV(outward_normal);
         rec.u = uv.u;
         rec.v = uv.v;
-        rec.mat = this.material;
+        rec.material = this.material;
         this.transform.transformRecord(ray, rec);
         return true;
       }

@@ -362,7 +362,7 @@ export class WebGPUComputePipeline extends WebGPUPipelineBase {
     this._pipeline = this._options.webGpuContext.device.createComputePipeline(pipelineDesc);
   }
 
-  public get gpuPipeline(): GPUComputePipeline {
+  public override get gpuPipeline(): GPUComputePipeline {
     return this._pipeline as GPUComputePipeline;
   }
 

@@ -76,17 +76,16 @@ export interface GLTFPrimitive {
   material?: number;
 }
 
-export type GLTFAttributeName =
-  | 'POSITION'
-  | 'NORMAL'
-  | 'TANGENT'
-  | 'TEXCOORD_0'
-  | 'TEXCOORD_1'
-  | 'COLOR_0'
-  | 'JOINTS_0'
-  | 'WEIGHTS_0';
-
-export type GLTFAttribute = Record<GLTFAttributeName, number>;
+export type GLTFAttribute = {
+  POSITION: number;
+  NORMAL?: number;
+  TANGENT?: number;
+  TEXCOORD_0?: number;
+  TEXCOORD_1?: number;
+  COLOR_0?: number;
+  JOINTS_0?: number;
+  WEIGHTS_0?: number;
+};
 
 export interface GLTFMaterial {
   doubleSided: boolean;

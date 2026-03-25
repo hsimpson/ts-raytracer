@@ -78,11 +78,7 @@ export function writeColor(array: Uint8ClampedArray, offset: number, color: Vec3
   array[offset++] = r * 255;
   array[offset++] = g * 255;
   array[offset++] = b * 255;
-  array[offset++] = 255;
-}
-
-export function lengthSquared(v: Vec3): number {
-  return v[0] ** 2 + v[1] ** 2 + v[2] ** 2;
+  array[offset] = 255;
 }
 
 export function reflect(v: Vec3, n: Vec3): Vec3 {
@@ -93,7 +89,7 @@ export function refract(uv: Vec3, n: Vec3, etai_over_etat: number): Vec3 {
   const cos_theta = vec3.dot(vec3.negate(vec3.create(), uv), n);
   const uvTheta = vec3.add(vec3.create(), uv, vec3.scale(n, cos_theta));
   const r_out_parallel = vec3.scale(uvTheta, etai_over_etat);
-  const r_out_perp = vec3.scale(n, -Math.sqrt(1 - lengthSquared(r_out_parallel)));
+  const r_out_perp = vec3.scale(n, -Math.sqrt(1 - vec3.lengthSq(r_out_parallel)));
   return vec3.add(r_out_parallel, r_out_perp);
 }
 
@@ -102,13 +98,11 @@ export function random(): Vec3 {
 }
 
 export function randomInUnitSphere(): Vec3 {
-  while (true) {
-    const p = randomRange(-1, 1);
-    if (lengthSquared(p) >= 1) {
-      continue;
-    }
-    return p;
-  }
+  let p: Vec3;
+  do {
+    p = randomRange(-1, 1);
+  } while (vec3.lengthSq(p) >= 1);
+  return p;
 }
 
 export function randomRange(min: number, max: number): Vec3 {
@@ -131,14 +125,13 @@ export function randomInHemisphere(normal: Vec3): Vec3 {
   return vec3.negate(in_unit_sphere, in_unit_sphere);
 }
 
-export function randomInUnitdisk(): Vec3 {
-  while (true) {
-    const p: Vec3 = vec3.create(randomNumberRange(-1, 1), randomNumberRange(-1, 1), 0);
-    if (lengthSquared(p) >= 1) {
-      continue;
-    }
-    return p;
-  }
+export function randomInUnitDisk(): Vec3 {
+  let p: Vec3;
+  do {
+    p = vec3.create(randomNumberRange(-1, 1), randomNumberRange(-1, 1), 0);
+  } while (vec3.lengthSq(p) >= 1);
+
+  return p;
 }
 
 export function mod4(x: Vec4, y: number): Vec4 {

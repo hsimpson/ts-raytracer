@@ -7,20 +7,20 @@ export interface CheckBoxProps {
   onValueChange: (checked: boolean) => void;
 }
 
-const CheckBox = (props: CheckBoxProps): React.ReactElement => {
+const CheckBox = ({ label, checked, disabled, onValueChange }: CheckBoxProps): React.ReactElement => {
   const onInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const value = event.target.checked;
-    props.onValueChange(value);
+    onValueChange(value);
   };
 
   let classes = 'checkbox';
-  if (props.disabled) {
+  if (disabled) {
     classes += ' disabled';
   }
   return (
     <div className={classes}>
-      <input type="checkbox" disabled={props.disabled} checked={props.checked} onChange={onInputChange} />
-      <span>{props.label}</span>
+      <input type="checkbox" disabled={disabled} checked={checked} onChange={onInputChange} />
+      <span>{label}</span>
     </div>
   );
 };

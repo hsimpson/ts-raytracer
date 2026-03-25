@@ -1,6 +1,6 @@
 import { randomInt } from '../util';
 import { AABB } from './aabb';
-import { Hitable } from './hitable';
+import { Hitable, HitableBase } from './hitable';
 import { HitableList } from './hitablelist';
 import { HitRecord } from './hitrecord';
 import { Ray } from './ray';
@@ -8,7 +8,7 @@ import { Ray } from './ray';
 let _id = 0;
 let _level = 0;
 
-export class BVHNode extends Hitable {
+export class BVHNode extends HitableBase {
   private bbox = new AABB();
   private left!: Hitable;
   private right!: Hitable;

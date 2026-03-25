@@ -1,9 +1,9 @@
 import { vec2, Vec2, vec3, Vec3 } from 'wgpu-matrix';
+import { Material } from '../material';
 import { AABB } from './aabb';
-import { Hitable } from './hitable';
+import { ObjectHitable } from './hitable';
 import { HitRecord } from './hitrecord';
 import { Ray } from './ray';
-import { Transform } from './transform';
 
 function avgVector3(vectors: Vec3[]): Vec3 {
   let x = 0,
@@ -19,7 +19,7 @@ function avgVector3(vectors: Vec3[]): Vec3 {
 
 const EPSILON = 1e-8;
 
-export class Triangle extends Hitable {
+export class Triangle extends ObjectHitable {
   public readonly v0: Vec3;
   public readonly n0?: Vec3;
   public readonly uv0?: Vec2;
@@ -33,7 +33,6 @@ export class Triangle extends Hitable {
   public readonly uv2?: Vec2;
 
   public readonly surfaceNormal: Vec3;
-  public readonly transform: Transform = new Transform();
 
   public doubleSided = false;
 
@@ -41,6 +40,7 @@ export class Triangle extends Hitable {
     v0: Vec3,
     v1: Vec3,
     v2: Vec3,
+    material: Material,
     n0?: Vec3,
     n1?: Vec3,
     n2?: Vec3,
@@ -48,7 +48,7 @@ export class Triangle extends Hitable {
     uv1?: Vec2,
     uv2?: Vec2,
   ) {
-    super();
+    super(material);
     this.v0 = v0;
     this.v1 = v1;
     this.v2 = v2;
@@ -108,7 +108,7 @@ export class Triangle extends Hitable {
   }
 
   /* from https://cadxfem.org/inf/Fast%20MinimumStorage%20RayTriangle%20Intersection.pdf */
-  public hit(ray: Ray, tMin: number, tMax: number, rec: HitRecord): boolean {
+  public hit(ray: Ray, _tMin: number, _tMax: number, rec: HitRecord): boolean {
     const transformedRay = this.transform.transformRay(ray);
 
     /* find vectors for two edges sharing vert */
@@ -188,7 +188,7 @@ export class Triangle extends Hitable {
 
     rec.t = t;
     rec.p = transformedRay.at(t);
-    rec.mat = this.material;
+    rec.material = this.material;
 
     const w = 1.0 - u - v;
 

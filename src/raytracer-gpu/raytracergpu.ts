@@ -24,10 +24,7 @@ export class RaytracerGPU extends RaytracerBase {
   }
 
   public static supportsWebGPU(): boolean {
-    if (navigator.gpu) {
-      return true;
-    }
-    return false;
+    return 'gpu' in navigator;
   }
 
   public async start(doneCallback?: DoneCallback): Promise<void> {
@@ -246,9 +243,7 @@ export class RaytracerGPU extends RaytracerBase {
 
     commandEncoder.copyBufferToBuffer(
       computePipeline.pixelBuffer.getRawBuffer(),
-      0,
       gpuDestBuffer.getRawBuffer(),
-      0,
       bufferSize,
     );
 

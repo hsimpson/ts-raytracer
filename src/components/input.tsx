@@ -9,25 +9,18 @@ export interface InputProps {
   onValueChange: (value: number) => void;
 }
 
-const NumberInput = (props: InputProps): React.ReactElement => {
+const NumberInput = ({ label, size, value, min, max, onValueChange }: InputProps): React.ReactElement => {
   const onInputChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const value = parseInt(event.target.value);
-    if (!Number.isNaN(value)) {
-      props.onValueChange(value);
+    const newValue = parseInt(event.target.value);
+    if (!Number.isNaN(newValue)) {
+      onValueChange(newValue);
     }
   };
 
   return (
     <div className="input">
-      <label>{props.label}</label>
-      <input
-        type="number"
-        size={props.size}
-        min={props.min}
-        max={props.max}
-        value={props.value}
-        onChange={onInputChange}
-      />
+      <label>{label}</label>
+      <input type="number" size={size} min={min} max={max} value={value} onChange={onInputChange} />
     </div>
   );
 };

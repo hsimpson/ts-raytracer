@@ -3,11 +3,11 @@ import { IsoTropic, Material } from '../material';
 import { Texture } from '../textures';
 import { randomNumber } from '../util';
 import { AABB } from './aabb';
-import { Hitable } from './hitable';
+import { Hitable, HitableBase } from './hitable';
 import { HitRecord } from './hitrecord';
 import { Ray } from './ray';
 
-export class ConstantMedium extends Hitable {
+export class ConstantMedium extends HitableBase {
   private readonly _boundary: Hitable;
   private readonly _phaseFunction: Material;
   private readonly _negInvDensity: number;
@@ -21,6 +21,7 @@ export class ConstantMedium extends Hitable {
 
   public hit(r: Ray, t_min: number, t_max: number, rec: HitRecord): boolean {
     const enableDebug = false;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const debugging = enableDebug && randomNumber() < 0.00001;
 
     const rec1 = new HitRecord();
@@ -34,6 +35,7 @@ export class ConstantMedium extends Hitable {
       return false;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (debugging) {
       console.log(`t0=${rec1.t}, t1=${rec2.t}`);
     }
@@ -65,6 +67,7 @@ export class ConstantMedium extends Hitable {
     rec.t = rec1.t + hitDistance / rayLength;
     rec.p = r.at(rec.t);
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (debugging) {
       const p = rec.p;
       console.log(`hitDistance = ${hitDistance}\n
@@ -75,7 +78,7 @@ export class ConstantMedium extends Hitable {
 
     rec.normal = vec3.create(1, 0, 0); // arbitrary
     rec.frontFace = true; // also arbitrary
-    rec.mat = this._phaseFunction;
+    rec.material = this._phaseFunction;
 
     return true;
   }

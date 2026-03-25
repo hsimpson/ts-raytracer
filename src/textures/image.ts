@@ -6,7 +6,7 @@ export class ImageTexture extends Texture {
   private _width = 0;
   private _height = 0;
   private _bytesPerScanLine = 0;
-  private _data!: Uint8ClampedArray;
+  private _data?: Uint8ClampedArray;
   private _url = '';
   private static BytesPerPixel = 4;
 
@@ -66,7 +66,7 @@ export class ImageTexture extends Texture {
     return vec3.create(
       this._data[pixelOffset++] * colorScale,
       this._data[pixelOffset++] * colorScale,
-      this._data[pixelOffset++] * colorScale,
+      this._data[pixelOffset] * colorScale,
     );
   }
 
@@ -79,6 +79,9 @@ export class ImageTexture extends Texture {
   }
 
   public get data(): Uint8ClampedArray {
+    if (!this._data) {
+      throw new Error('Texture data is not loaded');
+    }
     return this._data;
   }
 

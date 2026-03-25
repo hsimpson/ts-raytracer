@@ -1,9 +1,9 @@
 import { AABB } from './aabb';
-import { Hitable } from './hitable';
+import { Hitable, HitableBase } from './hitable';
 import { HitRecord } from './hitrecord';
 import { Ray } from './ray';
 
-export class HitableList extends Hitable {
+export class HitableList extends HitableBase {
   private readonly _objects: Hitable[] = [];
 
   public constructor(object?: Hitable) {

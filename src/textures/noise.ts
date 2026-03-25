@@ -40,7 +40,7 @@ export class NoiseTexture extends Texture {
     return Math.abs(accum);
   }
 
-  public value(u: number, v: number, p: Vec3): Vec3 {
+  public value(_u: number, _v: number, p: Vec3): Vec3 {
     return vec3.scale(
       vec3.scale(vec3.fromValues(1, 1, 1), 0.5),
       1.0 + Math.sin(this._scale * p[2] + 10.0 * this.turb(p)),

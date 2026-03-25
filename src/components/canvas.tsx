@@ -9,11 +9,11 @@ const Canvas = (): React.ReactElement => {
   const [raytracerRunningState, setRaytracerRunningState] = useAtom(raytracerRunningProperties);
   const rayTracerGPURef = React.useRef<RaytracerGPU>(null);
 
-  const onRayTracerDone = (stats: string): void => {
-    setRaytracerRunningState({ ...raytracerRunningState, isRunning: false, stats });
-  };
-
   React.useEffect(() => {
+    const onRayTracerDone = (stats: string): void => {
+      setRaytracerRunningState({ ...raytracerRunningState, isRunning: false, stats });
+    };
+
     const options: Omit<RayTracerGPUOptions, 'canvas'> = {
       imageWidth: raytracerState.imageWidth,
       imageHeight: raytracerState.imageHeight,
@@ -47,9 +47,7 @@ const Canvas = (): React.ReactElement => {
     } else if (!raytracerRunningState.isRunning && raytracer.isRunning) {
       raytracer.stop();
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [raytracerRunningState.isRunning]);
+  }, [setRaytracerRunningState, raytracerRunningState, raytracerState]);
 
   const gpuCanvasClasses = 'canvas enabled';
 

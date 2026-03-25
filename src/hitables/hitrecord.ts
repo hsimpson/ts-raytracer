@@ -9,7 +9,7 @@ export class HitRecord {
   public u = 0;
   public v = 0;
   public frontFace = true;
-  public mat!: Material;
+  public material?: Material;
 
   public setFaceNormal(r: Ray, outward_normal: Vec3): void {
     this.frontFace = vec3.dot(r.direction, outward_normal) < 0;
@@ -23,6 +23,6 @@ export class HitRecord {
     dest.u = this.u;
     dest.v = this.v;
     dest.frontFace = this.frontFace;
-    dest.mat = this.mat; // FIXME deep copy;
+    dest.material = this.material; // FIXME deep copy;
   }
 }

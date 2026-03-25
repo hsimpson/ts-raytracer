@@ -54,7 +54,7 @@ export async function load(url: string): Promise<HitableList> {
 
     let translation = vec3.zero();
     let rotation = quat.identity();
-    let scale = vec3.create(1, 1, 1);
+    // let scale = vec3.create(1, 1, 1);
 
     if (node.translation) {
       translation = node.translation;
@@ -63,17 +63,19 @@ export async function load(url: string): Promise<HitableList> {
       rotation = node.rotation;
     }
 
-    if (node.scale) {
-      scale = node.scale;
-    }
+    // if (node.scale) {
+    //   scale = node.scale;
+    // }
 
     // const rot = vec3.create();
     // const rad = quat.getAxisAngle(rot, rotation);
 
     for (const primitive of mesh.primitives) {
       const positionAccessor: GLTFAccessor = accessors[primitive.attributes.POSITION];
-      const normalAccessor: GLTFAccessor = accessors[primitive.attributes.NORMAL];
-      const textureCoordAccessor: GLTFAccessor = accessors[primitive.attributes.TEXCOORD_0];
+      const normalAccessor: GLTFAccessor | undefined =
+        primitive.attributes.NORMAL !== undefined ? accessors[primitive.attributes.NORMAL] : undefined;
+      const textureCoordAccessor: GLTFAccessor | undefined =
+        primitive.attributes.TEXCOORD_0 !== undefined ? accessors[primitive.attributes.TEXCOORD_0] : undefined;
 
       const positionBufferView: GLTFBufferView = bufferViews[positionAccessor.bufferView];
 
@@ -144,10 +146,16 @@ export async function load(url: string): Promise<HitableList> {
             uv2 = textureCoords[c];
           }
 
+          // // TODO: material
+          // triangle.material = WHITE_MATERIAL;
+          // triangle.material = NORMAL_MATERIAL;
+          const material = primitive.material ? raytracingMaterial[primitive.material] : defaultMaterial;
+
           const triangle = new Triangle(
             v0,
             v1,
             v2,
+            material,
 
             n0,
             n1,
@@ -157,11 +165,6 @@ export async function load(url: string): Promise<HitableList> {
             uv1,
             uv2,
           );
-
-          // // TODO: material
-          // triangle.material = WHITE_MATERIAL;
-          // triangle.material = NORMAL_MATERIAL;
-          triangle.material = primitive.material ? raytracingMaterial[primitive.material] : defaultMaterial;
 
           if (node.translation) {
             triangle.transform.translate(translation);

@@ -12,15 +12,15 @@ export class DiffuseLight extends Material {
     this._emit = new SolidColor(color);
   }
 
-  public get texture(): Texture {
+  public override get texture(): Texture {
     return this._emit;
   }
 
-  public scatter(_r_in: Ray, _rec: HitRecord, _attenuation: Vec3, _scattered: Ray): boolean {
+  public override scatter(_r_in: Ray, _rec: HitRecord, _attenuation: Vec3, _scattered: Ray): boolean {
     return false;
   }
 
-  public emitted(u: number, v: number, p: Vec3): Vec3 {
+  public override emitted(u: number, v: number, p: Vec3): Vec3 {
     return this._emit.value(u, v, p);
   }
 }

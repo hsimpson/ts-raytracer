@@ -15,11 +15,11 @@ export class LambertianMaterial extends Material {
     }
   }
 
-  public set texture(texture: Texture) {
+  public override set texture(texture: Texture) {
     this._albedo = texture;
   }
 
-  public get texture(): Texture {
+  public override get texture(): Texture {
     return this._albedo;
   }
 

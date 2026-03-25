@@ -65,9 +65,9 @@ export function rayColor(ray: Ray, background: Vec3, world: Hitable, depth: numb
 
   const scattered = new Ray();
   const attenuation = vec3.zero();
-  const emitted = rec.mat.emitted(rec.u, rec.v, rec.p);
+  const emitted: Vec3 = rec.material?.emitted(rec.u, rec.v, rec.p) ?? vec3.zero();
 
-  if (!rec.mat.scatter(ray, rec, attenuation, scattered)) {
+  if (!rec.material?.scatter(ray, rec, attenuation, scattered)) {
     return emitted;
   }
 
