@@ -244,8 +244,10 @@ export class RaytracerGPU extends RaytracerBase {
 
     commandEncoder.copyBufferToBuffer(
       computePipeline.pixelBuffer.getRawBuffer(),
+      0,
       gpuDestBuffer.getRawBuffer(),
-      bufferSize,
+      0,
+      bufferSize * Float32Array.BYTES_PER_ELEMENT,
     );
 
     this._webGpuContext.queue.submit([commandEncoder.finish()]);
