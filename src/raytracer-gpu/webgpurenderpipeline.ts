@@ -43,22 +43,22 @@ export class WebGPURenderPipeline extends WebGPUPipelineBase {
       return;
     }
     this._initialized = true;
-    this._vertexPositionBuffer = new WebGPUBuffer(
-      this._webGpuContext,
-      GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-      'vertexPositionBuffer',
-    );
+    this._vertexPositionBuffer = new WebGPUBuffer({
+      webGPUContext: this._webGpuContext,
+      usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+      label: 'vertexPositionBuffer',
+    });
     this._vertexPositionBuffer.setData('positions', {
       data: _vertexPositions,
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
     this._vertexPositionBuffer.writeBuffer();
 
-    this._renderParamsUniformBuffer = new WebGPUBuffer(
-      this._webGpuContext,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      'renderParamsUniformBuffer',
-    );
+    this._renderParamsUniformBuffer = new WebGPUBuffer({
+      webGPUContext: this._webGpuContext,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      label: 'renderParamsUniformBuffer',
+    });
     this._renderParamsUniformBuffer.setData('size', {
       data: this._options.renderUniformParams.size,
       dataType: { elementType: ScalarType.Uint32, bufferDataTypeKind: BufferDataTypeKind.Vec2 },

@@ -67,33 +67,33 @@ export class WebGPUComputePipeline extends WebGPUPipelineBase {
       this._options.computeUniformParams.imageSize[0] * this._options.computeUniformParams.imageSize[1] * 4;
 
     //COPY_SRC is needed because the pixel buffer is read after each compute call
-    this._pixelBuffer = new WebGPUBuffer(
-      this._webGpuContext,
-      GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
-      'pixelBuffer',
-    );
+    this._pixelBuffer = new WebGPUBuffer({
+      webGPUContext: this._webGpuContext,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+      label: 'pixelBuffer',
+    });
     this._pixelBuffer.setData('pixelBuffer', {
       data: new Float32Array(pixelBufferSize),
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
     this._pixelBuffer.writeBuffer();
 
-    this._accumulationBuffer = new WebGPUBuffer(
-      this._webGpuContext,
-      GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
-      'accumulationBuffer',
-    );
+    this._accumulationBuffer = new WebGPUBuffer({
+      webGPUContext: this._webGpuContext,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+      label: 'accumulationBuffer',
+    });
     this._accumulationBuffer.setData('accumulationBuffer', {
       data: new Float32Array(pixelBufferSize),
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
     this._accumulationBuffer.writeBuffer();
 
-    this._computeCameraUniformBuffer = new WebGPUBuffer(
-      this._webGpuContext,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      'computeCameraUniformBuffer',
-    );
+    this._computeCameraUniformBuffer = new WebGPUBuffer({
+      webGPUContext: this._webGpuContext,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      label: 'computeCameraUniformBuffer',
+    });
     const cameraArray = this._options.camera.getUniformArray();
     this._computeCameraUniformBuffer.setData('camera', {
       data: cameraArray,
@@ -101,33 +101,33 @@ export class WebGPUComputePipeline extends WebGPUPipelineBase {
     });
     this._computeCameraUniformBuffer.writeBuffer();
 
-    this._primitivesBuffer = new WebGPUBuffer(
-      this._webGpuContext,
-      GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-      'primitivesBuffer',
-    );
+    this._primitivesBuffer = new WebGPUBuffer({
+      webGPUContext: this._webGpuContext,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+      label: 'primitivesBuffer',
+    });
     this._primitivesBuffer.setData('primitives', {
       data: new Float32Array(this._raytracingBuffers.primitiveBuffer()),
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
     this._primitivesBuffer.writeBuffer();
 
-    this._materialsBuffer = new WebGPUBuffer(
-      this._webGpuContext,
-      GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-      'materialsBuffer',
-    );
+    this._materialsBuffer = new WebGPUBuffer({
+      webGPUContext: this._webGpuContext,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+      label: 'materialsBuffer',
+    });
     this._materialsBuffer.setData('materials', {
       data: new Float32Array(this._raytracingBuffers.materialBuffer()),
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
     });
     this._materialsBuffer.writeBuffer();
 
-    this._texturesBuffer = new WebGPUBuffer(
-      this._webGpuContext,
-      GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-      'texturesBuffer',
-    );
+    this._texturesBuffer = new WebGPUBuffer({
+      webGPUContext: this._webGpuContext,
+      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+      label: 'texturesBuffer',
+    });
     this._texturesBuffer.setData('textures', {
       data: new Float32Array(this._raytracingBuffers.textureBuffer()),
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
@@ -216,11 +216,11 @@ export class WebGPUComputePipeline extends WebGPUPipelineBase {
   }
 
   private createComputeUniformBuffer() {
-    this._computeParamsUniformBuffer = new WebGPUBuffer(
-      this._webGpuContext,
-      GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      'computeParamsUniformBuffer',
-    );
+    this._computeParamsUniformBuffer = new WebGPUBuffer({
+      webGPUContext: this._webGpuContext,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      label: 'computeParamsUniformBuffer',
+    });
 
     // FIXME: hardcoding the uniform buffer layout here, consider creating a helper function to build the buffer with proper alignment
 

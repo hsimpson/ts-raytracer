@@ -230,11 +230,12 @@ export class RaytracerGPU extends RaytracerBase {
 
     const bufferSize = this._rayTracerOptions.imageWidth * this._rayTracerOptions.imageHeight * 4;
 
-    const gpuDestBuffer = new WebGPUBuffer(
-      this._webGpuContext,
-      GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-      'gpuDestBuffer',
-    );
+    const gpuDestBuffer = new WebGPUBuffer({
+      webGPUContext: this._webGpuContext,
+      usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+      label: 'gpuDestBuffer',
+    });
+
     gpuDestBuffer.setData('copyBuffer', {
       data: new Float32Array(bufferSize),
       dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
