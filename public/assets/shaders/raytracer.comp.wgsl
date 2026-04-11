@@ -20,8 +20,8 @@ struct AccumulationBuffer {
     pixels: array<vec4<f32>>,
 };
 
-@group(0) @binding(2) var<storage, read_write> pixelBuffer : PixelBuffer;
-@group(0) @binding(3) var<storage, read_write> accumulationBuffer : AccumulationBuffer;
+@group(0) @binding(2) var<storage, read_write> pixelBuffer: PixelBuffer;
+@group(0) @binding(3) var<storage, read_write> accumulationBuffer: AccumulationBuffer;
 
 #include "./hittable/hittable.wgsl"
 #include "./material/material.wgsl"
@@ -37,29 +37,28 @@ fn rayColor(ray: ptr<function, Ray>, background: vec3<f32>, depth: u32) -> vec3<
             let emitted = materialEmitted(ray, &rec);
             let wasScattered = materialScatter(ray, &rec, &attenuation, &newRay);
 
-
             (*ray) = newRay;
 
             if wasScattered {
                 color = color * (emitted + attenuation);
             } else {
                 color = color * emitted;
-        break;
+                break;
             }
         } else {
             color = color * background;
-      break;
+            break;
         }
     }
 
     return color;
 }
 
-@compute @workgroup_size(8,8,1)
+@compute @workgroup_size(8, 8, 1)
 fn main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
     var index: vec2<u32> = GlobalInvocationID.xy;
-  // index.x = index.x + u32(computeUniformParams.tileOffsetX);
-  // index.y = index.y + u32(computeUniformParams.tileOffsetY);
+    // index.x = index.x + u32(computeUniformParams.tileOffsetX);
+    // index.y = index.y + u32(computeUniformParams.tileOffsetY);
     index += computeUniformParams.tileOffset;
 
     let i = f32(index.x);
@@ -74,13 +73,12 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID: vec3<u32>) {
     var ray = cameraGetRay(u, v);
     var pixelColor = rayColor(&ray, computeUniformParams.background, bounces);
 
-
-  // var pixelColor: vec3<f32> = vec3<f32>(0.578, 0.656, 1.0);
-  // var pixelColor: vec3<f32> = vec3<f32>(
-  //   randomMinMax(0.0, 1.0),
-  //   randomMinMax(0.0, 1.0),
-  //   randomMinMax(0.0, 1.0)
-  // );
+    // var pixelColor: vec3<f32> = vec3<f32>(0.578, 0.656, 1.0);
+    // var pixelColor: vec3<f32> = vec3<f32>(
+    //   randomMinMax(0.0, 1.0),
+    //   randomMinMax(0.0, 1.0),
+    //   randomMinMax(0.0, 1.0)
+    // );
 
     let pixelIndex: u32 = index.y * computeUniformParams.imageSize.x + index.x;
     let accumulatedColor: vec3<f32> = accumulationBuffer.pixels[pixelIndex].rgb + pixelColor;

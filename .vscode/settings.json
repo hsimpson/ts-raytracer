@@ -36,9 +36,5 @@
   "files.exclude": {
     "dist": true,
     "node_modules": true
-  },
-  "python.languageServer": "Pylance",
-  "python.linting.enabled": true,
-  "python.linting.pylintEnabled": true,
-  "typescript.tsdk": "node_modules/typescript/lib"
+  }
 }
