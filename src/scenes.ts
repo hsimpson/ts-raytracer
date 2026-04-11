@@ -89,7 +89,7 @@ function randomScene(useBVH: boolean): { world: HitableList; cameraOptions: Came
 
         if (chooseMat < 0.8) {
           // diffuse aka lambertian
-          const albedo = vec3.multiply(vec3.create(), random(), random());
+          const albedo = vec3.multiply(random(), random());
           sphereMaterial = new LambertianMaterial(albedo);
           const center2 = vec3.add(center, [0, randomNumberRange(0, 1.0), 0]);
           world.add(new MovingSphere(center, center2, 0.0, 1.0, 0.2, sphereMaterial));

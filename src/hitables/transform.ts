@@ -72,7 +72,8 @@ export class Transform {
   }
 
   public rotateEuler(angleX: number, angelY: number, angleZ: number): void {
-    const tempQuat = quat.fromEuler(angleX, angelY, angleZ, 'zyx');
+    const toRad = Math.PI / 180;
+    const tempQuat = quat.fromEuler(angleX * toRad, angelY * toRad, angleZ * toRad, 'zyx');
     this.rotateQuat(tempQuat);
   }
 
@@ -86,19 +87,24 @@ export class Transform {
 
   private _updateMatrix(): void {
     this._isTransformed = true;
-    const translationMatrix = mat4.create();
 
-    mat4.translate(translationMatrix, translationMatrix, this._position);
-    mat4.fromQuat(this._rotationMatrix, this._rotation);
+    // Build translation matrix
+    const translationMatrix = mat4.translation(this._position);
 
-    mat4.multiply(this._objectToWorldMatrix, translationMatrix, this._rotationMatrix);
+    // Build rotation matrix from quaternion: fromQuat(q, dst)
+    mat4.fromQuat(this._rotation, this._rotationMatrix);
 
-    mat4.invert(this._worldToObjectMatrix, this._objectToWorldMatrix);
-    mat4.invert(this._inverseRotationMatrix, this._rotationMatrix);
+    // objectToWorld = T * R: multiply(a, b, dst) stores a*b into dst
+    mat4.multiply(translationMatrix, this._rotationMatrix, this._objectToWorldMatrix);
 
-    mat4.transpose(this._normalMatrix, this._rotationMatrix);
+    // worldToObject = inverse(objectToWorld): invert(m, dst) stores invert(m) into dst
+    mat4.invert(this._objectToWorldMatrix, this._worldToObjectMatrix);
+
+    // inverseRotation = inverse(rotation)
+    mat4.invert(this._rotationMatrix, this._inverseRotationMatrix);
+
+    // normalMatrix = inverse(transpose(rotation))
+    mat4.transpose(this._rotationMatrix, this._normalMatrix);
     mat4.invert(this._normalMatrix, this._normalMatrix);
-
-    // logMatrix(this._modelMatrix);
   }
 }
