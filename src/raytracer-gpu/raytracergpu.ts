@@ -1,11 +1,20 @@
-import { BufferDataTypeKind, ScalarType, WebGPUBuffer, WebGPUContext } from '@donnerknalli/webgpu-utils';
+import {
+  BufferDataTypeKind,
+  ScalarType,
+  WebGPUBindGroup,
+  WebGPUBindGroupLayout,
+  WebGPUBuffer,
+  WebGPUContext,
+  WebGPUPipelineLayout,
+  WebGPURenderPipeline,
+  WebGPUShader,
+} from '@donnerknalli/webgpu-utils';
 import { vec2n } from 'wgpu-matrix';
 import { Camera } from '../camera';
 import { DoneCallback, RaytracerBase, RayTracerBaseOptions } from '../raytracerbase';
 import { getScene } from '../scenes';
 import { ComputeTile, createComputeTiles } from '../tiles';
 import { WebGPUComputePipeline } from './webgpucomputepipeline';
-import { WebGPURenderPipeline } from './webgpurenderpipeline';
 
 const LOCAL_SIZE = 8;
 
@@ -15,16 +24,14 @@ export class RaytracerGPU extends RaytracerBase {
   private _initialized = false;
   private readonly _webGpuContext: WebGPUContext;
 
-  private _presentationFormat!: GPUTextureFormat;
+  private renderBindGroup!: WebGPUBindGroup;
+  private vertexPositionBuffer!: WebGPUBuffer;
+  private renderParamsUniformBuffer!: WebGPUBuffer;
 
   public constructor(rayTracerGPUOptions: RayTracerGPUOptions) {
     super();
     this._rayTracerOptions = rayTracerGPUOptions;
     this._webGpuContext = new WebGPUContext(this._rayTracerOptions.canvas);
-  }
-
-  public static supportsWebGPU(): boolean {
-    return 'gpu' in navigator;
   }
 
   public async start(doneCallback?: DoneCallback): Promise<void> {
@@ -47,11 +54,11 @@ export class RaytracerGPU extends RaytracerBase {
       aspectRatio,
       cameraOptions.aperture,
       cameraOptions.focusDist,
-      0.0,
+      0,
       0.1,
     );
 
-    const baseUrl = window.location.href;
+    const baseUrl = globalThis.location.href;
 
     const computePipeline = new WebGPUComputePipeline({
       computeShaderUrl: new URL('assets/shaders/raytracer.comp.wgsl', baseUrl),
@@ -69,17 +76,141 @@ export class RaytracerGPU extends RaytracerBase {
 
     await computePipeline.initialize();
 
-    const renderPipeline = new WebGPURenderPipeline({
-      vertexShaderUrl: new URL('assets/shaders/renderer.vert.wgsl', baseUrl),
-      fragmentShaderUrl: new URL('assets/shaders/renderer.frag.wgsl', baseUrl),
-      sharedPixelBuffer: computePipeline.pixelBuffer,
-      renderUniformParams: {
-        size: vec2n.create(this._rayTracerOptions.imageWidth, this._rayTracerOptions.imageHeight),
-      },
-      webGpuContext: this._webGpuContext,
+    this.vertexPositionBuffer = new WebGPUBuffer({
+      webGPUContext: this._webGpuContext,
+      usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+      label: 'vertexPositionBuffer',
     });
+    this.vertexPositionBuffer.setData('positions', {
+      // prettier-ignore
+      data: new Float32Array([
+        // triangle top left
+        -1,  1, 0,
+         1,  1, 0,
+        -1, -1, 0,
 
-    await renderPipeline.initialize();
+        // triangle bottom right
+         1,  1, 0,
+         1, -1, 0,
+        -1, -1, 0,
+    ]),
+      dataType: { elementType: ScalarType.Float32, bufferDataTypeKind: BufferDataTypeKind.Array },
+    });
+    this.vertexPositionBuffer.writeBuffer();
+
+    this.renderParamsUniformBuffer = new WebGPUBuffer({
+      webGPUContext: this._webGpuContext,
+      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      label: 'renderParamsUniformBuffer',
+    });
+    this.renderParamsUniformBuffer.setData('size', {
+      data: vec2n.create(this._rayTracerOptions.imageWidth, this._rayTracerOptions.imageHeight),
+      dataType: { elementType: ScalarType.Uint32, bufferDataTypeKind: BufferDataTypeKind.Vec2 },
+    });
+    this.renderParamsUniformBuffer.writeBuffer();
+
+    const vertexShader = new WebGPUShader({
+      source: new URL('assets/shaders/renderer.vert.wgsl', baseUrl),
+      webGPUContext: this._webGpuContext,
+    });
+    await vertexShader.createShaderModule();
+
+    const fragmentShader = new WebGPUShader({
+      source: new URL('assets/shaders/renderer.frag.wgsl', baseUrl),
+      webGPUContext: this._webGpuContext,
+    });
+    await fragmentShader.createShaderModule();
+
+    const bindGroupLayout = new WebGPUBindGroupLayout({
+      webGPUContext: this._webGpuContext,
+      label: 'bindGroupLayout',
+      bindGroupLayoutEntries: [
+        {
+          binding: 0,
+          visibility: GPUShaderStage.FRAGMENT,
+          buffer: {
+            type: 'uniform',
+          },
+        },
+        {
+          binding: 1,
+          visibility: GPUShaderStage.FRAGMENT,
+          buffer: {
+            type: 'read-only-storage',
+          },
+        },
+      ],
+    });
+    bindGroupLayout.createBindGroupLayout();
+
+    this.renderBindGroup = new WebGPUBindGroup({
+      webGPUContext: this._webGpuContext,
+      bindGroupLayout,
+      bindGroupEntries: [
+        {
+          binding: 0,
+          resource: {
+            buffer: this.renderParamsUniformBuffer.getRawBuffer(),
+          },
+        },
+        {
+          binding: 1,
+          resource: {
+            buffer: computePipeline.pixelBuffer.getRawBuffer(),
+          },
+        },
+      ],
+      label: 'bindGroup',
+    });
+    this.renderBindGroup.createBindGroup();
+
+    const pipelineLayout = new WebGPUPipelineLayout({
+      webGPUContext: this._webGpuContext,
+      bindGroupLayouts: [bindGroupLayout],
+      label: 'pipelineLayout',
+    });
+    pipelineLayout.createPipelineLayout();
+
+    const renderPipeline = new WebGPURenderPipeline({
+      webGPUContext: this._webGpuContext,
+      vertexShader,
+      fragmentShader,
+      pipelineLayout,
+      label: 'renderPipeline',
+    });
+    renderPipeline.addVertexBufferLayout({
+      arrayStride: 3 * Float32Array.BYTES_PER_ELEMENT,
+      attributes: [
+        {
+          shaderLocation: 0,
+          offset: 0,
+          format: 'float32x3',
+        },
+      ],
+      stepMode: 'vertex',
+    });
+    renderPipeline.setPrimitiveState({
+      topology: 'triangle-list',
+      frontFace: 'cw',
+      cullMode: 'none',
+    });
+    renderPipeline.addColorTargetState({
+      format: this._webGpuContext.preferredCanvasFormat,
+      blend: {
+        color: {
+          srcFactor: 'src-alpha',
+          dstFactor: 'one-minus-src-alpha',
+          operation: 'add',
+        },
+        alpha: {
+          srcFactor: 'src-alpha',
+          dstFactor: 'one-minus-src-alpha',
+          operation: 'add',
+        },
+      },
+      writeMask: GPUColorWrite.ALL,
+    });
+    renderPipeline.createRenderPipeline();
 
     const computeTiles = createComputeTiles(
       this._rayTracerOptions.imageWidth,
@@ -141,7 +272,7 @@ export class RaytracerGPU extends RaytracerBase {
       let sample = 1;
       const frequency = 16;
       const frame = (): void => {
-        const frameStartTime = window.performance.now();
+        const frameStartTime = globalThis.performance.now();
         let duration = 0;
         do {
           this.computePass(computePipeline, sample, tiles[tileIndex]);
@@ -157,16 +288,16 @@ export class RaytracerGPU extends RaytracerBase {
           } else {
             sample++;
           }
-          duration += window.performance.now() - frameStartTime;
+          duration += globalThis.performance.now() - frameStartTime;
         } while (duration < frequency);
         this.renderPass(renderPipeline);
 
         if (tileIndex < numOfTiles - 1 || sample < this._rayTracerOptions.samplesPerPixel) {
-          window.requestAnimationFrame(frame);
+          globalThis.requestAnimationFrame(frame);
         }
       };
 
-      window.requestAnimationFrame(frame);
+      globalThis.requestAnimationFrame(frame);
     });
   }
 
@@ -175,18 +306,16 @@ export class RaytracerGPU extends RaytracerBase {
       return;
     }
     await this._webGpuContext.create();
-    this._presentationFormat = this._webGpuContext.preferredCanvasFormat;
 
     this._webGpuContext.gpuCanvasContext.configure({
       device: this._webGpuContext.device,
-      format: this._presentationFormat,
+      format: this._webGpuContext.preferredCanvasFormat,
     });
 
     this._initialized = true;
   }
 
   private computePass(computePipeline: WebGPUComputePipeline, sample: number, tile: ComputeTile): void {
-    // console.log('computePass sample:', sample, tile);
     const commandEncoder = this._webGpuContext.device.createCommandEncoder();
 
     computePipeline.updateUniformBuffer(sample, tile);
@@ -200,10 +329,8 @@ export class RaytracerGPU extends RaytracerBase {
   }
 
   private renderPass(renderPipeLine: WebGPURenderPipeline): void {
-    // console.log('renderPass');
     const commandEncoder = this._webGpuContext.device.createCommandEncoder();
 
-    // renderPipeLine.updateUniformBuffer(sample);
     const renderPassDesc: GPURenderPassDescriptor = {
       colorAttachments: [
         {
@@ -216,9 +343,9 @@ export class RaytracerGPU extends RaytracerBase {
     };
 
     const passEncoder = commandEncoder.beginRenderPass(renderPassDesc);
-    passEncoder.setPipeline(renderPipeLine.gpuPipeline);
-    passEncoder.setBindGroup(0, renderPipeLine.bindGroup);
-    passEncoder.setVertexBuffer(0, renderPipeLine.vertexPositionBuffer);
+    passEncoder.setPipeline(renderPipeLine.getRawRenderPipeline());
+    passEncoder.setBindGroup(0, this.renderBindGroup.getRawBindGroup());
+    passEncoder.setVertexBuffer(0, this.vertexPositionBuffer.getRawBuffer());
     passEncoder.draw(6, 1, 0, 0);
     passEncoder.end();
 
