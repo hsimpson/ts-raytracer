@@ -168,7 +168,7 @@ export class RaytracerGPU extends RaytracerBase {
   }
 
   public stop(): void {
-    //
+    this._isRunning = false;
   }
 
   private async createRenderPipeline(): Promise<void> {
@@ -561,6 +561,10 @@ export class RaytracerGPU extends RaytracerBase {
       let sample = 1;
       const frequency = 16;
       const frame = (): void => {
+        if (!this._isRunning) {
+          resolve();
+          return;
+        }
         const frameStartTime = globalThis.performance.now();
         let duration = 0;
         do {

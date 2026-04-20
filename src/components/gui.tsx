@@ -16,7 +16,11 @@ const Gui = (): React.ReactElement => {
   };
 
   const onStartRenderClicked = (): void => {
-    setRaytracerRunningState({ ...raytracerRunningState, isRunning: true, stats: '' });
+    if (raytracerRunningState.isRunning) {
+      setRaytracerRunningState({ ...raytracerRunningState, isRunning: false });
+    } else {
+      setRaytracerRunningState({ ...raytracerRunningState, isRunning: true, stats: '' });
+    }
   };
 
   const sceneConfig: DropDownItem[] = [
